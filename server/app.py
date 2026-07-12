@@ -875,6 +875,19 @@ def init_db() -> None:
                 )
         except sqlite3.OperationalError:
             pass  # SQLite 未编译 FTS5 时降级到 LIKE
+        # 浏览器跨设备云同步:每台设备每个 data_type 一行(upsert),按 updated_at 最新获胜。
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS browser_sync("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "user_id TEXT NOT NULL, device_id TEXT NOT NULL, data_type TEXT NOT NULL, "
+            "payload TEXT NOT NULL, "
+            "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+            "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+            "UNIQUE(user_id, device_id, data_type))"
+        )
+        c.execute(
+            "CREATE INDEX IF NOT EXISTS idx_browser_sync_user ON browser_sync(user_id, data_type, updated_at)"
+        )
         c.commit()
 
 
@@ -2478,6 +2491,170 @@ def device_status(device_id: str, u: sqlite3.Row = Depends(actor)) -> dict[str, 
         "deviceModel": row["device_model"],
         "revoked": bool(row["revoked"]),
     }
+
+
+# ─────────────────────────── endpoints: 浏览器跨设备云同步 ───────────────────────────
+# 书签/历史/标签页按 (user_id, device_id, data_type) upsert,每台设备每类各一行。
+# pull 排除调用方自己的 device_id,merge 按 updated_at 最新获胜。payload 上限 256KB,
+# history 在服务端截断到最近 500 条(按 visitedTs 降序)。
+BROWSER_SYNC_MAX_PAYLOAD = 256 * 1024
+BROWSER_SYNC_HISTORY_LIMIT = 500
+BROWSER_SYNC_DATA_TYPES = ("bookmark", "history", "tab")
+
+
+def _browser_sync_truncate_history(payload_json: str) -> str:
+    """history payload 截断到最近 500 条(按 visitedTs 降序),其余 data_type 原样返回。"""
+    try:
+        items = json.loads(payload_json)
+    except (ValueError, TypeError):
+        return payload_json
+    if not isinstance(items, list):
+        return payload_json
+    def _ts(it: Any) -> int:
+        if isinstance(it, dict):
+            v = it.get("visitedTs") or it.get("visited_ts") or 0
+            try:
+                return int(v)
+            except (ValueError, TypeError):
+                return 0
+        return 0
+    items.sort(key=_ts, reverse=True)
+    return json.dumps(items[:BROWSER_SYNC_HISTORY_LIMIT], ensure_ascii=False, separators=(",", ":"))
+
+
+@app.post("/api/browser/sync/push")
+def browser_sync_push(body: dict[str, Any], u: sqlite3.Row = Depends(actor)) -> dict[str, Any]:
+    """上传本机某类数据(bookmark/history/tab),upsert 到 browser_sync。
+    payload 限 256KB;history 截断到最近 500 条。payload 可传 JSON 字符串或内联对象/数组。"""
+    device_id = str(body.get("deviceId", "")).strip()
+    data_type = str(body.get("dataType", "")).strip()
+    payload = body.get("payload")
+    if not device_id or not data_type:
+        raise HTTPException(status_code=400, detail="deviceId 和 dataType 必填")
+    if data_type not in BROWSER_SYNC_DATA_TYPES:
+        raise HTTPException(status_code=400, detail="dataType 非法")
+    if payload is None:
+        raise HTTPException(status_code=400, detail="payload 必填")
+    # 客户端可能把 payload 作为 JSON 字符串发送(再被 FastAPI 解析成 str),也可能内联为对象/数组。
+    # 统一规范化为 JSON 文本存储,避免双重编码。
+    if isinstance(payload, str):
+        payload_json = payload
+    else:
+        payload_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    if len(payload_json.encode("utf-8")) > BROWSER_SYNC_MAX_PAYLOAD:
+        raise HTTPException(status_code=413, detail="payload 过大(>256KB)")
+    if data_type == "history":
+        payload_json = _browser_sync_truncate_history(payload_json)
+    ts = now_ms()
+    with closing(db()) as c:
+        c.execute(
+            "INSERT INTO browser_sync(user_id, device_id, data_type, payload, created_at, updated_at) "
+            "VALUES(?,?,?,?,?,?) "
+            "ON CONFLICT(user_id, device_id, data_type) DO UPDATE SET "
+            "payload=excluded.payload, updated_at=excluded.updated_at",
+            (u["user_id"], device_id, data_type, payload_json, ts, ts),
+        )
+        c.commit()
+    return {"ok": True, "updatedAt": ts}
+
+
+@app.get("/api/browser/sync/pull")
+def browser_sync_pull(device_id: str = "", since: int = 0,
+                      u: sqlite3.Row = Depends(actor)) -> dict[str, Any]:
+    """拉取其他设备的同步数据(排除自己的 device_id),可按 since(epoch ms)增量。"""
+    with closing(db()) as c:
+        rows = c.execute(
+            "SELECT device_id, data_type, payload, updated_at FROM browser_sync "
+            "WHERE user_id = ? AND (? = 0 OR updated_at > ?) AND (? = '' OR device_id != ?) "
+            "ORDER BY updated_at DESC",
+            (u["user_id"], since, since, device_id, device_id),
+        ).fetchall()
+    items = [
+        {"deviceId": r["device_id"], "dataType": r["data_type"],
+         "payload": r["payload"], "updatedAt": r["updated_at"]}
+        for r in rows
+    ]
+    return {"items": items, "serverTs": now_ms()}
+
+
+@app.post("/api/browser/sync/merge")
+def browser_sync_merge(body: dict[str, Any], u: sqlite3.Row = Depends(actor)) -> dict[str, Any]:
+    """批量合并冲突解决:客户端提交多个 {dataType, payload, updatedAt},服务端按 updated_at
+    最新获胜 upsert(仅当客户端 updatedAt >= 服务端现存值才覆盖),返回合并后各 data_type 的最终态。"""
+    device_id = str(body.get("deviceId", "")).strip()
+    items = body.get("items") or []
+    if not isinstance(items, list):
+        raise HTTPException(status_code=400, detail="items 必须是数组")
+    ts = now_ms()
+    applied = 0
+    with closing(db()) as c:
+        for it in items:
+            if not isinstance(it, dict):
+                continue
+            dt = str(it.get("dataType", "")).strip()
+            pl = it.get("payload")
+            ua = int(it.get("updatedAt", 0) or 0)
+            if not device_id or dt not in BROWSER_SYNC_DATA_TYPES or pl is None:
+                continue
+            if isinstance(pl, str):
+                pl_json = pl
+            else:
+                pl_json = json.dumps(pl, ensure_ascii=False, separators=(",", ":"))
+            if len(pl_json.encode("utf-8")) > BROWSER_SYNC_MAX_PAYLOAD:
+                continue
+            if dt == "history":
+                pl_json = _browser_sync_truncate_history(pl_json)
+            cur = c.execute(
+                "SELECT updated_at FROM browser_sync WHERE user_id=? AND device_id=? AND data_type=?",
+                (u["user_id"], device_id, dt),
+            ).fetchone()
+            existing_ua = int(cur["updated_at"]) if cur else 0
+            if cur is None:
+                c.execute(
+                    "INSERT INTO browser_sync(user_id, device_id, data_type, payload, created_at, updated_at) "
+                    "VALUES(?,?,?,?,?,?)",
+                    (u["user_id"], device_id, dt, pl_json, ts, ts),
+                )
+                applied += 1
+            elif ua >= existing_ua:
+                c.execute(
+                    "UPDATE browser_sync SET payload=?, updated_at=? WHERE user_id=? AND device_id=? AND data_type=?",
+                    (pl_json, ts, u["user_id"], device_id, dt),
+                )
+                applied += 1
+        # 返回该用户各 data_type 的最新合并态(跨所有设备,按 updated_at 最新那条)
+        merged: dict[str, Any] = {}
+        for dt in BROWSER_SYNC_DATA_TYPES:
+            row = c.execute(
+                "SELECT payload, updated_at FROM browser_sync WHERE user_id=? AND data_type=? "
+                "ORDER BY updated_at DESC LIMIT 1",
+                (u["user_id"], dt),
+            ).fetchone()
+            if row:
+                merged[dt] = {"payload": row["payload"], "updatedAt": int(row["updated_at"])}
+        c.commit()
+    return {"ok": True, "applied": applied, "merged": merged, "serverTs": ts}
+
+
+@app.get("/api/browser/sync/status")
+def browser_sync_status(u: sqlite3.Row = Depends(actor)) -> dict[str, Any]:
+    """返回各 data_type 的最后同步时间和参与的设备列表。"""
+    types: dict[str, Any] = {}
+    with closing(db()) as c:
+        for dt in BROWSER_SYNC_DATA_TYPES:
+            row = c.execute(
+                "SELECT MAX(updated_at) AS last, COUNT(*) AS cnt FROM browser_sync WHERE user_id=? AND data_type=?",
+                (u["user_id"], dt),
+            ).fetchone()
+            dev_rows = c.execute(
+                "SELECT DISTINCT device_id FROM browser_sync WHERE user_id=? AND data_type=? ORDER BY updated_at DESC",
+                (u["user_id"], dt),
+            ).fetchall()
+            types[dt] = {
+                "lastSync": int(row["last"]) if row and row["last"] else 0,
+                "devices": [r["device_id"] for r in dev_rows],
+            }
+    return {"types": types, "serverTs": now_ms()}
 
 
 # 崩溃上报 body 整体上限(防滥用刷爆磁盘/内存);stackTrace 字段单独再截断一次(纵深防御,

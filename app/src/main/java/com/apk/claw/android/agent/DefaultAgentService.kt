@@ -1077,6 +1077,15 @@ class DefaultAgentService : AgentService {
         if (!rawResult.isSuccess) AgentMetrics.toolFailure()
         // ── 动作录制：工具执行后记录成功/失败 ──
         actionRecorder?.onToolResult(toolName, rawResult.isSuccess)
+        // ── Agent 动作录制：用户主动开启录制时，把工具调用流水收进 AgentActionRecorder ──
+        if (AgentActionRecorder.isRecording) {
+            val resultSummary = if (rawResult.isSuccess) {
+                (rawResult.data ?: "ok").take(200)
+            } else {
+                "✗ " + (rawResult.error ?: "failed").take(200)
+            }
+            AgentActionRecorder.recordAction(toolName, params, resultSummary)
+        }
 
         // ── 导航图谱被动学习：有 UI 副作用的工具执行后通知 recorder ──
         if (rawResult.isSuccess) {

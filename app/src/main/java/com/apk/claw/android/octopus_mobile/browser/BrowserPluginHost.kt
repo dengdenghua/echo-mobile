@@ -382,7 +382,25 @@ object BrowserPluginHost {
 
     // ── SystemWebViewEngine 调用的读出口 ────────────
 
-    fun documentStartScript(): String? = STEALTH_JS.takeIf { stealthEnabled }
+    /**
+     * 文档开始时注入的 stealth JS。
+     *
+     * 优先级：
+     * 1. [StealthManager] 启用且本对象 stealthEnabled → 用 [buildStealthJs] 动态生成（UA/Canvas/WebGL 全套伪装）。
+     * 2. 仅本对象 stealthEnabled（StealthManager 关）→ 用兜底 [STEALTH_JS]（基础反检测，不改 UA）。
+     * 3. 两者都关 → null（不注入）。
+     *
+     * 这样 UI 层的"指纹保护"开关（控制 StealthManager.isEnabled）与 browser_plugins.json 里的 stealthEnabled
+     * 互不冲突：用户开指纹保护走完整 profile；未开但配置文件要求 stealth 走兜底。
+     */
+    fun documentStartScript(): String? {
+        if (!stealthEnabled) return null
+        return if (StealthManager.isEnabled()) {
+            buildStealthJs(StealthManager.getCurrent())
+        } else {
+            STEALTH_JS
+        }
+    }
 
     fun scriptsForUrl(url: String?, runAt: Userscript.RunAt): List<String> {
         if (url.isNullOrBlank()) return emptyList()

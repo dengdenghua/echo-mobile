@@ -42,6 +42,27 @@ object BookmarkManager {
         save(list)
     }
 
+    /**
+     * 合并远端书签:按 URL 去重 union,同 URL 保留 [BookmarkItem.addedTs] 较大者。
+     */
+    @Synchronized
+    fun mergeFromRemote(json: String) {
+        val remote: List<BookmarkItem> = try {
+            val type = object : TypeToken<List<BookmarkItem>>() {}.type
+            gson.fromJson(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            XLog.w("BookmarkManager", "mergeFromRemote parse failed", e)
+            return
+        }
+        if (remote.isEmpty()) return
+        val byUrl = LinkedHashMap<String, BookmarkItem>()
+        for (item in getAll() + remote) {
+            val ex = byUrl[item.url]
+            if (ex == null || item.addedTs > ex.addedTs) byUrl[item.url] = item
+        }
+        save(byUrl.values.toList())
+    }
+
     fun findByUrl(url: String): BookmarkItem? {
         return getAll().find { it.url == url }
     }

@@ -56,6 +56,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.repeatOnLifecycle
 import com.apk.claw.android.R
+import com.apk.claw.android.agent.AgentActionRecorder
 import com.apk.claw.android.octopus_mobile.browser.BrowserEngine
 import com.apk.claw.android.octopus_mobile.browser.BrowserEngineFactory
 import com.apk.claw.android.octopus_mobile.browser.EngineEvent
@@ -65,7 +66,9 @@ import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.compose.theme.OctopusSpacing
+import com.apk.claw.android.ui.featurescreens.UserscriptStoreActivity
 import com.apk.claw.android.utils.KVUtils
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 private const val TAG = "BrowserScreen"
@@ -78,7 +81,7 @@ sealed class BrowserPage {
     object Webview : BrowserPage()
 }
 
-data class HistoryEntry(val title: String, val url: String)
+// HistoryEntry 定义在 HistoryStore.kt(同步需要 visitedTs 字段)
 
 @Composable
 fun BrowserScreen(
@@ -87,6 +90,7 @@ fun BrowserScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val syncScope = rememberCoroutineScope()
 
     val engine = remember { BrowserEngineFactory.selectBest(context) }
 
@@ -109,8 +113,10 @@ fun BrowserScreen(
     var readerText by remember { mutableStateOf("") }
     var addressExpanded by remember { mutableStateOf(false) }
     var darkMode by rememberSaveable { mutableStateOf(false) }
+    // 指纹保护开关:读 StealthManager 持久化值,变更后刷新 UI 状态 + 重新加载页面生效。
+    var stealthEnabled by remember { mutableStateOf(com.apk.claw.android.octopus_mobile.browser.StealthManager.isEnabled()) }
 
-    val history = remember { mutableStateListOf<HistoryEntry>() }
+    val history = remember { mutableStateListOf<HistoryEntry>().apply { addAll(HistoryStore.getAll().take(10)) } }
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
 
     DisposableEffect(lifecycleOwner) {
@@ -135,6 +141,8 @@ fun BrowserScreen(
     LaunchedEffect(engine) {
         ToolRegistry.setBrowserEngine(engine)
         BrowserTabsStore.ensureAtLeastOne(context.getString(R.string.browser_new_tab))
+        // 把 UserscriptStore 已安装脚本同步进 BrowserPluginHost，确保浏览器加载页面时按最新列表注入
+        runCatching { UserscriptStore.syncToPluginHost(context) }
     }
 
     LaunchedEffect(engine, lifecycleOwner) {
@@ -155,6 +163,7 @@ fun BrowserScreen(
                         if (event.url.startsWith("http")) {
                             history.add(0, HistoryEntry(event.title.ifBlank { event.url }, event.url))
                             while (history.size > 10) history.removeAt(history.size - 1)
+                            HistoryStore.add(event.title.ifBlank { event.url }, event.url)
                         }
                     }
                     is EngineEvent.ProgressChanged -> {
@@ -373,8 +382,62 @@ fun BrowserScreen(
                     engine.navigate(currentUrl)
                     Toast.makeText(context, if (newMode) context.getString(R.string.browser_desktop_mode_on) else context.getString(R.string.browser_desktop_mode_off), Toast.LENGTH_SHORT).show()
                 },
+                onToggleStealth = {
+                    val newEnabled = !stealthEnabled
+                    com.apk.claw.android.octopus_mobile.browser.StealthManager.setEnabled(newEnabled)
+                    if (newEnabled) {
+                        // 开启时自动轮换一次,并 Toast 提示当前 UA 平台。
+                        val profile = com.apk.claw.android.octopus_mobile.browser.StealthManager.rotate()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.browser_stealth_switched, profile.label),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    } else {
+                        Toast.makeText(context, R.string.browser_menu_stealth_off, Toast.LENGTH_SHORT).show()
+                    }
+                    stealthEnabled = newEnabled
+                    // 重新加载当前页以应用新 UA + stealth JS(WebView UA 只在下次加载生效)。
+                    if (currentUrl.startsWith("http")) engine.navigate(currentUrl)
+                },
+                onCloudSync = {
+                    if (!BrowserSync.isReady()) {
+                        Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "正在同步…", Toast.LENGTH_SHORT).show()
+                        syncScope.launch {
+                            val r = BrowserSync.syncAll(context)
+                            val msg = if (r.notLoggedIn) {
+                                "请先登录"
+                            } else {
+                                "已同步 ${r.bookmarks} 个书签 / ${r.history} 条历史 / ${r.tabs} 个标签"
+                            }
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                onUserscriptStore = {
+                    runCatching { context.startActivity(Intent(context, UserscriptStoreActivity::class.java)) }
+                },
+                onRecordAgent = {
+                    if (AgentActionRecorder.isRecording) {
+                        val routine = AgentActionRecorder.stopRecording()
+                        val msg = if (routine != null) {
+                            context.getString(R.string.agent_record_saved, routine.name)
+                        } else {
+                            context.getString(R.string.agent_record_empty)
+                        }
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    } else {
+                        val goal = pageTitle.ifBlank { currentUrl.ifBlank { "浏览器 Agent 操作" } }
+                        AgentActionRecorder.startRecording(goal)
+                        Toast.makeText(context, R.string.agent_record_started, Toast.LENGTH_SHORT).show()
+                    }
+                },
                 darkMode = darkMode,
                 desktopMode = KVUtils.getBrowserDesktopMode(),
+                stealthEnabled = stealthEnabled,
+                isRecording = AgentActionRecorder.isRecording,
             )
         }
 
@@ -897,8 +960,14 @@ private fun BrowserMenuSheet(
     onTranslate: () -> Unit,
     onBookmarks: () -> Unit,
     onToggleDesktop: () -> Unit,
+    onToggleStealth: () -> Unit,
+    onCloudSync: () -> Unit,
+    onUserscriptStore: () -> Unit,
+    onRecordAgent: () -> Unit,
     darkMode: Boolean,
     desktopMode: Boolean,
+    stealthEnabled: Boolean,
+    isRecording: Boolean,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -924,6 +993,16 @@ private fun BrowserMenuSheet(
                 stringResource(if (desktopMode) R.string.browser_menu_mobile_mode else R.string.browser_menu_desktop_mode),
                 Icons.Filled.DesktopWindows,
             ) { onDismiss(); onToggleDesktop() }
+            MenuRow(
+                stringResource(if (stealthEnabled) R.string.browser_menu_stealth_on else R.string.browser_menu_stealth_protection),
+                Icons.Filled.Shield,
+            ) { onDismiss(); onToggleStealth() }
+            MenuRow(stringResource(R.string.browser_menu_cloud_sync), Icons.Filled.Sync) { onDismiss(); onCloudSync() }
+            MenuRow(stringResource(R.string.browser_menu_userscript_store), Icons.Filled.Extension) { onDismiss(); onUserscriptStore() }
+            MenuRow(
+                stringResource(if (isRecording) R.string.browser_menu_stop_recording else R.string.browser_menu_record_agent),
+                Icons.Filled.FiberManualRecord,
+            ) { onDismiss(); onRecordAgent() }
         }
     }
 }

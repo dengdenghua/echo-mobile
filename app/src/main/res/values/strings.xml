@@ -566,6 +566,14 @@ Shizuku 是安全、开源的本地辅助工具。</string>
     <string name="browser_menu_translate">翻译</string>
     <string name="browser_menu_mobile_mode">移动模式</string>
     <string name="browser_menu_desktop_mode">桌面模式</string>
+    <string name="browser_menu_userscript_store">脚本商店</string>
+    <string name="browser_menu_record_agent">录制 Agent 操作</string>
+    <string name="browser_menu_stop_recording">停止录制</string>
+    <string name="browser_menu_cloud_sync">云同步</string>
+    <string name="browser_menu_stealth_protection">指纹保护</string>
+    <string name="browser_menu_stealth_on">已开启指纹保护</string>
+    <string name="browser_menu_stealth_off">已关闭指纹保护</string>
+    <string name="browser_stealth_switched">已切换至 %1$s 指纹</string>
     <string name="browser_timeline_title">访问历史</string>
     <string name="browser_timeline_empty">暂无历史</string>
     <string name="browser_share_chooser">分享</string>
@@ -1315,4 +1323,21 @@ Shizuku 是安全、开源的本地辅助工具。</string>
     <string name="feat_more_title">更多</string>
     <string name="market_mine_skills">我的技能</string>
     <string name="market_mine_apps">我的小程序</string>
+
+    <!-- 油猴脚本商店 -->
+    <string name="userscript_store_title">脚本商店</string>
+    <string name="userscript_tab_installed">已安装</string>
+    <string name="userscript_tab_recommend">推荐</string>
+    <string name="userscript_install">安装</string>
+    <string name="userscript_uninstall">卸载</string>
+    <string name="userscript_installed_label">已安装</string>
+    <string name="userscript_install_from_url">从 URL 安装</string>
+    <string name="userscript_empty_installed">还没有安装脚本，去「推荐」Tab 选一个吧</string>
+    <string name="userscript_installed_toast">已安装：%1$s</string>
+    <string name="userscript_install_failed_toast">安装失败：%1$s</string>
+
+    <!-- Agent 动作录制 -->
+    <string name="agent_record_started">录制中…</string>
+    <string name="agent_record_saved">已保存为 Routine：%1$s</string>
+    <string name="agent_record_empty">未录到任何工具调用</string>
 </resources>

@@ -97,6 +97,7 @@ import com.apk.claw.android.BuildConfig
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
 import com.apk.claw.android.account.AccountConfig
+import com.apk.claw.android.agent.AgentActionRecorder
 import com.apk.claw.android.octopus_mobile.ControlTarget
 import com.apk.claw.android.octopus_mobile.DeviceInfo
 import com.apk.claw.android.octopus_mobile.RemoteStreamPrefs
@@ -791,6 +792,40 @@ fun ChatScreen() {
                     MoreMenuLink(
                         Icons.Filled.Shield, R.string.trustcenter_title,
                         TrustCenterActivity::class.java, dismiss,
+                    )
+                    // 录制 Agent 工具调用为例程：点击开始/停止录制
+                    val agentRecording = AgentActionRecorder.isRecording
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(
+                                    if (agentRecording) R.string.browser_menu_stop_recording
+                                    else R.string.browser_menu_record_agent,
+                                ),
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.FiberManualRecord,
+                                contentDescription = null,
+                                tint = if (agentRecording) ErrorColor else TextMuted,
+                            )
+                        },
+                        onClick = {
+                            moreMenuOpen = false
+                            if (agentRecording) {
+                                val routine = AgentActionRecorder.stopRecording()
+                                val msg = if (routine != null) {
+                                    context.getString(R.string.agent_record_saved, routine.name)
+                                } else {
+                                    context.getString(R.string.agent_record_empty)
+                                }
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            } else {
+                                AgentActionRecorder.startRecording("Agent 对话操作")
+                                Toast.makeText(context, R.string.agent_record_started, Toast.LENGTH_SHORT).show()
+                            }
+                        },
                     )
                     HorizontalDivider()
                     DropdownMenuItem(

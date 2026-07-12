@@ -85,14 +85,19 @@ class SystemWebViewEngine : BrowserEngine {
 
             mediaPlaybackRequiresUserGesture = false
 
-            // 桌面模式:开(默认)→ 桌面版 Chrome UA;关 → 保留 WebView 默认移动 UA。浏览器设置里可切。
-            if (com.apk.claw.android.utils.KVUtils.getBrowserDesktopMode()) {
-                userAgentString = DESKTOP_CHROME_UA
-            }
-
             // 安全:HTTPS 页面只放行被动混合内容(图片等),拦截 HTTP 脚本/iframe,
             // 防中间人注入。ALWAYS_ALLOW 会让"安全"连接被降级,改用 COMPATIBILITY。
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        }
+
+        // UA 优先级:
+        // 1. StealthManager 启用(指纹保护开)→ 用当前轮换 profile 的 UA(覆盖桌面/移动模式),
+        //    并同步 acceptLanguage / database / domStorage 等匹配项。
+        // 2. 桌面模式开 → 桌面版 Chrome UA;关 → 保留 WebView 默认移动 UA(浏览器设置里可切)。
+        if (StealthManager.isEnabled()) {
+            applyStealthProfile(webView, StealthManager.getCurrent())
+        } else if (com.apk.claw.android.utils.KVUtils.getBrowserDesktopMode()) {
+            webView.settings.userAgentString = DESKTOP_CHROME_UA
         }
 
         // 仅 DEBUG 构建开启 WebView 远程调试，避免 release 版被 adb chrome://inspect 注入已登录会话。
@@ -320,6 +325,32 @@ class SystemWebViewEngine : BrowserEngine {
     private fun setAcceptThirdPartyCookies(webView: WebView, accept: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(webView, accept)
+        }
+    }
+
+    /**
+     * 应用一个 [StealthProfile] 到 WebView：覆盖 UA / Accept-Language / 数据库 / DOM 存储 等。
+     *
+     * 与 [BrowserPluginHost.documentStartScript] 配合：JS 层 hook navigator.* 做运行时伪装，
+     * 这里同步把 WebView 原生层的 UA / Accept-Language 也改成 profile 值（HTTP 请求头与
+     * WebSettings.getUserAgentString() 走这里，JS 够不到）。
+     */
+    private fun applyStealthProfile(webView: WebView, profile: StealthProfile) {
+        webView.settings.apply {
+            userAgentString = profile.userAgent
+            // Accept-Language 透传到 HTTP 请求头,与 navigator.languages 对齐。
+            // WebSettings 没有直接 setter,走 WebSettings.setAcceptLanguage 是 API 14+ 的隐藏路径,
+            // 这里用反射兼容;失败则仅靠 JS 层 hook navigator.languages 兜底。
+            runCatching {
+                val m = WebSettings::class.java.getMethod("setAcceptLanguage", String::class.java)
+                m.invoke(this, profile.acceptLanguage)
+            }.onFailure { Log.w("SystemWebViewEngine", "setAcceptLanguage failed: ${it.message}") }
+            // 与真实浏览器行为对齐:启用 DOM 存储 / 数据库 / IndexedDB(已在 createView 开启,这里幂等确认)。
+            domStorageEnabled = true
+            databaseEnabled = true
+            // 桌面 profile 用桌面视口策略;Android profile 用移动视口。
+            useWideViewPort = profile.platform != "Linux armv8l" && profile.platform != "Linux aarch64"
+            loadWithOverviewMode = true
         }
     }
 

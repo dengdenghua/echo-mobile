@@ -164,6 +164,7 @@
         <activity android:name=".ui.featurescreens.AuditLogActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.ActivityActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.RoutinesActivity" android:exported="false" />
+        <activity android:name=".ui.featurescreens.UserscriptStoreActivity" android:exported="false" />
         <activity
             android:name=".plugin.MiniAppActivity"
             android:exported="false"

@@ -1,5 +1,8 @@
 package com.apk.claw.android.ui.browser
 
+import com.apk.claw.android.utils.XLog
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -59,5 +62,34 @@ object BrowserTabsStore {
     fun updateCurrent(url: String, title: String) {
         val id = _currentId.value
         _tabs.value = _tabs.value.map { if (it.id == id) it.copy(url = url, title = title) else it }
+    }
+
+    /**
+     * 合并远端标签(来自其他设备):按 URL 去重,本地未打开的 URL 补为新标签。
+     * 远端标签 id 不复用(各设备 id 空间独立),仅以 URL 为同步键。
+     */
+    @Synchronized
+    fun mergeFromRemote(json: String) {
+        val gson = Gson()
+        val remote: List<Tab> = try {
+            val type = object : TypeToken<List<Tab>>() {}.type
+            gson.fromJson(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            XLog.w("BrowserTabsStore", "mergeFromRemote parse failed", e)
+            return
+        }
+        if (remote.isEmpty()) return
+        val localUrls = _tabs.value.map { it.url }.toMutableSet()
+        var changed = false
+        for (tab in remote) {
+            if (tab.url.isEmpty() || tab.url in localUrls) continue
+            val t = Tab(seq++, tab.url, tab.title)
+            _tabs.value = _tabs.value + t
+            localUrls.add(tab.url)
+            changed = true
+        }
+        if (changed) {
+            XLog.d("BrowserTabsStore", "mergeFromRemote: 合入 ${_tabs.value.size} 个标签")
+        }
     }
 }
