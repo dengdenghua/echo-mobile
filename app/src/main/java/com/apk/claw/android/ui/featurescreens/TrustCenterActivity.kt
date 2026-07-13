@@ -52,7 +52,7 @@ import com.apk.claw.android.octopus_mobile.ControlTarget
 import com.apk.claw.android.octopus_mobile.EvolutionMetrics
 import com.apk.claw.android.octopus_mobile.InteractionLedger
 import com.apk.claw.android.ClawApplication
-import com.apk.claw.android.octopus_mobile.KnowledgeBundle
+import com.apk.claw.android.octopus_mobile.KnowledgeLocal
 import com.apk.claw.android.octopus_mobile.KnowledgeSync
 import okhttp3.OkHttpClient
 import com.apk.claw.android.octopus_mobile.memory.MemoryStore
@@ -698,19 +698,22 @@ private fun UserMemoryCard(tick: Int, onReset: () -> Unit) {
 }
 
 /**
- * 知识备份/迁移 —— 把用户规矩([InteractionLedger] manual)+ 记忆([MemoryStore])打成
- * [KnowledgeBundle] 文本存进剪贴板;导入则从剪贴板还原。只在本机之间迁移,不上传服务器。
+ * 知识备份/迁移 —— 把用户规矩([InteractionLedger] manual)+ 记忆([MemoryStore])做成
+ * [KnowledgeBundle] 文本,三种模态备份/迁移:剪贴板、文件、局域网设备拉取。采集/恢复统一走
+ * [KnowledgeLocal]。只在本机/设备间迁移,不上传服务器。
  */
 @Composable
-@Suppress("LongMethod")   // Compose 卡片:说明 + 导出/导入两个带剪贴板逻辑的按钮,声明式偏长
+@Suppress("LongMethod")   // Compose 卡片:说明 + 剪贴板/文件/局域网三模态按钮,声明式偏长
 private fun KnowledgeBackupCard(onChanged: () -> Unit) {
     val context = LocalContext.current
+    fun toast(msg: String) = Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     FCard {
         Text(
-            "把你教的规矩 + Agent 记住的关于你的事,导出成一段文本(复制到剪贴板),可存档或换机后导入恢复。" +
-                "只在本机之间迁移,不上传任何服务器。",
+            "把你教的规矩 + Agent 记住的关于你的事备份/迁移:复制到剪贴板、存成文件、或从同账号" +
+                "局域网设备拉取。只在本机/设备间流转,不上传任何服务器。",
             color = FMuted, fontSize = 11.sp, lineHeight = 15.sp,
         )
+        // ── 剪贴板 ──
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -719,15 +722,9 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
                 "导出到剪贴板", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable {
-                        val rules = InteractionLedger.snapshot().filter { it.manual }.map { it.title }
-                        val mems = MemoryStore().getMemories()
-                            .map { KnowledgeBundle.MemItem(it.content, it.type.name) }
-                        val json = KnowledgeBundle.export(rules, mems)
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        cm.setPrimaryClip(ClipData.newPlainText("octopus-knowledge", json))
-                        Toast.makeText(
-                            context, "已复制 ${rules.size} 条规矩 + ${mems.size} 条记忆到剪贴板", Toast.LENGTH_SHORT,
-                        ).show()
+                        cm.setPrimaryClip(ClipData.newPlainText("octopus-knowledge", KnowledgeLocal.gather()))
+                        toast("知识包已复制到剪贴板")
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
             )
@@ -737,26 +734,42 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
                     .clickable {
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val text = cm.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString() ?: ""
-                        if (!KnowledgeBundle.looksValid(text)) {
-                            Toast.makeText(context, "剪贴板里不是有效的知识包", Toast.LENGTH_SHORT).show()
-                        } else {
-                            val p = KnowledgeBundle.parse(text)
-                            p.rules.forEach { InteractionLedger.addManualRule(it) }
-                            val store = MemoryStore()
-                            p.memories.forEach {
-                                val t = runCatching { MemoryStore.MemoryType.valueOf(it.type) }
-                                    .getOrDefault(MemoryStore.MemoryType.FACT)
-                                store.addUserFact(it.content, t)
-                            }
-                            Toast.makeText(
-                                context, "已导入 ${p.rules.size} 条规矩 + ${p.memories.size} 条记忆", Toast.LENGTH_SHORT,
-                            ).show()
-                            onChanged()
-                        }
+                        val r = KnowledgeLocal.restore(text)
+                        toast(if (r == null) "剪贴板里不是有效的知识包" else "已导入 ${r.first} 条规矩 + ${r.second} 条记忆")
+                        if (r != null) onChanged()
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
             )
         }
+        // ── 文件(持久归档,重启不丢,可经任意渠道分享)──
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                "导出到文件", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable {
+                        val f = java.io.File(context.getExternalFilesDir(null), "octopus-knowledge.json")
+                        val ok = runCatching { f.writeText(KnowledgeLocal.gather()) }.isSuccess
+                        toast(if (ok) "已导出到文件:${f.absolutePath}" else "导出失败")
+                    }
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
+            )
+            Text(
+                "从文件导入", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable {
+                        val f = java.io.File(context.getExternalFilesDir(null), "octopus-knowledge.json")
+                        val text = runCatching { f.readText() }.getOrDefault("")
+                        val r = KnowledgeLocal.restore(text)
+                        toast(if (r == null) "未找到备份文件或格式非法" else "已从文件导入 ${r.first} 条规矩 + ${r.second} 条记忆")
+                        if (r != null) onChanged()
+                    }
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
+            )
+        }
+        // ── 局域网设备拉取 ──
         Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
             Text(
                 "⬇ 从局域网设备拉取", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,

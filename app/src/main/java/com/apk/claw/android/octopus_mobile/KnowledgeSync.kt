@@ -4,7 +4,6 @@
 
 package com.apk.claw.android.octopus_mobile
 
-import com.apk.claw.android.octopus_mobile.memory.MemoryStore
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -30,17 +29,8 @@ object KnowledgeSync {
         return try {
             http.newCall(req).execute().use { resp ->
                 if (!resp.isSuccessful) return null
-                val body = resp.body?.string().orEmpty()
-                if (!KnowledgeBundle.looksValid(body)) return null
-                val parsed = KnowledgeBundle.parse(body)
-                parsed.rules.forEach { InteractionLedger.addManualRule(it) }
-                val store = MemoryStore()
-                parsed.memories.forEach {
-                    val type = runCatching { MemoryStore.MemoryType.valueOf(it.type) }
-                        .getOrDefault(MemoryStore.MemoryType.FACT)
-                    store.addUserFact(it.content, type)
-                }
-                parsed.rules.size to parsed.memories.size
+                // 校验/解析/导入本机统一走 KnowledgeLocal.restore(与剪贴板/文件模态共用)。
+                KnowledgeLocal.restore(resp.body?.string().orEmpty())
             }
         } catch (e: Exception) {
             null
