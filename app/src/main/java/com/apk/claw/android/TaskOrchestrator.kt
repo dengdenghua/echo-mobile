@@ -15,6 +15,7 @@ import com.apk.claw.android.octopus_mobile.EvolutionMetrics
 import com.apk.claw.android.octopus_mobile.ExperienceLedger
 import com.apk.claw.android.octopus_mobile.ImmuneSystem
 import com.apk.claw.android.octopus_mobile.InteractionLedger
+import com.apk.claw.android.octopus_mobile.UsageStats
 import com.apk.claw.android.octopus_mobile.evolution.EvolutionEngine
 import com.apk.claw.android.octopus_mobile.evolution.LessonStore
 import com.apk.claw.android.octopus_mobile.memory.MemoryStore
@@ -565,6 +566,8 @@ class TaskOrchestrator(
                     }
                 }
                 onTaskFinished()
+                // 用量统计:累计任务数 + token,供信任中心透明展示成本。
+                UsageStats.recordTask(totalTokens)
                 // 自进化度量:任务完成为检查点,持久化计数并打印一行效果报告(命中率/告警率/注入次数)。
                 EvolutionMetrics.persist()
                 XLog.i(TAG, "EvolutionMetrics: ${EvolutionMetrics.report()}")
@@ -588,6 +591,7 @@ class TaskOrchestrator(
                 ChannelManager.flushMessages(channel)
                 FloatingCircleManager.setErrorState()
                 onTaskFinished()
+                UsageStats.recordTask(totalTokens)   // 失败任务也耗了 token,计入用量
                 triggerPostTaskReflect(success = false)
                 // 任务失败后，如果有下一个任务，通过 Handler 延迟调度，避免回调递归
                 scheduleHandler.post { executeCurrentTask() }

@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.ControlTarget
 import com.apk.claw.android.octopus_mobile.EvolutionMetrics
+import com.apk.claw.android.octopus_mobile.UsageStats
 import com.apk.claw.android.octopus_mobile.InteractionLedger
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.octopus_mobile.KnowledgeLocal
@@ -477,7 +478,9 @@ private fun EvolutionMetricsCard(tick: Int, onReset: () -> Unit) {
     val ledgerRepair = remember(tick) { EvolutionMetrics.get(EvolutionMetrics.LEDGER_REPAIR) }
     val injected = remember(tick) { EvolutionMetrics.get(EvolutionMetrics.MITIGATION_INJECTED) }
     val failover = remember(tick) { EvolutionMetrics.get(EvolutionMetrics.MODEL_FAILOVER) }
-    val hasData = hit + miss + immuneCall + ledgerErr > 0L
+    val usageTasks = remember(tick) { UsageStats.tasks() }
+    val usageTokens = remember(tick) { UsageStats.tokens() }
+    val hasData = hit + miss + immuneCall + ledgerErr + usageTasks > 0L
     FCard {
         MetricRow("⚡ 反射快路径命中率", reflexRate, "省下 $hit 次完整 LLM（$hit/${hit + miss}）")
         Spacer(Modifier.height(8.dp))
@@ -486,6 +489,8 @@ private fun EvolutionMetricsCard(tick: Int, onReset: () -> Unit) {
         MetricRow("📒 经验账本", "记 $ledgerErr", "修复 $ledgerRepair · 注入规避 $injected 次")
         Spacer(Modifier.height(8.dp))
         MetricRow("🔀 模型故障转移", "$failover 次", "主模型失败自动切备用(需在配置里填备用模型)")
+        Spacer(Modifier.height(8.dp))
+        MetricRow("📊 用量", "$usageTasks 个任务", "累计 $usageTokens token —— 走积分计费,心里有数")
         if (!hasData) {
             Text(
                 "暂无数据——跑几个任务后这里会显示反射命中率、免疫告警率等硬指标。",
@@ -497,7 +502,7 @@ private fun EvolutionMetricsCard(tick: Int, onReset: () -> Unit) {
             Text(
                 "重置统计", color = FWarning, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
-                    .clickable { EvolutionMetrics.reset(); EvolutionMetrics.persist(); onReset() }
+                    .clickable { EvolutionMetrics.reset(); EvolutionMetrics.persist(); UsageStats.reset(); onReset() }
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }

@@ -13,6 +13,7 @@ import com.apk.claw.android.octopus_mobile.EvolutionMetrics
 import com.apk.claw.android.octopus_mobile.ExperienceLedger
 import com.apk.claw.android.octopus_mobile.InteractionLedger
 import com.apk.claw.android.octopus_mobile.SkillManifest
+import com.apk.claw.android.octopus_mobile.UsageStats
 import com.apk.claw.android.octopus_mobile.TurnScorer
 import com.apk.claw.android.octopus_mobile.nerves.EventBus
 import com.apk.claw.android.plugin.PluginManager
@@ -124,6 +125,7 @@ open class ClawApplication : BaseApp() {
         runCatching { InteractionLedger.init(filesDir) }.onFailure { XLog.e(TAG, "InteractionLedger init failed", it) }
         runCatching { TurnScorer.init(filesDir) }.onFailure { XLog.e(TAG, "TurnScorer init failed", it) }
         runCatching { EvolutionMetrics.load() }.onFailure { XLog.e(TAG, "EvolutionMetrics load failed", it) }
+        runCatching { UsageStats.load() }.onFailure { XLog.e(TAG, "UsageStats load failed", it) }
 
         // Shizuku 增强层初始化（监听 Binder 到达/死亡）
         ShizukuManager.init()
