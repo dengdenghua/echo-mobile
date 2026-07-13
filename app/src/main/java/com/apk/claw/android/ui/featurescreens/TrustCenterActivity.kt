@@ -51,7 +51,10 @@ import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.ControlTarget
 import com.apk.claw.android.octopus_mobile.EvolutionMetrics
 import com.apk.claw.android.octopus_mobile.InteractionLedger
+import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.octopus_mobile.KnowledgeBundle
+import com.apk.claw.android.octopus_mobile.KnowledgeSync
+import okhttp3.OkHttpClient
 import com.apk.claw.android.octopus_mobile.memory.MemoryStore
 import com.apk.claw.android.octopus_mobile.SetupReadiness
 import com.apk.claw.android.server.ConfigServerManager
@@ -750,6 +753,33 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
                             ).show()
                             onChanged()
                         }
+                    }
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
+            Text(
+                "⬇ 从局域网设备拉取", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable {
+                        Thread {
+                            val target = ClawApplication.instance.deviceRegistry.getOnlineDevices()
+                                .firstOrNull { it.authToken.isNotBlank() }
+                            val msg = if (target == null) {
+                                "未发现已配对的在线局域网设备(先在设备里配对同账号设备)"
+                            } else {
+                                val r = KnowledgeSync.pullFrom(target.getBaseUrl(), target.authToken, OkHttpClient())
+                                if (r == null) {
+                                    "拉取失败:${target.deviceName} 无响应或数据非法"
+                                } else {
+                                    "已从 ${target.deviceName} 拉取 ${r.first} 条规矩 + ${r.second} 条记忆"
+                                }
+                            }
+                            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                                onChanged()
+                            }
+                        }.start()
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
             )
