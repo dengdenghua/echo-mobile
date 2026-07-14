@@ -73,4 +73,14 @@ class MemoryRelevanceTest {
         store.addUserFact("我对花生过敏")   // 去重
         assertEquals(1, store.getMemories().size)
     }
+
+    @Test
+    fun `addMemory skips near-duplicate memories`() {
+        store.addUserFact("我常用饿了么点外卖")
+        store.addUserFact("我常用饿了么点外卖啊")   // 近似 → 跳过
+        assertEquals("近似记忆去重,只留 1 条", 1, store.getMemories().size)
+        // 真不同的仍能加
+        store.addUserFact("我住北京朝阳区")
+        assertEquals(2, store.getMemories().size)
+    }
 }

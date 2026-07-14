@@ -141,6 +141,17 @@ class InteractionLedgerTest {
     }
 
     @Test
+    fun `manual rule skips near-duplicates`() {
+        InteractionLedger.addManualRule("订机票")
+        InteractionLedger.addManualRule("帮我订机票")   // 近似(含填充词)→ 跳过
+        InteractionLedger.addManualRule("  订机票  ")   // 空白变体 → 跳过
+        assertEquals("近似规矩去重,只留 1 条", 1, InteractionLedger.size())
+        // 真不同的规矩仍能加
+        InteractionLedger.addManualRule("查快递物流")
+        assertEquals(2, InteractionLedger.size())
+    }
+
+    @Test
     fun `clearLessons keeps manual rules but drops learned lessons`() {
         InteractionLedger.addManualRule("先登录再下单")
         InteractionLedger.recordFailure("tap", "", "找不到节点")   // 自动学到的

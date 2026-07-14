@@ -1,5 +1,6 @@
 package com.apk.claw.android.octopus_mobile.memory
 
+import com.apk.claw.android.octopus_mobile.TextSimilarity
 import com.apk.claw.android.utils.KVUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -66,15 +67,15 @@ class MemoryStore {
 没有新信息就不要输出 MEMO 行。绝不记录密码、验证码等敏感或一次性信息。"""
     }
 
+    /** 两条记忆内容是否重复:完全相同 / 互为包含 / 近似(空白/填充词/高度改写)。 */
+    private fun isSameOrSimilar(a: String, b: String): Boolean =
+        a == b || a.contains(b) || b.contains(a) || TextSimilarity.isNearDuplicate(a, b)
+
     /** 添加一条记忆 */
     fun addMemory(memory: Memory) {
         val memories = getMemories().toMutableList()
-        // 去重:完全相同或互为包含("我用饿了么" vs "我用饿了么点外卖")都不再添加
-        if (memories.any {
-                it.content == memory.content ||
-                    it.content.contains(memory.content) || memory.content.contains(it.content)
-            }
-        ) {
+        // 去重:完全相同 / 互为包含("我用饿了么" vs "我用饿了么点外卖") / 近似(空白/填充词/高度改写)都不再添加
+        if (memories.any { isSameOrSimilar(it.content, memory.content) }) {
             return
         }
         memories.add(memory)

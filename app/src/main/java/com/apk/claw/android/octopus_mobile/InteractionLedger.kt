@@ -196,7 +196,10 @@ object InteractionLedger {
         synchronized(lessons) {
             val now = System.currentTimeMillis()
             val pattern = "manual_" + Integer.toHexString(text.hashCode())
-            if (lessons.none { it.pattern == pattern }) {
+            // 去重:精确(同 hash)或与已有 manual 规矩近似(空白/填充词/高度改写)都跳过,防知识膨胀。
+            val isDup = lessons.any { it.pattern == pattern } ||
+                lessons.any { it.manual && TextSimilarity.isNearDuplicate(it.title, text) }
+            if (!isDup) {
                 lessons.add(Lesson(pattern, text, 1, now, now, "user", "", manual = true))
                 save()
             }
