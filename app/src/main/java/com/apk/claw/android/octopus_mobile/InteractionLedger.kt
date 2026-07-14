@@ -60,6 +60,7 @@ object InteractionLedger {
         val lastContext: String,  // 最近一次上下文(工具名 + 参数摘要)
         val mitigation: String,   // 注入 prompt 的规避策略;手动规矩为空(title 即规矩)
         val manual: Boolean = false,  // 用户手动教的规矩:永远注入、不被 evict/重置淘汰
+        val enabled: Boolean = true,  // 停用的规矩保留但不注入 prompt(用户可随时切回)
     )
 
     private val lessons = mutableListOf<Lesson>()
@@ -88,6 +89,7 @@ object InteractionLedger {
                             lastContext = o.optString("lastContext", ""),
                             mitigation = o.optString("mitigation", ""),
                             manual = o.optBoolean("manual", false),
+                            enabled = o.optBoolean("enabled", true),
                         ))
                     }
                     Log.i(TAG, "Loaded ${lessons.size} GUI lessons")
@@ -149,7 +151,7 @@ object InteractionLedger {
             val now = System.currentTimeMillis()
             val active = lessons
                 .map { it to score(it, now) }
-                .filter { it.second > 0.3 }
+                .filter { it.second > 0.3 && it.first.enabled }   // 停用的规矩保留但不注入
                 .sortedByDescending { it.second }
                 .take(6)
                 .map { it.first }
@@ -175,14 +177,31 @@ object InteractionLedger {
     fun size(): Int = synchronized(lessons) { lessons.size }
 
     /** 展示用视图:一条操作经验(给信任中心可视化)。manual=用户手动教的规矩。 */
-    data class LessonView(val title: String, val count: Int, val mitigation: String, val manual: Boolean)
+    data class LessonView(
+        val title: String,
+        val count: Int,
+        val mitigation: String,
+        val manual: Boolean,
+        val enabled: Boolean,
+    )
 
     /** 按分(时效×频次;用户规矩恒最高)降序返回前 [limit] 条的展示视图。纯读,无副作用。 */
     fun snapshot(limit: Int = 8): List<LessonView> = synchronized(lessons) {
         val now = System.currentTimeMillis()
         lessons.sortedByDescending { score(it, now) }
             .take(limit)
-            .map { LessonView(it.title, it.count, it.mitigation, it.manual) }
+            .map { LessonView(it.title, it.count, it.mitigation, it.manual, it.enabled) }
+    }
+
+    /** 启用/停用一条用户规矩(按规矩原文匹配)。停用的保留但不注入 prompt。 */
+    fun setManualRuleEnabled(rule: String, enabled: Boolean) {
+        synchronized(lessons) {
+            val idx = lessons.indexOfFirst { it.manual && it.title == rule }
+            if (idx >= 0 && lessons[idx].enabled != enabled) {
+                lessons[idx] = lessons[idx].copy(enabled = enabled)
+                save()
+            }
+        }
     }
 
     /**
@@ -311,6 +330,7 @@ object InteractionLedger {
                     put("lastContext", l.lastContext)
                     put("mitigation", l.mitigation)
                     put("manual", l.manual)
+                    put("enabled", l.enabled)
                 })
             }
             File(dir, FILE_NAME).writeText(JSONObject().put("lessons", arr).put("version", 1).toString(2))

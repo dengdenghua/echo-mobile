@@ -152,6 +152,21 @@ class InteractionLedgerTest {
     }
 
     @Test
+    fun `disabled manual rule is kept but not injected`() {
+        InteractionLedger.addManualRule("打开淘宝先关弹窗")
+        assertTrue(InteractionLedger.getMitigationsSection().contains("打开淘宝先关弹窗"))
+
+        InteractionLedger.setManualRuleEnabled("打开淘宝先关弹窗", false)
+        // 停用后:保留在账本(snapshot 可见)但不再注入 prompt
+        assertEquals(1, InteractionLedger.size())
+        assertTrue(InteractionLedger.snapshot().any { it.title.contains("淘宝") && !it.enabled })
+        assertFalse("停用的规矩不注入", InteractionLedger.getMitigationsSection().contains("打开淘宝先关弹窗"))
+
+        InteractionLedger.setManualRuleEnabled("打开淘宝先关弹窗", true)
+        assertTrue("重新启用后又注入", InteractionLedger.getMitigationsSection().contains("打开淘宝先关弹窗"))
+    }
+
+    @Test
     fun `clearLessons keeps manual rules but drops learned lessons`() {
         InteractionLedger.addManualRule("先登录再下单")
         InteractionLedger.recordFailure("tap", "", "找不到节点")   // 自动学到的

@@ -545,22 +545,37 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             (if (l.manual) "📌 " else "") + l.title,
-                            color = FText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+                            color = if (l.manual && !l.enabled) FMuted else FText,
+                            fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
                         )
                         if (l.mitigation.isNotBlank()) {
                             Text("规避:${l.mitigation}", color = FMuted, fontSize = 10.sp, lineHeight = 14.sp)
                         } else if (l.manual) {
-                            Text("你定的规矩 · 优先级最高", color = FMuted, fontSize = 10.sp)
+                            Text(
+                                if (l.enabled) "你定的规矩 · 优先级最高" else "已停用 · 暂不注入",
+                                color = FMuted, fontSize = 10.sp,
+                            )
                         }
                     }
                     Spacer(Modifier.width(8.dp))
                     if (l.manual) {
-                        Text(
-                            "删除", color = FWarning, fontSize = 11.sp,
-                            modifier = Modifier
-                                .clickable { InteractionLedger.removeManualRule(l.title); onReset() }
-                                .padding(4.dp),
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                if (l.enabled) "停用" else "启用", color = FPrimary, fontSize = 11.sp,
+                                modifier = Modifier
+                                    .clickable {
+                                        InteractionLedger.setManualRuleEnabled(l.title, !l.enabled)
+                                        onReset()
+                                    }
+                                    .padding(4.dp),
+                            )
+                            Text(
+                                "删除", color = FWarning, fontSize = 11.sp,
+                                modifier = Modifier
+                                    .clickable { InteractionLedger.removeManualRule(l.title); onReset() }
+                                    .padding(4.dp),
+                            )
+                        }
                     } else {
                         FPill("×${l.count}", FPrimary)
                     }
