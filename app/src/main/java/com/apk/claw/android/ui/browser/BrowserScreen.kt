@@ -80,9 +80,11 @@ private val URL_REGEX = Regex("https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]+")
 sealed class BrowserPage {
     object Home : BrowserPage()
     object Search : BrowserPage()
-    data class Result(val query: String) : BrowserPage()
+    object Result : BrowserPage()
     object Webview : BrowserPage()
 }
+
+data class ChatMsg(val isUser: Boolean, val text: String, val sources: List<String> = emptyList(), val done: Boolean = false)
 
 // HistoryEntry 定义在 HistoryStore.kt(同步需要 visitedTs 字段)
 
@@ -107,6 +109,7 @@ fun BrowserScreen(
     var answerText by remember { mutableStateOf("") }
     var sources by remember { mutableStateOf<List<String>>(emptyList()) }
     var thinking by remember { mutableStateOf(false) }
+    val messages = remember { mutableStateListOf<ChatMsg>() }
 
     var showMenu by remember { mutableStateOf(false) }
     var showTimeline by remember { mutableStateOf(false) }
@@ -231,20 +234,30 @@ fun BrowserScreen(
                 val engine = com.apk.claw.android.octopus_mobile.browser.SearchEngines.byId(KVUtils.getSearchEngine())
                 val isAiEngine = engine.id in setOf("perplexity", "kimi", "tongyi")
                 if (isAiEngine) {
-                    pageState = BrowserPage.Result(t)
-                    answerText = ""
-                    sources = emptyList()
-                    thinking = true
-                    runAiSearch(context, t,
-                        onAnswer = { full -> answerText = full },
-                        onDone = { finalText ->
-                            thinking = false
-                            sources = URL_REGEX.findAll(finalText).map { it.value }.distinct().take(5).toList()
-                        },
-                    )
+                    messages.clear()
+                    messages.add(ChatMsg(isUser = true, text = t))
+                    messages.add(ChatMsg(isUser = false, text = context.getString(R.string.browser_thinking_status)))
+                    pageState = BrowserPage.Result
+                    runAiStream(context, t) { full, srcs, done ->
+                        if (messages.isNotEmpty() && !messages.last().isUser) {
+                            messages[messages.lastIndex] = ChatMsg(isUser = false, text = full, sources = srcs, done = done)
+                        }
+                    }
                 } else {
-                    // 传统搜索引擎：直接 navigate 到搜索结果页
                     navigate(engine.searchUrl(t))
+                }
+            }
+        }
+    }
+
+    val followUp: (String) -> Unit = { input ->
+        val t = input.trim()
+        if (t.isNotEmpty()) {
+            messages.add(ChatMsg(isUser = true, text = t))
+            messages.add(ChatMsg(isUser = false, text = context.getString(R.string.browser_thinking_status)))
+            runAiStream(context, t) { full, srcs, done ->
+                if (messages.isNotEmpty() && !messages.last().isUser) {
+                    messages[messages.lastIndex] = ChatMsg(isUser = false, text = full, sources = srcs, done = done)
                 }
             }
         }
@@ -280,16 +293,18 @@ fun BrowserScreen(
                         onShowTabs = { showTabs = true },
                         tabCount = tabs.size,
                     )
-                    // BrowserSearchOverlay 已被删除(预存遗留),暂留 Search state 占位,
-                    // 让 when 仍 exhaustive;onActivateSearch 后续应替换为新的搜索入口。
-                    is BrowserPage.Search -> {}
-                    is BrowserPage.Result -> BrowserResultOverlay(
-                        query = (pageState as BrowserPage.Result).query,
-                        answer = answerText,
-                        sources = sources,
-                        thinking = thinking,
+                    is BrowserPage.Search -> BrowserSearchOverlay(
                         onBack = { pageState = BrowserPage.Home },
-                        onSuggestion = { s -> submitHome(s) },
+                        onSubmit = { s -> submitHome(s) },
+                        onOpenUrl = { url -> navigate(url) },
+                        history = history.toList(),
+                        commonSites = emptyList(),
+                    )
+                    is BrowserPage.Result -> BrowserResultOverlay(
+                        messages = messages.toList(),
+                        engineId = KVUtils.getSearchEngine(),
+                        onBack = { pageState = BrowserPage.Home },
+                        onFollowUp = { s -> followUp(s) },
                         onOpenSource = { url -> navigate(url) },
                     )
                     is BrowserPage.Webview -> {}
@@ -1068,21 +1083,32 @@ private fun CommonSiteTile(title: String, url: String, onClick: () -> Unit, modi
     }
 }
 
-// ── P1-2: 结果页答案优先 ──
+// ── P1-2: 对话式结果页 ──
 
 @Composable
 private fun BrowserResultOverlay(
-    query: String,
-    answer: String,
-    sources: List<String>,
-    thinking: Boolean,
+    messages: List<ChatMsg>,
+    engineId: String,
     onBack: () -> Unit,
-    onSuggestion: (String) -> Unit,
+    onFollowUp: (String) -> Unit,
     onOpenSource: (String) -> Unit,
 ) {
-    var sourcesExpanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var followText by remember { mutableStateOf("") }
+    val listState = rememberScrollState()
 
-    Column(modifier = Modifier.fillMaxSize().background(OctopusColors.Background)) {
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            kotlinx.coroutines.delay(100)
+            listState.animateScrollTo(listState.maxValue)
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(OctopusColors.Background),
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1092,107 +1118,224 @@ private fun BrowserResultOverlay(
             BrowserCapsuleButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.advanced_action_close),
+                    contentDescription = null,
                     tint = OctopusColors.TextSecondary,
                     modifier = Modifier.size(20.dp),
                 )
             }
-            Text(
-                text = query,
-                fontSize = 14.sp,
-                color = OctopusColors.TextPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f).padding(horizontal = OctopusSpacing.sm),
-            )
+            Spacer(Modifier.width(OctopusSpacing.sm))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(OctopusShape.capsule)
+                    .background(OctopusColors.SurfaceVariant)
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+            ) {
+                EngineGlyph(engineId = engineId)
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = SearchEngines.byId(engineId).label,
+                    fontSize = 13.sp,
+                    color = OctopusColors.TextSecondary,
+                )
+            }
         }
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = OctopusSpacing.lg),
+                .weight(1f)
+                .verticalScroll(listState)
+                .padding(horizontal = 12.dp),
+        ) {
+            Spacer(Modifier.height(OctopusSpacing.sm))
+            messages.forEach { msg ->
+                ChatBubble(
+                    msg = msg,
+                    engineId = engineId,
+                    onOpenSource = onOpenSource,
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+            Spacer(Modifier.height(OctopusSpacing.md))
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                shape = OctopusShape.large,
-                color = OctopusBackground.solidSurface,
-                contentColor = OctopusColors.TextPrimary,
-                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                color = OctopusColors.SurfaceVariant,
+                modifier = Modifier.weight(1f).height(44.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BasicTextField(
+                        value = followText,
+                        onValueChange = { followText = it },
+                        singleLine = true,
+                        textStyle = TextStyle(fontSize = 14.sp, color = OctopusColors.TextPrimary),
+                        cursorBrush = SolidColor(OctopusColors.Primary),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                        keyboardActions = KeyboardActions(onSend = {
+                            if (followText.trim().isNotEmpty()) {
+                                onFollowUp(followText.trim())
+                                followText = ""
+                            }
+                        }),
+                        decorationBox = { innerTextField ->
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                                if (followText.isEmpty()) {
+                                    Text(
+                                        text = "接着问…",
+                                        fontSize = 14.sp,
+                                        color = OctopusColors.TextMuted,
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(if (followText.trim().isNotEmpty()) OctopusColors.Primary else OctopusColors.SurfaceVariant)
+                    .clickable(enabled = followText.trim().isNotEmpty()) {
+                        onFollowUp(followText.trim())
+                        followText = ""
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.ArrowUpward,
+                    contentDescription = null,
+                    tint = if (followText.trim().isNotEmpty()) OctopusColors.OnPrimary else OctopusColors.TextMuted,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatBubble(
+    msg: ChatMsg,
+    engineId: String,
+    onOpenSource: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val arrangement = if (msg.isUser) Arrangement.End else Arrangement.Start
+    val bubbleColor = if (msg.isUser) OctopusColors.Primary else OctopusColors.Surface
+    val textColor = if (msg.isUser) OctopusColors.OnPrimary else OctopusColors.TextPrimary
+    val bubbleShape = if (msg.isUser) {
+        RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp)
+    } else {
+        RoundedCornerShape(4.dp, 16.dp, 16.dp, 16.dp)
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = arrangement,
+    ) {
+        if (!msg.isUser) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 4.dp, end = 8.dp)
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(OctopusColors.SurfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                EngineGlyph(engineId = engineId)
+            }
+        }
+
+        Column(
+            modifier = Modifier.widthIn(max = 280.dp),
+            horizontalAlignment = if (msg.isUser) Alignment.End else Alignment.Start,
+        ) {
+            Surface(
+                shape = bubbleShape,
+                color = bubbleColor,
             ) {
                 Text(
-                    text = if (thinking && answer.isBlank()) stringResource(R.string.browser_thinking_status) else answer,
+                    text = msg.text,
                     fontSize = 14.sp,
-                    color = OctopusColors.TextPrimary,
+                    color = textColor,
                     lineHeight = 22.sp,
-                    modifier = Modifier.padding(OctopusSpacing.lg),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                 )
             }
 
-            if (sources.isNotEmpty()) {
-                Spacer(Modifier.height(OctopusSpacing.md))
+            if (!msg.isUser && msg.sources.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(OctopusShape.medium)
-                        .background(OctopusColors.SurfaceVariant)
-                        .clickable { sourcesExpanded = !sourcesExpanded }
-                        .padding(OctopusSpacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(start = 2.dp),
                 ) {
-                    Icon(
-                        Icons.Filled.Language,
-                        contentDescription = null,
-                        tint = OctopusColors.TextSecondary,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(Modifier.width(OctopusSpacing.sm))
-                    Text(
-                        text = stringResource(R.string.browser_sources_count, sources.size),
-                        fontSize = 13.sp,
-                        color = OctopusColors.TextSecondary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Icon(
-                        if (sourcesExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                        contentDescription = null,
-                        tint = OctopusColors.TextSecondary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
-                if (sourcesExpanded) {
-                    sources.forEach { url ->
+                    msg.sources.take(3).forEach { url ->
                         Text(
-                            text = url,
-                            fontSize = 12.sp,
-                            color = OctopusColors.Primary,
+                            text = domainOf(url),
+                            fontSize = 11.sp,
+                            color = OctopusColors.TextMuted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .clip(OctopusShape.capsule)
+                                .background(OctopusColors.SurfaceVariant)
                                 .clickable { onOpenSource(url) }
-                                .padding(horizontal = OctopusSpacing.md, vertical = OctopusSpacing.sm),
+                                .padding(horizontal = 8.dp, vertical = 3.dp),
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(OctopusSpacing.lg))
-            Text(
-                text = stringResource(R.string.browser_follow_up_title),
-                fontSize = 13.sp,
-                color = OctopusColors.TextMuted,
-            )
-            Spacer(Modifier.height(OctopusSpacing.sm))
-            val detailText = stringResource(R.string.browser_follow_up_detail)
-            val exampleText = stringResource(R.string.browser_follow_up_example)
-            val summaryText = stringResource(R.string.browser_follow_up_summary)
-            Row(horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm)) {
-                SuggestionChip(detailText) { onSuggestion(detailText) }
-                SuggestionChip(exampleText) { onSuggestion(exampleText) }
-                SuggestionChip(summaryText) { onSuggestion(summaryText) }
+            if (!msg.isUser && msg.done) {
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(start = 4.dp),
+                ) {
+                    BubbleAction(icon = Icons.Default.ContentCopy, text = "复制") {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("answer", msg.text))
+                        Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show()
+                    }
+                    BubbleAction(icon = Icons.Default.Share, text = "分享") {
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, msg.text)
+                        }
+                        runCatching { context.startActivity(Intent.createChooser(shareIntent, "分享回答")) }
+                    }
+                }
             }
-            Spacer(Modifier.height(OctopusSpacing.xxl))
         }
+    }
+}
+
+@Composable
+private fun BubbleAction(icon: ImageVector, text: String, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(OctopusShape.capsule)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Icon(icon, contentDescription = null, tint = OctopusColors.TextMuted, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(text, fontSize = 11.sp, color = OctopusColors.TextMuted)
     }
 }
 
@@ -1974,6 +2117,38 @@ private fun runAiSearch(
             val msg = context.getString(R.string.browser_error_message, e)
             onAnswer(msg)
             onDone(msg)
+        },
+    )
+}
+
+/** 流式 AI 回答：实时回传 text/sources/done，用于多轮对话 UI */
+private fun runAiStream(
+    context: Context,
+    question: String,
+    onUpdate: (text: String, sources: List<String>, done: Boolean) -> Unit,
+) {
+    if (!com.apk.claw.android.ui.compose.screen.ChatAgentBridge.isConfigured()) {
+        val msg = context.getString(R.string.browser_configure_api_key_text)
+        onUpdate(msg, emptyList(), true)
+        return
+    }
+    val prompt = context.getString(R.string.browser_search_prompt, question)
+    val sb = StringBuilder()
+    onUpdate(context.getString(R.string.browser_thinking_status), emptyList(), false)
+    com.apk.claw.android.ui.compose.screen.ChatAgentBridge.run(
+        prompt,
+        onTool = { _, _, _, _ -> },
+        onText = { t ->
+            sb.append(t)
+            onUpdate(sb.toString(), URL_REGEX.findAll(sb.toString()).map { it.value }.distinct().take(5).toList(), false)
+        },
+        onDone = { d ->
+            val final = if (sb.isNotEmpty()) sb.toString() else d
+            onUpdate(final, URL_REGEX.findAll(final).map { it.value }.distinct().take(5).toList(), true)
+        },
+        onError = { e ->
+            val msg = context.getString(R.string.browser_error_message, e)
+            onUpdate(msg, emptyList(), true)
         },
     )
 }
