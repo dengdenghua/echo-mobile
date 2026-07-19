@@ -191,6 +191,10 @@ object ToolRegistry {
         // MEDIUM 风险(本地推理无外部 egress,但模型输出可能不当 → 纳入审计)。
         register(com.apk.claw.android.tool.localmodel.RunLocalModelTool())
 
+        // 虚拟显示(Root):创建隐藏虚拟屏,后台并发自动化 + 可截 FLAG_SECURE App。
+        // 最高危 → 不可信来源走来源闸门 + 全程审计。需 Root。
+        register(com.apk.claw.android.tool.impl.VirtualDisplayTool())
+
         // mini-app 双工 action 架构(移植 OpenRoom):两工具间接层,Agent 发现并操作已装 mini-app。
         register(com.apk.claw.android.tool.impl.ListAppsTool())
         register(com.apk.claw.android.tool.impl.AppActionTool())

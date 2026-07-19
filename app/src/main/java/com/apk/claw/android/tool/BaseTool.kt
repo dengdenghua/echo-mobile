@@ -44,6 +44,7 @@ abstract class BaseTool {
             "shell_exec",
             "run_shell",
             "run_shell_session",
+            "virtual_display",
             "preview_html",
             "generate_app",
             "edit_file",

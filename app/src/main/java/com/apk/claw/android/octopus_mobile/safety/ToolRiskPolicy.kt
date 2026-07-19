@@ -59,6 +59,9 @@ object ToolRiskPolicy {
         // 最高危 → 不可信来源走来源闸门 + 全程审计。见 RunShellTool/RunShellSessionTool/LinuxSandbox。
         "run_shell",
         "run_shell_session",
+        // 虚拟显示(Root):创建隐藏虚拟屏 + 触控注入 + 可截 FLAG_SECURE App。
+        // 最高危 → 不可信来源走来源闸门 + 全程审计。见 VirtualDisplayTool/RootShellService。
+        "virtual_display",
         // 全自动配置 Shizuku:与本机 adbd 完成 ADB 配对并跑 shell 拉起 Shizuku(shell 级特权入口)。
         // 最高危一类 → 不可信来源须弹审批 + 全程审计,防远端静默给自己开 Shizuku 提权。见 ShizukuAutoSetupTool。
         "shizuku_auto_setup",
