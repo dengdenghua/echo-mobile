@@ -625,4 +625,9 @@ object KVUtils {
     fun setOctopusBrainMode(value: String) = putString(KEY_OCTOPUS_BRAIN_MODE, value)
     fun isOctopusAutoConnect(): Boolean = getBoolean(KEY_OCTOPUS_AUTO_CONNECT, true)
     fun setOctopusAutoConnect(value: Boolean) = putBoolean(KEY_OCTOPUS_AUTO_CONNECT, value)
+
+    // ── 本地模型(llama.cpp):活跃 .gguf 模型文件路径 ──
+    private const val KEY_ACTIVE_LOCAL_MODEL = "KEY_ACTIVE_LOCAL_MODEL"
+    fun getActiveLocalModel(): String = getString(KEY_ACTIVE_LOCAL_MODEL, "")
+    fun setActiveLocalModel(value: String) = putString(KEY_ACTIVE_LOCAL_MODEL, value)
 }

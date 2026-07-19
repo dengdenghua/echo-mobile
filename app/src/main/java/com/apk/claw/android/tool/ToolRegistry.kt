@@ -187,6 +187,10 @@ object ToolRegistry {
         register(com.apk.claw.android.tool.impl.RunShellTool())
         register(com.apk.claw.android.tool.impl.RunShellSessionTool())
 
+        // 本地模型推理(llama.cpp GGUF):设备端离线推理,隐私数据不出设备。
+        // MEDIUM 风险(本地推理无外部 egress,但模型输出可能不当 → 纳入审计)。
+        register(com.apk.claw.android.tool.localmodel.RunLocalModelTool())
+
         // mini-app 双工 action 架构(移植 OpenRoom):两工具间接层,Agent 发现并操作已装 mini-app。
         register(com.apk.claw.android.tool.impl.ListAppsTool())
         register(com.apk.claw.android.tool.impl.AppActionTool())

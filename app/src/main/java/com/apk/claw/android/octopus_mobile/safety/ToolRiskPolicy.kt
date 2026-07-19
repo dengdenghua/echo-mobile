@@ -110,6 +110,8 @@ object ToolRiskPolicy {
         "echo_act",            // 写 Echo 虚拟世界
         "echo_bind",           // 绑定角色进 Echo 虚拟世界
         "spawn_subagent",      // 子 Agent 执行子任务（内部各工具再走一遍 executeTool 管线）
+        // 本地模型推理(llama.cpp GGUF):本地推理无外部 egress,但模型输出可能不当或含敏感信息 → 纳入审计。
+        "run_local_model",
         // 会话重置:销毁会话 scope、释放持久状态。本身无外部副作用,但可丢弃用户/Agent 在会话里
         // 累积的变量与函数定义 —— 纳入审计便于排查「为何我的会话状态没了」。
         "run_code_reset",
