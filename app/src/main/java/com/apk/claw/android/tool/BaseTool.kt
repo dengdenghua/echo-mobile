@@ -42,6 +42,8 @@ abstract class BaseTool {
             "run_code_session",
             "run_python",
             "shell_exec",
+            "run_shell",
+            "run_shell_session",
             "preview_html",
             "generate_app",
             "edit_file",

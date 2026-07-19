@@ -53,6 +53,12 @@ object ToolRiskPolicy {
         // getprop/settings get/logcat -d 等),但仍是系统级特权入口,可能读出设备指纹/账号等敏感信息。
         // 登记 HIGH → 不可信来源走来源闸门 + 全程审计。状态变更命令被白名单拦截,走 file_ops/tap。
         "shell_exec",
+        // Linux 容器 Shell(Alpine + PRoot,无需 root):能 apk add 任意包、跑任意 shell/Python/Node/ELF 二进制。
+        // 虽然容器通过 PRoot chroot 隔离(看不到 App data/system),但能力面等同桌面 Linux,
+        // 可装任意包、跑任意二进制、发任意网络请求(容器内 raw socket 不走宿主 UrlGuard)。
+        // 最高危 → 不可信来源走来源闸门 + 全程审计。见 RunShellTool/RunShellSessionTool/LinuxSandbox。
+        "run_shell",
+        "run_shell_session",
         // 全自动配置 Shizuku:与本机 adbd 完成 ADB 配对并跑 shell 拉起 Shizuku(shell 级特权入口)。
         // 最高危一类 → 不可信来源须弹审批 + 全程审计,防远端静默给自己开 Shizuku 提权。见 ShizukuAutoSetupTool。
         "shizuku_auto_setup",

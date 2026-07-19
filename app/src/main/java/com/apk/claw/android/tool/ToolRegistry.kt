@@ -182,6 +182,11 @@ object ToolRegistry {
         // 高危 → 不可信来源走来源闸门;只允许查询类命令,状态变更走 file_ops/tap/input_text
         register(com.apk.claw.android.tool.impl.ShellExecTool())
 
+        // Linux 容器 Shell(Alpine + PRoot,无需 root):能 apk add 任意包、跑任意 shell/Python/Node/ELF 二进制。
+        // 高危 → 不可信来源走来源闸门 + 全程审计。容器隔离(PRoot chroot)是主要防线。
+        register(com.apk.claw.android.tool.impl.RunShellTool())
+        register(com.apk.claw.android.tool.impl.RunShellSessionTool())
+
         // mini-app 双工 action 架构(移植 OpenRoom):两工具间接层,Agent 发现并操作已装 mini-app。
         register(com.apk.claw.android.tool.impl.ListAppsTool())
         register(com.apk.claw.android.tool.impl.AppActionTool())
