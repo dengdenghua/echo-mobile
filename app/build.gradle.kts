@@ -195,6 +195,8 @@ dependencies {
     }
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+    // OkHttp SSE —— MCP client 的 SSE 传输层(EventSource/EventSources)。
+    implementation("com.squareup.okhttp3:okhttp-sse:4.12.0")
     // androidx.webkit —— WebViewCompat.addDocumentStartJavaScript(文档开始前注入,做反检测)
     // + WebViewFeature 能力探测 + ProxyController(浏览器代理)。系统 WebView 增强能力的入口。
     implementation(libs.androidx.webkit)
