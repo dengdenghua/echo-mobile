@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -107,6 +109,7 @@ fun BrowserScreen(
 
     var showMenu by remember { mutableStateOf(false) }
     var showTimeline by remember { mutableStateOf(false) }
+    var showTabs by remember { mutableStateOf(false) }
     var showAi by remember { mutableStateOf(false) }
     var showBookmark by remember { mutableStateOf(false) }
     var showReader by remember { mutableStateOf(false) }
@@ -118,6 +121,8 @@ fun BrowserScreen(
 
     val history = remember { mutableStateListOf<HistoryEntry>().apply { addAll(HistoryStore.getAll().take(10)) } }
     val tts = remember { mutableStateOf<TextToSpeech?>(null) }
+    val tabs by BrowserTabsStore.tabs.collectAsState()
+    val currentTabId by BrowserTabsStore.currentId.collectAsState()
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -262,6 +267,8 @@ fun BrowserScreen(
                     is BrowserPage.Home -> BrowserHomeOverlay(
                         onSubmit = submitHome,
                         onClose = onClose,
+                        onMenu = { showMenu = true },
+                        onShowTabs = { showTabs = true },
                     )
                     is BrowserPage.Result -> BrowserResultOverlay(
                         query = (pageState as BrowserPage.Result).query,
@@ -449,6 +456,47 @@ fun BrowserScreen(
             )
         }
 
+        if (showTabs) {
+            BrowserTabsSheet(
+                tabs = tabs,
+                currentId = currentTabId,
+                onDismiss = { showTabs = false },
+                onSelect = { id ->
+                    val tab = tabs.firstOrNull { it.id == id }
+                    if (tab != null) {
+                        BrowserTabsStore.select(id)
+                        if (tab.url.isNotEmpty()) {
+                            navigate(tab.url)
+                        } else {
+                            pageState = BrowserPage.Home
+                            currentUrl = ""
+                            urlText = ""
+                        }
+                    }
+                    showTabs = false
+                },
+                onNew = {
+                    BrowserTabsStore.newTab(context.getString(R.string.browser_new_tab))
+                    pageState = BrowserPage.Home
+                    currentUrl = ""
+                    urlText = ""
+                    showTabs = false
+                },
+                onClose = { id ->
+                    BrowserTabsStore.close(id, context.getString(R.string.browser_new_tab))
+                    val cur = BrowserTabsStore.current()
+                    if (cur != null) {
+                        if (cur.url.isNotEmpty()) navigate(cur.url)
+                        else {
+                            pageState = BrowserPage.Home
+                            currentUrl = ""
+                            urlText = ""
+                        }
+                    }
+                },
+            )
+        }
+
         if (showAi) {
             BrowserAiSheet(
                 engine = engine,
@@ -515,100 +563,192 @@ private fun BrowserWebViewContainer(engine: BrowserEngine) {
     )
 }
 
-// ── P1-1: 首页极简化 ──
+// ── P1-1: 首页极简化（参考 vivo 浏览器首页：留白+插画+胶囊搜索框+底部胶囊导航） ──
 
 @Composable
 private fun BrowserHomeOverlay(
     onSubmit: (String) -> Unit,
     onClose: () -> Unit,
+    onMenu: () -> Unit = {},
+    onShowTabs: () -> Unit = {},
 ) {
+    val tabs by BrowserTabsStore.tabs.collectAsState()
     var text by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
-    var focusSignal by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(OctopusColors.Background)
-            .padding(horizontal = OctopusSpacing.lg),
-        contentAlignment = Alignment.Center,
+            .background(OctopusColors.Background),
     ) {
         Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(),
         ) {
-            BasicTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                textStyle = TextStyle(
-                    fontSize = 16.sp,
-                    color = OctopusColors.TextPrimary,
-                ),
-                cursorBrush = SolidColor(OctopusColors.Primary),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                keyboardActions = KeyboardActions(onGo = { onSubmit(text) }),
-                decorationBox = { innerTextField ->
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        if (text.isEmpty()) {
-                            Text(
-                                text = stringResource(R.string.browser_home_search_hint),
-                                fontSize = 16.sp,
-                                color = OctopusColors.TextMuted,
-                            )
-                        }
-                        innerTextField()
-                    }
-                },
+            Spacer(Modifier.height(72.dp))
+
+            // 轻量插画：一个漂浮的圆形+弧形，抽象星球/气泡感，零资源
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.size(180.dp)) {
+                    // 浅蓝渐变圆形
+                    drawCircle(
+                        color = Color(0xFFEAF2FF),
+                        radius = 78.dp.toPx(),
+                        center = center,
+                    )
+                    // 右上角淡橙色小弧
+                    drawArc(
+                        color = Color(0xFFFDECE0),
+                        startAngle = -30f,
+                        sweepAngle = 120f,
+                        useCenter = false,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 10.dp.toPx()),
+                        size = size,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // 胶囊搜索框
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
-                    .clip(OctopusShape.large)
-                    .background(OctopusBackground.solidSurface)
-                    .padding(horizontal = OctopusSpacing.lg)
                     .focusRequester(focusRequester),
-            )
-
-            Spacer(Modifier.height(OctopusSpacing.xl))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
+                shape = RoundedCornerShape(26.dp),
+                color = OctopusColors.Surface,
+                shadowElevation = 6.dp,
+                tonalElevation = 0.dp,
             ) {
-                QuickChip("查", stringResource(R.string.browser_chip_search)) { text = "帮我查一下 "; focusSignal++ }
-                QuickChip("买", stringResource(R.string.browser_chip_buy)) { text = "帮我比一下价格 "; focusSignal++ }
-                QuickChip("读", stringResource(R.string.browser_chip_read)) { text = "帮我读一下这篇 "; focusSignal++ }
-                QuickChip("下", stringResource(R.string.browser_chip_download)) { text = "帮我下载 "; focusSignal++ }
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        tint = OctopusColors.TextMuted,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (text.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.browser_home_search_hint),
+                                fontSize = 15.sp,
+                                color = OctopusColors.TextMuted,
+                            )
+                        }
+                        BasicTextField(
+                            value = text,
+                            onValueChange = { text = it },
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 15.sp,
+                                color = OctopusColors.TextPrimary,
+                            ),
+                            cursorBrush = SolidColor(OctopusColors.Primary),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                            keyboardActions = KeyboardActions(onGo = {
+                                if (text.trim().isNotEmpty()) onSubmit(text)
+                            }),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        Icons.Default.Mic,
+                        contentDescription = null,
+                        tint = OctopusColors.TextMuted,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(14.dp))
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = null,
+                        tint = OctopusColors.TextMuted,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
-        }
-    }
 
-    LaunchedEffect(focusSignal) {
-        if (focusSignal > 0) focusRequester.requestFocus()
+            Spacer(Modifier.weight(1f))
+
+            // 底部胶囊导航条（菜单 + 标签数）
+            BottomCapsuleBar(
+                tabCount = tabs.size,
+                onMenu = onMenu,
+                onShowTabs = onShowTabs,
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .navigationBarsPadding(),
+            )
+        }
     }
 }
 
 @Composable
-private fun QuickChip(char: String, label: String, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(OctopusShape.large)
-            .background(OctopusBackground.solidSurface)
-            .clickable(onClick = onClick)
-            .padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.md),
+private fun BottomCapsuleBar(
+    tabCount: Int,
+    onMenu: () -> Unit,
+    onShowTabs: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(28.dp),
+        color = OctopusColors.Surface,
+        shadowElevation = 8.dp,
+        tonalElevation = 0.dp,
     ) {
-        Text(
-            text = char,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = OctopusColors.Primary,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = label,
-            fontSize = 10.sp,
-            color = OctopusColors.TextSecondary,
-        )
+        Row(
+            modifier = Modifier.height(56.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clickable(onClick = onMenu),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.Menu,
+                    contentDescription = null,
+                    tint = OctopusColors.TextPrimary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clickable(onClick = onShowTabs),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .border(1.5.dp, OctopusColors.TextPrimary, RoundedCornerShape(4.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = if (tabCount > 99) "99+" else "$tabCount",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = OctopusColors.TextPrimary,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -1081,6 +1221,99 @@ private fun BrowserTimelineSheet(
                                 color = OctopusColors.TextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── 标签页 Sheet ──
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BrowserTabsSheet(
+    tabs: List<BrowserTabsStore.Tab>,
+    currentId: Long,
+    onDismiss: () -> Unit,
+    onSelect: (Long) -> Unit,
+    onNew: () -> Unit,
+    onClose: (Long) -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = OctopusColors.Surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = OctopusSpacing.lg)
+                .padding(bottom = OctopusSpacing.xxl),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "${tabs.size} 个标签",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = OctopusColors.TextPrimary,
+                )
+                BrowserCapsuleButton(onClick = onNew, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.Default.Add, contentDescription = null, tint = OctopusColors.TextPrimary, modifier = Modifier.size(20.dp))
+                }
+            }
+            Spacer(Modifier.height(OctopusSpacing.md))
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
+            ) {
+                items(tabs, key = { it.id }) { tab ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(OctopusShape.medium)
+                            .background(if (tab.id == currentId) OctopusColors.Primary.copy(alpha = 0.08f) else OctopusColors.SurfaceVariant)
+                            .clickable { onSelect(tab.id) }
+                            .padding(horizontal = OctopusSpacing.md, vertical = OctopusSpacing.md),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = tab.title.ifBlank { stringResource(R.string.browser_new_tab) },
+                                fontSize = 14.sp,
+                                color = OctopusColors.TextPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            if (tab.url.isNotEmpty()) {
+                                Text(
+                                    text = domainOf(tab.url),
+                                    fontSize = 11.sp,
+                                    color = OctopusColors.TextSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(OctopusSpacing.sm))
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .clickable { onClose(tab.id) },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = null,
+                                tint = OctopusColors.TextSecondary,
+                                modifier = Modifier.size(16.dp),
                             )
                         }
                     }

@@ -546,7 +546,7 @@ Shizuku 是安全、开源的本地辅助工具。</string>
     <string name="browser_install_success">安装成功：%1$s v%2$s</string>
     <string name="browser_install_failed">安装失败：%1$s</string>
     <string name="browser_install_error">安装错误：%1$s</string>
-    <string name="browser_home_search_hint">说说你想做什么…</string>
+    <string name="browser_home_search_hint">搜索或输入网址</string>
     <string name="browser_chip_search">查资料</string>
     <string name="browser_chip_buy">比价格</string>
     <string name="browser_chip_read">读文章</string>
