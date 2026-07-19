@@ -107,10 +107,15 @@ object RootShellService {
     /** 命令是否在白名单内 + 无注入字符。 */
     private fun isCommandAllowed(command: String): Boolean {
         val normalized = command.trimStart()
-        // 前缀白名单
+        // 前缀白名单匹配:每个前缀自带分隔符(空格或点),防 "getpropxxx" 骗过 "getprop"
+        // - "dumpsys " → 必须后跟空格(独立命令词)
+        // - "setprop persist." → 必须后跟点分隔的属性名
         val prefixMatch = ALLOWED_COMMAND_PREFIXES.any { prefix ->
-            val p = if (prefix.endsWith(" ")) prefix else "$prefix "
-            normalized == p.trimEnd() || normalized.startsWith(p)
+            normalized.startsWith(prefix) &&
+                (normalized == prefix ||
+                    normalized.length > prefix.length &&
+                    (prefix.last() == ' ' || prefix.last() == '.' ||
+                        normalized[prefix.length] == ' '))
         }
         if (!prefixMatch) {
             Log.w(TAG, "Command not in whitelist: $command")
