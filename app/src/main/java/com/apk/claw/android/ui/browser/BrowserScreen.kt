@@ -79,6 +79,7 @@ private val URL_REGEX = Regex("https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]+")
 
 sealed class BrowserPage {
     object Home : BrowserPage()
+    object Search : BrowserPage()
     data class Result(val query: String) : BrowserPage()
     object Webview : BrowserPage()
 }
@@ -245,6 +246,7 @@ fun BrowserScreen(
     BackHandler {
         when (pageState) {
             is BrowserPage.Home -> onClose()
+            is BrowserPage.Search -> pageState = BrowserPage.Home
             is BrowserPage.Result -> pageState = BrowserPage.Home
             is BrowserPage.Webview -> {
                 engine.evaluateJs("window.history.length") { len ->
@@ -265,11 +267,15 @@ fun BrowserScreen(
 
                 when (pageState) {
                     is BrowserPage.Home -> BrowserHomeOverlay(
-                        onSubmit = submitHome,
+                        onActivateSearch = { pageState = BrowserPage.Search },
                         onClose = onClose,
                         onMenu = { showMenu = true },
                         onShowTabs = { showTabs = true },
+                        tabCount = tabs.size,
                     )
+                    // BrowserSearchOverlay 已被删除(预存遗留),暂留 Search state 占位,
+                    // 让 when 仍 exhaustive;onActivateSearch 后续应替换为新的搜索入口。
+                    is BrowserPage.Search -> {}
                     is BrowserPage.Result -> BrowserResultOverlay(
                         query = (pageState as BrowserPage.Result).query,
                         answer = answerText,
@@ -567,15 +573,12 @@ private fun BrowserWebViewContainer(engine: BrowserEngine) {
 
 @Composable
 private fun BrowserHomeOverlay(
-    onSubmit: (String) -> Unit,
+    onActivateSearch: () -> Unit,
     onClose: () -> Unit,
     onMenu: () -> Unit = {},
     onShowTabs: () -> Unit = {},
+    tabCount: Int,
 ) {
-    val tabs by BrowserTabsStore.tabs.collectAsState()
-    var text by remember { mutableStateOf("") }
-    val focusRequester = remember { FocusRequester() }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -597,13 +600,11 @@ private fun BrowserHomeOverlay(
                 contentAlignment = Alignment.Center,
             ) {
                 Canvas(modifier = Modifier.size(180.dp)) {
-                    // 浅蓝渐变圆形
                     drawCircle(
                         color = Color(0xFFEAF2FF),
                         radius = 78.dp.toPx(),
                         center = center,
                     )
-                    // 右上角淡橙色小弧
                     drawArc(
                         color = Color(0xFFFDECE0),
                         startAngle = -30f,
@@ -617,16 +618,15 @@ private fun BrowserHomeOverlay(
 
             Spacer(Modifier.height(32.dp))
 
-            // 胶囊搜索框
+            // 胶囊搜索按钮（点击进入搜索聚焦态）
             Surface(
+                onClick = onActivateSearch,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
-                    .focusRequester(focusRequester),
+                    .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
                 color = OctopusColors.Surface,
                 shadowElevation = 6.dp,
-                tonalElevation = 0.dp,
             ) {
                 Row(
                     modifier = Modifier
@@ -634,47 +634,22 @@ private fun BrowserHomeOverlay(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
-                        tint = OctopusColors.TextMuted,
-                        modifier = Modifier.size(20.dp),
+                    // AI logo
+                    Text(
+                        text = "Ai",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3B82F6),
                     )
                     Spacer(Modifier.width(10.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        if (text.isEmpty()) {
-                            Text(
-                                text = stringResource(R.string.browser_home_search_hint),
-                                fontSize = 15.sp,
-                                color = OctopusColors.TextMuted,
-                            )
-                        }
-                        BasicTextField(
-                            value = text,
-                            onValueChange = { text = it },
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                fontSize = 15.sp,
-                                color = OctopusColors.TextPrimary,
-                            ),
-                            cursorBrush = SolidColor(OctopusColors.Primary),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                            keyboardActions = KeyboardActions(onGo = {
-                                if (text.trim().isNotEmpty()) onSubmit(text)
-                            }),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.browser_home_search_hint),
+                        fontSize = 15.sp,
+                        color = OctopusColors.TextMuted,
+                        modifier = Modifier.weight(1f),
+                    )
                     Icon(
                         Icons.Default.Mic,
-                        contentDescription = null,
-                        tint = OctopusColors.TextMuted,
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Spacer(Modifier.width(14.dp))
-                    Icon(
-                        Icons.Default.CameraAlt,
                         contentDescription = null,
                         tint = OctopusColors.TextMuted,
                         modifier = Modifier.size(20.dp),
@@ -686,7 +661,7 @@ private fun BrowserHomeOverlay(
 
             // 底部胶囊导航条（菜单 + 标签数）
             BottomCapsuleBar(
-                tabCount = tabs.size,
+                tabCount = tabCount,
                 onMenu = onMenu,
                 onShowTabs = onShowTabs,
                 modifier = Modifier
@@ -749,6 +724,245 @@ private fun BottomCapsuleBar(
                 }
             }
         }
+    }
+}
+
+// ── P1-1b: 搜索聚焦态（点击首页搜索框后展开） ──
+
+@Composable
+private fun BrowserSearchOverlay(
+    onBack: () -> Unit,
+    onSubmit: (String) -> Unit,
+    onOpenUrl: (String) -> Unit,
+    history: List<HistoryEntry>,
+    commonSites: List<CommonSiteItem>,
+) {
+    var text by rememberSaveable { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(80)
+        focusRequester.requestFocus()
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(OctopusColors.Background)
+            .statusBarsPadding(),
+    ) {
+        // 顶部搜索条：<  [Ai  输入框  🎙]  搜索
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BrowserCapsuleButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    tint = OctopusColors.TextPrimary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            Surface(
+                shape = RoundedCornerShape(22.dp),
+                color = OctopusColors.SurfaceVariant,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Ai",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3B82F6),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (text.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.browser_home_search_hint),
+                                fontSize = 15.sp,
+                                color = OctopusColors.TextMuted,
+                            )
+                        }
+                        BasicTextField(
+                            value = text,
+                            onValueChange = { text = it },
+                            singleLine = true,
+                            textStyle = TextStyle(fontSize = 15.sp, color = OctopusColors.TextPrimary),
+                            cursorBrush = SolidColor(OctopusColors.Primary),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                if (text.trim().isNotEmpty()) onSubmit(text.trim())
+                            }),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
+                        )
+                    }
+                    if (text.isNotEmpty()) {
+                        BrowserCapsuleButton(
+                            onClick = { text = "" },
+                            modifier = Modifier.size(28.dp),
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = null,
+                                tint = OctopusColors.TextMuted,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    } else {
+                        Icon(
+                            Icons.Default.Mic,
+                            contentDescription = null,
+                            tint = OctopusColors.TextMuted,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "搜索",
+                fontSize = 16.sp,
+                color = Color(0xFF3B82F6),
+                modifier = Modifier
+                    .clickable(enabled = text.trim().isNotEmpty()) { onSubmit(text.trim()) }
+                    .padding(horizontal = 6.dp, vertical = 10.dp),
+            )
+        }
+
+        // 下方内容
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.md),
+        ) {
+            // 历史记录
+            val recent = history.take(8)
+            if (recent.isNotEmpty()) {
+                Section("历史")
+                recent.forEach { entry ->
+                    HistoryRow(title = entry.title.ifBlank { entry.url }, subtitle = domainOf(entry.url)) {
+                        onOpenUrl(entry.url)
+                    }
+                }
+                Spacer(Modifier.height(OctopusSpacing.lg))
+            }
+
+            // 常用网站
+            if (commonSites.isNotEmpty()) {
+                Section("常用网站")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
+                ) {
+                    commonSites.take(4).forEach { site ->
+                        CommonSiteTile(
+                            title = site.title,
+                            url = site.url,
+                            onClick = { onOpenUrl(site.url) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Section(title: String) {
+    Text(
+        text = title,
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = OctopusColors.TextPrimary,
+        modifier = Modifier.padding(bottom = OctopusSpacing.sm),
+    )
+}
+
+@Composable
+private fun HistoryRow(title: String, subtitle: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(OctopusShape.medium)
+            .clickable(onClick = onClick)
+            .padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Default.History,
+            contentDescription = null,
+            tint = OctopusColors.TextMuted,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(OctopusSpacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                color = OctopusColors.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (subtitle.isNotEmpty()) {
+                Text(
+                    text = subtitle,
+                    fontSize = 11.sp,
+                    color = OctopusColors.TextMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CommonSiteTile(title: String, url: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clip(OctopusShape.medium)
+            .clickable(onClick = onClick)
+            .padding(vertical = OctopusSpacing.sm),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(OctopusColors.SurfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = title.take(1),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = OctopusColors.Primary,
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = title,
+            fontSize = 12.sp,
+            color = OctopusColors.TextSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
