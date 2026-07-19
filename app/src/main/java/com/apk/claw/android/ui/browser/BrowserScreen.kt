@@ -228,17 +228,24 @@ fun BrowserScreen(
             if (isUrlLike(t)) {
                 navigate(t)
             } else {
-                pageState = BrowserPage.Result(t)
-                answerText = ""
-                sources = emptyList()
-                thinking = true
-                runAiSearch(context, t,
-                    onAnswer = { full -> answerText = full },
-                    onDone = { finalText ->
-                        thinking = false
-                        sources = URL_REGEX.findAll(finalText).map { it.value }.distinct().take(5).toList()
-                    },
-                )
+                val engine = com.apk.claw.android.octopus_mobile.browser.SearchEngines.byId(KVUtils.getSearchEngine())
+                val isAiEngine = engine.id in setOf("perplexity", "kimi", "tongyi")
+                if (isAiEngine) {
+                    pageState = BrowserPage.Result(t)
+                    answerText = ""
+                    sources = emptyList()
+                    thinking = true
+                    runAiSearch(context, t,
+                        onAnswer = { full -> answerText = full },
+                        onDone = { finalText ->
+                            thinking = false
+                            sources = URL_REGEX.findAll(finalText).map { it.value }.distinct().take(5).toList()
+                        },
+                    )
+                } else {
+                    // 传统搜索引擎：直接 navigate 到搜索结果页
+                    navigate(engine.searchUrl(t))
+                }
             }
         }
     }
@@ -579,6 +586,7 @@ private fun BrowserHomeOverlay(
     onShowTabs: () -> Unit = {},
     tabCount: Int,
 ) {
+    val engineId = remember { KVUtils.getSearchEngine() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -634,13 +642,8 @@ private fun BrowserHomeOverlay(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // AI logo
-                    Text(
-                        text = "Ai",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3B82F6),
-                    )
+                    // 当前搜索引擎 glyph（跟随设置，显示首字+品牌色）
+                    EngineGlyph(engineId = engineId)
                     Spacer(Modifier.width(10.dp))
                     Text(
                         text = stringResource(R.string.browser_home_search_hint),
@@ -737,7 +740,10 @@ private fun BrowserSearchOverlay(
     history: List<HistoryEntry>,
     commonSites: List<CommonSiteItem>,
 ) {
+    val context = LocalContext.current
     var text by rememberSaveable { mutableStateOf("") }
+    var engineId by remember { mutableStateOf(KVUtils.getSearchEngine()) }
+    var showEngines by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
@@ -780,12 +786,7 @@ private fun BrowserSearchOverlay(
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = "Ai",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3B82F6),
-                    )
+                    EngineGlyph(engineId = engineId)
                     Spacer(Modifier.width(8.dp))
                     Box(modifier = Modifier.weight(1f)) {
                         if (text.isEmpty()) {
@@ -843,6 +844,16 @@ private fun BrowserSearchOverlay(
             )
         }
 
+        // 切换搜索引擎
+        Text(
+            text = "切换搜索引擎",
+            fontSize = 14.sp,
+            color = OctopusColors.TextMuted,
+            modifier = Modifier
+                .clickable { showEngines = true }
+                .padding(horizontal = OctopusSpacing.lg, vertical = 8.dp),
+        )
+
         // 下方内容
         Column(
             modifier = Modifier
@@ -875,6 +886,97 @@ private fun BrowserSearchOverlay(
                             url = site.url,
                             onClick = { onOpenUrl(site.url) },
                             modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showEngines) {
+        SearchEngineSheet(
+            currentId = engineId,
+            onDismiss = { showEngines = false },
+            onSelect = { id ->
+                KVUtils.setSearchEngine(id)
+                engineId = id
+                showEngines = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun EngineGlyph(engineId: String) {
+    // 用 tag 首字代替 favicon（和 SearchEngine.tag 一致，避免加载网络图标）
+    val engine = remember(engineId) { com.apk.claw.android.octopus_mobile.browser.SearchEngines.byId(engineId) }
+    val color = when (engineId) {
+        "google" -> Color(0xFF4285F4)
+        "bing" -> Color(0xFF008373)
+        "baidu" -> Color(0xFF2932E1)
+        "duckduckgo" -> Color(0xFFDE5833)
+        "perplexity" -> Color(0xFF20B8CD)
+        "kimi" -> Color(0xFF7B61FF)
+        "tongyi" -> Color(0xFF6236FF)
+        else -> Color(0xFF3B82F6)
+    }
+    Text(
+        text = engine.tag,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = color,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchEngineSheet(
+    currentId: String,
+    onDismiss: () -> Unit,
+    onSelect: (String) -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = OctopusColors.Surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = OctopusSpacing.lg)
+                .padding(bottom = OctopusSpacing.xxl),
+        ) {
+            Text(
+                text = "切换搜索引擎",
+                fontSize = 15.sp,
+                color = OctopusColors.TextMuted,
+                modifier = Modifier.padding(bottom = OctopusSpacing.md),
+            )
+            com.apk.claw.android.octopus_mobile.browser.SearchEngines.ALL.forEach { engine ->
+                val selected = engine.id == currentId
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(OctopusShape.medium)
+                        .clickable { onSelect(engine.id) }
+                        .padding(horizontal = OctopusSpacing.sm, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    EngineGlyph(engineId = engine.id)
+                    Spacer(Modifier.width(OctopusSpacing.lg))
+                    Text(
+                        text = engine.label,
+                        fontSize = 16.sp,
+                        color = OctopusColors.TextPrimary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (selected) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color(0xFF3B82F6),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
