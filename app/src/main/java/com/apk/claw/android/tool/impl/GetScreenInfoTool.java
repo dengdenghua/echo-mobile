@@ -5,6 +5,8 @@ import com.apk.claw.android.R;
 import com.apk.claw.android.octopus_mobile.ControlTarget;
 import com.apk.claw.android.octopus_mobile.DeviceInfo;
 import com.apk.claw.android.octopus_mobile.RemoteActions;
+import com.apk.claw.android.octopus_mobile.uitree.UiTree;
+import com.apk.claw.android.octopus_mobile.uitree.UiTreeCoordinator;
 import com.apk.claw.android.service.ClawAccessibilityService;
 import com.apk.claw.android.tool.BaseTool;
 import com.apk.claw.android.tool.ToolParameter;
@@ -28,17 +30,21 @@ public class GetScreenInfoTool extends BaseTool {
 
     @Override
     public String getDescriptionEN() {
-        return "Get the current screen's UI hierarchy tree, including all visible elements with their properties (text, id, bounds, clickable, etc.). Use this to understand what is currently displayed on the screen.";
+        return "Get the current screen's UI hierarchy tree, including all visible elements with their properties (text, id, bounds, clickable, etc.). Use this to understand what is currently displayed on the screen. Optional 'format' parameter: 'text' (default, backward-compatible) or 'json' (structured, more stable for LLM parsing).";
     }
 
     @Override
     public String getDescriptionCN() {
-        return "获取当前屏幕的UI层级树，包括所有可见元素的属性（文本、ID、边界、可点击状态等）。用于了解当前屏幕显示的内容。";
+        return "获取当前屏幕的UI层级树，包括所有可见元素的属性（文本、ID、边界、可点击状态等）。用于了解当前屏幕显示的内容。可选 'format' 参数：'text'（默认，向后兼容）或 'json'（结构化，LLM 解析更稳）。";
     }
 
     @Override
     public List<ToolParameter> getParameters() {
-        return Collections.emptyList();
+        return Collections.singletonList(
+            new ToolParameter("format", "string",
+                "Output format: 'text' (default, backward-compatible) or 'json' (structured UiTree with stableId/normBounds/actions). Values: text|json",
+                false)
+        );
     }
 
     public static final String SYSTEM_DIALOG_BLOCKED = "__SYSTEM_DIALOG_BLOCKED__";
@@ -51,6 +57,8 @@ public class GetScreenInfoTool extends BaseTool {
 
     @Override
     public ToolResult execute(Map<String, Object> params) {
+        String format = params.containsKey("format") ? String.valueOf(params.get("format")) : "text";
+
         DeviceInfo remote = ControlTarget.remoteTarget();
         if (remote != null) {
             String rtree = RemoteActions.screenTree(remote, useFullTree);
@@ -59,6 +67,17 @@ public class GetScreenInfoTool extends BaseTool {
             }
             return ToolResult.success(rtree);
         }
+
+        // 优先走新的统一 UI Tree 抽象（A11y → Shizuku uiautomator fallback）
+        try {
+            UiTree tree = UiTreeCoordinator.INSTANCE.getTree(useFullTree);
+            if (tree != null && tree.getRoot() != null) {
+                return ToolResult.success(UiTreeCoordinator.INSTANCE.format(tree, format));
+            }
+        } catch (Throwable ignored) {
+            // 回退到旧的 ClawAccessibilityService 直读
+        }
+
         ClawAccessibilityService service = ClawAccessibilityService.getInstance();
         if (service == null) {
             return ToolResult.error("Accessibility service is not running");
