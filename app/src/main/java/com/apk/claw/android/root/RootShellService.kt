@@ -1,8 +1,10 @@
 package com.apk.claw.android.root
 
 import android.util.Log
+import com.apk.claw.android.utils.XLog
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.concurrent.TimeUnit
 
 /**
  * Root Shell 服务 —— 通过 `su` 执行 root 权限命令。
@@ -18,12 +20,14 @@ import java.io.InputStreamReader
  *  - iptables 网络规则(容器网络隔离)
  *  - mount/umount 文件系统
  *  - 启停系统服务
+ *  - uiautomator dump（A11y/Shizuku 不可用时作为最低 fallback 通道）
  *
  * 安全模型:
  *  - 命令前缀白名单 + shell 元字符注入检测(与 ShizukuShell 一致)
  *  - 仅允许 [ALLOWED_COMMAND_PREFIXES] 中的命令
  *  - 登记为最高危,不可信来源走来源闸门 + 全程审计
  *  - Root 不可用时所有方法返回 null/false,上层应 fallback 到 Shizuku
+ *  - 所有 exec 调用带 [TIMEOUT_MS] 超时，防止 uiautomator dump 等命令卡死整个调用链
  */
 object RootShellService {
 
@@ -32,9 +36,16 @@ object RootShellService {
 
     /**
      * Root 命令白名单前缀。
-     * 仅允许虚拟显示/截图/属性/服务管理相关命令,显式排除 rm/dd/ifconfig/iptables 等。
+     *
+     * 命令分类：
+     * 1. 系统查询/控制：dumpsys/service/settings/getprop/setprop/wm/am/cmd
+     * 2. 截图：screencap
+     * 3. UI 树 fallback（[RootTreeProvider] 用）：uiautomator dump + cat/rm 限定 /sdcard/octopus_ui_dump_ 前缀
+     *
+     * 显式排除通用 rm/dd/ifconfig/iptables/cat 任意路径（仅允许 cat/rm 我们的 dump 临时文件）。
      */
     private val ALLOWED_COMMAND_PREFIXES = listOf(
+        // 系统查询/控制
         "dumpsys SurfaceFlinger",
         "dumpsys display",
         "service call SurfaceFlinger",
@@ -43,12 +54,17 @@ object RootShellService {
         "settings put",
         "getprop",
         "setprop persist.",
-        "screencap",
         "wm size",
         "wm density",
         "am start",
         "am force-stop",
         "cmd display",
+        // 截图
+        "screencap",
+        // UI 树 fallback —— 仅允许 dump 到 /sdcard 下，仅允许读写 octopus_ui_dump_ 前缀的临时文件
+        "uiautomator dump",
+        "cat /sdcard/octopus_ui_dump_",
+        "rm -f /sdcard/octopus_ui_dump_",
     )
 
     /** Shell 元字符黑名单(防注入)。 */
@@ -83,9 +99,9 @@ object RootShellService {
     }
 
     /**
-     * 执行 root 命令(白名单内)。
+     * 执行 root 命令(白名单内)，带 [TIMEOUT_MS] 超时。
      * @param command 完整命令字符串
-     * @return 命令输出(stdout+stderr 合并),失败返回 null
+     * @return 命令输出(stdout+stderr),失败或超时返回 null
      */
     @Suppress("ReturnCount", "TooGenericExceptionCaught")
     fun exec(command: String): ExecResult? {
@@ -94,10 +110,34 @@ object RootShellService {
 
         return try {
             val proc = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
-            val stdout = BufferedReader(InputStreamReader(proc.inputStream)).readText()
-            val stderr = BufferedReader(InputStreamReader(proc.errorStream)).readText()
-            val exitCode = proc.waitFor()
-            ExecResult(exitCode, stdout, stderr)
+            // 双线程读 stdout/stderr 防止管道阻塞（uiautomator dump 可能输出较大 XML）
+            val stdoutBuf = StringBuilder()
+            val stderrBuf = StringBuilder()
+            val stdoutThread = Thread {
+                runCatching {
+                    BufferedReader(InputStreamReader(proc.inputStream)).use { r ->
+                        r.forEachLine { stdoutBuf.append(it).append('\n') }
+                    }
+                }
+            }
+            val stderrThread = Thread {
+                runCatching {
+                    BufferedReader(InputStreamReader(proc.errorStream)).use { r ->
+                        r.forEachLine { stderrBuf.append(it).append('\n') }
+                    }
+                }
+            }
+            stdoutThread.start()
+            stderrThread.start()
+            val finished = proc.waitFor(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+            if (!finished) {
+                proc.destroyForcibly()
+                XLog.w(TAG, "exec timeout after ${TIMEOUT_MS}ms: $command")
+                return null
+            }
+            stdoutThread.join(2_000)
+            stderrThread.join(2_000)
+            ExecResult(proc.exitValue(), stdoutBuf.toString(), stderrBuf.toString())
         } catch (e: Exception) {
             Log.e(TAG, "exec failed: $command", e)
             null
@@ -107,15 +147,23 @@ object RootShellService {
     /** 命令是否在白名单内 + 无注入字符。 */
     private fun isCommandAllowed(command: String): Boolean {
         val normalized = command.trimStart()
-        // 前缀白名单匹配:每个前缀自带分隔符(空格或点),防 "getpropxxx" 骗过 "getprop"
-        // - "dumpsys " → 必须后跟空格(独立命令词)
-        // - "setprop persist." → 必须后跟点分隔的属性名
+        // 前缀白名单匹配规则：
+        // - 前缀末尾是 ' '（命令词，如 "dumpsys SurfaceFlinger"）→ 下个字符任意（已分隔）
+        // - 前缀末尾是 '.'（属性名分隔，如 "setprop persist."）→ 下个字符任意（已分隔）
+        // - 前缀末尾是 '/'（路径分隔，如 "cat /sdcard/octopus_ui_dump_/"）→ 下个字符任意（已分隔）
+        // - 前缀末尾是 '_'（文件名前缀，如 "cat /sdcard/octopus_ui_dump_"）→ 下个字符必须是安全文件名字符
+        // - 其他（前缀末尾是字母/数字，如 "uiautomator dump"）→ 下个字符必须是空格
+        //   防 "uiautomator dumpXYZ" 骗过 "uiautomator dump"
         val prefixMatch = ALLOWED_COMMAND_PREFIXES.any { prefix ->
-            normalized.startsWith(prefix) &&
-                (normalized == prefix ||
-                    normalized.length > prefix.length &&
-                    (prefix.last() == ' ' || prefix.last() == '.' ||
-                        normalized[prefix.length] == ' '))
+            if (!normalized.startsWith(prefix)) return@any false
+            if (normalized == prefix) return@any true
+            if (normalized.length <= prefix.length) return@any false
+            val nextChar = normalized[prefix.length]
+            when (prefix.last()) {
+                ' ', '.', '/' -> true
+                '_' -> isSafeFilenameChar(nextChar)
+                else -> nextChar == ' '
+            }
         }
         if (!prefixMatch) {
             Log.w(TAG, "Command not in whitelist: $command")
@@ -128,6 +176,9 @@ object RootShellService {
         }
         return true
     }
+
+    private fun isSafeFilenameChar(c: Char): Boolean =
+        c.isLetterOrDigit() || c == '_' || c == '-' || c == '.'
 
     data class ExecResult(val exitCode: Int, val stdout: String, val stderr: String)
 }
