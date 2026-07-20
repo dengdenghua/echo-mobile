@@ -24,7 +24,16 @@ data class Workflow(
     val createdAt: Long = System.currentTimeMillis(),
     val lastRunAt: Long = 0L,
     val runCount: Int = 0,
-)
+    /** 定时触发：小时（24 小时制，null = 未定时） */
+    val scheduleHour: Int? = null,
+    /** 定时触发：分钟（null = 未定时） */
+    val scheduleMinute: Int? = null,
+    /** 是否每天重复；false = 仅触发一次后清除 */
+    val scheduleDaily: Boolean = false,
+) {
+    /** 是否已设定定时 */
+    val isScheduled: Boolean get() = scheduleHour != null && scheduleMinute != null
+}
 
 /**
  * 工作流步骤。

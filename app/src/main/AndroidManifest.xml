@@ -301,6 +301,12 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- 工作流定时闹钟接收器（显式 Intent，无需 intent-filter） -->
+        <receiver
+            android:name=".service.WorkflowAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <!-- 桌面小组件(4x1 横条:logo + 标题 + 语音/浏览器快捷按钮)。
              用户长按桌面 → 添加 widget → 选 "Octopus Mobile" 即可。
              注册需声明 APPWIDGET_BIND 权限(系统在用户主动添加时授予)。 -->

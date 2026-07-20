@@ -26,6 +26,8 @@ class BootReceiver : BroadcastReceiver() {
             runCatching { KeepAliveJobService.schedule(context) }
             // 3. 开机后系统清空了闹钟，重新注册所有已定时的例程
             runCatching { RoutineScheduler.rescheduleAll(context) }
+            // 4. 同样重新注册所有已定时的工作流
+            runCatching { WorkflowScheduler.rescheduleAll(context) }
         }
     }
 }

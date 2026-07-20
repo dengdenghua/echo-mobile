@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,6 +35,7 @@ import com.apk.claw.android.octopus_mobile.workflow.WorkflowEngine
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowResult
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowStep
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowStore
+import com.apk.claw.android.service.WorkflowScheduler
 import com.apk.claw.android.tool.ToolRegistry
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -68,6 +71,7 @@ private fun WorkflowsScreen(onBack: () -> Unit) {
     var running by remember { mutableStateOf<Workflow?>(null) }
     var runResult by remember { mutableStateOf<WorkflowResult?>(null) }
     var exporting: Workflow? by remember { mutableStateOf(null) }
+    var scheduleEditing by remember { mutableStateOf<Workflow?>(null) }
     fun refresh() { rev++ }
 
     val importLauncher = rememberLauncherForActivityResult(
@@ -146,11 +150,16 @@ private fun WorkflowsScreen(onBack: () -> Unit) {
                             }
                         },
                         onEdit = { editing = wf },
-                        onDelete = { WorkflowStore.delete(ctx, wf.id); refresh() },
+                        onDelete = {
+                            // 删除前先取消可能存在的定时闹钟，避免幽灵闹钟
+                            if (wf.isScheduled) WorkflowScheduler.cancel(ctx, wf.id)
+                            WorkflowStore.delete(ctx, wf.id); refresh()
+                        },
                         onExport = {
                             exporting = wf
                             exportLauncher.launch(wf.name + ".json")
                         },
+                        onSchedule = { scheduleEditing = wf },
                     )
                 }
             }
@@ -205,6 +214,85 @@ private fun WorkflowsScreen(onBack: () -> Unit) {
             },
         )
     }
+    // 定时编辑
+    if (scheduleEditing != null) {
+        WorkflowScheduleDialog(
+            workflow = scheduleEditing!!,
+            onDismiss = { scheduleEditing = null },
+            onSave = { updated ->
+                WorkflowStore.save(ctx, updated)
+                if (updated.isScheduled) {
+                    WorkflowScheduler.schedule(ctx, updated)
+                } else {
+                    WorkflowScheduler.cancel(ctx, updated.id)
+                }
+                scheduleEditing = null
+                refresh()
+            },
+        )
+    }
+}
+
+/**
+ * 工作流定时编辑器：设定 HH:MM 触发 + 每天/一次。
+ * 留空小时 = 取消定时。
+ */
+@Composable
+private fun WorkflowScheduleDialog(
+    workflow: Workflow,
+    onDismiss: () -> Unit,
+    onSave: (Workflow) -> Unit,
+) {
+    var hour by remember { mutableStateOf(workflow.scheduleHour?.toString() ?: "") }
+    var minute by remember { mutableStateOf(workflow.scheduleMinute?.toString() ?: "") }
+    var daily by remember { mutableStateOf(workflow.scheduleDaily) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                val h = hour.trim().toIntOrNull()
+                val m = minute.trim().toIntOrNull()
+                if (h != null && m != null && h in 0..23 && m in 0..59) {
+                    onSave(workflow.copy(scheduleHour = h, scheduleMinute = m, scheduleDaily = daily))
+                } else if (h == null && m == null) {
+                    // 两个都空 = 取消定时
+                    onSave(workflow.copy(scheduleHour = null, scheduleMinute = null, scheduleDaily = false))
+                }
+            }) { Text("保存") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        title = { Text("定时触发：${workflow.name}", color = FText) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "设定每天或一次性的触发时刻。留空两个字段保存即取消定时。",
+                    color = FSub, fontSize = 12.sp,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = hour,
+                        onValueChange = { s -> if (s.all { it.isDigit() } && s.length <= 2) hour = s },
+                        label = { Text("时 (0-23)") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(":", color = FText, fontSize = 18.sp)
+                    OutlinedTextField(
+                        value = minute,
+                        onValueChange = { s -> if (s.all { it.isDigit() } && s.length <= 2) minute = s },
+                        label = { Text("分 (0-59)") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Switch(checked = daily, onCheckedChange = { daily = it })
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (daily) "每天重复触发" else "仅触发一次", color = FText, fontSize = 13.sp)
+                }
+            }
+        },
+    )
 }
 
 @Composable
@@ -214,6 +302,7 @@ private fun WorkflowCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onExport: () -> Unit,
+    onSchedule: () -> Unit,
 ) {
     val df = remember { SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()) }
     Surface(
@@ -251,6 +340,22 @@ private fun WorkflowCard(
                         if (workflow.lastRunAt > 0) "上次 ${df.format(Date(workflow.lastRunAt))}" else "未运行过",
                     color = FMuted, fontSize = 11.sp, modifier = Modifier.weight(1f),
                 )
+                // 定时状态：已定时时显示 ⏰ 每天/一次 HH:MM，点击进入定时编辑
+                if (workflow.isScheduled) {
+                    val hh = String.format("%02d", workflow.scheduleHour!!)
+                    val mm = String.format("%02d", workflow.scheduleMinute!!)
+                    val freq = if (workflow.scheduleDaily) "每天" else "一次"
+                    Row(
+                        modifier = Modifier
+                            .clickable { onSchedule() }
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.Schedule, contentDescription = null, tint = FPrimary, modifier = Modifier.size(12.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("$freq $hh:$mm", color = FPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -261,6 +366,10 @@ private fun WorkflowCard(
                 TextButton(onClick = onEdit, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(4.dp)); Text("编辑", fontSize = 12.sp)
+                }
+                TextButton(onClick = onSchedule, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Filled.Schedule, contentDescription = null, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(4.dp)); Text("定时", fontSize = 12.sp)
                 }
                 TextButton(onClick = onExport, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(14.dp))
