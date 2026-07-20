@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.apk.claw.android.ClawApplication;
 import com.apk.claw.android.R;
+import com.apk.claw.android.octopus_mobile.uitree.UiActionRouter;
 import com.apk.claw.android.service.ClawAccessibilityService;
 import com.apk.claw.android.tool.BaseTool;
 import com.apk.claw.android.tool.ToolParameter;
@@ -96,10 +97,11 @@ public class ScrollToFindTool extends BaseTool {
         // 循环：滚动 → 查找
         String lastScreenContent = getScreenSnapshot(service);
         for (int i = 0; i < maxScrolls; i++) {
-            // 执行滑动
-            boolean swiped = service.performSwipe(centerX, scrollStartY, centerX, scrollEndY, 400);
+            // 执行滑动 —— 走 UiActionRouter 统一通道降级（修复原版无远程分叉 bug）
+            boolean swiped = UiActionRouter.INSTANCE.swipe(centerX, scrollStartY, centerX, scrollEndY, 400);
             if (!swiped) {
-                return ToolResult.error("Swipe failed at scroll #" + (i + 1));
+                return ToolResult.error("Swipe failed at scroll #" + (i + 1)
+                    + " (所有通道都失败：Shizuku/A11y/Root 均不可用或失败)");
             }
 
             // 等待页面稳定

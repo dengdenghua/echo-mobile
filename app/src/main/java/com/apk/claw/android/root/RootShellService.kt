@@ -41,6 +41,7 @@ object RootShellService {
      * 1. 系统查询/控制：dumpsys/service/settings/getprop/setprop/wm/am/cmd
      * 2. 截图：screencap
      * 3. UI 树 fallback（[RootTreeProvider] 用）：uiautomator dump + cat/rm 限定 /sdcard/octopus_ui_dump_ 前缀
+     * 4. 触控写入（[UiActionRouter] Root 通道 + [VirtualDisplayService] 虚拟屏）：input tap/swipe/keyevent
      *
      * 显式排除通用 rm/dd/ifconfig/iptables/cat 任意路径（仅允许 cat/rm 我们的 dump 临时文件）。
      */
@@ -65,6 +66,11 @@ object RootShellService {
         "uiautomator dump",
         "cat /sdcard/octopus_ui_dump_",
         "rm -f /sdcard/octopus_ui_dump_",
+        // 触控写入 —— Root 作为最低优先级 fallback（Shizuku→A11y→Root）
+        // VirtualDisplayService 也用 input tap/swipe -d <displayId> 注入虚拟屏
+        "input tap",
+        "input swipe",
+        "input keyevent",
     )
 
     /** Shell 元字符黑名单(防注入)。 */
@@ -181,4 +187,28 @@ object RootShellService {
         c.isLetterOrDigit() || c == '_' || c == '-' || c == '.'
 
     data class ExecResult(val exitCode: Int, val stdout: String, val stderr: String)
+
+    // ── 触控写入便捷方法（镜像 ShizukuShellService 签名，供 UiActionRouter 调用） ──
+    // 返回 Boolean?：true=成功，false=命令失败 exitCode≠0，null=Root 不可用/命令被拦
+    // 坐标参数由调用方（UiActionRouter）做合法性校验，这里直接拼接（白名单 + 元字符黑名单已防注入）
+
+    /** Root 触控：input tap x y（可选 -d <displayId> 注入虚拟屏） */
+    fun tap(x: Int, y: Int, displayId: Int = -1): Boolean? {
+        val cmd = if (displayId >= 0) "input tap $x $y -d $displayId" else "input tap $x $y"
+        return exec(cmd)?.exitCode == 0
+    }
+
+    /** Root 触控：input swipe x1 y1 x2 y2 durationMs（可选 -d <displayId>） */
+    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, durationMs: Long = 300, displayId: Int = -1): Boolean? {
+        val cmd = if (displayId >= 0) "input swipe $x1 $y1 $x2 $y2 $durationMs -d $displayId"
+        else "input swipe $x1 $y1 $x2 $y2 $durationMs"
+        return exec(cmd)?.exitCode == 0
+    }
+
+    /** Root 长按：input swipe x y x y durationMs（同点 swipe 模拟长按，与 Shizuku 一致） */
+    fun longPress(x: Int, y: Int, durationMs: Long = 1000, displayId: Int = -1): Boolean? =
+        swipe(x, y, x, y, durationMs, displayId)
+
+    /** Root 按键：input keyevent <keyCode> */
+    fun keyEvent(keyCode: Int): Boolean? = exec("input keyevent $keyCode")?.exitCode == 0
 }

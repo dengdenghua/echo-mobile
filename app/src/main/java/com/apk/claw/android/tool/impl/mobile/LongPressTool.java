@@ -2,11 +2,8 @@ package com.apk.claw.android.tool.impl.mobile;
 
 import com.apk.claw.android.ClawApplication;
 import com.apk.claw.android.R;
-import com.apk.claw.android.octopus_mobile.ControlTarget;
-import com.apk.claw.android.octopus_mobile.DeviceInfo;
-import com.apk.claw.android.octopus_mobile.RemoteActions;
 import com.apk.claw.android.octopus_mobile.uitree.StableIdResolver;
-import com.apk.claw.android.service.ClawAccessibilityService;
+import com.apk.claw.android.octopus_mobile.uitree.UiActionRouter;
 import com.apk.claw.android.tool.BaseTool;
 import com.apk.claw.android.tool.ToolParameter;
 import com.apk.claw.android.tool.ToolResult;
@@ -80,20 +77,12 @@ public class LongPressTool extends BaseTool {
     }
 
     private ToolResult longPressAt(int x, int y, long duration) {
-        DeviceInfo remote = ControlTarget.remoteTarget();
-        if (remote != null) {
-            boolean ok = RemoteActions.longPress(remote, x, y, duration);
-            return ok ? ToolResult.success("Long pressed at (" + x + ", " + y + ") on " + remote.getDeviceName())
-                    : ToolResult.error("Remote long press failed on " + remote.getDeviceName());
-        }
-        ClawAccessibilityService service = ClawAccessibilityService.getInstance();
-        if (service == null) {
-            return ToolResult.error("Accessibility service is not running");
-        }
         String boundsError = validateCoordinates(x, y);
         if (boundsError != null) return ToolResult.error(boundsError);
-        boolean success = service.performLongPress(x, y, duration);
+        // 统一走 UiActionRouter：远程→Shizuku→A11y→Root 三级降级
+        boolean success = UiActionRouter.INSTANCE.longPress(x, y, duration);
         return success ? ToolResult.success("Long pressed at (" + x + ", " + y + ") for " + duration + "ms")
-                : ToolResult.error("Failed to long press at (" + x + ", " + y + ")");
+                : ToolResult.error("Failed to long press at (" + x + ", " + y + ") "
+                    + "(所有通道都失败：Shizuku/A11y/Root 均不可用或失败)");
     }
 }
