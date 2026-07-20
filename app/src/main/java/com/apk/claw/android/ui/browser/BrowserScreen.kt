@@ -92,6 +92,7 @@ data class ChatMsg(val isUser: Boolean, val text: String, val sources: List<Stri
 fun BrowserScreen(
     initialUrl: String? = null,
     onClose: () -> Unit = {},
+    embedded: Boolean = false,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -292,6 +293,7 @@ fun BrowserScreen(
                         onMenu = { showMenu = true },
                         onShowTabs = { showTabs = true },
                         tabCount = tabs.size,
+                        embedded = embedded,
                     )
                     is BrowserPage.Search -> BrowserSearchOverlay(
                         onBack = { pageState = BrowserPage.Home },
@@ -600,6 +602,7 @@ private fun BrowserHomeOverlay(
     onMenu: () -> Unit = {},
     onShowTabs: () -> Unit = {},
     tabCount: Int,
+    embedded: Boolean = false,
 ) {
     val engineId = remember { KVUtils.getSearchEngine() }
     Box(
@@ -614,6 +617,40 @@ private fun BrowserHomeOverlay(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(72.dp))
+
+            // 嵌入模式：右上角放菜单/标签按钮；独立模式：顶部关闭按钮
+            if (embedded) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    BrowserCapsuleButton(onClick = onShowTabs, modifier = Modifier.size(40.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .border(1.2.dp, OctopusColors.TextSecondary, RoundedCornerShape(4.dp)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = if (tabCount > 99) "99+" else "$tabCount",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = OctopusColors.TextSecondary,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(6.dp))
+                    BrowserCapsuleButton(onClick = onMenu, modifier = Modifier.size(40.dp)) {
+                        Icon(
+                            Icons.Default.Menu,
+                            contentDescription = null,
+                            tint = OctopusColors.TextSecondary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.weight(0.3f))
+            }
 
             // 轻量插画：一个漂浮的圆形+弧形，抽象星球/气泡感，零资源
             Box(
@@ -649,7 +686,7 @@ private fun BrowserHomeOverlay(
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
                 color = OctopusColors.Surface,
-                shadowElevation = 6.dp,
+                shadowElevation = 2.dp,
             ) {
                 Row(
                     modifier = Modifier
@@ -657,7 +694,6 @@ private fun BrowserHomeOverlay(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // 当前搜索引擎 glyph（跟随设置，显示首字+品牌色）
                     EngineGlyph(engineId = engineId)
                     Spacer(Modifier.width(10.dp))
                     Text(
@@ -677,15 +713,19 @@ private fun BrowserHomeOverlay(
 
             Spacer(Modifier.weight(1f))
 
-            // 底部胶囊导航条（菜单 + 标签数）
-            BottomCapsuleBar(
-                tabCount = tabCount,
-                onMenu = onMenu,
-                onShowTabs = onShowTabs,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .navigationBarsPadding(),
-            )
+            // 非嵌入模式（独立 Activity）：底部胶囊导航条
+            if (!embedded) {
+                BottomCapsuleBar(
+                    tabCount = tabCount,
+                    onMenu = onMenu,
+                    onShowTabs = onShowTabs,
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                        .navigationBarsPadding(),
+                )
+            } else {
+                Spacer(Modifier.height(8.dp))
+            }
         }
     }
 }

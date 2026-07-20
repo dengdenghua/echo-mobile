@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +18,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -41,20 +45,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.apk.claw.android.ui.compose.screen.ChatScreen
-import com.apk.claw.android.ui.compose.screen.DiscoverScreen
 import com.apk.claw.android.ui.compose.screen.FeatureHubScreen
 import com.apk.claw.android.ui.compose.screen.GhostChatSessionStore
 import com.apk.claw.android.ui.compose.screen.SettingsScreen
 import com.apk.claw.android.ui.compose.screen.PluginMarketplaceScreen
 import com.apk.claw.android.ui.compose.screen.SkillMarketplaceScreen
 import com.apk.claw.android.ui.compose.screen.UniverseScreen
-import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
-import com.apk.claw.android.ui.compose.theme.OctopusIconSize
-import com.apk.claw.android.ui.compose.theme.OctopusShape
-import com.apk.claw.android.ui.compose.theme.OctopusLayout
 import com.apk.claw.android.ui.compose.theme.OctopusSpacing
-import com.apk.claw.android.ui.compose.theme.OctopusType
 import kotlinx.coroutines.launch
 
 /**
@@ -114,76 +112,78 @@ fun OctopusApp() {
 // 底部 dock 专用颜色别名（跟随主题切换）
 private val NavPrimaryColor get() = OctopusColors.Primary
 private val NavTextMutedColor get() = OctopusColors.TextMuted
-private val NavGlassSurfaceColor get() = OctopusBackground.cardSurface
-private val NavGlassBorderColor get() = OctopusBackground.cardBorder
 
 @Composable
 private fun CompactBottomBar(
     currentRoute: String?,
     onSelect: (Screen) -> Unit,
 ) {
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding(),
-        color = NavGlassSurfaceColor.copy(alpha = if (OctopusColors.isLight) 0.92f else 0.88f),
-        border = BorderStroke(0.5.dp, NavGlassBorderColor),
-        shadowElevation = 0.dp,
+            .navigationBarsPadding()
+            .padding(horizontal = OctopusSpacing.md, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(OctopusLayout.bottomNavHeight)
-                .padding(horizontal = OctopusSpacing.sm),
-            horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = OctopusColors.Surface,
+            shadowElevation = 3.dp,
         ) {
-            Screen.bottomBar.forEach { screen ->
-                val selected = currentRoute == screen.route
-                BottomTabItem(
-                    screen = screen,
-                    selected = selected,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(OctopusLayout.bottomNavItemHeight),
-                    onClick = { onSelect(screen) },
-                )
+            Row(
+                modifier = Modifier
+                    .height(52.dp)
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Screen.bottomBar.forEach { screen ->
+                    val selected = currentRoute == screen.route
+                    BottomTabItem(
+                        screen = screen,
+                        selected = selected,
+                        onClick = { onSelect(screen) },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun BottomTabItem(
+private fun RowScope.BottomTabItem(
     screen: Screen,
     selected: Boolean,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val label = stringResource(screen.labelRes)
     val contentColor = if (selected) NavPrimaryColor else NavTextMutedColor
-    Row(
-        modifier = modifier
-            .clip(OctopusShape.small)
-            .clickable(onClick = onClick)
-            .padding(horizontal = OctopusSpacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    Box(
+        modifier = Modifier
+            .weight(1f)
+            .height(40.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (selected) NavPrimaryColor.copy(alpha = 0.08f) else Color.Transparent)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            screen.icon,
-            contentDescription = label,
-            tint = contentColor,
-            modifier = Modifier.size(OctopusIconSize.medium),
-        )
-        Text(
-            label,
-            color = contentColor,
-            fontSize = if (selected) OctopusType.tag else 9.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            maxLines = 1,
-            modifier = Modifier.padding(start = OctopusSpacing.xs),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                screen.icon,
+                contentDescription = label,
+                tint = contentColor,
+                modifier = Modifier.size(20.dp),
+            )
+            if (selected) {
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    label,
+                    color = contentColor,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                )
+            }
+        }
     }
 }
 
@@ -209,7 +209,11 @@ fun OctopusNavHost(
         popExitTransition = { fadeOut(tween(160)) },
     ) {
         composable(Screen.Discover.route) {
-            DiscoverScreen()
+            // 发现 Tab 直接挂载新极简浏览器首页（带插画+胶囊搜索框+引擎切换+对话式 AI 结果）
+            com.apk.claw.android.ui.browser.BrowserScreen(
+                onClose = {},
+                embedded = true,
+            )
         }
         composable(Screen.Chat.route) { ChatScreen() }
         composable(Screen.Features.route) {
