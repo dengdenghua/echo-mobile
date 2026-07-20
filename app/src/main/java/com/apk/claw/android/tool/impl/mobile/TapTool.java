@@ -5,9 +5,7 @@ import com.apk.claw.android.R;
 import com.apk.claw.android.octopus_mobile.ControlTarget;
 import com.apk.claw.android.octopus_mobile.DeviceInfo;
 import com.apk.claw.android.octopus_mobile.RemoteActions;
-import com.apk.claw.android.octopus_mobile.uitree.UiNode;
-import com.apk.claw.android.octopus_mobile.uitree.UiTree;
-import com.apk.claw.android.octopus_mobile.uitree.UiTreeCoordinator;
+import com.apk.claw.android.octopus_mobile.uitree.StableIdResolver;
 import com.apk.claw.android.service.ClawAccessibilityService;
 import com.apk.claw.android.tool.BaseTool;
 import com.apk.claw.android.tool.ToolParameter;
@@ -63,7 +61,12 @@ public class TapTool extends BaseTool {
         String stableId = params.containsKey("stableId")
             ? String.valueOf(params.get("stableId")) : "";
         if (stableId != null && !stableId.isEmpty() && !"null".equals(stableId)) {
-            return tapByStableId(stableId);
+            StableIdResolver.Result r = StableIdResolver.INSTANCE.resolveCenter(stableId);
+            if (r == null) {
+                return ToolResult.error("stableId not found in current UI tree: " + stableId
+                    + " (界面可能已变化，请重新调 get_screen_info)");
+            }
+            return tapAt(r.getX(), r.getY());
         }
 
         final int x;
@@ -76,33 +79,6 @@ public class TapTool extends BaseTool {
                 + " (or pass stableId to tap by node reference)");
         }
         return tapAt(x, y);
-    }
-
-    private ToolResult tapByStableId(String stableId) {
-        // 即时拉取最新 UiTree（可能来源 a11y 或 shizuku uiautomator）
-        UiTree tree;
-        try {
-            tree = UiTreeCoordinator.INSTANCE.getTree(false);
-        } catch (Throwable t) {
-            return ToolResult.error("Failed to fetch UI tree for stableId lookup: " + t.getMessage());
-        }
-        if (tree == null || tree.getRoot() == null) {
-            return ToolResult.error("UI tree unavailable, cannot resolve stableId: " + stableId);
-        }
-        // 深度优先扁平化找节点（stableId 唯一性由 viewId+textHash+boundsHash 保证）
-        UiNode found = null;
-        for (UiNode n : tree.flatten()) {
-            if (stableId.equals(n.getStableId())) { found = n; break; }
-        }
-        if (found == null) {
-            return ToolResult.error("stableId not found in current UI tree: " + stableId
-                + " (界面可能已变化，请重新调 get_screen_info)");
-        }
-        // 用节点 bounds 中心点点击
-        android.graphics.Rect b = found.getBounds();
-        int cx = b.centerX();
-        int cy = b.centerY();
-        return tapAt(cx, cy);
     }
 
     private ToolResult tapAt(int x, int y) {
