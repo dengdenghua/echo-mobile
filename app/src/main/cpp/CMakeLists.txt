@@ -44,3 +44,79 @@ target_include_directories(llama-jni PRIVATE
     ${llama_cpp_SOURCE_DIR}/include
     ${llama_cpp_SOURCE_DIR}/ggml/include
 )
+
+# ════════════════════════════════════════════════════════════════════
+# MNN JNI 桥接(可选,由 BUILD_MNN_JNI 开关控制)
+# ════════════════════════════════════════════════════════════════════
+# 对应 Kotlin 声明: MnnJni.kt
+# 构建方式见 build-mnn.sh(传 -DBUILD_MNN_JNI=ON)
+#
+# 默认 OFF —— 这样 build-native.sh(llama.cpp 专用)不受影响。
+# 只有 build-mnn.sh 会开启,拉取 MNN 上游 + 编译 mnn-jni.cpp。
+option(BUILD_MNN_JNI "Build MNN JNI bridge (LLM + Whisper)" OFF)
+
+if(BUILD_MNN_JNI)
+
+# ── 拉取 MNN 上游源码 ──
+include(FetchContent)
+FetchContent_Declare(
+    mnn
+    GIT_REPOSITORY https://github.com/alibaba/MNN.git
+    GIT_TAG        3.1.1
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(mnn)
+
+# MNN 构建选项(由 build-mnn.sh 通过 -D 传入)
+option(MNN_VULKAN      "Enable Vulkan backend"     ON)
+option(MNN_OPENCL      "Enable OpenCL backend"     ON)
+option(MNN_ARM82       "Enable ARM8.2 FP16"        ON)
+option(MNN_KLEIDIAI    "Enable KleidiAI"           ON)
+option(MNN_BUILD_LLM   "Build MNN LLM"             ON)
+option(MNN_BUILD_WHISPER "Build MNN Whisper"       ON)
+
+# ── mnn-jni 桥接库 ──
+add_library(mnn-jni SHARED
+    mnn-jni.cpp
+)
+
+find_library(log-lib log)
+
+target_link_libraries(mnn-jni
+    MNN
+    MNN_Express
+    ${log-lib}
+)
+
+# MNN LLM + Whisper 子模块(若启用)
+if(MNN_BUILD_LLM)
+    target_link_libraries(mnn-jni llm)
+    target_include_directories(mnn-jni PRIVATE
+        ${mnn_SOURCE_DIR}/llm/head
+        ${mnn_SOURCE_DIR}/llm/src
+    )
+endif()
+
+if(MNN_BUILD_WHISPER)
+    target_link_libraries(mnn-jni whisper)
+    target_include_directories(mnn-jni PRIVATE
+        ${mnn_SOURCE_DIR}/whisper
+    )
+endif()
+
+# Vulkan 后端(可选)
+if(MNN_VULKAN)
+    target_link_libraries(mnn-jni MNN_Vulkan)
+endif()
+
+# OpenCL 后端(可选)
+if(MNN_OPENCL)
+    target_link_libraries(mnn-jni MNN_CL)
+endif()
+
+target_include_directories(mnn-jni PRIVATE
+    ${JNI_INCLUDE_DIRS}
+    ${mnn_SOURCE_DIR}/include
+)
+
+endif()  # BUILD_MNN_JNI

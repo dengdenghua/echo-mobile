@@ -1,32 +1,32 @@
 package com.apk.claw.android.tool.localmodel
 
 import android.util.Log
-import com.apk.claw.android.tool.ToolErr
-import com.apk.claw.android.tool.ToolResult
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 本地模型管理器 —— 管理 GGUF 模型加载/卸载/推理。
+ * 本地模型管理器 —— 引擎调度器,根据模型格式选择 [LocalLlmEngine] 实现。
  *
- * 使用 llama.cpp 作为推理引擎,支持在设备端运行量化后的 GGUF 模型:
- *  - Qwen2.5-3B-Q4_K_M(~2GB,6GB+ RAM 设备可用,中文好)
- *  - Llama-3.2-3B-Q4_K_M(~2GB,英文好)
- *  - Phi-3.5-mini-Q4_K_M(~2.5GB,推理强)
+ * 支持的引擎(可插拔):
+ *  - [LlamaEngine]  —— GGUF 格式(llama.cpp,稳定后备)
+ *  - [MnnLlmEngine] —— MNN 格式(移动端优化,可选 GPU 加速)
  *
- * 模型文件存放:用户通过设置页选择 .gguf 文件,路径记录在 KVUtils。
- * 推理在后台线程执行,不阻塞 UI。
+ * 模型文件格式识别:
+ *  - .gguf → LlamaEngine
+ *  - .mnn / 目录(含 .mnn + config.json) → MnnLlmEngine
+ *  - 其他 → 失败
  *
- * 性能参考(Snapdragon 8 Gen 2, Qwen2.5-3B-Q4_K_M):
- *  - 加载:~5s
- *  - 推理:~15 tokens/s
- *  - 内存:~2.5GB
+ * 加载流程:
+ *  1. 检查至少一个引擎可用(否则返回"native 库未就绪")
+ *  2. 根据文件后缀选引擎
+ *  3. 调 engine.loadModel 拿到 native 句柄
+ *  4. 包装 ModelHandle 存入 map,path 作为 key
  *
- * 局限:
- *  - 需要 6GB+ RAM 设备(3B 模型),8B 模型需 8GB+ RAM
- *  - 无 GPU 加速(纯 CPU),速度远低于云端 API
- *  - 不支持 function calling(纯文本补全,需 LLM 自己解析工具调用)
- *  - 模型质量低于 GPT-4/Claude,适合隐私敏感/离线场景
+ * 性能参考(Snapdragon 8 Gen 2):
+ *  - llama.cpp + Qwen2.5-3B-Q4_K_M:加载 ~5s,推理 ~15 tok/s,内存 ~2.5GB
+ *  - MNN + Qwen-1.8B-INT8(GPU):加载 ~3s,推理 ~30 tok/s,内存 ~1.5GB
+ *
+ * 并发:ConcurrentHashMap + native 层 mutex,无显式锁。
  */
 object LocalModelManager {
 
@@ -37,22 +37,63 @@ object LocalModelManager {
 
     data class ModelHandle(
         val path: String,
+        val engineId: String,
         val ptr: Long,
         val contextSize: Int,
         val loadedAt: Long,
         /** 加载时文件大小(字节),用于 UI 展示内存占用估算。 */
         val fileSizeBytes: Long,
+        /** 引擎实例(便于 complete/free 时直接调用,无需再次选择)。 */
+        val engine: LocalLlmEngine,
+    )
+
+    /** 所有已注册的引擎实例(id → engine)。 */
+    private val engines: Map<String, LocalLlmEngine> = mapOf(
+        LlamaEngine.id to LlamaEngine,
+        MnnLlmEngine.id to MnnLlmEngine,
     )
 
     /** 当前已加载模型路径列表(快照,用于 UI 列表)。 */
     fun listLoaded(): List<ModelHandle> = loadedModels.values.toList().sortedBy { it.loadedAt }
 
+    /** 所有已注册引擎列表(UI 显示引擎选择用)。 */
+    fun listEngines(): List<LocalLlmEngine> = engines.values.toList()
+
+    /** 引擎是否已注册且可用。 */
+    fun isEngineAvailable(engineId: String): Boolean =
+        engines[engineId]?.isAvailable() == true
+
+    /** 至少一个引擎可用。 */
+    fun hasAnyEngineAvailable(): Boolean = engines.values.any { it.isAvailable() }
+
     /**
-     * 加载 GGUF 模型。
-     * @param modelPath .gguf 文件绝对路径
+     * 根据模型路径选择引擎。
+     *  - .gguf → LlamaEngine
+     *  - .mnn 文件 / 目录(含 .mnn) → MnnLlmEngine
+     *  - 其他后缀 → null(不支持的格式)
+     */
+    fun selectEngineForPath(modelPath: String): LocalLlmEngine? {
+        val file = File(modelPath)
+        // 目录:看里面是否含 .mnn 文件
+        if (file.isDirectory) {
+            return if (file.listFiles()?.any { it.name.endsWith(".mnn", ignoreCase = true) } == true) {
+                MnnLlmEngine
+            } else null
+        }
+        // 文件:按后缀
+        return when (modelPath.substringAfterLast('.', "").lowercase()) {
+            "gguf" -> LlamaEngine
+            "mnn" -> MnnLlmEngine
+            else -> null
+        }
+    }
+
+    /**
+     * 加载模型。
+     * @param modelPath 模型文件/目录绝对路径(.gguf 文件 / .mnn 目录)
      * @param contextSize 上下文窗口(tokens),默认 4096
      * @param gpuLayers GPU 层数(0=纯 CPU,移动端通常 0)
-     * @return 成功返回 ModelHandle,失败返回 ToolResult.error
+     * @return 成功返回 ModelHandle,失败返回 Result.failure
      */
     @Suppress("ReturnCount")
     fun loadModel(
@@ -60,36 +101,55 @@ object LocalModelManager {
         contextSize: Int = 4096,
         gpuLayers: Int = 0,
     ): Result<ModelHandle> {
-        if (!LlamaJni.isAvailable()) {
+        if (!hasAnyEngineAvailable()) {
             return Result.failure(IllegalStateException(
-                "本地模型引擎未就绪(libllama-jni.so 未加载)。需要编译 native 库,详见 build-native.sh。",
+                "本地模型引擎未就绪(libllama-jni.so / libmnn-jni.so 均未加载)。" +
+                    "需要编译 native 库,详见 build-native.sh / build-mnn.sh。",
             ))
         }
 
         val file = File(modelPath)
-        if (!file.exists() || !file.isFile) {
-            return Result.failure(IllegalArgumentException("模型文件不存在: $modelPath"))
+        if (!file.exists()) {
+            return Result.failure(IllegalArgumentException("模型文件/目录不存在: $modelPath"))
         }
-        if (!file.name.endsWith(".gguf")) {
-            return Result.failure(IllegalArgumentException("仅支持 .gguf 格式模型文件"))
+
+        val engine = selectEngineForPath(modelPath)
+            ?: return Result.failure(IllegalArgumentException(
+                "无法识别模型格式(支持 .gguf 文件 / .mnn 目录)。路径: $modelPath",
+            ))
+
+        if (!engine.isAvailable()) {
+            return Result.failure(IllegalStateException(
+                "引擎 ${engine.displayName} 不可用(native 库未加载)。",
+            ))
         }
 
         // 已加载 → 直接返回
         loadedModels[modelPath]?.let { return Result.success(it) }
 
         return try {
-            val ptr = LlamaJni.nativeLoadModel(modelPath, contextSize, gpuLayers)
+            val ptr = engine.loadModel(modelPath, contextSize, gpuLayers)
             if (ptr == 0L) {
-                return Result.failure(IllegalStateException("模型加载失败(内存不足?文件损坏?)"))
+                return Result.failure(IllegalStateException(
+                    "模型加载失败(内存不足?文件损坏?引擎=${engine.id})",
+                ))
+            }
+            val sizeBytes = if (file.isDirectory) {
+                file.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+            } else {
+                file.length()
             }
             val handle = ModelHandle(
-                path = modelPath, ptr = ptr,
+                path = modelPath,
+                engineId = engine.id,
+                ptr = ptr,
                 contextSize = contextSize,
                 loadedAt = System.currentTimeMillis(),
-                fileSizeBytes = file.length(),
+                fileSizeBytes = sizeBytes,
+                engine = engine,
             )
             loadedModels[modelPath] = handle
-            Log.i(TAG, "Model loaded: ${file.name} (ctx=$contextSize, ptr=$ptr)")
+            Log.i(TAG, "Model loaded: ${file.name} (engine=${engine.id}, ctx=$contextSize, ptr=$ptr)")
             Result.success(handle)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load model: $modelPath", e)
@@ -119,7 +179,7 @@ object LocalModelManager {
             ?: return Result.failure(IllegalStateException("模型未加载: $modelPath。请先调用 loadModel。"))
 
         return try {
-            val result = LlamaJni.nativeComplete(
+            val result = handle.engine.complete(
                 handle.ptr, prompt, maxTokens, temperature, topP, stopStr,
             )
             Result.success(result)
@@ -133,8 +193,8 @@ object LocalModelManager {
     fun unloadModel(modelPath: String) {
         loadedModels.remove(modelPath)?.let { handle ->
             try {
-                LlamaJni.nativeFreeModel(handle.ptr)
-                Log.i(TAG, "Model unloaded: $modelPath")
+                handle.engine.freeModel(handle.ptr)
+                Log.i(TAG, "Model unloaded: $modelPath (engine=${handle.engineId})")
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to free model: ${e.message}")
             }
@@ -154,9 +214,18 @@ object LocalModelManager {
         val handle = loadedModels[modelPath]
             ?: return Result.failure(IllegalStateException("模型未加载: $modelPath"))
         return try {
-            Result.success(LlamaJni.nativeTokenCount(handle.ptr, text))
+            Result.success(handle.engine.tokenCount(handle.ptr, text))
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    // ── 引擎预加载(native 库加载,App 启动时调一次) ──
+
+    /** 启动时尝试加载所有 native 库(失败不崩,后续按需降级)。 */
+    fun preloadEngines() {
+        LlamaJni.ensureLoaded()
+        MnnJni.ensureLoaded()
+        Log.i(TAG, "Engine preload: llama=${LlamaEngine.isAvailable()}, mnn=${MnnLlmEngine.isAvailable()}")
     }
 }

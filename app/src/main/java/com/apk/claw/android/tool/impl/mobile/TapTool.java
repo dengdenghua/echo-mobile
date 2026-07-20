@@ -82,7 +82,7 @@ public class TapTool extends BaseTool {
         String boundsError = validateCoordinates(x, y);
         if (boundsError != null) return ToolResult.error(boundsError);
         // 统一走 UiActionRouter：远程→Shizuku→A11y→Root 三级降级，零关心通道选择
-        boolean success = UiActionRouter.INSTANCE.tap(x, y);
+        boolean success = UiActionRouter.INSTANCE.tap(x, y, 100L);
         return success ? ToolResult.success("Tapped at (" + x + ", " + y + ")")
                 : ToolResult.error("Failed to tap at (" + x + ", " + y + ") "
                     + "(所有通道都失败：Shizuku/A11y/Root 均不可用或失败)");

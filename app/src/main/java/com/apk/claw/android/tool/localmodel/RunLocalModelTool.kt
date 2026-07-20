@@ -70,11 +70,11 @@ class RunLocalModelTool : BaseTool() {
 
     @Suppress("ReturnCount")
     override fun execute(params: Map<String, Any>): ToolResult {
-        // 检查 native 库
-        if (!LlamaJni.isAvailable()) {
+        // 检查至少一个引擎可用
+        if (!LocalModelManager.hasAnyEngineAvailable()) {
             return ToolResult.error(
-                "本地模型引擎未就绪。libllama-jni.so 未加载 — 需要编译 native 库。\n" +
-                    "请在项目根目录运行 ./build-native.sh 编译 llama.cpp,然后重新构建 APK。",
+                "本地模型引擎未就绪。libllama-jni.so / libmnn-jni.so 均未加载 — 需要编译 native 库。\n" +
+                    "请运行 ./build-native.sh(llama.cpp)或 ./build-mnn.sh(MNN),然后重新构建 APK。",
                 ToolErr.INTERNAL,
             )
         }
@@ -94,7 +94,7 @@ class RunLocalModelTool : BaseTool() {
             .takeIf { it.isNotBlank() }
             ?: getActiveModelPath()
             ?: return ToolResult.error(
-                "未指定 model_path,且没有已加载的模型。请先在设置页加载 .gguf 模型。",
+                "未指定 model_path,且没有已加载的模型。请先在设置页加载 .gguf / .mnn 模型。",
                 ToolErr.NOT_FOUND,
             )
 
