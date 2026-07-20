@@ -3,6 +3,7 @@ package com.apk.claw.android.tool
 import android.util.Log
 import com.apk.claw.android.tool.impl.*
 import com.apk.claw.android.tool.impl.browser.*
+import com.apk.claw.android.tool.impl.workspace.*
 import com.apk.claw.android.tool.impl.mobile.*
 import com.apk.claw.android.tool.impl.tv.*
 import com.apk.claw.android.octopus_mobile.safety.SafetyGate
@@ -102,6 +103,26 @@ object ToolRegistry {
      * 为 null 时调用方应回退到 [KVUtils.getScriptWorkspace]。
      */
     fun currentWorkspace(): String? = workspaceOverride.get()
+
+    /**
+     * 当前线程的工作空间本地路径（已解析 remote:// 前缀）。
+     *
+     * - 普通路径（如 /sdcard/Download/Octopus/）原样返回
+     * - remote://<mountId> 解析为 context.cacheDir/remote_workspace/<mountId>/
+     * - null 时调用方应回退到 [KVUtils.getScriptWorkspace]
+     */
+    fun currentWorkspaceLocalPath(): String? {
+        val ws = workspaceOverride.get() ?: return null
+        if (com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceCache.PathParser.isRemote(ws)) {
+            val parsed = com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceCache.PathParser.parse(ws)
+            if (parsed != null) {
+                val cacheDir = com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceCache.getCachePath(parsed.first, "/")
+                return cacheDir.parentFile?.absolutePath ?: return null
+            }
+            return null
+        }
+        return ws
+    }
 
     /**
      * 不可信来源调用高危工具时的确认回调（供 UI 接入"逐次人工确认"）。
@@ -213,6 +234,14 @@ object ToolRegistry {
         register(com.apk.claw.android.tool.impl.ssh.SftpMvTool())
         register(com.apk.claw.android.tool.impl.ssh.SftpMkdirTool())
         register(com.apk.claw.android.tool.impl.ssh.SftpStatTool())
+
+        // 远程工作空间工具 —— NAS/云盘/SSH 目录挂载编程
+        register(com.apk.claw.android.tool.impl.workspace.WorkspaceMountTool())
+        register(com.apk.claw.android.tool.impl.workspace.WorkspaceUnmountTool())
+        register(com.apk.claw.android.tool.impl.workspace.WorkspaceListTool())
+        register(com.apk.claw.android.tool.impl.workspace.WorkspacePullTool())
+        register(com.apk.claw.android.tool.impl.workspace.WorkspacePushTool())
+        register(com.apk.claw.android.tool.impl.workspace.WorkspaceSyncTool())
     }
 
     private fun registerTvTools() {

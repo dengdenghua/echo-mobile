@@ -1,0 +1,127 @@
+name: Build Native (llama.cpp JNI)
+
+# 独立的 native 编译流水线 —— 与 ci.yml(纯 Kotlin/APK) 解耦,避免每条 PR 都跑 10+ 分钟的
+# llama.cpp 编译。只在 JNI/CMake/build-native.sh 改动时触发,或手动 dispatch。
+#
+# 产物用途:
+#   1. PR 验证:JNI 代码改动是否能通过 NDK 交叉编译,防止合并后才发现符号缺失/头文件漂移。
+#   2. 刷新预编译 .so:llama.cpp 上游 bump(b3600 → 新 tag)时,手动触发产出新 .so,
+#      下载 artifact 解压到 app/src/main/jniLibs/<abi>/ 后提交。
+#
+# 不在 CI 直接打包到 APK 的原因:
+#   - 当前 gradle 没用 externalNativeBuild,而是直接打包 jniLibs/。在 CI 中重建 .so 再打包
+#     会让单次流水线耗时从 5min 涨到 20min+,且 cache 命中率低。
+#   - 保留"预编译 .so 入仓 + CI 校验编译能力"的分工,与 llama.cpp 官方 Android demo 一致。
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'app/src/main/cpp/**'
+      - 'build-native.sh'
+      - '.github/workflows/build-native.yml'
+  pull_request:
+    paths:
+      - 'app/src/main/cpp/**'
+      - 'build-native.sh'
+      - '.github/workflows/build-native.yml'
+  workflow_dispatch:
+    inputs:
+      abis:
+        description: 'Comma-separated ABIs to build (default: arm64-v8a,x86_64)'
+        required: false
+        default: 'arm64-v8a,x86_64'
+
+jobs:
+  build:
+    name: Build ${{ matrix.abi }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: ${{ fromJSON(format('["{0}"]', replace(github.event.inputs.abis || 'arm64-v8a,x86_64', ',', '","'))) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            ndk;27.0.12077973
+            cmake;3.22.1
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Resolve NDK root
+        id: ndk
+        run: |
+          NDK_ROOT="$ANDROID_HOME/ndk/27.0.12077973"
+          # android-actions/setup-android 把 SDK 装在 $ANDROID_SDK_ROOT,与 $ANDROID_HOME 等价
+          if [ ! -d "$NDK_ROOT" ] && [ -n "$ANDROID_SDK_ROOT" ]; then
+            NDK_ROOT="$ANDROID_SDK_ROOT/ndk/27.0.12077973"
+          fi
+          echo "NDK_ROOT=$NDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=${ANDROID_SDK_ROOT:-$ANDROID_HOME}" >> "$GITHUB_ENV"
+          test -d "$NDK_ROOT" || { echo "NDK not found at $NDK_ROOT"; exit 1; }
+
+      # llama.cpp 上游 ~200MB,缓存 FetchContent 下载的源码目录可让增量构建 5-10min 内完成。
+      # key 含 CMakeLists.txt 的 llama_cpp GIT_TAG,tag 一变就重建缓存。
+      - name: Cache llama.cpp source
+        id: cache-llama-src
+        uses: actions/cache@v4
+        with:
+          path: app/.cxx/${{ matrix.abi }}-release/_deps/llama_cpp-src
+          key: llama-cpp-src-${{ matrix.abi }}-${{ hashFiles('app/src/main/cpp/CMakeLists.txt') }}
+          restore-keys: |
+            llama-cpp-src-${{ matrix.abi }}-
+
+      - name: Build native libs
+        env:
+          NDK_ROOT: ${{ env.NDK_ROOT }}
+        run: |
+          chmod +x ./build-native.sh
+          ./build-native.sh ${{ matrix.abi }}
+
+      - name: Verify artifacts
+        run: |
+          set -e
+          ABI="${{ matrix.abi }}"
+          DIR="app/src/main/jniLibs/$ABI"
+          echo "=== $DIR ==="
+          ls -lh "$DIR/"
+          for lib in libllama-jni.so libllama.so libggml.so; do
+            test -f "$DIR/$lib" || { echo "Missing: $lib"; exit 1; }
+          done
+          file "$DIR/libllama-jni.so"
+
+      - name: Upload .so artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-libs-${{ matrix.abi }}
+          path: app/src/main/jniLibs/${{ matrix.abi }}/*.so
+          if-no-files-found: error
+          retention-days: 14
+
+      # 工程内的 jniLibs/ 已含历史预编译 .so,这里把 CI 产出的新 .so diff 一下,
+      # PR 上能直观看到二进制是否有变化(仅 push 到 main 时跑,PR 跑只是浪费)。
+      - name: Diff against committed jniLibs
+        if: github.event_name == 'pull_request'
+        run: |
+          ABI="${{ matrix.abi }}"
+          DIR="app/src/main/jniLibs/$ABI"
+          for lib in libllama-jni.so libllama.so libggml.so; do
+            if [ -f "$DIR/$lib" ]; then
+              NEW_SIZE=$(stat -c%s "$DIR/$lib")
+              echo "$lib: new_size=${NEW_SIZE} bytes"
+            fi
+          done

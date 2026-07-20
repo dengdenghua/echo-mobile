@@ -174,6 +174,75 @@ object EnvelopeFactory {
         )
     )
 
+    // ── workspace 协议(workspace/sync 系列) ──────────────────────
+
+    /** workspace/sync_ack —— 移动端收到母体 workspace/sync 后的确认 */
+    fun workspaceSyncAck(
+        workspaceId: String,
+        mountId: String,
+        status: String,  // ok / mount_failed / invalid_type / missing_host
+        message: String,
+    ): Envelope.Request = Envelope.Request(
+        method = "workspace/sync_ack",
+        params = mapOf(
+            "workspace_id" to workspaceId,
+            "mount_id" to mountId,
+            "status" to status,
+            "message" to message,
+            "ts" to System.currentTimeMillis(),
+        )
+    )
+
+    /** workspace/lease_acquire —— 移动端推送前向母体申请租约(防多端同时推送) */
+    fun workspaceLeaseAcquire(
+        leaseId: String,
+        workspaceId: String,
+        path: String,
+        tentacleId: String,
+    ): Envelope.Request = Envelope.Request(
+        method = "workspace/lease_acquire",
+        params = mapOf(
+            "lease_id" to leaseId,
+            "workspace_id" to workspaceId,
+            "path" to path,
+            "tentacle_id" to tentacleId,
+            "ts" to System.currentTimeMillis(),
+        )
+    )
+
+    /** workspace/lease_release —— 推送完成后释放租约 */
+    fun workspaceLeaseRelease(
+        leaseId: String,
+        workspaceId: String,
+        path: String,
+        tentacleId: String,
+    ): Envelope.Request = Envelope.Request(
+        method = "workspace/lease_release",
+        params = mapOf(
+            "lease_id" to leaseId,
+            "workspace_id" to workspaceId,
+            "path" to path,
+            "tentacle_id" to tentacleId,
+        )
+    )
+
+    /** workspace/push_notify —— 通知母体文件已推送(协作通知) */
+    fun workspacePushNotify(
+        workspaceId: String,
+        path: String,
+        mountId: String,
+        tentacleId: String,
+    ): Envelope.Request = Envelope.Request(
+        method = "workspace/push_notify",
+        params = mapOf(
+            "workspace_id" to workspaceId,
+            "path" to path,
+            "mount_id" to mountId,
+            "tentacle_id" to tentacleId,
+            "ts" to System.currentTimeMillis(),
+        )
+    )
+
     /** tool/result —— 工具执行结果（reply to tool/execute） */
     fun toolResult(
         callId: String,

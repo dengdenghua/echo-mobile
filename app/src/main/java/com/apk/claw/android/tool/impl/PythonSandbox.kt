@@ -288,11 +288,19 @@ object PythonSandbox {
          * 使 open("file.txt") 等相对路径默认落到工作空间目录,与 JS 沙箱行为一致。
          */
         fun getWorkspace(): String {
-            val ws = ToolRegistry.getInstance().currentWorkspace()
+            // currentWorkspaceLocalPath() 对 remote://<mountId>/ 工作空间返回本地缓存目录路径,
+            // 使 os.chdir(WORKSPACE) 和 open("file.txt") 能正常工作于已 pull 的远程文件。
+            val ws = ToolRegistry.getInstance().currentWorkspaceLocalPath()
                 ?: com.apk.claw.android.utils.KVUtils.getScriptWorkspace()
             // 确保目录存在(与 ScriptSandbox.createScope 行为一致)
             runCatching { File(ws).mkdirs() }
             return ws
+        }
+
+        /** 返回远程工作空间前缀(如 "remote://abc123/"),非远程工作空间返回 null。 */
+        fun getRemoteWorkspace(): String? {
+            val ws = ToolRegistry.getInstance().currentWorkspace() ?: return null
+            return if (ws.startsWith("remote://")) ws else null
         }
 
         // ── helpers ──

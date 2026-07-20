@@ -64,6 +64,10 @@ server/.env
 
 # ─────────────── Linux 容器 assets(由 scripts/download-linux-container-assets.sh 下载) ───────────────
 # PRoot 二进制 + Alpine rootfs tarball 不进 git 仓库(共 ~6MB),构建前由脚本下载。
+# Ubuntu rootfs(28MB)默认不打包进 APK,运行时按需下载到 filesDir;
+# 但若用 --ubuntu 选项预下载到 assets(开发测试用),也需排除。
 app/src/main/assets/proot/proot-aarch64
 app/src/main/assets/proot/alpine-minirootfs.tar.gz
 app/src/main/assets/proot/alpine-minirootfs.tar.gz.sha256
+app/src/main/assets/proot/ubuntu-base-*.tar.gz
+app/src/main/assets/proot/ubuntu-base-*.tar.gz.sha256

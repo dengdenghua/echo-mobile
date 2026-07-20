@@ -328,6 +328,7 @@
     <string name="settings_val_devices">2 台</string>
     <string name="settings_browser_engine">ブラウザエンジン</string>
     <string name="settings_cast_control">画面投影</string>
+    <string name="settings_remote_workspace">リモートワークスペース</string>
     <string name="settings_plugin_mgmt">プラグイン管理</string>
     <string name="settings_val_plugins_loaded">3 件読み込み済み</string>
 
@@ -1288,4 +1289,101 @@
     <string name="user_profile_load_failed">ユーザー情報の読み込みに失敗しました</string>
     <string name="market_mine_skills">マイスキル</string>
     <string name="market_mine_apps">マイアプリ</string>
+
+    <string name="remote_workspace_title">リモートワークスペース</string>
+    <string name="remote_workspace_empty">マウントがありません</string>
+    <string name="remote_workspace_add">マウントを追加</string>
+    <string name="remote_workspace_mount">マウント</string>
+
+    <!-- LLM Provider UI -->
+    <string name="provider_selector_label">プロバイダー</string>
+
+    <!-- Language switcher -->
+    <string name="language_menu_title">言語</string>
+    <string name="language_follow_system">システムに従う</string>
+    <string name="language_dialog_title">言語を選択</string>
+    <string name="language_name_en">English</string>
+    <string name="language_name_zh">简体中文</string>
+    <string name="language_name_ja">日本語</string>
+    <string name="language_name_ko">한국어</string>
+    <string name="language_name_es">Español</string>
+    <string name="language_name_pt">Português</string>
+
+    <!-- 历史缺失 key 补齐 -->
+    <!-- Agent Record -->
+    <string name="agent_record_empty">ツール呼び出しは記録されていません</string>
+    <string name="agent_record_saved">ルーチンとして保存: %1$s</string>
+    <string name="agent_record_started">記録中…</string>
+    <!-- Browser -->
+    <string name="browser_chip_buy">価格を比較</string>
+    <string name="browser_chip_download">ファイルをダウンロード</string>
+    <string name="browser_chip_read">記事を読む</string>
+    <string name="browser_chip_search">リサーチ</string>
+    <string name="browser_desktop_mode_off">モバイルモードに切り替えました</string>
+    <string name="browser_desktop_mode_on">デスクトップモードに切り替えました</string>
+    <string name="browser_download_started">ダウンロード開始: %1$s</string>
+    <string name="browser_follow_up_detail">もっと詳しく</string>
+    <string name="browser_follow_up_example">実例を挙げて</string>
+    <string name="browser_follow_up_summary">要点をまとめて</string>
+    <string name="browser_follow_up_title">フォローアップ</string>
+    <string name="browser_home_search_hint">検索または URL を入力</string>
+    <string name="browser_menu_cloud_sync">クラウド同期</string>
+    <string name="browser_menu_dark_mode">ダークモード</string>
+    <string name="browser_menu_desktop_mode">デスクトップモード</string>
+    <string name="browser_menu_downloads">ダウンロード</string>
+    <string name="browser_menu_light_mode">ライトモード</string>
+    <string name="browser_menu_mobile_mode">モバイルモード</string>
+    <string name="browser_menu_record_agent">Agent 操作を記録</string>
+    <string name="browser_menu_share">共有</string>
+    <string name="browser_menu_stealth_off">フィンガープリント保護オフ</string>
+    <string name="browser_menu_stealth_on">フィンガープリント保護オン</string>
+    <string name="browser_menu_stealth_protection">フィンガープリント保護</string>
+    <string name="browser_menu_stop_recording">記録を停止</string>
+    <string name="browser_menu_translate">翻訳</string>
+    <string name="browser_menu_userscript_store">ユーザースクリプトストア</string>
+    <string name="browser_reader_button">リーダーモード</string>
+    <string name="browser_reader_empty">読むものがありません</string>
+    <string name="browser_reader_title">リーダーモード</string>
+    <string name="browser_reading_page">ページ内容を読み込み中…</string>
+    <string name="browser_search_prompt">あなたはスマート検索アシスタントです。ユーザーの質問に簡潔に答えてください。ブラウザツールを使って最新情報を検索しても構いません。\nユーザーの質問: %1$s</string>
+    <string name="browser_share_chooser">共有</string>
+    <string name="browser_sources_count">%1$d 件のソース</string>
+    <string name="browser_stealth_switched">%1$s フィンガープリントに切り替えました</string>
+    <string name="browser_timeline_empty">履歴はまだありません</string>
+    <string name="browser_timeline_title">履歴</string>
+    <!-- Userscript -->
+    <string name="userscript_empty_installed">インストール済みのスクリプトがありません。「おすすめ」タブから選んでください。</string>
+    <string name="userscript_install">インストール</string>
+    <string name="userscript_install_failed_toast">インストール失敗: %1$s</string>
+    <string name="userscript_install_from_url">URL からインストール</string>
+    <string name="userscript_installed_label">インストール済み</string>
+    <string name="userscript_installed_toast">インストール済み: %1$s</string>
+    <string name="userscript_store_title">ユーザースクリプトストア</string>
+    <string name="userscript_tab_installed">インストール済み</string>
+    <string name="userscript_tab_recommend">おすすめ</string>
+    <string name="userscript_uninstall">アンインストール</string>
+    <!-- Voice Call -->
+    <string name="voice_call_billing_free">無料通話分</string>
+    <string name="voice_call_billing_paid">%1$d クレジット消費</string>
+    <string name="voice_call_close">閉じる</string>
+    <string name="voice_call_connecting">接続中…</string>
+    <string name="voice_call_ended">通話終了</string>
+    <string name="voice_call_entry">リアルタイム音声通話</string>
+    <string name="voice_call_hangup">通話終了</string>
+    <string name="voice_call_listening">聞いています… どうぞ</string>
+    <string name="voice_call_reason_insufficient">クレジットが不足しています。チャージまたはサブスクリプションをご利用ください</string>
+    <string name="voice_call_reason_limit">1 回の通話の最大時間に達しました</string>
+    <string name="voice_call_retry">もう一度通話</string>
+    <string name="voice_call_speaking">応答中</string>
+    <string name="voice_call_title">リアルタイム音声通話</string>
+    <string name="voice_settings_title">音声設定</string>
+    <!-- Wakeword -->
+    <string name="wakeword_channel_desc">マイク経由でウェイクワードを監視するバックグラウンドサービス通知</string>
+    <string name="wakeword_channel_name">ウェイクワード監視</string>
+    <string name="wakeword_feature_desc">ウェイクワードを話しかけてアシスタントを起動（常駐マイクが必要）</string>
+    <string name="wakeword_feature_title">ウェイクワード</string>
+    <string name="wakeword_notification_text">「%1$s」と話しかけてアシスタントを起動</string>
+    <string name="wakeword_notification_title">ウェイクワードを監視中</string>
+    <string name="wakeword_privacy_body">ウェイクワードを有効にすると、アプリはバックグラウンドでマイク音声を継続的に監視し、カスタムウェイクワードを検出します。\n\n・音声はローカルで処理され、アップロードされません\n・ウェイクワードを検出すると、アプリが自動的にアシスタント UI を起動します\n・通知バーまたは設定からいつでもオフにできます\n・オフにするとマイクのキャプチャは即座に停止します\n\n上記の内容をご理解のうえ、続行に同意してください。</string>
+    <string name="wakeword_privacy_title">常駐マイクに関するお知らせ</string>
 </resources>

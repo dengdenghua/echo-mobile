@@ -77,6 +77,9 @@ object ToolRiskPolicy {
         // SSH 建立连接:凭据泄漏可被持久化利用,且后续高危操作的入口。
         // 高危 → 不可信来源走来源闸门 + 全程审计。
         "ssh_connect",
+        // workspace_push: 推送本地修改回远程工作空间,可能覆盖他人改动。
+        // 高危 → 不可信来源走来源闸门 + 全程审计。
+        "workspace_push",
     )
 
     val MEDIUM_RISK_TOOLS: Set<String> = setOf(
@@ -130,6 +133,10 @@ object ToolRiskPolicy {
         // SSH/SFTP 只读类:读取远程目录/文件内容/元数据,可能暴露敏感配置(/etc/passwd、~/.ssh 等)。
         // 与 browse_files/read_sms 同级 MEDIUM —— 纳入审计,便于追溯「谁在何时读了哪台机器的什么文件」。
         "sftp_ls", "sftp_read", "sftp_stat",
+        // 远程工作空间挂载管理:建立/断开连接,改本地挂载配置,纳入审计。
+        "workspace_mount", "workspace_unmount",
+        // 远程工作空间文件操作:拉取/同步,可能暴露远程敏感配置。
+        "workspace_pull", "workspace_sync",
     )
 
     /**
@@ -163,6 +170,8 @@ object ToolRiskPolicy {
         // SSH 连接管理:ssh_list 列出本机活跃连接(无远程数据);ssh_disconnect 关闭用户主动建的连接(纯清理)。
         // 均无数据出口/状态变更,LOW 与其他只读观察类一致。
         "ssh_list", "ssh_disconnect",
+        // 远程工作空间列表:纯查询,无副作用。
+        "workspace_list",
     )
 
     /** 已知未注册但有意保留在风险名单中的工具名（前向兼容），供漂移守护排除。 */

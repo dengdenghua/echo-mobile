@@ -1,6 +1,25 @@
 package com.apk.claw.android.agent
 
-enum class LlmProvider { OPENAI, ANTHROPIC, LOCAL }
+enum class LlmProvider(
+    val displayName: String,
+    val defaultBaseUrl: String,
+    val openAiCompat: Boolean,
+) {
+    OPENAI("OpenAI", "https://api.openai.com/v1", true),
+    ANTHROPIC("Anthropic Claude", "", false),
+    GEMINI("Google Gemini", "", false),
+    XAI("xAI Grok", "https://api.x.ai/v1", true),
+    OLLAMA("Ollama (Local)", "http://localhost:11434/v1", true),
+    DEEPSEEK("DeepSeek", "https://api.deepseek.com/v1", true),
+    DASHSCOPE("阿里云 DashScope", "https://dashscope.aliyuncs.com/compatible-mode/v1", true),
+    BAIDU_BAILING("百度千帆百灵", "https://qianfan.baidubce.com/v2", true),
+    SILICONFLOW("硅基流动", "https://api.siliconflow.cn/v1", true),
+    NOVITA("Novita AI", "https://api.novita.ai/v3", true),
+    NVIDIA_NIM("NVIDIA NIM", "https://integrate.api.nvidia.com/v1", true),
+    OPENROUTER("OpenRouter", "https://openrouter.ai/api/v1", true),
+    LMSTUDIO("LM Studio (Local)", "http://localhost:1234/v1", true),
+    LOCAL("本地模型 (llama.cpp)", "", false);
+}
 
 data class AgentConfig(
     val apiKey: String,

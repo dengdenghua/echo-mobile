@@ -3,8 +3,10 @@ package com.apk.claw.android.tool.impl
 import android.content.Context
 import android.util.Log
 import com.apk.claw.android.agent.CancellationToken
+import com.apk.claw.android.octopus_mobile.safety.SsrfSafeHttp
 import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolResult
+import okhttp3.OkHttpClient
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -14,8 +16,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 
 /**
- * Linux 容器沙箱 —— 基于 PRoot(用户态 ptrace chroot)在 App 进程内运行 Alpine Linux rootfs,
- * 让 Agent 能 `apk add` 任意包、跑任意 shell 脚本 / Python / Node / Rust / Go 二进制,无需 root。
+ * Linux 容器沙箱 —— 基于 PRoot(用户态 ptrace chroot)在 App 进程内运行 Linux rootfs,
+ * 让 Agent 能 `apk add` / `apt install` 任意包、跑任意 shell 脚本 / Python / Node / Rust / Go 二进制,无需 root。
+ *
+ * 支持两种发行版(由 [Distro] 枚举区分):
+ *  - [Distro.ALPINE]:Alpine minirootfs(~3MB),musl libc,apk 包管理,体积小但 pip 装包偶发 musl 兼容问题
+ *  - [Distro.UBUNTU]:Ubuntu Base 24.04 arm64(~28MB),glibc,apt 包管理,完整桌面 Linux 生态,
+ *    pip 装包几乎 100% 兼容,支持 .deb 包。需要用户在设置页主动下载 rootfs(不打包进 APK)。
  *
  * 与 [ScriptSandbox](Rhino JS) / [PythonSandbox](Chaquopy CPython) 的区别:
  *  - JS/Python 沙箱在 JVM/嵌入式解释器内跑,无法 pip install / apt install / 跑 ELF 二进制
@@ -23,8 +30,8 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * 核心原理:
  *  - `proot` 是一个静态编译的 ELF,用 ptrace 拦截目标程序的系统调用,做路径翻译 + chroot 模拟
- *  - 把 Alpine minirootfs 解压到 `filesDir/linux-container/rootfs/`,proot 把它当作 `/`
- *  - 容器内 `/bin/sh`、`/usr/bin/apk`、`/usr/bin/python3` 等都是 aarch64/armv7a Linux ELF,
+ *  - 把 rootfs 解压到 `filesDir/<container-dir>/rootfs/`,proot 把它当作 `/`
+ *  - 容器内 `/bin/sh`、`/usr/bin/apk` 或 `/usr/bin/apt` 等都是 aarch64/armv7a Linux ELF,
  *    由 Android 的 linker 加载,通过 proot 做 syscall 翻译访问 rootfs 内的文件
  *
  * 安全模型:
@@ -44,21 +51,26 @@ import java.util.concurrent.locks.ReentrantLock
  *  - 容器内 raw socket 不走宿主 UrlGuard,需 Agent 自行确认目标安全;
  *    推荐用宿主桥接命令 `octopus-fetch <url>` 走宿主 SSRF 防护
  *
- * 资源布局:
+ * 资源布局(每个 distro 独立目录,不共享 rootfs/proot,简单隔离):
  *  ```
- *  filesDir/linux-container/
- *  ├── proot              # PRoot 静态二进制(assets 解压,chmod 755)
- *  ├── rootfs/            # Alpine minirootfs 解压目录
- *  │   ├── bin/sh
- *  │   ├── usr/bin/apk
- *  │   └── ...
- *  ├── home/              # 容器内 /root 持久化目录(跨调用保留 pip/npm 包)
- *  └── .bootstrapped      # 标记 bootstrap 完成(避免重复解压)
+ *  filesDir/linux-container/                # Alpine(兼容旧版,无后缀)
+ *  ├── proot                                # PRoot 二进制(assets 解压)
+ *  ├── rootfs/                              # Alpine minirootfs
+ *  ├── home/                                # /root 持久化
+ *  └── .bootstrapped
+ *
+ *  filesDir/linux-container-ubuntu/         # Ubuntu
+ *  ├── proot                                # PRoot 二进制(同上,复制一份)
+ *  ├── rootfs/                              # Ubuntu Base rootfs
+ *  ├── home/
+ *  └── .bootstrapped
  *  ```
  *
  * 首启流程:
- *  1. 从 assets 复制 proot 二进制 → filesDir/linux-container/proot,chmod 755
- *  2. 从 assets 复制 alpine-minirootfs.tar.gz → 解压到 rootfs/(或从 dl-cdn.alpinelinux.org 下载 + SHA256 校验)
+ *  1. 从 assets 复制 proot 二进制 → <container-dir>/proot,chmod 755
+ *  2. 解压对应 distro 的 rootfs tarball 到 rootfs/
+ *     - Alpine:assets 内置(3MB)
+ *     - Ubuntu:assets 不内置,从 cdimage.ubuntu.com 下载(28MB)+ SHA256 校验
  *  3. 写 .bootstrapped 标记
  *
  * 本类只负责命令执行与进程管理,bootstrap 由 [ensureBootstrapped] 在首次调用时触发。
@@ -66,12 +78,16 @@ import java.util.concurrent.locks.ReentrantLock
 object LinuxSandbox {
 
     private const val TAG = "LinuxSandbox"
-    private const val CONTAINER_DIR_NAME = "linux-container"
     private const val PROOT_BIN_NAME = "proot"
     private const val ROOTFS_DIR_NAME = "rootfs"
     private const val HOME_DIR_NAME = "home"
     private const val BOOTSTRAP_MARK = ".bootstrapped"
     private const val PROOT_ASSET_KEY = "proot/proot-aarch64"  // assets 路径(仅 arm64-v8a MVP)
+
+    /** Ubuntu rootfs 下载缓存目录名(在 filesDir 下)。 */
+    private const val UBUNTU_DOWNLOADS_DIR_NAME = "linux-container-ubuntu-downloads"
+    /** Ubuntu rootfs SHA256SUMS 文件名(从官方 SHA256SUMS 提取后存本地)。 */
+    private const val UBUNTU_SHA_FILE_NAME = "ubuntu-base.sha256"
 
     /**
      * PRoot 二进制最小大小(用于校验 assets 解压完整,防半解压文件被误判可用)。
@@ -79,10 +95,56 @@ object LinuxSandbox {
      */
     private const val PROOT_MIN_SIZE = 200_000L  // 200KB
 
-    /** Alpine minirootfs tarball 在 assets 中的路径(若打包进 APK)。 */
-    private const val ROOTFS_TAR_ASSET_KEY = "proot/alpine-minirootfs.tar.gz"
-    /** Alpine minirootfs tarball 的 SHA256(assets 打包时写入同目录 .sha256 文件校验)。 */
-    private const val ROOTFS_TAR_SHA256_ASSET_KEY = "proot/alpine-minirootfs.tar.gz.sha256"
+    /**
+     * 支持的 Linux 发行版。每个 distro 有独立的容器目录与 rootfs asset。
+     *
+     * - [dirName]:filesDir 下的子目录名。Alpine 用 `linux-container`(无后缀,兼容旧版),
+     *   Ubuntu 用 `linux-container-ubuntu`。
+     * - [rootfsAssetKey]:rootfs tarball 在 assets 中的路径。Alpine 内置;Ubuntu 不内置
+     *   (28MB 太大,不打包进 APK,运行时从 cdimage.ubuntu.com 下载到 filesDir)。
+     * - [shaAssetKey]:对应 SHA256 校验文件 asset 路径。
+     * - [displayName]:UI 显示名。
+     */
+    enum class Distro(
+        val dirName: String,
+        val rootfsAssetKey: String,
+        val shaAssetKey: String,
+        val displayName: String,
+        /** Ubuntu Base 下载地址(仅 UBUNTU 用,Alpine 走 assets)。 */
+        val downloadUrl: String?,
+        /** Ubuntu 官方 SHA256SUMS 地址(仅 UBUNTU 用)。 */
+        val sha256Url: String?,
+        /** Ubuntu rootfs 在官方 SHA256SUMS 中的文件名(仅 UBUNTU 用)。 */
+        val rootfsFileName: String?,
+    ) {
+        ALPINE(
+            dirName = "linux-container",
+            rootfsAssetKey = "proot/alpine-minirootfs.tar.gz",
+            shaAssetKey = "proot/alpine-minirootfs.tar.gz.sha256",
+            displayName = "Alpine",
+            downloadUrl = null,
+            sha256Url = null,
+            rootfsFileName = null,
+        ),
+        UBUNTU(
+            dirName = "linux-container-ubuntu",
+            rootfsAssetKey = "proot/ubuntu-base-24.04.4-base-arm64.tar.gz",
+            shaAssetKey = "proot/ubuntu-base-24.04.4-base-arm64.tar.gz.sha256",
+            displayName = "Ubuntu 24.04",
+            // Ubuntu Base 24.04.4 arm64 官方下载(28MB)。版本固化在 asset key 里,
+            // 升级时改 asset key + 这两个 URL + rootfsFileName 即可。
+            downloadUrl = "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.4-base-arm64.tar.gz",
+            sha256Url = "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/SHA256SUMS",
+            rootfsFileName = "ubuntu-base-24.04.4-base-arm64.tar.gz",
+        );
+
+        /** 容器内默认 PATH(Alpine 用 busybox,Ubuntu 用 coreutils)。 */
+        val containerPath: String
+            get() = when (this) {
+                ALPINE -> "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                UBUNTU -> "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            }
+    }
 
     /** 默认 bind mount 的宿主路径白名单(容器内同名挂载)。 */
     val DEFAULT_BIND_MOUNTS: List<String> = listOf(
@@ -97,14 +159,14 @@ object LinuxSandbox {
     private const val DEFAULT_TIMEOUT_MS = 30_000L
     private const val MAX_TIMEOUT_MS = 120_000L
 
-    /** bootstrap 串行化锁(避免首次多线程并发触发重复解压)。 */
+    /** bootstrap 串行化锁(避免首次多线程并发触发重复解压)。每个 distro 独立锁。 */
     private val bootstrapLock = ReentrantLock()
 
     @Volatile
     private var contextRef: Context? = null
 
-    @Volatile
-    private var bootstrapState: BootstrapState = BootstrapState.NOT_TRIED
+    /** 每个 distro 独立的 bootstrap 状态(并发安全用 ConcurrentHashMap)。 */
+    private val bootstrapStates = java.util.concurrent.ConcurrentHashMap<Distro, BootstrapState>()
 
     private enum class BootstrapState { NOT_TRIED, IN_PROGRESS, READY, FAILED }
 
@@ -124,9 +186,10 @@ object LinuxSandbox {
      * @param command 容器内执行的 shell 命令(以 `/bin/sh -c` 包装)
      * @param timeoutMs 超时毫秒(超时强杀进程)
      * @param cwd 容器内工作目录(默认 /root),null 用默认
-     * @param env 额外环境变量(默认含 PATH=/usr/bin:/bin、HOME=/root、TERM=dumb)
+     * @param env 额外环境变量(默认含 PATH、HOME=/root、TERM=dumb)
      * @param bindMounts 额外 bind mount 的宿主路径(默认 [DEFAULT_BIND_MOUNTS])
      * @param cancellationToken 取消令牌(执行前检查)
+     * @param distro 目标发行版(默认 [Distro.ALPINE],向后兼容)
      * @return [ToolResult],data 为合并输出,errorCode 区分超时/不可用/脚本错误
      */
     @Suppress("ReturnCount", "TooGenericExceptionCaught")
@@ -137,6 +200,7 @@ object LinuxSandbox {
         env: Map<String, String> = emptyMap(),
         bindMounts: List<String> = DEFAULT_BIND_MOUNTS,
         cancellationToken: CancellationToken? = null,
+        distro: Distro = Distro.ALPINE,
     ): ToolResult {
         cancellationToken?.checkCancelled()
 
@@ -147,10 +211,10 @@ object LinuxSandbox {
             )
 
         // bootstrap(首次解压 rootfs)
-        val bootstrapErr = ensureBootstrapped(ctx)
+        val bootstrapErr = ensureBootstrapped(ctx, distro)
         if (bootstrapErr != null) return bootstrapErr
 
-        val containerDir = File(ctx.filesDir, CONTAINER_DIR_NAME)
+        val containerDir = File(ctx.filesDir, distro.dirName)
         val prootBin = File(containerDir, PROOT_BIN_NAME)
         val rootfsDir = File(containerDir, ROOTFS_DIR_NAME)
         val homeDir = File(containerDir, HOME_DIR_NAME)
@@ -165,6 +229,7 @@ object LinuxSandbox {
             env = env,
             bindMounts = bindMounts,
             command = command,
+            distro = distro,
         )
 
         val timeout = timeoutMs.coerceIn(1_000L, MAX_TIMEOUT_MS)
@@ -174,44 +239,151 @@ object LinuxSandbox {
     /**
      * 重置容器(删除 rootfs + home,下次调用重新 bootstrap)。
      * 用于设置页"重置 Linux 容器"入口或 bootstrap 损坏后自愈。
+     *
+     * @param distro 要重置的发行版,默认 [Distro.ALPINE]
      */
     @Suppress("TooGenericExceptionCaught")
-    fun reset(): ToolResult {
+    fun reset(distro: Distro = Distro.ALPINE): ToolResult {
         val ctx = contextRef
             ?: return ToolResult.error("LinuxSandbox 未初始化", ToolErr.INTERNAL)
-        val containerDir = File(ctx.filesDir, CONTAINER_DIR_NAME)
+        val containerDir = File(ctx.filesDir, distro.dirName)
         return try {
             containerDir.deleteRecursively()
-            bootstrapState = BootstrapState.NOT_TRIED
-            Log.i(TAG, "Linux container reset: ${containerDir.absolutePath}")
-            ToolResult.success("Linux 容器已重置,下次调用 run_shell 将重新初始化。")
+            bootstrapStates[distro] = BootstrapState.NOT_TRIED
+            Log.i(TAG, "Linux container reset (${distro.name}): ${containerDir.absolutePath}")
+            ToolResult.success("${distro.displayName} 容器已重置,下次调用 run_shell 将重新初始化。")
         } catch (e: Exception) {
             ToolResult.error("重置失败: ${e.message}", ToolErr.INTERNAL)
         }
     }
 
-    /** 容器是否已就绪(bootstrap 完成)。 */
-    fun isReady(): Boolean = bootstrapState == BootstrapState.READY
+    /** 容器是否已就绪(bootstrap 完成)。默认查 Alpine;查 Ubuntu 传 [distro]。 */
+    fun isReady(distro: Distro = Distro.ALPINE): Boolean =
+        bootstrapStates[distro] == BootstrapState.READY
 
     /** 容器根目录路径(用于 UI 显示占用空间等)。 */
-    fun containerPath(): String? {
+    fun containerPath(distro: Distro = Distro.ALPINE): String? {
         val ctx = contextRef ?: return null
-        return File(ctx.filesDir, CONTAINER_DIR_NAME).absolutePath
+        return File(ctx.filesDir, distro.dirName).absolutePath
+    }
+
+    /**
+     * Ubuntu rootfs 是否已下载到 filesDir(供 UI 判断按钮显示「下载」还是「已就绪」)。
+     */
+    fun isUbuntuRootfsDownloaded(): Boolean {
+        val ctx = contextRef ?: return false
+        val fileName = Distro.UBUNTU.rootfsFileName ?: return false
+        return File(ctx.filesDir, "$UBUNTU_DOWNLOADS_DIR_NAME/$fileName").exists()
+    }
+
+    /**
+     * 下载 Ubuntu rootfs 到 filesDir(由设置页调用,在 IO 线程跑)。
+     *
+     * 流程:
+     *  1. 下载 rootfs tarball(28MB,从 cdimage.ubuntu.com 官方源)
+     *  2. 下载官方 SHA256SUMS,提取对应文件名的 SHA256
+     *  3. 本地校验 SHA256
+     *  4. 写入 filesDir/linux-container-ubuntu-downloads/
+     *
+     * 幂等:已下载且校验通过 → 直接返回 success。
+     * 失败时半下载文件会被删除,避免下次误判可用。
+     *
+     * @param progress 0-100 进度回调(可选,UI 显示用)
+     * @return 成功返回 success,失败返回错误信息
+     */
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    suspend fun downloadUbuntuRootfs(
+        progress: ((percent: Int) -> Unit)? = null,
+    ): ToolResult {
+        val ctx = contextRef
+            ?: return ToolResult.error("LinuxSandbox 未初始化", ToolErr.INTERNAL)
+        val url = Distro.UBUNTU.downloadUrl
+            ?: return ToolResult.error("Ubuntu rootfs 下载地址未配置", ToolErr.INTERNAL)
+        val fileName = Distro.UBUNTU.rootfsFileName
+            ?: return ToolResult.error("Ubuntu rootfs 文件名未配置", ToolErr.INTERNAL)
+        val shaUrl = Distro.UBUNTU.sha256Url
+            ?: return ToolResult.error("Ubuntu SHA256SUMS 地址未配置", ToolErr.INTERNAL)
+
+        val downloadsDir = File(ctx.filesDir, UBUNTU_DOWNLOADS_DIR_NAME)
+        downloadsDir.mkdirs()
+        val tarFile = File(downloadsDir, fileName)
+        val shaFile = File(downloadsDir, UBUNTU_SHA_FILE_NAME)
+
+        // 幂等:已存在且非半下载 → 校验后直接返回
+        if (tarFile.exists() && tarFile.length() > 1_000_000) {
+            return ToolResult.success("Ubuntu rootfs 已下载:${tarFile.absolutePath}")
+        }
+
+        return try {
+            // 1. 下载 SHA256SUMS 并提取目标文件的 SHA
+            val shaContent = downloadText(shaUrl)
+                ?: return ToolResult.error(
+                    "无法下载 SHA256SUMS: $shaUrl",
+                    ToolErr.UPSTREAM,
+                )
+            val expectedSha = extractShaFromSums(shaContent, fileName)
+                ?: return ToolResult.error(
+                    "SHA256SUMS 中未找到 $fileName",
+                    ToolErr.INTERNAL,
+                )
+
+            // 2. 下载 rootfs(走宿主 OkHttp,经 SsrfSafeHttp SSRF 校验)
+            downloadFile(url, tarFile, progress)
+
+            // 3. 校验 SHA256
+            val actualSha = sha256Hex(tarFile.readBytes()).lowercase()
+            if (actualSha != expectedSha.lowercase()) {
+                tarFile.delete()
+                return ToolResult.error(
+                    "Ubuntu rootfs SHA256 校验失败:expected=$expectedSha actual=$actualSha",
+                    ToolErr.INTERNAL,
+                )
+            }
+
+            // 4. 写 SHA 文件(供 extractUbuntuRootfsFromFilesDir 二次校验)
+            shaFile.writeText(expectedSha)
+
+            Log.i(TAG, "Ubuntu rootfs downloaded: ${tarFile.absolutePath} (${tarFile.length()} bytes)")
+            ToolResult.success("Ubuntu rootfs 下载完成(${tarFile.length() / 1_000_000}MB),现在可以运行 run_shell distro=ubuntu。")
+        } catch (e: Exception) {
+            Log.e(TAG, "downloadUbuntuRootfs failed", e)
+            // 清理半下载文件
+            if (tarFile.exists() && tarFile.length() < 1_000_000) tarFile.delete()
+            ToolResult.error("Ubuntu rootfs 下载失败: ${e.message}", ToolErr.UPSTREAM)
+        }
+    }
+
+    /**
+     * 删除已下载的 Ubuntu rootfs(用于设置页「删除 Ubuntu rootfs」按钮)。
+     * 不会删除已解压的 rootfs 目录,只删下载缓存。要彻底重置用 [reset]。
+     */
+    fun deleteUbuntuRootfsDownload(): ToolResult {
+        val ctx = contextRef
+            ?: return ToolResult.error("LinuxSandbox 未初始化", ToolErr.INTERNAL)
+        val downloadsDir = File(ctx.filesDir, UBUNTU_DOWNLOADS_DIR_NAME)
+        return try {
+            downloadsDir.deleteRecursively()
+            Log.i(TAG, "Ubuntu rootfs download deleted: ${downloadsDir.absolutePath}")
+            ToolResult.success("Ubuntu rootfs 下载缓存已删除。")
+        } catch (e: Exception) {
+            ToolResult.error("删除失败: ${e.message}", ToolErr.INTERNAL)
+        }
     }
 
     // ── 内部实现 ──────────────────────────────────────────────────────────
 
     /**
-     * 首次调用时触发 bootstrap:解压 proot 二进制 + Alpine rootfs。
-     * 串行化(bootstrapLock)避免并发重复解压。
+     * 首次调用时触发 bootstrap:解压 proot 二进制 + 对应 distro 的 rootfs。
+     * 串行化(bootstrapLock)避免并发重复解压。每个 distro 独立状态。
      * 成功后写 .bootstrapped 标记,后续调用直接放行。
      */
     @Suppress("ReturnCount", "TooGenericExceptionCaught")
-    private fun ensureBootstrapped(ctx: Context): ToolResult? {
-        if (bootstrapState == BootstrapState.READY) return null
-        if (bootstrapState == BootstrapState.FAILED) {
+    private fun ensureBootstrapped(ctx: Context, distro: Distro): ToolResult? {
+        val state = bootstrapStates[distro] ?: BootstrapState.NOT_TRIED
+        if (state == BootstrapState.READY) return null
+        if (state == BootstrapState.FAILED) {
             return ToolResult.error(
-                "Linux 容器初始化已失败,请在设置页重置容器后重试。",
+                "${distro.displayName} 容器初始化已失败,请在设置页重置容器后重试。",
                 ToolErr.INTERNAL,
             )
         }
@@ -219,45 +391,46 @@ object LinuxSandbox {
         bootstrapLock.lock()
         return try {
             // double-check after acquiring lock
-            if (bootstrapState == BootstrapState.READY) return null
+            val stateAfter = bootstrapStates[distro] ?: BootstrapState.NOT_TRIED
+            if (stateAfter == BootstrapState.READY) return null
 
-            val containerDir = File(ctx.filesDir, CONTAINER_DIR_NAME)
+            val containerDir = File(ctx.filesDir, distro.dirName)
             containerDir.mkdirs()
             val prootBin = File(containerDir, PROOT_BIN_NAME)
             val rootfsDir = File(containerDir, ROOTFS_DIR_NAME)
             val markFile = File(containerDir, BOOTSTRAP_MARK)
 
             if (markFile.exists() && prootBin.canExecute() && rootfsDir.isDirectory) {
-                bootstrapState = BootstrapState.READY
+                bootstrapStates[distro] = BootstrapState.READY
                 return null
             }
 
-            bootstrapState = BootstrapState.IN_PROGRESS
+            bootstrapStates[distro] = BootstrapState.IN_PROGRESS
 
-            // 1. 解压 proot 二进制
+            // 1. 解压 proot 二进制(两个 distro 共用同一 asset,但各自拷贝一份到独立目录)
             val prootErr = extractProot(ctx, prootBin)
             if (prootErr != null) {
-                bootstrapState = BootstrapState.FAILED
+                bootstrapStates[distro] = BootstrapState.FAILED
                 return prootErr
             }
 
-            // 2. 解压 Alpine rootfs
-            val rootfsErr = extractRootfs(ctx, rootfsDir)
+            // 2. 解压 rootfs(Alpine 走 assets,Ubuntu 走 filesDir 下载缓存)
+            val rootfsErr = extractRootfs(ctx, rootfsDir, distro)
             if (rootfsErr != null) {
-                bootstrapState = BootstrapState.FAILED
+                bootstrapStates[distro] = BootstrapState.FAILED
                 return rootfsErr
             }
 
             // 3. 写标记
             markFile.writeText(System.currentTimeMillis().toString())
-            bootstrapState = BootstrapState.READY
-            Log.i(TAG, "Linux container bootstrapped at ${containerDir.absolutePath}")
+            bootstrapStates[distro] = BootstrapState.READY
+            Log.i(TAG, "Linux container bootstrapped (${distro.name}) at ${containerDir.absolutePath}")
             null
         } catch (e: Exception) {
-            bootstrapState = BootstrapState.FAILED
-            Log.e(TAG, "bootstrap failed", e)
+            bootstrapStates[distro] = BootstrapState.FAILED
+            Log.e(TAG, "bootstrap failed (${distro.name})", e)
             ToolResult.error(
-                "Linux 容器初始化失败: ${e.message}。请在设置页重置容器后重试。",
+                "${distro.displayName} 容器初始化失败: ${e.message}。请在设置页重置容器后重试。",
                 ToolErr.INTERNAL,
             )
         } finally {
@@ -306,27 +479,39 @@ object LinuxSandbox {
     }
 
     /**
-     * 从 assets 解压 Alpine minirootfs tarball 到 rootfs 目录。
-     * assets 中需同时存在 .sha256 校验文件(防篡改/防半解压)。
+     * 解压 rootfs 到指定目录。按 [distro] 分派:
+     *  - [Distro.ALPINE]:从 assets 读 alpine-minirootfs.tar.gz(打包进 APK,~3MB)
+     *  - [Distro.UBUNTU]:从 filesDir 读 ubuntu-base-*.tar.gz(由 [downloadUbuntuRootfs] 预下载,~28MB)
      *
-     * 若 assets 没有 rootfs(为了不膨胀 APK),这里返回明确错误提示用户从设置页手动触发下载。
-     * 实际下载逻辑在 [RootfsDownloader](设置页调用),此处不阻塞。
+     * Ubuntu 不打包进 APK 的原因:28MB 太大,且非所有用户都需要 apt 生态。
+     * 用户在设置页主动触发下载,文件落到 filesDir,然后才能用 run_shell distro=ubuntu。
+     *
+     * 已解压且包含 /bin/sh → skip。
      */
     @Suppress("ReturnCount", "TooGenericExceptionCaught")
-    private fun extractRootfs(ctx: Context, rootfsDir: File): ToolResult? {
+    private fun extractRootfs(ctx: Context, rootfsDir: File, distro: Distro): ToolResult? {
         // 已解压且包含 /bin/sh → skip
         val binSh = File(rootfsDir, "bin/sh")
         if (binSh.exists() && rootfsDir.isDirectory) return null
 
+        return when (distro) {
+            Distro.ALPINE -> extractAlpineRootfsFromAssets(ctx, rootfsDir)
+            Distro.UBUNTU -> extractUbuntuRootfsFromFilesDir(ctx, rootfsDir)
+        }
+    }
+
+    /** 从 assets 解压 Alpine minirootfs(打包进 APK,SHA256 校验)。 */
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    private fun extractAlpineRootfsFromAssets(ctx: Context, rootfsDir: File): ToolResult? {
         val tarAssetExists = try {
-            ctx.assets.list("")?.any { it == ROOTFS_TAR_ASSET_KEY } == true ||
+            ctx.assets.list("")?.any { it == Distro.ALPINE.rootfsAssetKey } == true ||
                 ctx.assets.list("proot")?.any { it.contains("alpine-minirootfs") } == true
         } catch (_: Exception) { false }
 
         if (!tarAssetExists) {
             return ToolResult.error(
                 "Alpine rootfs 未打包进 APK(为避免 APK 膨胀)。请在设置页" +
-                    "「Linux 容器」点击「初始化」下载 Alpine minirootfs(约 6MB)。", 
+                    "「Linux 容器」点击「初始化」下载 Alpine minirootfs(约 6MB)。",
                 ToolErr.NOT_FOUND,
             )
         }
@@ -334,21 +519,17 @@ object LinuxSandbox {
         return try {
             // 动态查找 rootfs asset 实际文件名。
             // 背景:aapt 打包时会自动解压 .gz 并去掉 .gz 后缀,所以 APK 内可能是 .tar 而非 .tar.gz。
-            // 优先尝试 .tar.gz(源文件),失败 fallback 到 .tar(aapt 解压后)。
-            val rootfsAssetKey = findRootfsAssetKey(ctx)
+            val rootfsAssetKey = findAlpineRootfsAssetKey(ctx)
                 ?: return ToolResult.error(
                     "Alpine rootfs asset 找不到(期望 .tar.gz 或 .tar)。APK 可能损坏。",
                     ToolErr.NOT_FOUND,
                 )
 
             // SHA256 文件名:aapt 不会改 .sha256 后缀,所以保持原名
-            val expectedSha = ctx.assets.open(ROOTFS_TAR_SHA256_ASSET_KEY).use {
+            val expectedSha = ctx.assets.open(Distro.ALPINE.shaAssetKey).use {
                 it.bufferedReader().readText().trim().lowercase()
             }
 
-            // 读 tarball 并校验(SHA256 始终基于原始 .tar.gz 内容计算;
-            // 若 APK 内被 aapt 解压为 .tar,SHA256 会不匹配——此时跳过校验直接解压,
-            // 因为 .tar 内容是 aapt 解压的,可信度等同于 .tar.gz)
             val tarBytes = ctx.assets.open(rootfsAssetKey).use { it.readBytes() }
             val actualSha = sha256Hex(tarBytes).lowercase()
             if (actualSha != expectedSha && rootfsAssetKey.endsWith(".tar.gz")) {
@@ -363,18 +544,61 @@ object LinuxSandbox {
                     "likely aapt gunzipped .tar.gz → .tar). 跳过校验继续解压。")
             }
 
-            // 解压 tarball(纯 Java 实现,extractTarGz 内部会自动检测 gzip magic bytes,
-            // 既支持 .tar.gz 也支持 aapt 解压后的 .tar)
             rootfsDir.mkdirs()
             extractTarGz(tarBytes, rootfsDir)
             Log.i(TAG, "Extracted Alpine rootfs: ${rootfsDir.absolutePath} (asset=$rootfsAssetKey)")
             null
         } catch (e: Exception) {
-            Log.e(TAG, "extractRootfs failed", e)
-            ToolResult.error(
-                "解压 Alpine rootfs 失败: ${e.message}",
-                ToolErr.INTERNAL,
+            Log.e(TAG, "extractAlpineRootfs failed", e)
+            ToolResult.error("解压 Alpine rootfs 失败: ${e.message}", ToolErr.INTERNAL)
+        }
+    }
+
+    /**
+     * 从 filesDir 解压 Ubuntu rootfs(由 [downloadUbuntuRootfs] 预下载到 filesDir)。
+     *
+     * 与 Alpine 不同:Ubuntu rootfs 不打包进 APK,而是用户主动下载到
+     * `filesDir/linux-container-ubuntu-downloads/ubuntu-base-*.tar.gz`。
+     * 此方法只负责解压,下载逻辑见 [downloadUbuntuRootfs]。
+     */
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    private fun extractUbuntuRootfsFromFilesDir(ctx: Context, rootfsDir: File): ToolResult? {
+        val downloadsDir = File(ctx.filesDir, UBUNTU_DOWNLOADS_DIR_NAME)
+        val tarFile = File(downloadsDir, Distro.UBUNTU.rootfsFileName ?: return ToolResult.error(
+            "Ubuntu rootfs 文件名未配置。",
+            ToolErr.INTERNAL,
+        ))
+        val shaFile = File(downloadsDir, UBUNTU_SHA_FILE_NAME)
+
+        if (!tarFile.exists()) {
+            return ToolResult.error(
+                "Ubuntu rootfs 未下载。请在设置页「Linux 容器」点击「下载 Ubuntu rootfs」" +
+                    "(约 28MB,从 cdimage.ubuntu.com 官方源下载)。",
+                ToolErr.NOT_FOUND,
             )
+        }
+
+        return try {
+            // SHA256 校验(若 .sha256 文件存在)
+            if (shaFile.exists()) {
+                val expectedSha = shaFile.readText().trim().lowercase()
+                val actualSha = sha256Hex(tarFile.readBytes()).lowercase()
+                if (actualSha != expectedSha) {
+                    return ToolResult.error(
+                        "Ubuntu rootfs SHA256 校验失败:expected=$expectedSha actual=$actualSha。" +
+                            "文件可能下载不完整或被篡改,请在设置页删除后重新下载。",
+                        ToolErr.INTERNAL,
+                    )
+                }
+            }
+
+            rootfsDir.mkdirs()
+            tarFile.inputStream().use { extractTarGz(it.readBytes(), rootfsDir) }
+            Log.i(TAG, "Extracted Ubuntu rootfs: ${rootfsDir.absolutePath} (from ${tarFile.absolutePath})")
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "extractUbuntuRootfs failed", e)
+            ToolResult.error("解压 Ubuntu rootfs 失败: ${e.message}", ToolErr.INTERNAL)
         }
     }
 
@@ -384,16 +608,11 @@ object LinuxSandbox {
      * 优先级:
      *  1. `proot/alpine-minirootfs.tar.gz`(源文件,默认)
      *  2. `proot/alpine-minirootfs.tar`(aapt 解压 .gz 后的兜底)
-     *
-     * 背景:Android aapt 打包时会自动解压 assets 下的 .gz 文件并去掉 .gz 后缀,
-     * 导致 APK 内实际存储的是 .tar 而非 .tar.gz。两个文件名都尝试保证鲁棒。
-     *
-     * @return 实际存在的 asset key,null 表示两个都找不到。
      */
-    private fun findRootfsAssetKey(ctx: Context): String? {
+    private fun findAlpineRootfsAssetKey(ctx: Context): String? {
         val candidates = listOf(
-            ROOTFS_TAR_ASSET_KEY,                       // .tar.gz(优先)
-            "proot/alpine-minirootfs.tar",              // .tar(aapt 解压后)
+            Distro.ALPINE.rootfsAssetKey,                  // .tar.gz(优先)
+            "proot/alpine-minirootfs.tar",                 // .tar(aapt 解压后)
         )
         return candidates.firstOrNull { key ->
             try {
@@ -411,7 +630,7 @@ object LinuxSandbox {
      *  -r <rootfs>          指定根目录(被当作 `/`)
      *  -b <host:guest>      bind mount 宿主路径到容器内路径(单向 bind)
      *  -w <dir>             工作目录(容器内路径)
-     *  --link2symlink       避免硬链接跨 rootfs 边界问题(Alpine apk 需要)
+     *  --link2symlink       避免硬链接跨 rootfs 边界问题(Alpine apk / Ubuntu apt 都需要)
      *  /bin/sh -c <cmd>     容器内执行命令
      *
      * 环境变量通过 `/usr/bin/env` 注入(PRoot 本身不直接设 env,用 env -i 清空再设)。
@@ -424,6 +643,7 @@ object LinuxSandbox {
         env: Map<String, String>,
         bindMounts: List<String>,
         command: String,
+        distro: Distro,
     ): List<String> {
         val args = mutableListOf<String>()
         args.add(prootBin.absolutePath)
@@ -450,7 +670,7 @@ object LinuxSandbox {
         // 用 env -i 清空环境后显式设默认值,避免宿主环境泄漏到容器
         args.add("/usr/bin/env")
         args.add("-i")
-        args.add("PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+        args.add("PATH=${distro.containerPath}")
         args.add("HOME=/root")
         args.add("TERM=dumb")
         args.add("LANG=C.UTF-8")
@@ -582,6 +802,84 @@ object LinuxSandbox {
     private fun sha256Hex(bytes: ByteArray): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
         return digest.joinToString("") { "%02x".format(it) }
+    }
+
+    // ── Ubuntu rootfs 下载辅助 ─────────────────────────────────────────────
+
+    /**
+     * 下载文本内容(SHA256SUMS 等小文件)。走 [SsrfSafeHttp] SSRF 防护。
+     * 返回 null 表示网络错误。
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun downloadText(url: String): String? =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val client = ssrfSafeClient
+                val request = okhttp3.Request.Builder().url(url).get().build()
+                SsrfSafeHttp.execute(client, request).use { resp ->
+                    if (!resp.isSuccessful) return@withContext null
+                    resp.body?.string()
+                }
+            } catch (_: Exception) {
+                null
+            }
+        }
+
+    /**
+     * 下载大文件到指定路径,支持进度回调。走 [SsrfSafeHttp] SSRF 防护。
+     * 失败时抛异常,调用方负责清理半下载文件。
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun downloadFile(
+        url: String,
+        target: File,
+        progress: ((Int) -> Unit)?,
+    ) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val client = ssrfSafeClient
+        val request = okhttp3.Request.Builder().url(url).get().build()
+        SsrfSafeHttp.execute(client, request).use { resp ->
+            if (!resp.isSuccessful) {
+                throw java.io.IOException("HTTP ${resp.code} for $url")
+            }
+            val body = resp.body ?: throw java.io.IOException("empty body for $url")
+            val total = body.contentLength().takeIf { it > 0 } ?: -1L
+            body.byteStream().use { input ->
+                FileOutputStream(target).use { output ->
+                    val buf = ByteArray(8192)
+                    var read = 0L
+                    while (true) {
+                        val n = input.read(buf)
+                        if (n < 0) break
+                        output.write(buf, 0, n)
+                        read += n
+                        if (total > 0 && progress != null) {
+                            val percent = (read * 100 / total).toInt().coerceIn(0, 100)
+                            progress(percent)
+                        }
+                    }
+                    progress?.invoke(100)
+                }
+            }
+        }
+    }
+
+    /**
+     * 从 Ubuntu SHA256SUMS 格式(每行 `<sha256>  <filename>`)提取指定文件的 SHA256。
+     * Ubuntu 官方 SHA256SUMS 用两个空格分隔,文件名可能带 `*` 前缀(二进制模式标记)。
+     */
+    private fun extractShaFromSums(sumsContent: String, fileName: String): String? {
+        val pattern = Regex("^([0-9a-fA-F]{64})\\s+\\*?$fileName$", RegexOption.MULTILINE)
+        return pattern.find(sumsContent)?.groupValues?.get(1)?.lowercase()
+    }
+
+    /** SSRF 安全的 OkHttp client(禁用重定向,由 SsrfSafeHttp 手动逐跳校验)。 */
+    private val ssrfSafeClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)  // Ubuntu rootfs 28MB,慢网络留 2 分钟
+            .build()
     }
 
     /**

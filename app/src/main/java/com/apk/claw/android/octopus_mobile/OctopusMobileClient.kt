@@ -105,6 +105,8 @@ open class OctopusMobileClient(
 
     /** 等待远程任务结果的 future：task_id → CompletableDeferred */
     private val pendingTasks = ConcurrentHashMap<String, CompletableDeferred<RemoteTaskResult>>()
+    /** lease_id → 等待母体响应的租约申请(workspace/lease_acquire_result) */
+    private val pendingLeases = ConcurrentHashMap<String, CompletableDeferred<LeaseResult>>()
 
     @Volatile
     private var state: ConnectionState = ConnectionState.OFFLINE
@@ -320,6 +322,19 @@ open class OctopusMobileClient(
                         return
                     }
                     onConfigChange?.invoke(text)
+                }
+                // 母体下发的 workspace/sync —— 自动创建本地挂载点,实现远程协作项目同步
+                "workspace/sync" -> {
+                    if (state != ConnectionState.ONLINE) {
+                        XLog.w(tag, "workspace/sync rejected before handshake ack (state=$state)")
+                        return
+                    }
+                    handleWorkspaceSync(root)
+                }
+                // 母体下发的 workspace/lease_acquire_result —— 推送前申请租约的结果
+                "workspace/lease_acquire_result" -> {
+                    if (state != ConnectionState.ONLINE) return
+                    handleLeaseAcquireResult(root)
                 }
                 // 心跳 ACK（母体确认收到心跳，表明母体存活）
                 "heartbeat/ack" -> {
@@ -605,4 +620,192 @@ open class OctopusMobileClient(
             emptyMap()
         }
     }
+    // ── workspace/sync 处理 ──────────────────────────────
+
+    /**
+     * 处理母体下发的 workspace/sync —— 解析 workspace 配置,自动创建本地挂载点.
+     *
+     * 协议格式:
+     * ```
+     * {
+     *   "method": "workspace/sync",
+     *   "workspace_id": "ws-xxx",
+     *   "mount_config": {
+     *     "name": "Team Project X",
+     *     "type": "sftp" | "webdav" | "local",
+     *     "host": "nas.example.com",
+     *     "port": 22,
+     *     "user": "dev",
+     *     "root_path": "/home/dev/project-x"
+     *   },
+     *   "credentials": {  // 可选;母体可只下发配置,凭据由用户在移动端输入
+     *     "password": "...",
+     *     "private_key": "..."
+     *   },
+     *   "lease_token": "optional-lease-token"
+     * }
+     * ```
+     *
+     * 行为:
+     *  1. 按 motherWorkspaceId 去重:已存在则只更新 lease_token,不重复 mount
+     *  2. 不存在则创建 Mount 并调用 RemoteWorkspaceManager.mount()
+     *  3. 回复 workspace/sync_ack(含 mountId + 状态)
+     */
+    private fun handleWorkspaceSync(root: JsonObject) {
+        try {
+            val workspaceId = root.get("workspace_id")?.asString ?: ""
+            if (workspaceId.isEmpty()) {
+                XLog.w(tag, "workspace/sync missing workspace_id")
+                return
+            }
+            val mountConfig = root.getAsJsonObject("mount_config") ?: run {
+                XLog.w(tag, "workspace/sync missing mount_config")
+                return
+            }
+            val credObj = root.getAsJsonObject("credentials")
+            val password = credObj?.get("password")?.asString ?: ""
+            val privateKey = credObj?.get("private_key")?.asString ?: ""
+            val leaseToken = root.get("lease_token")?.asString ?: ""
+
+            val name = mountConfig.get("name")?.asString ?: "Mother-$workspaceId"
+            val typeStr = mountConfig.get("type")?.asString ?: "sftp"
+            val host = mountConfig.get("host")?.asString ?: ""
+            val port = mountConfig.get("port")?.asInt ?: 22
+            val user = mountConfig.get("user")?.asString ?: ""
+            val rootPath = mountConfig.get("root_path")?.asString ?: "/"
+
+            if (host.isEmpty()) {
+                XLog.w(tag, "workspace/sync missing host")
+                sendWorkspaceSyncAck(workspaceId, "", "missing_host", "Mount config missing host")
+                return
+            }
+
+            // 去重:按 motherWorkspaceId 查找已有挂载
+            val existing = com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceMounts
+                .findByMotherWorkspaceId(workspaceId)
+            if (existing != null) {
+                XLog.i(tag, "workspace/sync: mount ${existing.id} already exists for $workspaceId")
+                sendWorkspaceSyncAck(workspaceId, existing.id, "ok", "already_mounted")
+                return
+            }
+
+            // 创建新挂载点
+            val type = try {
+                com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceMounts.Type
+                    .valueOf(typeStr.uppercase())
+            } catch (e: Exception) {
+                sendWorkspaceSyncAck(workspaceId, "", "invalid_type", "Unknown type: $typeStr")
+                return
+            }
+            val mount = com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceMounts.Mount(
+                id = "rws-" + java.util.UUID.randomUUID().toString().take(8),
+                name = name,
+                type = type,
+                host = host,
+                port = port,
+                user = user,
+                rootPath = rootPath,
+                motherWorkspaceId = workspaceId,
+            )
+
+            val result = com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceManager
+                .mount(mount, password, privateKey)
+
+            val ackStatus = if (result.success) "ok" else "mount_failed"
+            val ackMsg = if (result.success) "mounted" else result.message
+            sendWorkspaceSyncAck(workspaceId, mount.id, ackStatus, ackMsg)
+        } catch (e: Exception) {
+            XLog.w(tag, "handleWorkspaceSync error: ${e.message}")
+        }
+    }
+
+    /** 处理母体对 lease_acquire 的响应 —— 通知等待中的 push 操作. */
+    private fun handleLeaseAcquireResult(root: JsonObject) {
+        try {
+            val leaseId = root.get("lease_id")?.asString ?: return
+            val granted = root.get("granted")?.asBoolean ?: false
+            val holder = root.get("holder_info")?.asString ?: ""
+            val deferred = pendingLeases.remove(leaseId)
+            if (deferred != null) {
+                deferred.complete(LeaseResult(granted, holder))
+            }
+        } catch (e: Exception) {
+            XLog.w(tag, "handleLeaseAcquireResult error: ${e.message}")
+        }
+    }
+
+    /** 发送 workspace/sync_ack 给母体. */
+    private fun sendWorkspaceSyncAck(
+        workspaceId: String,
+        mountId: String,
+        status: String,
+        message: String,
+    ) {
+        val params = mapOf(
+            "workspace_id" to workspaceId,
+            "mount_id" to mountId,
+            "status" to status,
+            "message" to message,
+            "ts" to System.currentTimeMillis(),
+        )
+        send(Envelope.Request(method = "workspace/sync_ack", params = params))
+    }
+
+    /**
+     * 向母体申请推送租约(防多端同时推送覆盖).
+     *
+     * @param workspaceId 母体 workspace id
+     * @param path 要推送的文件路径
+     * @return [LeaseResult] —— granted=true 可推送;granted=false 他人持有租约,需等待
+     */
+    suspend fun acquirePushLease(workspaceId: String, path: String): LeaseResult {
+        val leaseId = "lease-" + java.util.UUID.randomUUID().toString().take(8)
+        val deferred = CompletableDeferred<LeaseResult>()
+        pendingLeases[leaseId] = deferred
+        val params = mapOf(
+            "lease_id" to leaseId,
+            "workspace_id" to workspaceId,
+            "path" to path,
+            "tentacle_id" to tentacleId,
+            "ts" to System.currentTimeMillis(),
+        )
+        send(Envelope.Request(method = "workspace/lease_acquire", params = params))
+        // 10s 超时
+        return try {
+            withTimeoutOrNull(10_000) { deferred.await() } ?: LeaseResult(false, "timeout")
+        } catch (e: Exception) {
+            pendingLeases.remove(leaseId)
+            LeaseResult(false, "error: ${e.message}")
+        } finally {
+            pendingLeases.remove(leaseId)
+        }
+    }
+
+    /** 释放推送租约(推送完成后调用). */
+    fun releasePushLease(leaseId: String, workspaceId: String, path: String) {
+        val params = mapOf(
+            "lease_id" to leaseId,
+            "workspace_id" to workspaceId,
+            "path" to path,
+            "tentacle_id" to tentacleId,
+        )
+        send(Envelope.Request(method = "workspace/lease_release", params = params))
+    }
+
+    /** 通知母体文件已推送(用于协作通知). */
+    fun notifyPushComplete(workspaceId: String, path: String, mountId: String) {
+        val params = mapOf(
+            "workspace_id" to workspaceId,
+            "path" to path,
+            "mount_id" to mountId,
+            "tentacle_id" to tentacleId,
+            "ts" to System.currentTimeMillis(),
+        )
+        send(Envelope.Request(method = "workspace/push_notify", params = params))
+    }
+
+    /** 租约申请结果. */
+    data class LeaseResult(val granted: Boolean, val holderInfo: String)
+
+
 }

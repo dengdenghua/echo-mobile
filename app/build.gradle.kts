@@ -71,10 +71,11 @@ android {
         buildConfigField("String", "VERSION_INFO", getVersionGit())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // 只保留 app 实际支持的语言资源(默认/英文 + 中文 values-zh + 日文 values-ja)。
+        // 只保留 app 实际支持的语言资源(默认/英文 + 中文 values-zh + 日文 values-ja
+        // + 韩文 values-ko + 西班牙文 values-es + 葡萄牙文 values-pt)。
         // AndroidX/Material/Compose 等库自带数十种语言的字符串,这里过滤掉未支持的语言,
-        // 缩减 resources.arsc / res。注意必须含 ja,否则会误删 app 自带的日语翻译。
-        resourceConfigurations += setOf("en", "zh", "ja")
+        // 缩减 resources.arsc / res。注意必须含 ja/ko/es/pt,否则会误删 app 自带的对应翻译。
+        resourceConfigurations += setOf("en", "zh", "ja", "ko", "es", "pt")
 
         // ABI 由下方 splits 块按架构分包(每个 APK 只带自己架构);另出一个
         // universal 通用包(含所有 .so,一个包多架构都能装)。GeckoView 已移除,
@@ -192,6 +193,9 @@ dependencies {
         exclude(group = "dev.langchain4j", module = "langchain4j-http-client-jdk")
     }
     implementation(libs.langchain4j.anthropic) {
+        exclude(group = "dev.langchain4j", module = "langchain4j-http-client-jdk")
+    }
+    implementation(libs.langchain4j.google.ai.gemini) {
         exclude(group = "dev.langchain4j", module = "langchain4j-http-client-jdk")
     }
     implementation(libs.okhttp)

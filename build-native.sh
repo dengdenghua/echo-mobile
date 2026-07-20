@@ -56,9 +56,15 @@ cmake --build "$BUILD_DIR" --config Release --parallel
 mkdir -p "$JNILIBS_DIR"
 
 # strip 工具(NDK 自带 llvm-strip,可去掉 debug_info 把体积减半)
-STRIP="$NDK_ROOT/toolchains/llvm/prebuilt/$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin/darwin-x86_64/')/bin/llvm-strip"
+# NDK prebuilt 目录命名:host-tag 形式 —— macOS=darwin-x86_64,Linux=linux-x86_64
+HOST_TAG="$(uname -s | tr '[:upper:]' '[:lower:]')"
+case "$HOST_TAG" in
+    darwin) HOST_TAG="darwin-x86_64" ;;
+    linux)  HOST_TAG="linux-x86_64" ;;
+esac
+STRIP="$NDK_ROOT/toolchains/llvm/prebuilt/$HOST_TAG/bin/llvm-strip"
 if [ ! -x "$STRIP" ]; then
-    # 兜底:macOS 上 NDK 目录名可能是 darwin-x86_64 或 host-tag
+    # 兜底:有些 NDK 版本用 host-tag 而非 host-x86_64(arm64 mac 等)
     STRIP="$(find "$NDK_ROOT/toolchains/llvm/prebuilt" -name llvm-strip -type f 2>/dev/null | head -1)"
 fi
 

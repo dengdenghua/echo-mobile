@@ -15,12 +15,15 @@ import com.apk.claw.android.widget.MenuGroup
 import com.apk.claw.android.widget.MenuItem
 import kotlinx.coroutines.launch
 import android.content.Intent
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.apk.claw.android.appViewModel
 import com.apk.claw.android.server.ConfigServerManager
 import com.apk.claw.android.account.AccountConfig
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.account.LoginActivity
+import com.apk.claw.android.utils.KVUtils
 
 /**
  * 设置页面
@@ -59,6 +62,8 @@ class SettingsActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         refreshSettings()
+        // 刷新语言项的副标题(切换语言后 Activity 重建,onResume 重新设置当前语言名)
+        menuItems["LANGUAGE"]?.setTrailingText(getCurrentLanguageDisplayName())
     }
 
     private fun initToolbar() {
@@ -198,6 +203,25 @@ class SettingsActivity : BaseActivity() {
             showDivider = false
         )
         menuItems[SettingsViewModel.MenuAction.PLUGIN.name]?.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+
+        menuItems[SettingsViewModel.MenuAction.REMOTE_WORKSPACE.name] = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_storage,
+            title = getString(R.string.settings_remote_workspace),
+            onClick = { viewModel.onMenuItemClick(SettingsViewModel.MenuAction.REMOTE_WORKSPACE) },
+            showDivider = false
+        )
+        menuItems[SettingsViewModel.MenuAction.REMOTE_WORKSPACE.name]?.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+
+        // 语言切换(通用设置项,放在 modelGroup 末尾)
+        val languageItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.language_menu_title),
+            onClick = { showLanguageDialog() },
+            showDivider = false
+        )
+        languageItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        languageItem.setTrailingText(getCurrentLanguageDisplayName())
+        menuItems["LANGUAGE"] = languageItem
     }
 
     private fun observeViewModel() {
@@ -332,6 +356,9 @@ class SettingsActivity : BaseActivity() {
                             SettingsViewModel.MenuAction.PLUGIN -> {
                                 startActivity(Intent(this@SettingsActivity, com.apk.claw.android.ui.plugin.PluginActivity::class.java))
                             }
+                            SettingsViewModel.MenuAction.REMOTE_WORKSPACE -> {
+                                startActivity(Intent(this@SettingsActivity, com.apk.claw.android.ui.featurescreens.RemoteWorkspaceActivity::class.java))
+                            }
                             null -> {}
                             else -> {}
                         }
@@ -353,5 +380,56 @@ class SettingsActivity : BaseActivity() {
             actionTitle = getString(R.string.unbind_action),
             onAction = onUnbind
         )
+    }
+
+    /**
+     * 语言选择对话框:7 个选项(跟随系统 / en / zh / ja / ko / es / pt)。
+     * 选中后即时应用 AppCompatDelegate.setApplicationLocales 并持久化到 KVUtils。
+     */
+    private fun showLanguageDialog() {
+        // tag 与显示标签一一对应("" 表示跟随系统)
+        val tags = listOf("", "en", "zh", "ja", "ko", "es", "pt")
+        val labels = arrayOf(
+            getString(R.string.language_follow_system),
+            getString(R.string.language_name_en),
+            getString(R.string.language_name_zh),
+            getString(R.string.language_name_ja),
+            getString(R.string.language_name_ko),
+            getString(R.string.language_name_es),
+            getString(R.string.language_name_pt),
+        )
+        val currentTag = KVUtils.getAppLanguage()
+        val checkedItem = tags.indexOf(currentTag).coerceAtLeast(0)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.language_dialog_title)
+            .setSingleChoiceItems(labels, checkedItem) { dialog, which ->
+                val tag = tags[which]
+                KVUtils.setAppLanguage(tag)
+                if (tag.isEmpty()) {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+                } else {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+                }
+                dialog.dismiss()
+                // setApplicationLocales 会触发 Activity 重建,onResume 中会刷新 trailingText
+            }
+            .show()
+    }
+
+    /**
+     * 返回当前应用语言的可读名称(用于菜单项副标题)。
+     */
+    private fun getCurrentLanguageDisplayName(): String {
+        return when (KVUtils.getAppLanguage()) {
+            "" -> getString(R.string.language_follow_system)
+            "en" -> getString(R.string.language_name_en)
+            "zh" -> getString(R.string.language_name_zh)
+            "ja" -> getString(R.string.language_name_ja)
+            "ko" -> getString(R.string.language_name_ko)
+            "es" -> getString(R.string.language_name_es)
+            "pt" -> getString(R.string.language_name_pt)
+            else -> KVUtils.getAppLanguage()
+        }
     }
 }

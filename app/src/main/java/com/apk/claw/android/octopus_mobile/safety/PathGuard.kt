@@ -145,6 +145,16 @@ object PathGuard {
     const val SDCARD_SANDBOX = "/sdcard"
 
     /**
+     * 远程工作空间缓存根 —— 由 [com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceCache.init] 设置。
+     *
+     * 通常为 `context.cacheDir/remote_workspace/`。设置后 [underSdcard] 也会放行此目录下的路径,
+     * 让 file_ops/browse_files 等工具能透明操作远程文件的本地缓存副本。
+     * 为 null 时(未初始化)不放宽任何检查。
+     */
+    @Volatile
+    var remoteCacheRoot: String? = null
+
+    /**
      * 便捷方法：校验 agent 提供的路径是否安全地位于 /sdcard 沙箱内。
      * 用于 file_ops / browse_files / search_files / backup_app 等工具，
      * 防止越界访问 /system、/proc、其他 App 的 /data/data 私有目录。
@@ -152,7 +162,11 @@ object PathGuard {
     fun underSdcard(path: String): PathVerdict {
         // /sdcard 沙箱是无条件安全边界 —— 即使 FULL_POWER 模式也不解除。
         // 防止越界访问 /system、/proc、其他 App 的 /data/data 私有目录。
-        return check(path, sandboxDir = SDCARD_SANDBOX)
+        val verdict = check(path, sandboxDir = SDCARD_SANDBOX)
+        if (verdict.allow) return verdict
+        // 回退:远程工作空间缓存目录(若已初始化)
+        val cacheRoot = remoteCacheRoot ?: return verdict
+        return check(path, sandboxDir = cacheRoot)
     }
 
     // ── 内部 ──────────────────────────────────────────

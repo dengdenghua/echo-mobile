@@ -1,6 +1,8 @@
 package com.apk.claw.android
 
 import android.content.res.Configuration
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.apk.claw.android.agent.DefaultAgentService
 import com.apk.claw.android.base.BaseApp
 import com.apk.claw.android.channel.ChannelManager
@@ -102,6 +104,16 @@ open class ClawApplication : BaseApp() {
         registerNetworkCallback()
         appViewModelInstance = getAppViewModelProvider()[AppViewModel::class.java]
         KVUtils.init(this)
+        // 启动恢复用户选择的应用语言(在 KVUtils 初始化之后,任何 Activity 创建之前)。
+        // 空字符串 = 跟随系统,使用 emptyLocaleList;非空 tag = 强制该语言。
+        runCatching {
+            val langTag = KVUtils.getAppLanguage()
+            if (langTag.isEmpty()) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+            } else {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(langTag))
+            }
+        }.onFailure { XLog.e(TAG, "Apply app language failed", it) }
         // LLM API Key 池初始化(读取持久化的多 key + 统计)。
         // 必须在 KVUtils 之后;在 Agent initialize 之前,使后续 chatWithRetry 可 acquireKey。
         runCatching { ApiKeyPool.init() }.onFailure { XLog.e(TAG, "ApiKeyPool init failed", it) }

@@ -1,0 +1,1398 @@
+<resources>
+    <string name="app_name">Octopus Mobile</string>
+
+    <!-- AppWidget -->
+    <string name="widget_subtitle_default">Toca para iniciar · Mantén pulsado para voz</string>
+    <string name="widget_voice">Asistente de voz</string>
+    <string name="widget_browser">Navegador</string>
+
+    <!-- Common -->
+    <string name="common_confirm">Aceptar</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_close">Cerrar</string>
+    <string name="common_save">Guardar</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="common_more">Más</string>
+    <string name="common_agree">Aceptar</string>
+    <string name="common_bound">Conectado</string>
+    <string name="common_unbound">No conectado</string>
+    <string name="common_unconfigured">No configurado</string>
+    <string name="common_unbound_success">Desconectado</string>
+    <string name="channel_dingtalk">DingTalk</string>
+    <string name="channel_feishu">Feishu</string>
+    <string name="channel_qq">QQ</string>
+    <string name="channel_discord">Discord</string>
+    <string name="channel_telegram">Telegram</string>
+    <string name="channel_wechat">WeChat</string>
+    <string name="common_load_failed">Error al cargar: %s</string>
+
+    <string name="app_slogan">Un asistente inteligente que completa tareas en el teléfono</string>
+
+    <!-- Guide -->
+    <string name="guide_page_title">Permisos</string>
+    <string name="guide_page_subtitle">Habilita los siguientes permisos para que la app pueda realizar tareas del teléfono de forma fiable</string>
+    <string name="guide_skip">Omitir</string>
+    <string name="guide_start">Comenzar</string>
+    <string name="guide_all_done">Todo listo</string>
+    <string name="guide_tap_to_setup">Toca para configurar</string>
+    <string name="guide_status_done">Habilitado</string>
+    <string name="guide_status_pending">No habilitado</string>
+    <string name="guide_title_accessibility">Servicio de Accesibilidad</string>
+    <string name="guide_desc_accessibility">Este es el permiso principal para controlar el dispositivo.
+
+1. Ve a Ajustes del sistema → Accesibilidad → Apps descargadas
+2. Busca "Octopus Mobile" en la lista
+3. Activa el interruptor
+4. Confirma en el diálogo del sistema</string>
+    <string name="guide_title_notification">Notificación Persistente</string>
+    <string name="guide_desc_notification">Mantiene la app ejecutándose de forma estable en segundo plano y reduce la posibilidad de que el sistema la detenga.\n\nToca este elemento para habilitarlo. Android 13+ pedirá permiso de notificaciones primero.</string>
+    <string name="guide_title_overlay">Ventana Superpuesta</string>
+    <string name="guide_desc_overlay">Muestra un panel flotante para ver el estado de ejecución de tareas.
+
+1. Ve a Ajustes del sistema → Apps → Octopus Mobile
+2. Busca "Mostrar sobre otras apps"
+3. Activa el interruptor</string>
+    <string name="guide_title_battery">Lista Blanca de Batería</string>
+    <string name="guide_desc_battery">Evita que el sistema detenga la app en segundo plano.\n\nToca este elemento y confirma "Permitir" en el diálogo del sistema. Algunos dispositivos deben configurarse como "Sin restricciones".</string>
+    <string name="guide_title_storage">Acceso a Archivos</string>
+    <string name="guide_desc_storage">Permite leer y escribir archivos del dispositivo.\n\nAndroid 11+: Ve a Ajustes del sistema y habilita "Acceso a todos los archivos".\nAndroid 10 e inferior: Concede el permiso en la ventana emergente.</string>
+
+    <!-- Advanced (Shizuku) permission card -->
+    <string name="home_card_advanced_title">Capacidades avanzadas (opcional)</string>
+    <string name="home_card_advanced_subtitle">Maneja ventanas emergentes protegidas y captura ventanas seguras</string>
+    <string name="advanced_dialog_title">Habilitar capacidades avanzadas vía Shizuku</string>
+    <string name="advanced_dialog_intro">Por defecto se usa la API de Accesibilidad de Android, suficiente para la mayoría de operaciones. Algunas capacidades requieren Shizuku:
+
+• Tocar ventanas emergentes de permiso/sistema (FLAG_SECURE)
+• Capturar pantallas protegidas con DRM
+• Forzar detención de apps, modificar ajustes del sistema
+
+Shizuku es una herramienta local segura y de código abierto.</string>
+    <string name="advanced_dialog_steps">Pasos de configuración:\n1. Instala Shizuku desde Play Store o GitHub\n2. Inícialo vía Depuración Inalámbrica (Android 11+) o ADB desde PC\n3. Vuelve aquí, Octopus lo detectará automáticamente</string>
+    <string name="advanced_dialog_status_ready">✓ Shizuku está listo, capacidades avanzadas habilitadas</string>
+    <string name="advanced_dialog_status_installed_no_perm">Shizuku está instalado pero no autorizado. Abre Shizuku para completar la autorización.</string>
+    <string name="advanced_dialog_status_not_installed">Shizuku no está instalado aún.</string>
+    <string name="advanced_action_open_shizuku">Abrir Shizuku</string>
+    <string name="advanced_action_install">Instalar Shizuku</string>
+    <string name="advanced_action_downloading">Descargando…</string>
+    <string name="advanced_install_fetching">Conectando con el sitio oficial de Octopus…</string>
+    <string name="advanced_install_downloading">Descargando instalador de Shizuku…</string>
+    <string name="advanced_install_opening">Instalador descargado, abriendo instalador del sistema.</string>
+    <string name="advanced_install_not_configured">El instalador de Shizuku no está configurado en el sitio oficial, inténtalo más tarde.</string>
+    <string name="advanced_install_verify_failed">Verificación del instalador fallida, inténtalo más tarde.</string>
+    <string name="advanced_install_failed">Descarga e instalación fallidas, revisa tu red e inténtalo de nuevo.</string>
+    <string name="advanced_install_unknown_sources_required">Permite primero que Octopus instale apps de origen desconocido, luego vuelve e inténtalo de nuevo.</string>
+    <string name="advanced_action_learn_more">Saber más</string>
+    <string name="advanced_action_close">Cerrar</string>
+    <string name="advanced_url_download">https://shizuku.rikka.app/download/</string>
+    <string name="advanced_url_guide">https://shizuku.rikka.app/guide/setup/</string>
+
+    <!-- Home -->
+    <string name="home_need_notification_permission">Se requiere permiso de notificaciones</string>
+    <string name="home_enable_accessibility">Habilita el servicio de accesibilidad de Octopus Mobile</string>
+    <string name="home_accessibility_enabled">Servicio de accesibilidad habilitado</string>
+    <string name="home_notification_enabled">Notificación persistente habilitada</string>
+    <string name="home_overlay_enabled">Permiso de superposición habilitado</string>
+    <string name="home_battery_ignored">Optimización de batería ignorada</string>
+    <string name="home_permission_enabled">Habilitado</string>
+    <string name="home_card_accessibility_title">Servicio de Accesibilidad</string>
+    <string name="home_card_accessibility_subtitle">Usado para control automatizado del teléfono</string>
+    <string name="home_card_notification_title">Notificación Persistente</string>
+    <string name="home_card_notification_subtitle">Muestra el estado de ejecución</string>
+    <string name="home_card_system_window_title">Superposición del Sistema</string>
+    <string name="home_card_system_window_subtitle">Muestra pasos de ejecución y panel de control</string>
+    <string name="home_card_battery_title">Lista Blanca de Batería</string>
+    <string name="home_card_battery_subtitle">Evita que las tareas en segundo plano se detengan</string>
+    <string name="home_card_storage_title">Acceso a Archivos</string>
+    <string name="home_card_storage_subtitle">Leer y escribir archivos del dispositivo</string>
+    <string name="home_storage_enabled">Permiso de acceso a archivos concedido</string>
+    <string name="home_enable_storage">Permite el acceso a todos los archivos</string>
+    <string name="home_cancel_task">Detener tarea actual</string>
+    <string name="home_cancel_task_success">Tarea detenida</string>
+    <string name="home_no_task_running">No hay ninguna tarea en ejecución</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_group_channel">Canal</string>
+    <string name="settings_group_model">Modelo</string>
+
+    <!-- Unbind -->
+    <string name="unbind_title">Desconectar</string>
+    <string name="unbind_message">¿Desconectar %1$s? Ya no recibirás mensajes vía %2$s.</string>
+    <string name="unbind_action">Desconectar</string>
+
+    <!-- Channel Config -->
+    <string name="channel_config_dingtalk_title">Ajustes de DingTalk</string>
+    <string name="channel_config_feishu_title">Ajustes de Feishu</string>
+    <string name="channel_config_dingtalk_tip">Introduce Client ID y Client Secret para conectar DingTalk</string>
+    <string name="channel_config_feishu_tip">Introduce App ID y App Secret para conectar Feishu</string>
+    <string name="channel_config_dingtalk_hint1">Introduce Client ID</string>
+    <string name="channel_config_dingtalk_hint2">Introduce Client Secret</string>
+    <string name="channel_config_feishu_hint1">Introduce App ID</string>
+    <string name="channel_config_feishu_hint2">Introduce App Secret</string>
+    <string name="channel_config_qq_title">Ajustes de QQ</string>
+    <string name="channel_config_qq_tip">Introduce App ID y App Secret del bot de QQ (desde QQ Open Platform)</string>
+    <string name="channel_config_qq_hint1">Introduce App ID</string>
+    <string name="channel_config_qq_hint2">Introduce App Secret</string>
+    <string name="channel_config_discord_title">Ajustes de Discord</string>
+    <string name="channel_config_discord_tip">Introduce el Bot Token (desde la página Bot en Discord Developer Portal) y habilita Message Content Intent.</string>
+    <string name="channel_config_discord_hint1">Introduce Bot Token</string>
+    <string name="channel_config_telegram_title">Ajustes de Telegram</string>
+    <string name="channel_config_telegram_tip">Introduce el Bot Token (crea un bot vía @BotFather en Telegram)</string>
+    <string name="channel_config_telegram_hint1">Introduce Bot Token</string>
+    <string name="channel_config_wechat_title">Ajustes de WeChat</string>
+    <string name="channel_config_wechat_tip">Escanea el código QR con WeChat para autorizar. El Token y la dirección API se guardarán automáticamente tras la confirmación.</string>
+    <string name="channel_config_wechat_btn_scan">Obtener código QR</string>
+    <string name="channel_config_wechat_scanning">Esperando escaneo…</string>
+    <string name="channel_config_wechat_confirmed">Autorización confirmada</string>
+    <string name="wechat_qr_failed">Error al obtener el código QR de WeChat</string>
+    <string name="wechat_unsupported_media">Mensaje %s recibido, tipo no soportado. Envía un comando de texto.</string>
+    <string name="wechat_media_image">Imagen</string>
+    <string name="wechat_media_video">Vídeo</string>
+    <string name="wechat_media_file">Archivo</string>
+    <string name="wechat_media_voice">Voz</string>
+    <string name="wechat_media_unknown">Multimedia</string>
+    <string name="channel_config_saved">Configuración guardada</string>
+    <string name="channel_config_lan_hint">Habilita "Configuración LAN" en los ajustes para configurar vía navegador</string>
+    <string name="channel_config_lan_hint_running">Abre %s en un navegador para configurar</string>
+    <string name="channel_config_lan_copied">Dirección copiada</string>
+
+    <!-- LLM Config -->
+    <string name="llm_config_title">Ajustes del Modelo</string>
+    <string name="llm_config_tip">Introduce la API Key del modelo, la Base URL y el nombre del modelo. Los datos se almacenan solo localmente.</string>
+    <string name="llm_config_api_key">API Key</string>
+    <string name="llm_config_api_key_hint">p. ej. sk-xxx o tu clave de proveedor</string>
+    <string name="llm_config_base_url">Base URL</string>
+    <string name="llm_config_base_url_hint">p. ej. https://api.deepseek.com/v1 (vacío para usar el valor predeterminado de DeepSeek)</string>
+    <string name="llm_config_model_name">Nombre del Modelo</string>
+    <string name="llm_config_model_name_hint">p. ej. gpt-4o, gpt-4o-mini, claude-3-5-sonnet</string>
+    <string name="llm_config_saved">Configuración del modelo guardada</string>
+    <string name="llm_config_api_key_required">Introduce la API Key</string>
+    <!-- API Key Pool -->
+    <string name="key_pool_section">Pool de API Keys (cambio automático multi-key)</string>
+    <string name="key_pool_tip">Cuando la clave principal falla (401/429/5xx), cambia automáticamente a una clave de respaldo para mejorar la disponibilidad. La clave principal siempre es la introducida arriba; esta sección solo gestiona las claves de respaldo.</string>
+    <string name="key_pool_enable">Habilitar pool de claves</string>
+    <string name="key_pool_add">Añadir clave de respaldo</string>
+    <string name="key_pool_add_hint">Introduce la API Key de respaldo (sk-xxx)</string>
+    <string name="key_pool_empty">Aún no hay claves de respaldo</string>
+    <string name="key_pool_status">Total %1$d claves: %2$s</string>
+    <string name="key_pool_disabled_tag">Deshabilitada</string>
+    <string name="key_pool_cooldown_tag">En enfriamiento</string>
+    <string name="key_pool_primary_tag">Principal</string>
+    <string name="key_pool_reset">Reiniciar estadísticas</string>
+    <string name="key_pool_remove">Eliminar</string>
+    <string name="key_pool_clear_all">Borrar claves de respaldo</string>
+    <string name="key_pool_add_duplicate">Esta clave ya existe</string>
+    <string name="key_pool_add_empty">La clave no puede estar vacía</string>
+    <string name="key_pool_add_success">Clave de respaldo añadida</string>
+    <string name="key_pool_clear_confirm">¿Borrar todas las claves de respaldo? La clave principal se mantendrá.</string>
+    <string name="key_pool_remove_confirm">¿Eliminar esta clave de respaldo?</string>
+    <string name="key_pool_pick_action">Elegir acción</string>
+    <string name="vision_config_section">Modelo de Visión (lectura de pantalla)</string>
+    <string name="vision_config_tip">Se usa cuando el árbol de accesibilidad no es suficiente para entender la pantalla (juegos, canvas, imágenes, etc.). Deja los tres vacíos para reutilizar el modelo principal (debe soportar entrada de imagen).</string>
+    <string name="vision_config_base_url_hint">p. ej. https://dashscope.aliyuncs.com/compatible-mode/v1</string>
+    <string name="vision_config_model_name_hint">p. ej. qwen-vl-max, gpt-4o, glm-4v</string>
+    <string name="menu_llm_config">Ajustes del Modelo</string>
+
+    <!-- Settings Menu -->
+    <string name="menu_dingtalk">DingTalk</string>
+    <string name="menu_feishu">Feishu</string>
+    <string name="menu_qq">QQ</string>
+    <string name="menu_discord">Discord</string>
+    <string name="menu_telegram">Telegram</string>
+    <string name="menu_wechat">WeChat</string>
+    <string name="menu_lan_config">Configuración LAN</string>
+    <string name="lan_config_stopped">Detenido</string>
+    <string name="lan_config_no_wifi">Conéctate primero a Wi-Fi</string>
+
+    <!-- Protocol -->
+    <string name="protocol_agree_title">Aviso de Privacidad</string>
+    <string name="protocol_alert_title">Términos &amp; Privacidad</string>
+    <string name="protocol_disagree">No aceptar</string>
+    <string name="protocol_agree_continue">Aceptar y continuar</string>
+
+    <!-- Wake Word -->
+    <string name="wakeword_channel_name">Escucha de Palabra de Activación</string>
+    <string name="wakeword_channel_desc">Notificación del servicio en segundo plano para escuchar la palabra de activación vía micrófono</string>
+    <string name="wakeword_notification_title">Escuchando palabra de activación</string>
+    <string name="wakeword_notification_text">Di "%1$s" para invocar al asistente</string>
+    <string name="wakeword_feature_title">Palabra de Activación</string>
+    <string name="wakeword_feature_desc">Di la palabra de activación para invocar al asistente (requiere micrófono persistente)</string>
+    <string name="wakeword_privacy_title">Aviso de Micrófono Persistente</string>
+    <string name="wakeword_privacy_body">Tras habilitar la palabra de activación, la app escuchará continuamente el audio del micrófono en segundo plano para detectar tu palabra personalizada.\n\n· El audio se procesa localmente y nunca se sube\n· Cuando se detecta la palabra, la app invocará automáticamente la UI del asistente\n· Puedes desactivarlo en cualquier momento desde la barra de notificaciones o los ajustes\n· Una vez apagado, la captura del micrófono se detiene inmediatamente\n\nConfirma que comprendes lo anterior y aceptas continuar.</string>
+
+    <!-- Floating -->
+    <string name="floating_ai_label">IA</string>
+    <string name="floating_task_received">Recibido: "%s"</string>
+
+    <!-- Foreground Service Notification -->
+    <string name="notification_channel_name">Estado de Octopus Mobile</string>
+    <string name="notification_channel_description">Muestra el estado de ejecución y estadísticas de Octopus Mobile</string>
+    <string name="notification_content_title">Octopus Mobile está ejecutándose</string>
+    <string name="notification_content_text">El servicio de tareas inteligentes está activo</string>
+
+    <!-- Channel Messages -->
+    <string name="channel_msg_task_cancelled">Tarea cancelada manualmente</string>
+    <string name="channel_msg_service_not_ready">El servicio no está listo, inténtalo más tarde</string>
+    <string name="channel_msg_tool_success">Éxito</string>
+    <string name="channel_msg_tool_failure">Fallido</string>
+    <string name="channel_msg_tool_execution">[%1$s]: %2$s</string>
+    <string name="channel_msg_task_error">Error: %s</string>
+    <string name="channel_msg_no_accessibility">Falta permiso de accesibilidad, no se puede ejecutar la tarea</string>
+    <string name="channel_msg_task_in_progress">Ya hay una tarea en ejecución, espera</string>
+    <string name="channel_msg_system_dialog_blocked">Un diálogo del sistema podría estar bloqueando la pantalla, manéjalo manualmente y reintenta.</string>
+
+    <!-- Accessibility -->
+    <string name="cd_back_button">Atrás</string>
+    <string name="cd_settings">Ajustes</string>
+    <string name="cd_clear_input">Borrar entrada</string>
+    <string name="cd_checkbox">Alternar opción</string>
+    <string name="cd_selected">Seleccionado</string>
+    <string name="cd_task_success">Tarea completada con éxito</string>
+    <string name="cd_task_error">Tarea fallida</string>
+    <string name="cd_channel_logo">Icono del canal</string>
+    <string name="cd_app_logo">Icono de la app</string>
+    <string name="cd_qr_code">Código QR</string>
+    <string name="cd_toggle_password">Mostrar u ocultar contraseña</string>
+    <string name="cd_copy">Copiar</string>
+    <string name="cd_arrow_right">Más</string>
+    <string name="cd_empty_state">Sin datos</string>
+    <string name="cd_error_state">Carga fallida</string>
+
+    <!-- Agent -->
+    <string name="agent_accessibility_not_enabled">El servicio de accesibilidad no está habilitado</string>
+    <string name="agent_task_cancelled">Tarea cancelada</string>
+    <string name="agent_task_completed">Tarea completada</string>
+    <string name="agent_task_cancel">Cancelar tarea</string>
+    <string name="agent_api_call_failed">Llamada al servicio inteligente fallida: %s</string>
+    <string name="agent_empty_response">El modelo no responde temporalmente (probable fluctuación del servicio ascendente)</string>
+    <string name="agent_max_iterations">Alcanzadas iteraciones máximas (%d), tarea aún incompleta</string>
+
+    <!-- File Tool -->
+    <string name="tool_no_storage_permission">Sin permiso de lectura/escritura de archivos</string>
+    <string name="tool_file_not_found">Archivo no encontrado: %s</string>
+    <string name="tool_not_a_file">La ruta no es un archivo: %s</string>
+    <string name="tool_no_task_channel">Sin canal de tarea activo</string>
+    <string name="tool_file_sent">Archivo enviado: %s</string>
+    <string name="tool_file_send_failed">Envío de archivo fallido: %s</string>
+
+    <!-- Tool Names -->
+    <string name="tool_name_screenshot">Captura de pantalla</string>
+    <string name="tool_name_send_file">Enviar Archivo</string>
+    <string name="tool_name_wait">Esperar</string>
+
+    <!-- 100 行扩展示例工具（EXTENDING.md） -->
+    <string name="tool_name_current_time">Hora Actual</string>
+    <string name="tool_name_device_info">Info del Dispositivo</string>
+    <string name="tool_name_hello_world">Herramienta de Ejemplo</string>
+    <string name="tool_name_get_screen_info">Leer Pantalla</string>
+    <string name="tool_name_finish">Finalizar Tarea</string>
+    <string name="tool_name_open_app">Abrir App</string>
+    <string name="tool_name_get_installed_apps">Apps Instaladas</string>
+    <string name="tool_name_system_key">Tecla del Sistema</string>
+    <string name="tool_name_tap">Tocar</string>
+    <string name="tool_name_swipe">Deslizar</string>
+    <string name="tool_name_input_text">Introducir Texto</string>
+    <string name="tool_name_find_node_info">Buscar Nodo</string>
+    <string name="tool_name_long_press">Pulsación Larga</string>
+    <string name="tool_name_repeat_actions">Repetir Acciones</string>
+    <string name="tool_name_volume_up">Subir Volumen</string>
+    <string name="tool_name_volume_down">Bajar Volumen</string>
+    <string name="tool_name_dpad_up">D-pad Arriba</string>
+    <string name="tool_name_dpad_down">D-pad Abajo</string>
+    <string name="tool_name_dpad_left">D-pad Izquierda</string>
+    <string name="tool_name_dpad_right">D-pad Derecha</string>
+    <string name="tool_name_dpad_center">D-pad Centro</string>
+    <string name="tool_name_press_menu">Tecla Menú</string>
+    <string name="tool_name_press_power">Tecla Encendido</string>
+    <string name="tool_name_search_app">Buscar App</string>
+    <string name="tool_name_clipboard">Portapapeles</string>
+    <string name="tool_name_scroll_to_find">Desplazar para Buscar</string>
+
+    <!-- Path A: 个人上下文工具 -->
+    <string name="tool_name_send_intent">Enviar Intent</string>
+    <string name="tool_name_read_sms">Leer SMS</string>
+    <string name="tool_name_read_calendar">Leer Calendario</string>
+    <string name="tool_name_get_usage_stats">Estadísticas de Uso</string>
+    <string name="tool_name_send_sms">Enviar SMS</string>
+
+    <!-- Extendroid Window Management Tools -->
+    <string name="tool_name_launch_freeform">Abrir Ventana Libre</string>
+    <string name="tool_name_resize_window">Redimensionar Ventana</string>
+    <string name="tool_name_get_window_info">Obtener Info de Ventana</string>
+
+    <!-- AI NAS File Management Tools -->
+    <string name="tool_name_browse_files">Explorar Archivos</string>
+    <string name="tool_name_search_files">Buscar Archivos</string>
+    <string name="tool_name_file_ops">Operaciones de Archivo</string>
+    <string name="tool_name_backup_app">Copia de App</string>
+    <string name="tool_name_navigate">Navegación Inteligente</string>
+    <string name="tool_name_media_player">Reproductor Multimedia</string>
+
+    <!-- Input Dialog -->
+    <string name="input_dialog_need_more">Introduce al menos %d caracteres</string>
+    <string name="input_dialog_need_less">Introduce como máximo %d caracteres</string>
+    <string name="input_dialog_no_zero">Introduce un valor distinto de cero</string>
+
+    <!-- DiscoverScreen (Compose) -->
+    <string name="discover_search_hint">Busca o introduce un comando…</string>
+    <string name="discover_shortcut_browser">Navegador</string>
+    <string name="discover_shortcut_clouddrive">Disco en la Nube</string>
+    <string name="discover_shortcut_video">Vídeo</string>
+    <string name="discover_shortcut_plugin">Habilidades</string>
+    <string name="discover_shortcut_extension">Extensiones</string>
+    <string name="discover_shortcut_cast">Transmitir</string>
+    <string name="discover_shortcut_multiwindow">Multi-ventana</string>
+    <string name="discover_shortcut_memory">Memoria</string>
+    <string name="discover_shortcut_evolution">Auto-optimización</string>
+    <string name="discover_suggest_weather">Clima</string>
+    <string name="discover_suggest_organize">Organizar disco en la nube</string>
+    <string name="discover_suggest_resume">Continuar viendo</string>
+    <string name="discover_status_memory">5 recuerdos</string>
+    <string name="discover_status_rules">2 reglas</string>
+    <string name="discover_stat_sessions">%1$d sesiones</string>
+    <string name="discover_stat_a11y_on">Accesibilidad activada</string>
+    <string name="discover_stat_a11y_off">Accesibilidad desactivada</string>
+    <string name="discover_stat_llm_on">Modelo listo</string>
+    <string name="discover_stat_llm_off">Modelo no configurado</string>
+    <string name="workbench_title">Espacio de Tareas del Teléfono</string>
+    <string name="workbench_subtitle">Mantén este dispositivo en línea, operable y capaz de completar tareas automáticamente</string>
+    <string name="workbench_agent_ready">Listo</string>
+    <string name="workbench_agent_incomplete">Requiere configuración</string>
+    <string name="workbench_device_card_title">Este teléfono puede permanecer en línea y trabajar</string>
+    <string name="workbench_device_card_target">Objetivo: %1$s</string>
+    <string name="workbench_lan_off">LAN desactivada</string>
+    <string name="workbench_action_chat">Pasar al asistente</string>
+    <string name="workbench_metric_sessions">Sesiones</string>
+    <string name="workbench_metric_routines">Tareas</string>
+    <string name="workbench_metric_target">Objetivo</string>
+    <string name="workbench_section_tasks">Espacio de Tareas</string>
+    <string name="workbench_routines_desc">%1$d automatizaciones guardadas, pueden ejecutarse programadas o bajo demanda</string>
+    <string name="workbench_skills_desc">Gestiona capacidades y herramientas que este teléfono puede invocar</string>
+    <string name="workbench_devices_desc">Descubre teléfonos antiguos y controla por lotes dispositivos en línea</string>
+    <string name="workbench_activity_desc">Revisa tareas completadas recientemente y registros de auditoría</string>
+    <string name="workbench_section_templates">Plantillas de Tareas</string>
+    <string name="workbench_section_tools">Herramientas del Dispositivo</string>
+    <string name="ai_browser_title">Navegador Inteligente</string>
+    <string name="ai_browser_subtitle">Busca, lee, resume y opera páginas web por ti</string>
+    <string name="ai_browser_omnibox_hint">Buscar o introducir URL</string>
+    <string name="ai_browser_clean_home">Inicio Limpio</string>
+    <string name="ai_browser_mode_web">Web</string>
+    <string name="ai_browser_mode_ai">Búsqueda Inteligente</string>
+    <string name="ai_browser_mode_all">Búsqueda en toda la web</string>
+    <string name="ai_browser_voice">Voz</string>
+    <string name="ai_browser_camera">Cámara</string>
+    <string name="ai_browser_clean">Limpiar</string>
+    <string name="ai_browser_action_ask">Preguntar a la página actual</string>
+    <string name="ai_browser_action_ask_desc">Abre el navegador para resumir o traducir vía ask-page</string>
+    <string name="ai_browser_action_operate">Operar página</string>
+    <string name="ai_browser_action_operate_desc">Hace clic, rellena formularios y completa tareas web por ti</string>
+    <string name="ai_browser_extensions_desc">Mejora el navegador móvil con extensiones GeckoView</string>
+    <string name="ai_browser_files_desc">Accede al disco en la nube y archivos locales desde tareas del navegador</string>
+    <string name="ai_browser_section_quick_search">Búsqueda Rápida</string>
+    <string name="ai_browser_quick_news">Resumir las noticias de hoy sobre teléfonos con IA</string>
+    <string name="ai_browser_quick_research">Encontrar 3 fuentes fiables sobre automatización en Android</string>
+    <string name="ai_browser_quick_shopping">Comparar teléfonos Android de segunda mano para tareas siempre activas</string>
+    <string name="ai_browser_section_agent">Asistente de Página</string>
+    <string name="ai_browser_agent_desc">El navegador puede leer la página actual vía accesibilidad, y hacer clic, introducir, resumir, traducir o ejecutar tareas web por ti.</string>
+    <string name="ai_browser_section_automation">Automatización</string>
+    <string name="ai_browser_routines_desc">%1$d automatizaciones de navegador/dispositivo</string>
+    <string name="browser_home_title">Inicio del Navegador Inteligente</string>
+    <string name="browser_home_subtitle">Buscar o introducir URL</string>
+    <string name="browser_home_favorites">Favoritos</string>
+    <string name="browser_home_tools">Acceso Rápido</string>
+    <string name="browser_home_miniapps">Mis Mini Apps</string>
+    <string name="discover_group_apps">Mis Apps</string>
+    <string name="discover_group_web">Web</string>
+    <string name="browser_home_miniapp_tag">Mini App</string>
+    <string name="browser_home_bookmarks">Marcadores</string>
+    <string name="browser_home_common_sites">Sitios Comunes</string>
+    <string name="browser_home_remove_common_site_title">¿Eliminar de sitios comunes?</string>
+    <string name="browser_home_removed_toast">Eliminado</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_discover">Descubrir</string>
+    <string name="nav_workbench">Espacio</string>
+    <string name="nav_browser">Navegador</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_device">Dispositivo</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="nav_agent_square">Plaza de Inspiración</string>
+    <string name="nav_universe">Universo</string>
+
+    <!-- SettingsScreen (Compose) -->
+    <string name="settings_center_badge">Centro de Control de Dispositivos</string>
+    <string name="settings_subtitle">Gestiona permisos, modelo, conexiones y runtime de teléfonos antiguos</string>
+    <string name="settings_metric_permissions">Permisos</string>
+    <string name="settings_metric_model">Modelo</string>
+    <string name="settings_metric_lan">LAN</string>
+    <string name="settings_section_permissions">Permisos</string>
+    <string name="perm_accessibility">Accesibilidad</string>
+    <string name="perm_notification">Notificación</string>
+    <string name="perm_overlay">Superposición</string>
+    <string name="perm_battery">Batería</string>
+    <string name="perm_storage">Almacenamiento</string>
+    <string name="settings_section_model">Modelo</string>
+    <string name="settings_local_fallback">Respaldo local ✓</string>
+    <string name="settings_section_channels">Canales</string>
+    <string name="status_connected">Conectado</string>
+    <string name="status_not_configured">No configurado</string>
+    <string name="status_not_connected">No conectado</string>
+    <string name="settings_section_other">Otros</string>
+    <string name="settings_lan_config">Configuración LAN</string>
+    <string name="settings_device_mgmt">Gestión de Dispositivos</string>
+    <string name="settings_val_devices">2 dispositivos</string>
+    <string name="settings_browser_engine">Motor del Navegador</string>
+    <string name="settings_cast_control">Control de Transmisión</string>
+    <string name="settings_remote_workspace">Espacio de Trabajo Remoto</string>
+    <string name="settings_plugin_mgmt">Gestión de Complementos</string>
+    <string name="settings_val_plugins_loaded">3 cargados</string>
+    <string name="settings_device_control_section">Pantalla &amp; Control Remoto</string>
+    <string name="settings_device_mgmt_desc">Gestiona teléfonos antiguos conectados y controlables</string>
+    <string name="settings_plugin_desc">Gestiona habilidades y extensiones que el agente puede invocar</string>
+
+    <!-- Shared status -->
+    <string name="status_online">En línea</string>
+    <string name="status_offline">Desconectado</string>
+
+    <!-- ChatScreen (Compose) -->
+    <string name="chat_remote">Remoto</string>
+    <string name="chat_local">Local</string>
+    <string name="chat_input_hint">Dime qué hacer en tu teléfono...</string>
+    <string name="chat_ack">Entendido, ejecutando en el dispositivo…</string>
+    <string name="chat_thinking">Pensando</string>
+    <string name="chat_empty_hint">Una línea para programar revisión de notificaciones, acciones de apps, organización de archivos y tareas entre dispositivos.</string>
+    <string name="chat_empty_title">¿Qué debería hacer el teléfono por ti hoy?</string>
+    <string name="chat_suggestion_notifications">Vigila notificaciones, resúmeme lo importante</string>
+    <string name="chat_suggestion_files">Encuentra las capturas de pantalla de hoy y organízalas en una carpeta</string>
+    <string name="chat_suggestion_app">Abre WeChat y revisa mensajes sin leer</string>
+    <string name="chat_prompt_monitor">Revisión de Notificaciones</string>
+    <string name="chat_prompt_organize">Organización de Archivos</string>
+    <string name="chat_prompt_control">Recados en Apps</string>
+    <string name="chat_home_prompts_title">Tareas Comunes</string>
+    <string name="chat_tool_steps">%1$d pasos de herramientas</string>
+    <string name="chat_new">Chat nuevo</string>
+    <string name="chat_sessions">Sesiones</string>
+    <string name="chat_agent_ready">Listo</string>
+    <string name="chat_agent_setup_needed">Requiere configuración</string>
+    <string name="chat_status_running">Ejecutando</string>
+    <string name="chat_drawer_subtitle">Sesiones, dispositivo objetivo y estado de tareas</string>
+    <string name="chat_home_status_title">Consola de Tareas</string>
+    <string name="chat_metric_model">Modelo</string>
+    <string name="chat_metric_target">Objetivo</string>
+    <string name="chat_metric_devices">Dispositivos</string>
+    <string name="chat_sessions_today">Hoy</string>
+    <string name="chat_sessions_recent">Últimos 7 días</string>
+    <string name="chat_sessions_earlier">Anterior</string>
+    <string name="chat_clear_current">Limpiar chat actual</string>
+    <string name="setup_title">Completa la configuración para empezar</string>
+    <string name="setup_llm">Configurar LLM (API Key)</string>
+    <string name="setup_a11y">Habilitar servicio de accesibilidad</string>
+    <string name="setup_go">Ir a ajustes ›</string>
+
+    <!-- DeviceScreen (Compose) -->
+    <string name="device_title">Dispositivo</string>
+    <string name="device_online_count">%1$d/%2$d en línea</string>
+    <string name="device_cast">Transmitir</string>
+    <string name="device_cast_disconnected">No conectado</string>
+    <string name="device_vision">Visión</string>
+    <string name="device_vision_desc">Análisis multimodal del modelo de visión\nRetroceso automático en diálogos del sistema</string>
+    <string name="device_this_device">Este dispositivo</string>
+    <string name="ctrl_screenshot">Captura de pantalla</string>
+    <string name="ctrl_tap">Tocar</string>
+    <string name="ctrl_open">Abrir</string>
+    <string name="ctrl_back">Atrás</string>
+    <string name="ctrl_home">Inicio</string>
+    <string name="ctrl_recents">Recientes</string>
+    <string name="ctrl_notifications">Notificaciones</string>
+    <string name="ctrl_lock">Bloquear</string>
+    <string name="device_controls">Controles Rápidos</string>
+    <string name="device_a11y_required">Habilita el servicio de accesibilidad para controlar este dispositivo</string>
+    <string name="device_a11y_enable">Habilitar ›</string>
+    <string name="device_screenshot_saved">Captura guardada en la galería</string>
+    <string name="device_screenshot_failed">Captura fallida (requiere accesibilidad o Shizuku)</string>
+    <string name="device_android_version">Android %1$s</string>
+    <string name="device_nearby">Dispositivos cercanos</string>
+    <string name="device_nearby_empty">Buscando… Abre Octopus en otro dispositivo en la misma Wi-Fi</string>
+    <string name="device_discoverable">%1$s es detectable</string>
+    <string name="device_discoverable_off">Conéctate a Wi-Fi para ser detectable</string>
+    <string name="device_cmd_sent">Enviado a %1$s</string>
+    <string name="device_cmd_failed">Envío fallido (el dispositivo podría estar desconectado)</string>
+    <string name="device_allow_control">Permitir control remoto LAN</string>
+    <string name="device_allow_control_desc">Permite que otros dispositivos en la misma Wi-Fi controlen este teléfono. Desactivado por defecto; habilítalo solo en redes de confianza.</string>
+    <string name="device_browser">Navegador</string>
+    <string name="device_tabs">Pestañas</string>
+    <string name="device_extensions">Extensiones</string>
+    <string name="badge_active">Activo</string>
+    <string name="floating_circle_running_state">Ejecutando…</string>
+    <string name="floating_circle_success_state">Hecho</string>
+    <string name="floating_circle_error_state">Terminado</string>
+    <string name="routine_alarm_running_title">Rutina en ejecución</string>
+    <string name="routine_alarm_running_text">%1$s\n%2$s</string>
+    <string name="routine_alarm_skipped_title">Rutina omitida</string>
+    <string name="routine_alarm_skipped_text">"%1$s" se activó, pero el modelo no está configurado</string>
+    <string name="routine_alarm_retry_title">Rutina encolada</string>
+    <string name="routine_alarm_retry_text">"%1$s" se activó, pero el agente está ocupado. Reintento %2$d/%3$d se ejecutará más tarde.</string>
+    <string name="routine_alarm_busy_give_up_text">"%1$s" se activó, pero el agente sigue ocupado tras varios reintentos</string>
+    <string name="browser_loading_text">Cargando...</string>
+    <string name="browser_engine_chip_description">Cambiar motor de búsqueda</string>
+    <string name="browser_url_hint">Buscar o introducir URL</string>
+    <string name="browser_ai_operate_toast">Operando la página actual...</string>
+    <string name="browser_refresh_button">Refrescar</string>
+    <string name="browser_ask_ai_button">Preguntar a IA</string>
+    <string name="browser_back_button">Atrás</string>
+    <string name="browser_forward_button">Adelante</string>
+    <string name="browser_home_button">Inicio</string>
+    <string name="browser_bookmarks_button">Marcadores</string>
+    <string name="browser_ai_sheet_title">Preguntar a IA · Sobre esta página</string>
+    <string name="browser_accessibility_warning">Habilita el servicio de accesibilidad para leer el contenido de la página</string>
+    <string name="browser_reading_page">Leyendo contenido de la página…</string>
+    <string name="browser_ask_page_hint">Pregunta a esta página...</string>
+    <string name="browser_chip_summarize">Resumir</string>
+    <string name="browser_chip_key_points">Puntos clave</string>
+    <string name="browser_chip_translate">Traducir</string>
+    <string name="browser_chip_reader">Modo lector</string>
+    <string name="browser_chip_speak">Leer en voz alta</string>
+    <string name="browser_input_ask_or_operate">Pregunta a esta página, o deja que la IA la opere...</string>
+    <string name="browser_ask_button">Preguntar</string>
+    <string name="browser_execute_button">Ejecutar</string>
+    <string name="browser_cannot_read_content">No se puede leer el contenido (habilita accesibilidad)</string>
+    <string name="browser_no_content_to_speak">No hay contenido para leer en voz alta</string>
+    <string name="browser_configure_api_key">Configura primero la API Key en Ajustes → Modelo</string>
+    <string name="browser_configure_api_key_text">Configura primero la API Key en Ajustes → Modelo.</string>
+    <string name="browser_thinking_status">Pensando...</string>
+    <string name="browser_error_message">Error: %1$s</string>
+    <string name="browser_load_error">Error de carga: %1$s</string>
+    <string name="browser_download_notification">Descarga: %1$s</string>
+    <string name="browser_download_started">Descarga iniciada: %1$s</string>
+    <string name="browser_remove_bookmark">Eliminar marcador</string>
+    <string name="browser_bookmark_current">☆ Marcar esta página</string>
+    <string name="browser_add_common_site">＋ Añadir a sitios comunes del inicio</string>
+    <string name="browser_remove_common_site">Eliminar de sitios comunes del inicio</string>
+    <string name="browser_common_site_added">Añadido a sitios comunes del inicio</string>
+    <string name="browser_saved_bookmarks_header">── Marcadores Guardados ──</string>
+    <string name="browser_bookmark_removed">Marcador eliminado</string>
+    <string name="browser_bookmarked">Marcado</string>
+    <string name="browser_engine_no_extensions">El motor actual (%1$s) no soporta extensiones</string>
+    <string name="browser_extension_xpi_hint">Enlace de extensión .xpi (Firefox)</string>
+    <string name="browser_extension_dialog_message">Recomendado: toca "Explorar tienda AMO" para abrir el mercado de complementos de Firefox, luego toca "Añadir a Firefox" en la página de la extensión para instalarla.\nTambién puedes pegar un enlace .xpi abajo para instalarla.\nDebido a restricciones de firma, las extensiones de Chrome no se pueden instalar en el motor Firefox.</string>
+    <string name="browser_install_button">Instalar</string>
+    <string name="browser_browse_amo_button">Explorar tienda AMO</string>
+    <string name="browser_installing_extension">Instalando extensión...</string>
+    <string name="browser_install_success">Instalado: %1$s v%2$s</string>
+    <string name="browser_install_failed">Instalación fallida: %1$s</string>
+    <string name="browser_install_error">Error de instalación: %1$s</string>
+    <string name="browser_home_search_hint">Buscar o introducir URL</string>
+    <string name="browser_chip_search">Investigar</string>
+    <string name="browser_chip_buy">Comparar precios</string>
+    <string name="browser_chip_read">Leer artículo</string>
+    <string name="browser_chip_download">Descargar archivo</string>
+    <string name="browser_sources_count">%1$d fuentes</string>
+    <string name="browser_follow_up_title">Seguimiento</string>
+    <string name="browser_follow_up_detail">Más detalle</string>
+    <string name="browser_follow_up_example">Dar un ejemplo real</string>
+    <string name="browser_follow_up_summary">Resumir en puntos clave</string>
+    <string name="browser_reader_button">Modo lector</string>
+    <string name="browser_reader_title">Modo lector</string>
+    <string name="browser_reader_empty">Nada que leer</string>
+    <string name="browser_menu_downloads">Descargas</string>
+    <string name="browser_menu_share">Compartir</string>
+    <string name="browser_menu_dark_mode">Modo oscuro</string>
+    <string name="browser_menu_light_mode">Modo claro</string>
+    <string name="browser_menu_translate">Traducir</string>
+    <string name="browser_menu_mobile_mode">Modo móvil</string>
+    <string name="browser_menu_desktop_mode">Modo escritorio</string>
+    <string name="browser_menu_userscript_store">Tienda de Userscripts</string>
+    <string name="browser_menu_record_agent">Grabar Acciones del Agente</string>
+    <string name="browser_menu_stop_recording">Detener Grabación</string>
+    <string name="browser_menu_cloud_sync">Sincronización en la Nube</string>
+    <string name="browser_menu_stealth_protection">Protección de Huella</string>
+    <string name="browser_menu_stealth_on">Protección de huella activada</string>
+    <string name="browser_menu_stealth_off">Protección de huella desactivada</string>
+    <string name="browser_stealth_switched">Cambiado a huella %1$s</string>
+    <string name="browser_timeline_title">Historial</string>
+    <string name="browser_timeline_empty">Aún no hay historial</string>
+    <string name="browser_share_chooser">Compartir</string>
+    <string name="browser_desktop_mode_on">Cambiado a modo escritorio</string>
+    <string name="browser_desktop_mode_off">Cambiado a modo móvil</string>
+    <string name="browser_search_prompt">Eres un asistente de búsqueda inteligente. Responde la pregunta del usuario de forma concisa; puedes usar la herramienta del navegador para buscar la información más reciente.\nPregunta del usuario: %1$s</string>
+    <string name="screen_cast_status_title">Estado de Transmisión</string>
+    <string name="screen_cast_not_casting">● No transmitiendo</string>
+    <string name="screen_cast_stop_button">Detener transmisión</string>
+    <string name="screen_cast_start_button">Iniciar transmisión</string>
+    <string name="screen_cast_preview_label">Vista previa de pantalla remota</string>
+    <string name="screen_cast_preview_button">Vista previa</string>
+    <string name="screen_cast_connecting_toast">Conectando...</string>
+    <string name="screen_cast_remote_control_title">Control Remoto</string>
+    <string name="screen_cast_launch_external_title">Lanzar en pantalla externa</string>
+    <string name="screen_cast_custom_package_menu">Nombre de paquete personalizado</string>
+    <string name="screen_cast_casting">● Transmitiendo</string>
+    <string name="screen_cast_not_casting_indicator">○ No transmitiendo</string>
+    <string name="screen_cast_service_not_running">El servicio de accesibilidad no se está ejecutando</string>
+    <string name="screen_cast_action_sent">%1$s enviado</string>
+    <string name="screen_cast_screenshot_api_required">La captura requiere la API de ConfigServer</string>
+    <string name="screen_cast_send_button">Enviar</string>
+    <string name="screen_cast_text_copied">Texto copiado al portapapeles</string>
+    <string name="screen_cast_app_launched">Lanzado %1$s en pantalla externa</string>
+    <string name="screen_cast_launch_failed">Lanzamiento fallido (inicia transmisión primero)</string>
+    <string name="screen_cast_enter_package_name">Introduce el nombre del paquete</string>
+    <string name="screen_cast_launch_button">Lanzar</string>
+    <string name="chat_agent_bridge_busy_error">Otra tarea se está ejecutando, espera</string>
+    <string name="chat_agent_bridge_preparing">Preparando…</string>
+    <string name="chat_agent_bridge_thinking">Pensando…</string>
+    <string name="chat_agent_bridge_error">Error</string>
+    <string name="chat_agent_bridge_call_failed">Llamada fallida</string>
+    <string name="chat_agent_bridge_manual_required">Requiere manejo manual</string>
+    <string name="chat_agent_bridge_dialog_detected">Diálogo del sistema detectado, pausado</string>
+    <string name="chat_agent_bridge_dialog_detected_full">Diálogo del sistema detectado, pausado (requiere manejo manual)</string>
+    <string name="chat_agent_bridge_manually_stopped">Detenido manualmente</string>
+    <string name="chat_mic_permission_granted">Autorizado, mantén pulsado para hablar</string>
+    <string name="chat_mic_permission_denied">Micrófono no autorizado, entrada de voz no disponible</string>
+    <!-- 实时语音通话 -->
+    <string name="voice_call_title">Llamada de Voz en Tiempo Real</string>
+    <string name="voice_call_connecting">Conectando…</string>
+    <string name="voice_call_listening">Escuchando… adelante</string>
+    <string name="voice_call_speaking">Respondiendo</string>
+    <string name="voice_call_hangup">Colgar</string>
+    <string name="voice_call_retry">Llamar de nuevo</string>
+    <string name="voice_call_close">Cerrar</string>
+    <string name="voice_call_ended">Llamada finalizada</string>
+    <string name="voice_call_billing_free">Minutos gratis</string>
+    <string name="voice_call_billing_paid">Cobrados %1$d créditos</string>
+    <string name="voice_call_reason_insufficient">Créditos insuficientes, recarga o suscríbete</string>
+    <string name="voice_call_reason_limit">Alcanzada la duración máxima por llamada</string>
+    <string name="voice_call_entry">Llamada de Voz</string>
+    <string name="voice_settings_title">Ajustes de Voz</string>
+    <string name="chat_voice_stop_agent">■  Detener tarea</string>
+    <string name="chat_voice_listening_release">Escuchando… suelta para enviar</string>
+    <string name="chat_voice_hold_to_speak">Mantén pulsado para hablar</string>
+    <string name="chat_scroll_bottom">Volver abajo</string>
+    <string name="chat_target_local_device">Este dispositivo</string>
+    <string name="chat_target_virtual_pc">Modo TV</string>
+    <string name="chat_demo_open_wechat">Abre WeChat y envía un mensaje a Xiaoming</string>
+    <string name="chat_demo_main_screen">✓ Pantalla de inicio</string>
+    <string name="chat_demo_search">✓ Buscar</string>
+    <string name="chat_demo_xiaoming">✓ Xiaoming</string>
+    <string name="chat_demo_send">✓ Enviar</string>
+    <string name="chat_demo_wechat_sent">Abrió WeChat, encontró el chat de Xiaoming y envió el mensaje "¿Cenamos esta noche?".</string>
+    <string name="chat_demo_check_weather">Consulta el clima de mañana</string>
+    <string name="chat_demo_weather_details">✓ Detalles del clima</string>
+    <string name="chat_demo_weather_forecast">Mañana en Beijing: soleado pasando a nublado, máx 28°C, mín 16°C, buena calidad del aire.</string>
+    <string name="chat_save_as_routine">Guardar como rutina</string>
+    <string name="chat_routine_saved_toast">Guardado como rutina (ver)</string>
+    <string name="fast_replay_activity_log_message">Reproducción rápida de %1$d pasos</string>
+    <string name="routine_runner_target_offline">(Objetivo "%1$s" desconectado, cambiado a este dispositivo)</string>
+    <string name="routine_runner_model_not_configured">Modelo no configurado, ve a Ajustes → Modelo</string>
+    <string name="routine_runner_fast_path">Ruta rápida</string>
+    <string name="routine_runner_starting_execution">Iniciando ejecución</string>
+    <string name="settings_llm_api_key_configured">Configurado</string>
+    <string name="settings_rpc_url_default">No configurado (predeterminado: ws://10.0.2.2:8765)</string>
+    <string name="settings_octopus_runtime_title">Conexión Host · Octopus Runtime</string>
+    <string name="settings_rpc_remote_brain_description">Ejecución remota RPC (el host despacha herramientas/ejecución)</string>
+    <string name="settings_pc_remote_desktop_title">Escritorio Remoto del Host</string>
+    <string name="settings_pc_remote_h264_description">Ver pantalla del PC + control táctil/teclado (H.264/WS, misma LAN)</string>
+    <string name="settings_webrtc_remote_desktop_title">Escritorio Remoto (WebRTC)</string>
+    <string name="settings_webrtc_p2p_description">Conexión P2P directa (WebView/STUN hole-punching, entre redes, requiere pc_remote_webrtc.py en el host)</string>
+    <string name="device_detail_toolbar_title">Detalle del Dispositivo</string>
+    <string name="device_detail_status_online">● En línea</string>
+    <string name="device_detail_status_offline">○ Desconectado</string>
+    <string name="device_detail_name_label">Nombre</string>
+    <string name="device_detail_address_label">Dirección</string>
+    <string name="device_detail_android_label">Android</string>
+    <string name="device_detail_app_version_label">Versión de la app</string>
+    <string name="device_detail_last_seen_label">Última conexión</string>
+    <string name="device_detail_screenshot_button">Vista previa de captura</string>
+    <string name="device_detail_screenshot_failed_toast">Captura fallida</string>
+    <string name="device_detail_operation_failed_toast">Operación fallida</string>
+    <string name="device_detail_remote_input_dialog_title">Entrada de texto remota</string>
+    <string name="device_detail_launched_toast">Lanzado %1$s</string>
+    <string name="device_detail_launch_failed_toast">Lanzamiento fallido (requiere transmisión)</string>
+    <string name="device_list_toolbar_title">Dispositivos LAN</string>
+    <string name="device_list_online_group_title">Dispositivos en línea</string>
+    <string name="device_list_offline_group_title">Dispositivos desconectados</string>
+    <string name="device_list_empty_state_text">Escaneando dispositivos LAN...</string>
+    <string name="device_list_refresh_button_text">Volver a escanear</string>
+    <string name="device_batch_group_title">Control por Lotes</string>
+    <string name="device_batch_home">Todos a Inicio</string>
+    <string name="device_batch_back">Todos a Atrás</string>
+    <string name="device_batch_recent">Todos a Recientes</string>
+    <string name="device_batch_input_text">Introducir texto a todos los dispositivos</string>
+    <string name="device_batch_open_app">Abrir app en todos los dispositivos</string>
+    <string name="device_batch_no_online">Sin dispositivos en línea</string>
+    <string name="device_batch_result">%1$d/%2$d hechos</string>
+    <string name="activity_outcome_cancelled">Cancelado</string>
+    <string name="activity_time_just_now">Justo ahora</string>
+    <string name="activity_time_minutes_ago">hace %1$d min</string>
+    <string name="activity_time_hours_ago">hace %1$d h</string>
+    <string name="activity_screen_title">Actividad</string>
+    <string name="activity_clear_button">Limpiar</string>
+    <string name="activity_empty_state">Aún no hay actividad. Cada tarea completada deja aquí una auditoría revisable (comando / objetivo / pasos / resultado).</string>
+    <string name="activity_summary_count">%1$d registros · en todas las sesiones y dispositivos</string>
+    <string name="activity_steps_and_time">%1$d pasos · %2$s</string>
+    <string name="clouddrive_empty_or_auth_failed">Directorio vacío, o servidor inalcanzable / auth fallida</string>
+    <string name="clouddrive_title">Disco en la Nube / NAS</string>
+    <string name="clouddrive_add_button">+ Añadir</string>
+    <string name="clouddrive_empty_state_hint">Aún no hay puntos de montaje. Toca "+ Añadir" arriba a la derecha e introduce la dirección WebDAV de tu NAS/disco en la nube (soporta Synology, Nextcloud, Jianguoyun, AList, etc.) para explorar y reproducir.</string>
+    <string name="clouddrive_empty_directory">El directorio está vacío</string>
+    <string name="clouddrive_add_mount_dialog_title">Añadir montaje WebDAV</string>
+    <string name="clouddrive_label_server_address">Dirección del servidor</string>
+    <string name="clouddrive_label_start_path">Ruta inicial (p. ej. / o /dav)</string>
+    <string name="clouddrive_label_username">Usuario (opcional)</string>
+    <string name="clouddrive_label_password">Contraseña (opcional)</string>
+    <string name="evolution_empty_state">Aún no hay registros de optimización. Tras cada tarea, se extraen lecciones y surten efecto gradualmente vía lanzamiento canary; los resultados aparecerán aquí.</string>
+    <string name="evolution_lessons_section_title">Lecciones extraídas (%1$d)</string>
+    <string name="evolution_no_lessons">Aún no hay lecciones</string>
+    <string name="evolution_hit_count">Aciertos: %1$d</string>
+    <string name="evolution_canary_section_title">Lanzamientos canary (%1$d)</string>
+    <string name="evolution_no_canaries">Sin lanzamientos canary</string>
+    <string name="evolution_canary_stats">Muestras %1$d · Éxito %2$d · Fallo %3$d</string>
+    <string name="evolution_effectiveness">Eficacia %1$d%%</string>
+    <string name="extensions_title">Extensiones del Navegador</string>
+    <string name="extensions_install_from_amo">Instalar desde la tienda de Firefox (AMO)</string>
+    <string name="extensions_install_instructions">Abre addons.mozilla.org, toca "Añadir a Firefox" en la página de la extensión</string>
+    <string name="extensions_go_install_button">Instalar</string>
+    <string name="extensions_installed_section">Instaladas</string>
+    <string name="extensions_empty_state">Sin extensiones instaladas.\nToca "Instalar" arriba para visitar la tienda de Firefox, elige una extensión y toca "Añadir a Firefox" en la página.</string>
+    <string name="extensions_enabled_status">● Habilitada</string>
+    <string name="extensions_disabled_status">○ Deshabilitada</string>
+    <string name="extensions_disable_button">Deshabilitar</string>
+    <string name="extensions_enable_button">Habilitar</string>
+    <string name="extensions_uninstall_button">Desinstalar</string>
+    <string name="extensions_uninstalled_toast">Desinstalado %1$s</string>
+    <string name="memory_type_preference">Preferencia</string>
+    <string name="memory_type_context">Contexto</string>
+    <string name="memory_type_fact">Hecho</string>
+    <string name="memory_empty_state">Aún no hay recuerdos. Las preferencias y hechos se registran automáticamente durante los chats; también puedes tocar + arriba a la derecha para añadir manualmente.</string>
+    <string name="memory_count_info">%1$d registros · inyectados en el prompt del sistema de tareas</string>
+    <string name="memory_source_reference_count">Fuente %1$s · referenciada %2$d veces</string>
+    <string name="memory_add_dialog_title">Añadir recuerdo</string>
+    <string name="memory_input_placeholder">p. ej. Prefiero respuestas concisas</string>
+    <string name="memory_add_button">Añadir</string>
+    <string name="multiwindow_shizuku_ready">Shizuku listo</string>
+    <string name="multiwindow_shizuku_required">Las ventanas libres requieren Shizuku</string>
+    <string name="multiwindow_available">Disponible</string>
+    <string name="multiwindow_unauthorized">No autorizado</string>
+    <string name="multiwindow_instruction">Toca una app para abrirla en una ventana libre</string>
+    <string name="multiwindow_loading">Cargando lista de apps...</string>
+    <string name="multiwindow_no_apps">No se encontraron apps lanzables</string>
+    <string name="multiwindow_shizuku_unauthorized">Shizuku no autorizado, no se puede abrir ventana libre</string>
+    <string name="multiwindow_opened_success">Abierto %1$s en ventana libre</string>
+    <string name="multiwindow_opened_failed">Apertura fallida: %1$s</string>
+    <string name="pcremote_waiting_screen">Conectado al host, esperando pantalla...\n(Confirma que pc_remote_server.py se está ejecutando en el host)</string>
+    <string name="pcremote_not_connected">No conectado al host.\nConfigura y conecta en Ajustes → Conexión Host.</string>
+    <string name="pcremote_back_button">‹ Atrás</string>
+    <string name="pcremote_frame_count">▶ H264 %1$d</string>
+    <string name="pcremote_status_connected">● Conectado</string>
+    <string name="pcremote_status_disconnected">○ No conectado</string>
+    <string name="pcremote_input_dialog_title">Introducir texto al PC</string>
+    <string name="pcremote_enter_button">Intro</string>
+    <string name="pc_remote_webrtc_webview_unavailable">WebView del sistema no disponible, no se puede iniciar el escritorio remoto.</string>
+    <string name="routines_title">Rutinas</string>
+    <string name="routines_empty_state">Aún no hay rutinas.\n\nMantén pulsado un comando en el chat para guardarlo, o clona una plantilla de la Plaza de Inspiración para reproducir, programar o refinar aquí.</string>
+    <string name="routines_count_summary">%1$d en total · las rutas rápidas aprendidas se ejecutan más rápido; en caso contrario el agente replanea desde la pantalla al ejecutar</string>
+    <string name="routines_item_target_and_count">Objetivo %1$s · ejecutada %2$d veces</string>
+    <string name="routines_item_schedule_daily"> · Diario %1$s</string>
+    <string name="routines_item_schedule_once"> · Una vez %1$s</string>
+    <string name="routines_item_lightning_steps">%1$d</string>
+    <string name="routines_item_run_button">Ejecutar</string>
+    <string name="routines_forget_fastpath_title">Olvidar ruta rápida</string>
+    <string name="routines_forget_fastpath_message">"%1$s" ha aprendido una ruta rápida de %2$d pasos. Tras olvidarla, el agente replaneará desde la pantalla y volverá a grabar en la próxima ejecución.</string>
+    <string name="routines_forget_button">Olvidar</string>
+    <string name="routines_forgotten_toast">Ruta rápida olvidada</string>
+    <string name="routines_schedule_dialog_title">Programar %1$s</string>
+    <string name="routines_schedule_daily_option">Repetir diariamente</string>
+    <string name="routines_schedule_once_option">Solo una vez</string>
+    <string name="routines_schedule_cancel_option">Cancelar programación</string>
+    <string name="routines_set_daily_toast">Programada para repetir diariamente a las %1$s</string>
+    <string name="routines_set_once_toast">Programada para ejecutarse una vez a las %1$s</string>
+    <string name="routines_cancel_scheduling_toast">Programación cancelada</string>
+    <string name="skills_screen_title">Habilidades &amp; Herramientas</string>
+    <string name="skills_screen_description">El agente puede invocar %1$d herramientas. Las herramientas de control/percepción principales están bloqueadas; otras pueden deshabilitarse bajo demanda para reducir uso indebido y exposición de privacidad.</string>
+    <string name="skills_badge_core">Principal</string>
+    <string name="trustcenter_title">Centro de Confianza</string>
+    <string name="trustcenter_description">Opera tu dispositivo mediante los siguientes permisos. Consulta el estado, abre la gestión o revoca el acceso en cualquier momento.</string>
+    <string name="trustcenter_section_capabilities">Capacidades de Control del Dispositivo</string>
+    <string name="trustcenter_capability_accessibility_desc">Principal: leer pantalla, tocar, introducir y controlar dispositivo</string>
+    <string name="trustcenter_capability_overlay_desc">Capa de control en tiempo real: muestra pasos y botón de detención durante la ejecución</string>
+    <string name="trustcenter_capability_battery">Exención de Optimización de Batería</string>
+    <string name="trustcenter_capability_battery_desc">Las tareas largas en segundo plano resisten ser detenidas por el sistema</string>
+    <string name="trustcenter_capability_notification_desc">Notificación del servicio en primer plano / recordatorios de tareas</string>
+    <string name="trustcenter_capability_shizuku">Shizuku</string>
+    <string name="trustcenter_capability_shizuku_desc">Mejoras a nivel de shell: ventanas libres, capturas, ajustes del sistema</string>
+    <string name="trustcenter_capability_storage_desc">Leer y escribir archivos multimedia (p. ej. guardar capturas)</string>
+    <string name="trustcenter_section_lannetwork">LAN</string>
+    <string name="trustcenter_lan_allow_toggle">Permitir control LAN</string>
+    <string name="trustcenter_lan_allow_desc">Al habilitarse, este dispositivo transmite credenciales de control a la misma red Wi-Fi</string>
+    <string name="trustcenter_lan_discoverable_label">Dispositivo detectable</string>
+    <string name="trustcenter_lan_not_started">No iniciado</string>
+    <string name="trustcenter_section_target">Objetivo de ejecución actual</string>
+    <string name="trustcenter_target_label">Operará</string>
+    <string name="trustcenter_action_revoke">Revocar control de red</string>
+    <string name="trustcenter_action_revoke_desc">Deshabilita la difusión LAN y restablece el objetivo de ejecución a este dispositivo</string>
+    <string name="trustcenter_instruction_manual_disable">Los permisos del sistema como accesibilidad y superposición deben desactivarse manualmente en los ajustes del sistema (toca el elemento correspondiente arriba).</string>
+    <string name="videolibrary_scanning">Escaneando videos locales...</string>
+    <string name="videolibrary_no_files">No se encontraron archivos de vídeo. Coloca vídeos en el almacenamiento del teléfono e reintenta, o pide al asistente en el chat que reproduzca vídeos en línea/en la nube.</string>
+    <string name="videolibrary_count">%1$d vídeos en total</string>
+    <string name="videolibrary_bluray_label"> · Blu-ray</string>
+    <string name="plugin_loaded_group_title">Habilidades cargadas</string>
+    <string name="plugin_available_group_title">Habilidades disponibles</string>
+    <string name="plugin_empty_state">Sin habilidades disponibles</string>
+    <string name="plugin_install_button">Instalar desde archivo</string>
+    <string name="plugin_install_note">Nota: las habilidades requieren un archivo .dex + manifest.json. Tras la instalación se registran como herramientas invocables por el agente.</string>
+    <string name="plugin_error_status">Error</string>
+    <string name="plugin_load_action">Cargar</string>
+    <string name="plugin_load_success_toast">Habilidad cargada</string>
+    <string name="plugin_load_failure_toast">Carga fallida: %1$s</string>
+    <string name="plugin_unload_success_toast">Habilidad descargada</string>
+    <string name="plugin_select_manifest_toast">Selecciona un archivo manifest.json</string>
+    <string name="plugin_install_success_toast">Habilidad instalada: %1$s</string>
+    <string name="plugin_install_failure_toast">Instalación de habilidad fallida</string>
+    <string name="plugin_read_dex_failure_toast">Error al leer archivo: %1$s</string>
+    <string name="plugin_read_manifest_failure_toast">Error al leer manifest: %1$s</string>
+    <string name="plugin_unknown_error">Error desconocido</string>
+    <string name="runtime_config_auth_token_label">Auth Token (opcional)</string>
+    <string name="runtime_config_auth_hint">Vacío para omitir autenticación</string>
+    <string name="runtime_config_launch_mode_label">Modo de lanzamiento</string>
+    <string name="runtime_config_mode_local_only">LOCAL_ONLY — Ejecución puramente local</string>
+    <string name="runtime_config_mode_rpc_only">RPC_ONLY — Remoto puro (requiere host)</string>
+    <string name="runtime_config_mode_dual">DUAL — Remoto primero, respaldo offline</string>
+    <string name="runtime_config_auto_connect">Auto-conectar al iniciar</string>
+    <string name="runtime_config_status_label">Estado de conexión</string>
+    <string name="runtime_config_connect_button">Conectar</string>
+    <string name="runtime_config_disconnect_button">Desconectar</string>
+    <string name="runtime_config_save_button">Guardar config</string>
+    <string name="runtime_config_empty_url_toast">Introduce primero la URL del Runtime</string>
+    <string name="settings_runtime_connecting">● Conectando...</string>
+    <string name="settings_runtime_offline">○ Desconectado</string>
+    <string name="trust_center_granted">Concedido</string>
+    <string name="trust_center_not_granted">No concedido</string>
+    <string name="chat_demo_contact_name">Xiaoming</string>
+    <string name="chat_demo_dinner_msg">¿Cenamos esta noche?</string>
+    <string name="control_target_local">Este dispositivo</string>
+    <string name="channels_hub_title">Canales de Mensaje</string>
+    <string name="channels_hub_desc">Tras conectar un bot de IM, puedes dirigir tareas desde apps de chat. Toca un canal para configurar.</string>
+    <string name="wechat_login_title">Inicio de sesión QR de WeChat</string>
+    <string name="wechat_login_hint">Abre WeChat → Escanear, apunta al código QR de abajo y confirma en tu teléfono.</string>
+    <string name="wechat_login_get_qr">Obtener código QR</string>
+    <string name="wechat_login_waiting">Esperando escaneo…</string>
+    <string name="wechat_login_success">Sesión iniciada, canal WeChat conectado ✓</string>
+    <string name="wechat_login_failed">Error al obtener código QR, revisa tu red e reintenta.</string>
+    <string name="wechat_login_linked">WeChat conectado.</string>
+    <string name="wechat_login_relogin">Volver a escanear para iniciar sesión</string>
+    <string name="wechat_login_done">Hecho</string>
+    <string name="nav_features">Plaza</string>
+    <string name="feat_section_automation">Automatización</string>
+    <string name="feat_section_data">Datos &amp; Memoria</string>
+    <string name="feat_section_advanced">Avanzado</string>
+    <string name="feat_skills">Habilidades</string>
+    <string name="feat_extensions">Complementos del Navegador</string>
+    <string name="feat_routines">Rutinas</string>
+    <string name="feat_miniapps">Mini Apps</string>
+    <string name="feat_clouddrive">Disco en la Nube</string>
+    <string name="feat_memory">Memoria</string>
+    <string name="feat_video">Biblioteca de Vídeo</string>
+    <!-- Desktop mode (横屏桌面) -->
+    <string name="desktop_chat_label">Chat</string>
+    <string name="desktop_collapse_chat">Contraer chat</string>
+    <string name="desktop_expand_chat">Expandir chat</string>
+    <string name="desktop_opening_host">Abriendo %1$s…</string>
+    <string name="desktop_address_placeholder">Introduce URL…</string>
+    <string name="desktop_conn_online">Host en línea</string>
+    <string name="desktop_conn_connecting">Conectando…</string>
+    <string name="desktop_conn_disconnected">No conectado</string>
+    <string name="desktop_idle_hint">Escritorio del agente · inactivo, emite comandos en el chat a la derecha</string>
+    <string name="desktop_launch_pinned">★ Establecer como acceso directo</string>
+    <string name="desktop_launch_pin">☆ Establecer como escritorio de lanzamiento</string>
+    <string name="desktop_launch_pinned_toast">Entrará en modo escritorio directamente al arrancar</string>
+    <string name="desktop_launch_unpinned_toast">Acceso directo cancelado</string>
+    <string name="desktop_date_format">MMM d EEEE</string>
+    <string name="feat_multiwindow">Multi-ventana</string>
+    <string name="feat_evolution">Auto-optimización</string>
+    <string name="feat_trust">Centro de Confianza</string>
+    <string name="feat_toolbox_title">Mercado</string>
+    <string name="feat_explore">Explorar</string>
+    <string name="feat_explore_title">Inspiración</string>
+    <string name="feat_explore_hot">Popular</string>
+    <string name="feat_explore_recent">Reciente</string>
+    <string name="feat_explore_office">Oficina &amp; Estudio</string>
+    <string name="feat_explore_pc">Configuración de PC</string>
+    <string name="feat_explore_life">Vida Diaria</string>
+    <string name="feat_explore_coming">Próximamente</string>
+    <string name="feat_explore_hint">Casos y habilidades curados en camino</string>
+    <string name="feat_skills_desc">Habilidades y conjunto de herramientas</string>
+    <string name="feat_extensions_desc">Extensiones y complementos del navegador</string>
+    <string name="feat_routines_desc">Tareas automatizadas y programación</string>
+    <string name="feat_miniapps_desc">Tu ecosistema de mini apps</string>
+    <string name="feat_clouddrive_desc">Acceso a archivos del disco en la nube</string>
+    <string name="feat_memory_desc">Memoria de preferencias entre sesiones</string>
+    <string name="feat_video_desc">Biblioteca multimedia y reproducción</string>
+    <string name="feat_browser_desc">Motor de búsqueda y ajustes del navegador</string>
+    <string name="feat_multiwindow_desc">Ventanas libres y pantalla dividida</string>
+    <string name="feat_evolution_desc">Experiencia de tareas y auto-optimización</string>
+    <string name="feat_trust_desc">Permisos de seguridad y registros de auditoría</string>
+    <string name="feat_explore_hot_circles">Círculos populares</string>
+    <string name="feat_explore_recommended">Recomendado</string>
+    <string name="feat_explore_my_circles">Mis círculos</string>
+    <string name="feat_explore_members">Miembros</string>
+    <string name="feat_explore_all_skills">Todas las habilidades</string>
+    <string name="feat_explore_all_skills_desc">Explorar todas las habilidades disponibles</string>
+    <string name="feat_explore_join_circle">Unirse al círculo</string>
+    <string name="feat_explore_join_circle_hint">Comparte rutinas y consejos con la comunidad</string>
+    <string name="browser_settings_title">Ajustes del Navegador</string>
+    <string name="browser_settings_search_engine">Motor de búsqueda predeterminado</string>
+    <string name="browser_settings_engine_kernel">Motor</string>
+    <string name="browser_settings_browsing">Navegación</string>
+    <string name="browser_settings_desktop_mode">Modo escritorio</string>
+    <string name="browser_settings_desktop_mode_hint">Mostrar páginas versión escritorio</string>
+    <string name="browser_settings_text_size">Tamaño de texto</string>
+    <string name="browser_settings_text_small">Pequeño</string>
+    <string name="browser_settings_text_normal">Normal</string>
+    <string name="browser_settings_text_large">Grande</string>
+    <string name="browser_settings_text_xlarge">Extra grande</string>
+    <string name="browser_settings_clear_data">Borrar datos de navegación</string>
+    <string name="browser_settings_clear_data_hint">Caché · Cookies · Datos del sitio</string>
+    <string name="browser_settings_cleared">Borrado</string>
+    <string name="browser_settings_wallpaper">Fondo de pantalla</string>
+    <string name="browser_settings_wallpaper_hint">Mostrar tu imagen como fondo del inicio del navegador</string>
+    <string name="browser_settings_wallpaper_upload">Subir fondo</string>
+    <string name="browser_settings_wallpaper_change">Cambiar fondo</string>
+    <string name="browser_settings_wallpaper_clear">Quitar fondo</string>
+    <string name="browser_settings_kernel_value">Selección automática</string>
+    <string name="feat_browser_settings">Ajustes del Navegador</string>
+    <string name="settings_remote_pc_title">Control Remoto de PC</string>
+    <string name="settings_remote_pc_desc">Ver y controlar tu PC desde tu teléfono</string>
+    <string name="settings_advanced_title">Avanzado</string>
+    <string name="settings_advanced_hint">Conexión host · Escritorio remoto LAN</string>
+    <string name="settings_remote_lan_title">Escritorio Remoto · LAN</string>
+    <string name="settings_runtime_plain_desc">Dejar que el PC despache tareas a este teléfono</string>
+    <string name="settings_workspace_title">Espacio de Scripts</string>
+    <string name="settings_workspace_desc">Directorio predeterminado accesible vía la constante WORKSPACE por scripts del agente. readFile/writeFile están restringidos a este directorio y a Download/Documents; el directorio se crea automáticamente si no existe.</string>
+    <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
+    <string name="chat_workspace_pick_title">Elegir espacio para esta sesión</string>
+    <string name="chat_workspace_pick_desc">Similar a seleccionar un directorio de proyecto con --cd al lanzar Codex. El agente puede leer código y archivos en este directorio, y el WORKSPACE para run_code/run_python cambia aquí también. Vacío para usar el predeterminado global.</string>
+    <string name="chat_workspace_change">Cambiar espacio</string>
+    <string name="chat_artifact_preview">Vista previa</string>
+    <string name="chat_artifact_open">Abrir</string>
+    <string name="confirm">Confirmar</string>
+
+    <!-- ── account &amp; billing ── -->
+    <string name="menu_account">Cuenta &amp; Créditos</string>
+    <string name="account_title">Mi Cuenta</string>
+    <string name="account_edit_nickname">Editar</string>
+    <string name="account_nickname_title">Editar apodo</string>
+    <string name="account_nickname_hint">1–24 caracteres</string>
+    <string name="account_nickname_unset">Apodo no establecido</string>
+    <string name="account_nickname_updated">Apodo actualizado</string>
+    <string name="account_login_title">Iniciar sesión</string>
+    <string name="account_login_tip">Inicia sesión con email y te enviaremos un código de verificación.</string>
+    <string name="account_mobile_label">Teléfono</string>
+    <string name="account_mobile_hint">Introduce el número de teléfono</string>
+    <string name="account_code_label">Código de verificación</string>
+    <string name="account_code_hint">Introduce el código de verificación</string>
+    <string name="account_send_code">Obtener código de verificación</string>
+    <string name="account_sending">Enviando…</string>
+    <string name="account_resend_in">Reenviar en %1$d s</string>
+    <string name="account_code_sent">Código de verificación enviado</string>
+    <string name="account_mock_code_filled">Código de prueba autocompletado: %1$s</string>
+    <string name="account_code_send_failed">Error al enviar el código de verificación</string>
+    <string name="account_login_button">Iniciar sesión / Registrarse</string>
+    <string name="account_login_success">Sesión iniciada</string>
+    <string name="account_login_failed">Inicio de sesión fallido</string>
+    <string name="account_invalid_mobile">Introduce un número de teléfono válido</string>
+    <string name="account_invalid_code">Introduce el código de verificación</string>
+    <string name="account_credits_label">Saldo de créditos</string>
+    <string name="account_credits_breakdown">Permanentes %1$d · Bonus de este mes %2$d</string>
+    <string name="account_daily_claim">Check-in diario</string>
+    <string name="account_recharge_title">Membresía</string>
+    <string name="account_goods_credits">%1$d créditos</string>
+    <string name="account_goods_bonus">(bonus %1$d)</string>
+    <string name="account_goods_sub_subscription">Permanentes %1$d · Bonus mensual %2$d (reinicia a fin de mes) · Incluye modelo integrado</string>
+    <string name="account_per_month_suffix">/mes</string>
+    <string name="account_logout">Cerrar sesión</string>
+    <string name="account_order_failed">Error al crear pedido</string>
+    <string name="account_pay_opened">Pago iniciado, completa el pago</string>
+    <string name="account_recharge_success">Recarga exitosa, +%1$d créditos</string>
+    <string name="account_recharge_failed">Pago fallido</string>
+    <string name="account_recharge_pending">Pago en proceso, actualiza más tarde</string>
+    <string name="account_claim_success">Reclamado +%1$d créditos</string>
+    <string name="account_claim_already">Ya hiciste check-in hoy</string>
+    <string name="account_claim_failed">Check-in fallido</string>
+    <string name="account_invite_title">Invitar amigos</string>
+    <string name="account_invite_my_code">Mi código de invitación</string>
+    <string name="account_invite_copy">Copiar</string>
+    <string name="account_invite_copied">Código de invitación copiado</string>
+    <string name="account_invite_sub">Invitados %1$d · Ambos reciben +%2$d créditos</string>
+    <string name="account_invite_redeem_hint">Introduce el código de invitación</string>
+    <string name="account_invite_redeem">Canjear</string>
+    <string name="account_invite_redeem_success">Canjeado +%1$d créditos</string>
+    <string name="account_invite_redeem_failed">Canje fallido</string>
+    <string name="account_tier_title">Nivel de chat</string>
+    <string name="account_tier_fast">Rápido</string>
+    <string name="account_tier_flash">Estándar</string>
+    <string name="account_tier_premium">Premium</string>
+    <string name="account_tier_fast_hint">Más rápido · menos créditos</string>
+    <string name="account_tier_flash_hint">Equilibrado · para tareas complejas diarias</string>
+    <string name="account_tier_premium_hint">Más inteligente · más créditos</string>
+    <string name="account_byo_locked_title">Solo miembros</string>
+    <string name="account_byo_locked_msg">Suscríbete para conectar tu propio modelo. Usuarios gratuitos usan el modelo de la plataforma y pagan por crédito.</string>
+    <string name="account_go_recharge">Hacerse miembro</string>
+    <string name="account_member_active">Miembro · válido hasta %1$s</string>
+    <string name="account_member_inactive">No miembro · usando modelo de plataforma</string>
+    <string name="account_tab_phone">Teléfono</string>
+    <string name="account_tab_email">Email</string>
+    <string name="account_email_hint">Introduce email</string>
+    <string name="account_invalid_email">Introduce un email válido</string>
+    <string name="account_byo_credits_hint">Auto-habilitado cuando se agoten los créditos</string>
+    <string name="account_byo_member_hint">Hazte miembro para usar un modelo personalizado (reinicia mensualmente)</string>
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_light_mode">Modo claro</string>
+    <string name="settings_dark_mode">Modo oscuro</string>
+    <string name="settings_theme_follow_system">Seguir el sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="remote_control_notif_viewing">Siendo visto remotamente</string>
+    <string name="remote_control_notif_controlling">Siendo controlado remotamente</string>
+    <string name="remote_control_notif_text">Viendo %1$d · Controlando %2$d · Origen: %3$s</string>
+
+    <!-- Browser home categories -->
+    <string name="browser_app_tongyi_qianwen">Tongyi Qianwen</string>
+    <string name="browser_home_categories">Categorías</string>
+    <string name="browser_cat_ai">Herramientas IA</string>
+    <string name="browser_cat_ai_sub">Modelos, escritura, investigación</string>
+    <string name="browser_cat_video">Vídeo</string>
+    <string name="browser_cat_video_sub">YouTube, Bilibili</string>
+    <string name="browser_cat_dev">Dev</string>
+    <string name="browser_cat_dev_sub">Código, docs, Q&amp;A</string>
+    <string name="browser_cat_knowledge">Conocimiento</string>
+    <string name="browser_cat_knowledge_sub">Q&amp;A, enciclopedia, referencias</string>
+
+    <!-- Settings hardcoded fix -->
+    <string name="settings_go_setup">Ir a ajustes</string>
+    <string name="settings_status_ok">OK</string>
+    <string name="settings_status_set">Establecer</string>
+    <string name="settings_version_template">Octopus Mobile v%1$s · Apache 2.0</string>
+    <string name="channel_name_dingtalk">DingTalk</string>
+    <string name="channel_name_feishu">Feishu</string>
+    <string name="channel_name_qq">QQ</string>
+    <string name="channel_name_discord">Discord</string>
+    <string name="channel_name_telegram">Telegram</string>
+    <string name="channel_name_wechat">WeChat</string>
+
+    <!-- Browser hardcoded fix -->
+    <string name="browser_input_url">Introduce URL…</string>
+    <string name="browser_current_tab">Pestaña actual</string>
+    <string name="browser_copy_url">Copiar URL</string>
+    <string name="browser_copied">Copiado</string>
+    <string name="browser_ai_prompt_summarize">Resume el contenido principal de esta página en puntos clave concisos.</string>
+    <string name="browser_ai_prompt_key_points">Extrae la información más importante de esta página.</string>
+    <string name="browser_ai_prompt_translate">Traduce el contenido principal de esta página al inglés.</string>
+    <string name="browser_chrome_filter">X,Browser,GeckoView,Stop,Ask,Execute,✨,Refresh,Close,Switch search engine,Ask AI,Back,Forward,Home,Bookmarks,Extensions,Search or enter URL,Loading,Loading…,Search or enter</string>
+    <string name="browser_page_cmd_markers">help me,this page,click,fill,add to cart,log in,submit,check the</string>
+    <string name="browser_agent_prompt">Estás operando la página web actual dentro del navegador embebido de la app. Prefiere las herramientas browser_*: browser_get_dom para obtener contenido, browser_click para hacer clic (selector CSS), browser_type para introducir texto, browser_evaluate para ejecutar JS, browser_navigate para saltar a una URL, browser_screenshot para capturar. Solo retrocede a la ruta de accesibilidad (get_screen_info para coordenadas + tap/input_text) cuando browser_* no estén disponibles o fallen.\n\nTarea: %1$s</string>
+    <string name="browser_ai_system_prompt">Eres un asistente de lectura de páginas web. Responde solo según el contenido de la página siguiente; no llames a ninguna herramienta.\nPregunta del usuario: %1$s%2$s</string>
+    <string name="browser_installing_extension_toast">Instalando extensión…</string>
+
+    <!-- Circle names & tags -->
+    <string name="circle_ai_players">Jugadores de IA</string>
+    <string name="circle_efficiency">Gurús de Eficiencia</string>
+    <string name="circle_digital">Amantes de Gadgets</string>
+    <string name="circle_geek">Espacio Geek</string>
+    <string name="circle_lazy">Trucos Perezosos</string>
+    <string name="circle_tv_cast">Transmisión a TV</string>
+    <string name="circle_tag_hot">Popular</string>
+    <string name="circle_tag_recommended">Recomendado</string>
+    <string name="circle_tag_new">Nuevo</string>
+
+    <!-- ChatScreen hardcoded fix -->
+    <string name="chat_loopback">Loopback (local:9527)</string>
+    <string name="chat_loopback_device">Loopback</string>
+
+    <!-- RemoteControl hardcoded fix -->
+    <string name="remote_back">Atrás</string>
+    <string name="remote_home">Inicio</string>
+    <string name="remote_recents">Recientes</string>
+    <string name="remote_exit">Salir</string>
+
+    <!-- FeatureUi hardcoded fix -->
+    <string name="feature_back">Atrás</string>
+    <string name="feature_close">Cerrar</string>
+
+    <!-- Wallpaper picker -->
+    <string name="browser_wallpaper_title">Fondo de pantalla</string>
+    <string name="browser_wallpaper_presets">Fondos predefinidos</string>
+    <string name="browser_wallpaper_upload">Subir fondo</string>
+    <string name="browser_wallpaper_upload_hint">Elige una imagen de la galería</string>
+    <string name="browser_wallpaper_remove_custom">Quitar fondo personalizado</string>
+    <string name="browser_wallpaper_save_failed">Error al guardar el fondo</string>
+    <string name="feat_explore_circle_avatar">Avatar de %1$s</string>
+
+    <!-- Brand header -->
+    <string name="browser_brand_name">Octopus</string>
+    <string name="browser_brand_slogan">Reimaginando la navegación inteligente</string>
+
+    <!-- Voice assistant overlay -->
+    <string name="voice_assistant_listening">Escuchando…</string>
+    <string name="voice_assistant_stop">Detener</string>
+    <string name="voice_assistant_need_mic">La entrada de voz requiere permiso de micrófono</string>
+
+    <!-- Floating circle -->
+    <string name="floating_accessibility_hint">Ve a ajustes para alternar el permiso de accesibilidad</string>
+
+    <!-- Inspiration Square -->
+    <string name="agent_square_title">Plaza de Inspiración</string>
+    <string name="agent_square_tab_recommend">Recomendado</string>
+    <string name="agent_square_tab_following">Siguiendo</string>
+    <string name="agent_square_tab_hot">Popular</string>
+    <string name="agent_square_entry_title">Descubre ideas de automatización</string>
+    <string name="agent_square_entry_desc">Explora habilidades clonables, tutoriales y creaciones</string>
+    <string name="cd_back">Atrás</string>
+    <string name="cd_search">Buscar</string>
+    <string name="cd_create">Crear</string>
+    <string name="agent_trending_now">En tendencia</string>
+    <string name="agent_inspiration_plaza">Plaza de Inspiración</string>
+    <string name="agent_inspiration_desc">Explora ideas, clona plantillas y guarda inspiraciones listas para ejecutar</string>
+    <string name="agent_action_search">Buscar ideas</string>
+    <string name="agent_action_universe">Mi Ghost</string>
+    <string name="agent_action_publish">Publicar idea</string>
+    <string name="agent_action_favorite">Favorito</string>
+    <string name="agent_action_reproduce">Clonar</string>
+    <string name="agent_topic_inspiration">Inspiración de %1$s</string>
+    <string name="agent_reproduce_prefix">Clonar inspiración: </string>
+    <string name="cancel">Cancelar</string>
+    <string name="status_loading">Procesando…</string>
+    <string name="remote_console_title">Consola Web</string>
+    <string name="remote_console_status_connected">Emparejado · web en línea</string>
+    <string name="remote_console_status_paired">Emparejado · esperando conexión</string>
+    <string name="remote_console_status_unpaired">Introduce el código de emparejamiento web para controlar remotamente este dispositivo entre redes</string>
+    <string name="remote_console_login_required">Inicia sesión antes de emparejar la consola web</string>
+    <string name="remote_console_pair_title">Emparejar consola web</string>
+    <string name="remote_console_pair_desc">Genera un código de emparejamiento en la consola web e introdúcelo aquí. Tras el emparejamiento, este dispositivo se conectará activamente a la web; sin IP pública necesaria.</string>
+    <string name="remote_console_pair_code_label">Código de emparejamiento</string>
+    <string name="remote_console_pair_confirm">Iniciar emparejamiento</string>
+    <string name="remote_console_pair_failed">Emparejamiento fallido</string>
+
+    <!-- Agent discovery posts -->
+    <string name="agent_post_travel_title">Planificador de Viajes: Vuelos a Itinerario en un Toque</string>
+    <string name="agent_post_travel_desc">Introduce destino y presupuesto para buscar atracciones, planificar rutas y generar una lista verificable.</string>
+    <string name="agent_post_travel_author">Inspiración de Viajes</string>
+    <string name="agent_post_travel_initial">T</string>
+    <string name="agent_post_travel_duration">Uns 4 min</string>
+    <string name="agent_post_weekly_title">Plantilla de Auto-Guardado de Informe Semanal</string>
+    <string name="agent_post_weekly_desc">Extrae registros de chat, listas de tareas y calendarios para escribir un informe que a tu jefe le encantará.</string>
+    <string name="agent_post_weekly_author">Jugador de Eficiencia</string>
+    <string name="agent_post_weekly_initial">E</string>
+    <string name="agent_post_weekly_duration">Uns 2 min</string>
+    <string name="agent_post_phone_title">Convierte tu Teléfono Antiguo en Ejecutor 24/7</string>
+    <string name="agent_post_phone_desc">Deja que tu respaldo maneje mensajes, capturas, reenvíos y tareas programadas mientras tu teléfono principal permanece tranquilo.</string>
+    <string name="agent_post_phone_author">Geek Hub</string>
+    <string name="agent_post_phone_initial">G</string>
+    <string name="agent_post_phone_duration">Uns 6 min</string>
+    <string name="agent_post_shopping_title">El Rastreador de Precios Me Ahorró 2000+</string>
+    <string name="agent_post_shopping_desc">Monitorea precios históricos, cupones y promociones de plataformas, y te avisa cuando el precio baja.</string>
+    <string name="agent_post_shopping_author">Bot de Ahorro</string>
+    <string name="agent_post_shopping_initial">S</string>
+    <string name="agent_post_shopping_duration">Uns 3 min</string>
+    <string name="agent_post_paper_title">Lector de Papers: Puntos Clave en 10 Minutos</string>
+    <string name="agent_post_paper_desc">Lee PDFs, páginas web y capturas, extrae conclusiones e insights citables automáticamente.</string>
+    <string name="agent_post_paper_author">Asistente Académico</string>
+    <string name="agent_post_paper_initial">A</string>
+    <string name="agent_post_paper_duration">Uns 5 min</string>
+    <string name="agent_post_voice_title">Asistente de Voz: Maneja Mensajes Mientras Conduces</string>
+    <string name="agent_post_voice_desc">Mantén pulsado y habla, detecta destinatario, ajusta tono y envía.</string>
+    <string name="agent_post_voice_author">Entusiasta de Coches</string>
+    <string name="agent_post_voice_initial">C</string>
+    <string name="agent_post_voice_duration">Uns 2 min</string>
+
+    <!-- Agent topics & tags -->
+    <string name="agent_topic_automation">Automatización</string>
+    <string name="agent_topic_efficiency">Eficiencia</string>
+    <string name="agent_topic_life">Estilo de vida</string>
+    <string name="agent_topic_learning">Aprendizaje</string>
+    <string name="agent_topic_device">Dispositivo</string>
+    <string name="agent_tag_voice">Voz</string>
+
+    <!-- Agent permissions -->
+    <string name="agent_perm_browser">Navegador</string>
+    <string name="agent_perm_location">Ubicación</string>
+    <string name="agent_perm_screenshot">Captura de pantalla</string>
+    <string name="agent_perm_calendar">Calendario</string>
+    <string name="agent_perm_clipboard">Portapapeles</string>
+    <string name="agent_perm_document">Documentos</string>
+    <string name="agent_perm_accessibility">Accesibilidad</string>
+    <string name="agent_perm_notification">Notificaciones</string>
+    <string name="agent_perm_background">Segundo plano</string>
+    <string name="agent_perm_timer">Temporizador</string>
+    <string name="agent_perm_file">Archivos</string>
+    <string name="agent_perm_mic">Micrófono</string>
+
+    <!-- Agent metrics & detail -->
+    <string name="agent_metric_usage">Uso</string>
+    <string name="agent_metric_success_rate">Tasa de Éxito</string>
+    <string name="agent_metric_duration">Duración</string>
+    <string name="agent_detail_how_to_use">Cómo Usar</string>
+    <string name="agent_detail_prerequisites">Antes de Ejecutar</string>
+    <string name="agent_detail_permissions">Permisos Requeridos</string>
+    <string name="agent_detail_use_1">Clonar como tu propia plantilla de automatización</string>
+    <string name="agent_detail_use_2">Añade permisos y apps objetivo según el escenario</string>
+    <string name="agent_detail_use_3">Guarda en favoritos para acceso rápido</string>
+    <string name="agent_detail_prereq_1">Confirma que el servicio de accesibilidad está habilitado</string>
+    <string name="agent_detail_prereq_2">Selecciona dispositivo local o LAN</string>
+    <string name="agent_detail_prereq_3">Sigue las indicaciones para autorizar en la primera ejecución</string>
+    <string name="agent_reproduce_target">. Objetivo: </string>
+    <string name="agent_reproduce_suffix"> Confirma primero accesibilidad, notificaciones y estado de la app objetivo, luego planifica y ejecuta paso a paso; pausa y espera confirmación del usuario al encontrar inicio de sesión, pago o confirmaciones sensibles.</string>
+    <string name="agent_reproduce_toast">Clonado a rutina: %s</string>
+
+    <!-- Browser hardcoded fix (round 2) -->
+    <string name="browser_app_doubao">Doubao</string>
+    <string name="browser_app_tongyi">Tongyi</string>
+    <string name="browser_app_zhihu">Zhihu</string>
+    <string name="browser_windows">Windows</string>
+    <string name="browser_refresh_page">Refrescar</string>
+    <string name="browser_engine_settings">Ajustes de Navegador &amp; Motor</string>
+    <string name="browser_change_wallpaper">Cambiar Fondo</string>
+    <string name="browser_extensions">Extensiones</string>
+    <string name="browser_copy_link">Copiar Enlace</string>
+    <string name="browser_link_copied">Enlace Copiado</string>
+    <string name="browser_open_in_system">Abrir en Navegador del Sistema</string>
+    <string name="browser_new_tab">Nueva Pestaña</string>
+    <string name="browser_windows_count">Ventanas (%1$d)</string>
+    <string name="browser_new_window">+ Nueva Ventana</string>
+    <!-- Cast approval gate -->
+    <string name="cast_approval_channel_name">Aprobación de Transmisión</string>
+    <string name="cast_approval_channel_desc">Notificación de confirmación mostrada cuando una solicitud remota inicia transmisión o lanza una app en pantalla externa</string>
+    <string name="cast_approval_title">Solicitud de transmisión remota</string>
+    <string name="cast_approval_text">El origen %1$s solicita control de la pantalla externa. ¿Permitir?</string>
+    <string name="cast_approval_allow">Permitir</string>
+    <string name="cast_approval_deny">Denegar</string>
+
+    <!-- 技能商城(广场 → 能力) -->
+    <string name="common_back">Atrás</string>
+    <string name="skill_marketplace_title">Mercado de Habilidades</string>
+    <string name="skill_marketplace_subtitle">Instaladas %1$d · Total %2$d</string>
+    <string name="skill_marketplace_entry_desc">Habilidades en la nube bajo demanda, junto con habilidades integradas</string>
+    <string name="skill_filter_all">Todas</string>
+    <string name="skill_filter_mobile">Solo móvil</string>
+    <string name="skill_search_hint">Buscar habilidades</string>
+    <string name="skill_load_failed">Carga fallida, revisa tu red e reintenta</string>
+    <string name="skill_empty">Sin habilidades coincidentes</string>
+    <string name="skill_install">Instalar</string>
+    <string name="skill_installing">Descargando</string>
+    <string name="skill_installed">Instalada</string>
+    <string name="skill_installed_toast">Instalada %1$s</string>
+    <string name="skill_uninstalled_toast">Desinstalada %1$s</string>
+
+    <!-- 插件商城 -->
+    <string name="plugin_marketplace_title">Mercado de Complementos</string>
+    <string name="plugin_marketplace_subtitle">Instalados %1$d · Total %2$d</string>
+    <string name="plugin_marketplace_entry_desc">Mini apps y complementos de extensión descargables desde la nube</string>
+    <string name="plugin_marketplace_search_hint">Buscar complementos</string>
+    <string name="plugin_marketplace_load_failed">Carga fallida, revisa tu red e reintenta</string>
+    <string name="plugin_marketplace_empty">Sin complementos coincidentes</string>
+    <string name="plugin_marketplace_download_failed">Descarga fallida: red o servicio inalcanzable</string>
+    <string name="plugin_marketplace_installed_toast">Instalado %1$s</string>
+    <string name="plugin_marketplace_uninstalled_toast">Desinstalado %1$s</string>
+
+    <!-- 创作者中心(分成闭环) -->
+    <string name="creator_center_title">Centro de Creadores</string>
+    <string name="creator_center_entry_desc">Publica obras y gana un 70% de los ingresos</string>
+    <string name="creator_center_login_required">Inicia sesión para ver datos de creador</string>
+    <string name="creator_center_load_failed">Carga fallida, desliza hacia abajo para reintentar</string>
+    <string name="creator_center_empty">Aún no hay datos de creador</string>
+    <string name="creator_center_metric_earnings">Ingresos totales (créditos)</string>
+    <string name="creator_center_metric_downloads">Descargas totales</string>
+    <string name="creator_center_metric_published">Publicadas</string>
+    <string name="creator_center_section_assets">Mis obras</string>
+    <string name="creator_center_section_revenue">Ingresos de los últimos 30 días</string>
+    <string name="creator_center_section_ranking">Ranking de creadores</string>
+    <string name="creator_center_my_rank">Mi puesto</string>
+    <string name="creator_center_no_rank">Fuera del ranking</string>
+    <string name="creator_center_revenue_empty">Aún no hay registros de ingresos</string>
+    <string name="creator_center_assets_empty">Aún no hay obras publicadas</string>
+    <string name="creator_center_status_published">Publicada</string>
+    <string name="creator_center_status_pending">En revisión</string>
+    <string name="creator_center_status_rejected">Rechazada</string>
+    <string name="creator_center_earnings_suffix">Ingresos %1$d</string>
+    <string name="creator_center_downloads_suffix">Descargas %1$d</string>
+    <string name="creator_center_rank_format">Puesto %1$d</string>
+    <string name="creator_center_retry">Reintentar</string>
+
+    <!-- 发帖(小红书式图文帖) -->
+    <string name="create_post_title">Nueva publicación</string>
+    <string name="create_post_publish">Publicar</string>
+    <string name="create_post_publishing">Publicando</string>
+    <string name="create_post_title_label">Título (obligatorio)</string>
+    <string name="create_post_content_label">Di algo...</string>
+    <string name="create_post_images_label">Imágenes (hasta 9)</string>
+    <string name="create_post_tag_label">Etiquetas (opcional)</string>
+
+    <!-- 帖子详情 -->
+    <string name="post_detail_title">Detalle de publicación</string>
+    <string name="post_detail_comments_section">Comentarios %1$d</string>
+    <string name="post_detail_no_comments">Sin comentarios aún, sé el primero</string>
+    <string name="post_detail_comment_hint">Di algo...</string>
+    <string name="post_detail_send">Enviar</string>
+
+    <string name="square_search_title">Buscar</string>
+    <string name="square_search_hint">Buscar ideas, tutoriales, obras</string>
+    <string name="square_search_empty">Introduce una palabra clave para buscar en la plaza</string>
+    <string name="square_search_no_result">Sin resultados</string>
+    <string name="square_search_loading">Buscando…</string>
+    <string name="square_search_failed">Búsqueda fallida, reintenta más tarde</string>
+
+    <string name="user_profile_title">Perfil de usuario</string>
+    <string name="user_profile_posts">Obras %1$d</string>
+    <string name="user_profile_following">Siguiendo %1$d</string>
+    <string name="user_profile_followers">Seguidores %1$d</string>
+    <string name="user_profile_follow">Seguir</string>
+    <string name="user_profile_following_tag">Siguiendo</string>
+    <string name="user_profile_no_posts">Aún no hay obras publicadas</string>
+    <string name="user_profile_load_failed">Error al cargar info del usuario</string>
+
+    <string name="market_kind_skill">Habilidad</string>
+    <string name="market_kind_plugin">Complemento</string>
+    <string name="market_kind_app">App</string>
+    <string name="market_sort_ranking">Ranking</string>
+    <string name="market_sort_latest">Recientes</string>
+    <string name="market_sort_trending">Tendencia</string>
+    <string name="market_category_all">Todas</string>
+    <string name="market_empty">Aún no hay nada en esta categoría, vuelve más tarde</string>
+    <string name="feat_more_title">Más</string>
+    <string name="market_mine_skills">Mis habilidades</string>
+    <string name="market_mine_apps">Mis mini apps</string>
+
+    <!-- 油猴脚本商店 -->
+    <string name="userscript_store_title">Tienda de Userscripts</string>
+    <string name="userscript_tab_installed">Instalados</string>
+    <string name="userscript_tab_recommend">Recomendado</string>
+    <string name="userscript_install">Instalar</string>
+    <string name="userscript_uninstall">Desinstalar</string>
+    <string name="userscript_installed_label">Instalado</string>
+    <string name="userscript_install_from_url">Instalar desde URL</string>
+    <string name="userscript_empty_installed">Aún no hay scripts instalados. Elige uno desde la pestaña "Recomendado".</string>
+    <string name="userscript_installed_toast">Instalado: %1$s</string>
+    <string name="userscript_install_failed_toast">Instalación fallida: %1$s</string>
+
+    <!-- Agent 动作录制 -->
+    <string name="agent_record_started">Grabando…</string>
+    <string name="agent_record_saved">Guardado como Rutina: %1$s</string>
+    <string name="agent_record_empty">No se grabaron llamadas a herramientas</string>
+
+    <string name="remote_workspace_title">Espacio de Trabajo Remoto</string>
+    <string name="remote_workspace_empty">Sin montajes configurados</string>
+    <string name="remote_workspace_add">Añadir Montaje</string>
+    <string name="remote_workspace_mount">Montar</string>
+
+    <!-- LLM Provider UI -->
+    <string name="provider_selector_label">Proveedor</string>
+
+    <!-- Language switcher -->
+    <string name="language_menu_title">Idioma</string>
+    <string name="language_follow_system">Seguir el sistema</string>
+    <string name="language_dialog_title">Seleccionar idioma</string>
+    <string name="language_name_en">English</string>
+    <string name="language_name_zh">简体中文</string>
+    <string name="language_name_ja">日本語</string>
+    <string name="language_name_ko">한국어</string>
+    <string name="language_name_es">Español</string>
+    <string name="language_name_pt">Português</string>
+</resources>

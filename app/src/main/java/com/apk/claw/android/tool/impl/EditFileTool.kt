@@ -4,6 +4,7 @@ import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolParameter
 import com.apk.claw.android.tool.ToolResult
 import com.apk.claw.android.tool.ToolRegistry
+import com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceCache
 import com.apk.claw.android.utils.KVUtils
 import java.io.File
 
@@ -78,7 +79,22 @@ class EditFileTool : BaseTool() {
             return ToolResult.error("Access denied: path '$path' not in workspace or Download/Documents.")
         }
 
-        val file = File(path)
+        // remote://<mountId>/<path>: 通过 RemoteWorkspaceCache 解析为本地缓存文件
+        val isRemote = RemoteWorkspaceCache.PathParser.isRemote(path)
+        val (localPath, remoteMountId, remotePath) = if (isRemote) {
+            val parsed = RemoteWorkspaceCache.PathParser.parse(path)
+                ?: return ToolResult.error("Invalid remote path: $path")
+            val localFile = try {
+                RemoteWorkspaceCache.getLocalPath(parsed.first, parsed.second)
+            } catch (e: Exception) {
+                return ToolResult.error("Failed to pull remote file: ${e.message}")
+            }
+            Triple(localFile.absolutePath, parsed.first, parsed.second)
+        } else {
+            Triple(path, "", "")
+        }
+
+        val file = File(localPath)
 
         // ── 文件不存在时:按 create_if_missing 决定 ──
         if (!file.exists()) {
@@ -88,6 +104,9 @@ class EditFileTool : BaseTool() {
             file.parentFile?.takeIf { !it.exists() }?.mkdirs()
             runCatching { file.writeText(newText) }
                 .onFailure { return ToolResult.error("Failed to create file: ${it.message}") }
+            if (isRemote) {
+                RemoteWorkspaceCache.markDirty(remoteMountId, remotePath)
+            }
             val diff = buildUnifiedDiff(path, "", newText)
             return ToolResult.successWithDiff(
                 "Created file: $path (${newText.length} chars).",
@@ -124,6 +143,11 @@ class EditFileTool : BaseTool() {
         runCatching { file.writeText(updated) }
             .onFailure { return ToolResult.error("Failed to write file: ${it.message}") }
 
+        // 远程文件:标记 dirty,等待 workspace_push 推送
+        if (isRemote) {
+            RemoteWorkspaceCache.markDirty(remoteMountId, remotePath)
+        }
+
         val diff = buildUnifiedDiff(path, original, updated)
         val changeSummary = if (newText.isEmpty()) "deleted ${oldText.length} chars"
             else "replaced ${oldText.length} chars with ${newText.length} chars"
@@ -133,8 +157,13 @@ class EditFileTool : BaseTool() {
         )
     }
 
-    /** 路径安全:工作空间(会话级优先)或 Download/Documents,与 ScriptSandbox 同源规则。 */
+    /** 路径安全:工作空间(会话级优先)或 Download/Documents,与 ScriptSandbox 同源规则。
+     *  remote://<mountId>/<path> 前缀也视为安全（由 RemoteWorkspaceCache 透明处理）。 */
     private fun isPathSafe(path: String): Boolean {
+        // remote:// 前缀:由 RemoteWorkspaceCache 解析为本地缓存文件,缓存目录已是安全沙箱
+        if (RemoteWorkspaceCache.PathParser.isRemote(path)) {
+            return RemoteWorkspaceCache.PathParser.parse(path) != null
+        }
         val normalized = runCatching { File(path).canonicalPath }.getOrNull() ?: return false
         val safePrefixes = listOf(
             "/sdcard/Download/",

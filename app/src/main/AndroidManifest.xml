@@ -172,6 +172,7 @@
         <activity android:name=".ui.featurescreens.MultiWindowActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.VideoLibraryActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.CloudDriveActivity" android:exported="false" />
+        <activity android:name=".ui.featurescreens.RemoteWorkspaceActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.TrustCenterActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.ChannelAclActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.AuditLogActivity" android:exported="false" />

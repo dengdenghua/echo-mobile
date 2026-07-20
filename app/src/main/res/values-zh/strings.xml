@@ -211,6 +211,16 @@
     <string name="protocol_disagree">不同意</string>
     <string name="protocol_agree_continue">同意并继续</string>
 
+    <!-- 唤醒词 -->
+    <string name="wakeword_channel_name">唤醒词监听</string>
+    <string name="wakeword_channel_desc">常驻麦克风监听唤醒词的后台服务通知</string>
+    <string name="wakeword_notification_title">正在监听唤醒词</string>
+    <string name="wakeword_notification_text">说「%1$s」唤起助手</string>
+    <string name="wakeword_feature_title">唤醒词</string>
+    <string name="wakeword_feature_desc">说唤醒词即可唤起助手(需常驻麦克风)</string>
+    <string name="wakeword_privacy_title">常驻麦克风告知</string>
+    <string name="wakeword_privacy_body">开启唤醒词后,App 将在后台持续监听麦克风音频,以检测你设定的唤醒词。\n\n· 音频在本地处理,不会上传\n· 检测到唤醒词后,App 会自动唤起助手界面\n· 你可以随时在通知栏或设置中关闭\n· 关闭后麦克风立即停止采集\n\n请确认你已知晓上述行为并同意继续。</string>
+
     <!-- 悬浮窗 -->
     <string name="floating_ai_label">AI</string>
     <string name="floating_task_received">已收到：\"%s\"</string>
@@ -429,6 +439,7 @@
     <string name="settings_val_devices">2 台设备</string>
     <string name="settings_browser_engine">浏览器引擎</string>
     <string name="settings_cast_control">投屏控制</string>
+    <string name="settings_remote_workspace">远程工作空间</string>
     <string name="settings_plugin_mgmt">插件管理</string>
     <string name="settings_val_plugins_loaded">3 个已加载</string>
     <string name="settings_device_control_section">屏幕与远程控制</string>
@@ -1285,4 +1296,92 @@
     <string name="user_profile_load_failed">加载用户信息失败</string>
     <string name="market_mine_skills">我的技能</string>
     <string name="market_mine_apps">我的小程序</string>
+
+    <!-- 油猴脚本商店 -->
+    <string name="userscript_store_title">脚本商店</string>
+    <string name="userscript_tab_installed">已安装</string>
+    <string name="userscript_tab_recommend">推荐</string>
+    <string name="userscript_install">安装</string>
+    <string name="userscript_uninstall">卸载</string>
+    <string name="userscript_installed_label">已安装</string>
+    <string name="userscript_install_from_url">从 URL 安装</string>
+    <string name="userscript_empty_installed">还没有安装脚本，去「推荐」Tab 选一个吧</string>
+    <string name="userscript_installed_toast">已安装：%1$s</string>
+    <string name="userscript_install_failed_toast">安装失败：%1$s</string>
+
+    <!-- Agent 动作录制 -->
+    <string name="agent_record_started">录制中…</string>
+    <string name="agent_record_saved">已保存为 Routine：%1$s</string>
+    <string name="agent_record_empty">未录到任何工具调用</string>
+
+    <string name="remote_workspace_title">远程工作空间</string>
+    <string name="remote_workspace_empty">暂无挂载点</string>
+    <string name="remote_workspace_add">添加挂载点</string>
+    <string name="remote_workspace_mount">挂载</string>
+
+    <!-- LLM Provider UI -->
+    <string name="provider_selector_label">模型提供商</string>
+
+    <!-- Language switcher -->
+    <string name="language_menu_title">语言</string>
+    <string name="language_follow_system">跟随系统</string>
+    <string name="language_dialog_title">选择语言</string>
+    <string name="language_name_en">English</string>
+    <string name="language_name_zh">简体中文</string>
+    <string name="language_name_ja">日本語</string>
+    <string name="language_name_ko">한국어</string>
+    <string name="language_name_es">Español</string>
+    <string name="language_name_pt">Português</string>
+
+    <!-- 历史缺失 key 补齐 -->
+    <!-- Browser -->
+    <string name="browser_chip_buy">比价</string>
+    <string name="browser_chip_download">下载文件</string>
+    <string name="browser_chip_read">阅读文章</string>
+    <string name="browser_chip_search">深度搜索</string>
+    <string name="browser_desktop_mode_off">已切换到移动模式</string>
+    <string name="browser_desktop_mode_on">已切换到桌面模式</string>
+    <string name="browser_follow_up_detail">更多细节</string>
+    <string name="browser_follow_up_example">举个实际例子</string>
+    <string name="browser_follow_up_summary">总结要点</string>
+    <string name="browser_follow_up_title">追问</string>
+    <string name="browser_home_search_hint">搜索或输入网址</string>
+    <string name="browser_menu_cloud_sync">云同步</string>
+    <string name="browser_menu_dark_mode">深色模式</string>
+    <string name="browser_menu_desktop_mode">桌面模式</string>
+    <string name="browser_menu_downloads">下载</string>
+    <string name="browser_menu_light_mode">浅色模式</string>
+    <string name="browser_menu_mobile_mode">移动模式</string>
+    <string name="browser_menu_record_agent">录制 Agent 操作</string>
+    <string name="browser_menu_share">分享</string>
+    <string name="browser_menu_stealth_off">指纹保护已关闭</string>
+    <string name="browser_menu_stealth_on">指纹保护已开启</string>
+    <string name="browser_menu_stealth_protection">指纹保护</string>
+    <string name="browser_menu_stop_recording">停止录制</string>
+    <string name="browser_menu_translate">翻译</string>
+    <string name="browser_menu_userscript_store">用户脚本商店</string>
+    <string name="browser_reader_button">阅读模式</string>
+    <string name="browser_reader_empty">没有可读内容</string>
+    <string name="browser_reader_title">阅读模式</string>
+    <string name="browser_search_prompt">你是一个智能搜索助手。请简洁地回答用户的问题；可以使用浏览器工具搜索最新信息。\n用户问题：%1$s</string>
+    <string name="browser_share_chooser">分享</string>
+    <string name="browser_sources_count">%1$d 个来源</string>
+    <string name="browser_stealth_switched">已切换到 %1$s 指纹</string>
+    <string name="browser_timeline_empty">暂无历史记录</string>
+    <string name="browser_timeline_title">历史记录</string>
+    <!-- Voice Call -->
+    <string name="voice_call_billing_free">免费分钟数</string>
+    <string name="voice_call_billing_paid">扣除 %1$d 积分</string>
+    <string name="voice_call_close">关闭</string>
+    <string name="voice_call_connecting">正在连接…</string>
+    <string name="voice_call_ended">通话已结束</string>
+    <string name="voice_call_entry">实时语音通话</string>
+    <string name="voice_call_hangup">挂断</string>
+    <string name="voice_call_listening">正在聆听… 请说</string>
+    <string name="voice_call_reason_insufficient">积分不足，请充值或订阅</string>
+    <string name="voice_call_reason_limit">已达单次通话最大时长</string>
+    <string name="voice_call_retry">再次呼叫</string>
+    <string name="voice_call_speaking">正在回应</string>
+    <string name="voice_call_title">实时语音通话</string>
+    <string name="voice_settings_title">语音设置</string>
 </resources>

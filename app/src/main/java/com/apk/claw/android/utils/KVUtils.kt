@@ -3,6 +3,7 @@ package com.apk.claw.android.utils
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.apk.claw.android.agent.LlmProvider
 import com.tencent.mmkv.MMKV
 import java.util.concurrent.ConcurrentHashMap
 
@@ -94,6 +95,20 @@ object KVUtils {
         "cd2_password",
     )
 
+    /** 必须走加密存储的敏感 Key 前缀集合（用于动态 key，如按 mountId 分键的挂载凭据）。
+     *  任何以此集合中前缀开头的 key 都会走 [securePrefs] 加密存储。 */
+    private val SECURE_KEY_PREFIXES = setOf(
+        // 远程工作空间挂载凭据(RemoteWorkspaceMounts)—— 按 mountId 分键
+        "remote_workspace_password_",
+        "remote_workspace_ssh_private_key_",
+        // LLM per-provider API Key —— KEY_LLM_API_KEY_OPENAI / KEY_LLM_API_KEY_DEEPSEEK 等
+        "KEY_LLM_API_KEY_",
+    )
+
+    /** 判断 key 是否应走加密存储（精确匹配或前缀匹配）。 */
+    private fun isSecureKey(key: String): Boolean =
+        key in SECURE_KEYS || SECURE_KEY_PREFIXES.any { key.startsWith(it) }
+
     /**
      * 在 Application.onCreate 中调用初始化
      */
@@ -121,7 +136,7 @@ object KVUtils {
 
     // ==================== String ====================
     fun putString(key: String, value: String?): Boolean {
-        if (key in SECURE_KEYS) {
+        if (isSecureKey(key)) {
             return putSecureString(key, value)
         }
         if (!::mmkv.isInitialized) {
@@ -132,7 +147,7 @@ object KVUtils {
     }
 
     fun getString(key: String, defaultValue: String = ""): String {
-        if (key in SECURE_KEYS) {
+        if (isSecureKey(key)) {
             return getSecureString(key, defaultValue)
         }
         if (!::mmkv.isInitialized) {
@@ -261,14 +276,14 @@ object KVUtils {
 
     // ==================== 常用操作 ====================
     fun contains(key: String): Boolean {
-        if (key in SECURE_KEYS && ::securePrefs.isInitialized) {
+        if (isSecureKey(key) && ::securePrefs.isInitialized) {
             return securePrefs.contains(key)
         }
         return mmkv.containsKey(key)
     }
 
     fun remove(key: String) {
-        if (key in SECURE_KEYS && ::securePrefs.isInitialized) {
+        if (isSecureKey(key) && ::securePrefs.isInitialized) {
             runCatchingLog("KVUtils") { securePrefs.edit().remove(key).commit() }
         }
         // 内存兜底也要清（MMKV 未初始化时 string/bool 走 fallback map）。生产环境 map 为空，无副作用。
@@ -570,16 +585,104 @@ object KVUtils {
     fun isConfigServerEnabled(): Boolean = getBoolean(KEY_CONFIG_SERVER_ENABLED, false)
     fun setConfigServerEnabled(enabled: Boolean) = putBoolean(KEY_CONFIG_SERVER_ENABLED, enabled)
 
+    // ==================== 应用语言 ====================
+    private const val KEY_APP_LANGUAGE = "KEY_APP_LANGUAGE"
+
+    /** 应用语言(BCP-47 tag,如 "zh-CN"/"en-US");空=跟随系统。 */
+    fun getAppLanguage(): String = getString(KEY_APP_LANGUAGE, "")
+
+    fun setAppLanguage(tag: String) = putString(KEY_APP_LANGUAGE, tag)
+
     private const val KEY_LLM_API_KEY = "KEY_LLM_API_KEY"
     private const val KEY_LLM_BASE_URL = "KEY_LLM_BASE_URL"
     private const val KEY_LLM_MODEL_NAME = "KEY_LLM_MODEL_NAME"
+    private const val KEY_LLM_PROVIDER = "KEY_LLM_PROVIDER"
 
-    fun getLlmApiKey(): String = getString(KEY_LLM_API_KEY, "")
-    fun setLlmApiKey(value: String) = putString(KEY_LLM_API_KEY, value)
-    fun getLlmBaseUrl(): String = getString(KEY_LLM_BASE_URL, "")
-    fun setLlmBaseUrl(value: String) = putString(KEY_LLM_BASE_URL, value)
-    fun getLlmModelName(): String = getString(KEY_LLM_MODEL_NAME, "")
-    fun setLlmModelName(value: String) = putString(KEY_LLM_MODEL_NAME, value)
+    // 旧的无参方法转发到 per-provider 方法(使用当前 provider),保留向后兼容。
+    fun getLlmApiKey(): String = getLlmApiKey(getLlmProvider())
+    fun setLlmApiKey(value: String) = setLlmApiKey(getLlmProvider(), value)
+    fun getLlmBaseUrl(): String = getLlmBaseUrl(getLlmProvider())
+    fun setLlmBaseUrl(value: String) = setLlmBaseUrl(getLlmProvider(), value)
+    fun getLlmModelName(): String = getLlmModelName(getLlmProvider())
+    fun setLlmModelName(value: String) = setLlmModelName(getLlmProvider(), value)
+
+    // ==================== LLM Provider 独立配置(per-provider 持久化)====================
+    // 每个 provider 独立保存 apiKey/baseUrl/modelName,key = KEY_LLM_API_KEY_${provider.name} 等。
+    // 切换 provider 时不会覆盖其他 provider 的配置。
+    fun getLlmApiKey(provider: LlmProvider): String =
+        getString("KEY_LLM_API_KEY_${provider.name}", "")
+    fun setLlmApiKey(provider: LlmProvider, value: String) =
+        putString("KEY_LLM_API_KEY_${provider.name}", value)
+    fun getLlmBaseUrl(provider: LlmProvider): String =
+        getString("KEY_LLM_BASE_URL_${provider.name}", "")
+    fun setLlmBaseUrl(provider: LlmProvider, value: String) =
+        putString("KEY_LLM_BASE_URL_${provider.name}", value)
+    fun getLlmModelName(provider: LlmProvider): String =
+        getString("KEY_LLM_MODEL_NAME_${provider.name}", "")
+    fun setLlmModelName(provider: LlmProvider, value: String) =
+        putString("KEY_LLM_MODEL_NAME_${provider.name}", value)
+
+    /**
+     * 读取已保存的 LLM provider。
+     *
+     * 向后兼容:旧版本 App 存的 provider 名仍是 OPENAI/ANTHROPIC/LOCAL,直接 valueOf 可读;
+     * 若读到未知值(老值被人工改坏 / 跨版本 enum 名变更),fallback 到 OPENAI 而非抛异常,
+     * 避免在 Application.onCreate 链路里崩 → App 起不来。
+     */
+    fun getLlmProvider(): LlmProvider {
+        val name = getString(KEY_LLM_PROVIDER, LlmProvider.OPENAI.name)
+        return try {
+            LlmProvider.valueOf(name)
+        } catch (_: IllegalArgumentException) {
+            LlmProvider.OPENAI
+        }
+    }
+
+    fun setLlmProvider(value: LlmProvider) = putString(KEY_LLM_PROVIDER, value.name)
+
+    /**
+     * 旧版 LLM 配置迁移:把无 provider 后缀的旧 key 拷贝到 OPENAI 的 per-provider key。
+     *
+     * - 旧 key(KEY_LLM_API_KEY / KEY_LLM_BASE_URL / KEY_LLM_MODEL_NAME)非空,
+     *   且对应的 _OPENAI key 为空时,拷贝过去。
+     * - 不删除旧 key(避免回滚风险)。
+     * - 幂等:多次调用效果相同(只在 _OPENAI 为空时拷贝)。
+     *
+     * 应在 Application.onCreate(KVUtils.init 之后)调用一次。
+     */
+    fun migrateLegacyLlmConfigIfNeeded() {
+        val targetProvider = LlmProvider.OPENAI
+        // API Key
+        val legacyApiKey = getString(KEY_LLM_API_KEY, "")
+        if (legacyApiKey.isNotEmpty()) {
+            val newKey = "KEY_LLM_API_KEY_${targetProvider.name}"
+            if (getString(newKey, "").isEmpty()) {
+                putString(newKey, legacyApiKey)
+            }
+        }
+        // Base URL
+        val legacyBaseUrl = getString(KEY_LLM_BASE_URL, "")
+        if (legacyBaseUrl.isNotEmpty()) {
+            val newKey = "KEY_LLM_BASE_URL_${targetProvider.name}"
+            if (getString(newKey, "").isEmpty()) {
+                putString(newKey, legacyBaseUrl)
+            }
+        }
+        // Model Name
+        val legacyModelName = getString(KEY_LLM_MODEL_NAME, "")
+        if (legacyModelName.isNotEmpty()) {
+            val newKey = "KEY_LLM_MODEL_NAME_${targetProvider.name}"
+            if (getString(newKey, "").isEmpty()) {
+                putString(newKey, legacyModelName)
+            }
+        }
+        // Provider:旧 key 非空但 provider 未显式设置时,显式写入 OPENAI(默认即 OPENAI,幂等)
+        if ((legacyApiKey.isNotEmpty() || legacyBaseUrl.isNotEmpty() || legacyModelName.isNotEmpty())
+            && !contains(KEY_LLM_PROVIDER)
+        ) {
+            putString(KEY_LLM_PROVIDER, LlmProvider.OPENAI.name)
+        }
+    }
 
     /** 是否已配置 LLM（API Key 非空即视为已配置） */
     fun hasLlmConfig(): Boolean = getLlmApiKey().isNotEmpty()

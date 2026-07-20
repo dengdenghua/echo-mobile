@@ -122,8 +122,9 @@ object ScriptSandbox {
     @Suppress("ReturnCount")
     private fun sanitizedWorkspacePrefix(): String? {
         // 优先读会话级工作空间(类似 Codex --cd 选定项目目录),为 null 时回退全局默认。
-        // ToolRegistry.currentWorkspace() 由 ChatAgentBridge.run → service.setWorkspace 注入 ThreadLocal。
-        val ws = ToolRegistry.getInstance().currentWorkspace() ?: KVUtils.getScriptWorkspace()
+        // ToolRegistry.currentWorkspaceLocalPath() 由 ChatAgentBridge.run → service.setWorkspace 注入 ThreadLocal;
+        // 对 remote://<mountId>/ 工作空间,返回本地缓存目录路径(context.cacheDir/remote_workspace/<mountId>)。
+        val ws = ToolRegistry.getInstance().currentWorkspaceLocalPath() ?: KVUtils.getScriptWorkspace()
         if (ws.isBlank()) return null
         val canon = try { File(ws).canonicalPath } catch (_: Exception) { return null }
         if (canon in FORBIDDEN_WORKSPACE_ROOTS) return null
@@ -286,10 +287,15 @@ object ScriptSandbox {
         installDatetime(cx, scope)
         installUuid(scope)
         installCallToolAsync(scope)
-        // WORKSPACE 全局常量 —— 优先会话级工作空间,回退全局默认
-        val workspace = ToolRegistry.getInstance().currentWorkspace() ?: KVUtils.getScriptWorkspace()
+        // WORKSPACE 全局常量 —— 优先会话级工作空间(对 remote:// 已解析为本地缓存目录),回退全局默认
+        val workspace = ToolRegistry.getInstance().currentWorkspaceLocalPath() ?: KVUtils.getScriptWorkspace()
         File(workspace).mkdirs()
         ScriptableObject.putProperty(scope, "WORKSPACE", workspace)
+        // 暴露远程工作空间前缀(若有),供脚本通过 edit_file(path="remote://...") 透明编辑远程文件
+        val remoteWs = ToolRegistry.getInstance().currentWorkspace()
+        if (remoteWs != null && remoteWs.startsWith("remote://")) {
+            ScriptableObject.putProperty(scope, "REMOTE_WORKSPACE", remoteWs)
+        }
         return scope
     }
 

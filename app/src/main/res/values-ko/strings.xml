@@ -1,0 +1,1398 @@
+<resources>
+    <string name="app_name">Octopus Mobile</string>
+
+    <!-- AppWidget -->
+    <string name="widget_subtitle_default">탭하여 실행 · 길게 눌러 음성</string>
+    <string name="widget_voice">음성 비서</string>
+    <string name="widget_browser">브라우저</string>
+
+    <!-- Common -->
+    <string name="common_confirm">확인</string>
+    <string name="common_cancel">취소</string>
+    <string name="common_close">닫기</string>
+    <string name="common_save">저장</string>
+    <string name="common_delete">삭제</string>
+    <string name="common_more">더보기</string>
+    <string name="common_agree">동의</string>
+    <string name="common_bound">연결됨</string>
+    <string name="common_unbound">연결되지 않음</string>
+    <string name="common_unconfigured">구성되지 않음</string>
+    <string name="common_unbound_success">연결 해제됨</string>
+    <string name="channel_dingtalk">DingTalk</string>
+    <string name="channel_feishu">Feishu</string>
+    <string name="channel_qq">QQ</string>
+    <string name="channel_discord">Discord</string>
+    <string name="channel_telegram">Telegram</string>
+    <string name="channel_wechat">WeChat</string>
+    <string name="common_load_failed">로드 실패: %s</string>
+
+    <string name="app_slogan">휴대폰 작업을 완수하는 스마트 비서</string>
+
+    <!-- Guide -->
+    <string name="guide_page_title">권한</string>
+    <string name="guide_page_subtitle">앱이 휴대폰 작업을 안정적으로 수행할 수 있도록 다음 권한을 활성화하세요</string>
+    <string name="guide_skip">건너뛰기</string>
+    <string name="guide_start">시작하기</string>
+    <string name="guide_all_done">모두 완료</string>
+    <string name="guide_tap_to_setup">탭하여 설정</string>
+    <string name="guide_status_done">활성화됨</string>
+    <string name="guide_status_pending">활성화되지 않음</string>
+    <string name="guide_title_accessibility">접근성 서비스</string>
+    <string name="guide_desc_accessibility">기기 제어를 위한 핵심 권한입니다.
+
+1. 시스템 설정 → 접근성 → 다운로드된 앱으로 이동
+2. 목록에서 "Octopus Mobile"을 찾으세요
+3. 스위치를 켜세요
+4. 시스템 대화상자에서 확인하세요</string>
+    <string name="guide_title_notification">상태 알림</string>
+    <string name="guide_desc_notification">앱이 백그라운드에서 안정적으로 실행되도록 유지하고 시스템에 의해 중단될 확률을 줄입니다.\n\n이 항목을 탭하여 활성화하세요. Android 13+는 먼저 알림 권한을 요청합니다.</string>
+    <string name="guide_title_overlay">오버레이 창</string>
+    <string name="guide_desc_overlay">작업 실행 상태를 보기 위해 플로팅 패널을 표시합니다.
+
+1. 시스템 설정 → 앱 → Octopus Mobile로 이동
+2. "다른 앱 위에 표시"를 찾으세요
+3. 스위치를 켜세요</string>
+    <string name="guide_title_battery">배터리 화이트리스트</string>
+    <string name="guide_desc_battery">시스템이 백그라운드에서 앱을 중단하는 것을 방지합니다.\n\n이 항목을 탭하고 시스템 대화상자에서 "허용"을 확인하세요. 일부 기기는 "제한 없음"으로 설정해야 합니다.</string>
+    <string name="guide_title_storage">파일 접근</string>
+    <string name="guide_desc_storage">기기 파일 읽기 및 쓰기를 허용합니다.\n\nAndroid 11+: 시스템 설정에서 "모든 파일 접근"을 활성화하세요.\nAndroid 10 이하: 팝업에서 권한을 부여하세요.</string>
+
+    <!-- Advanced (Shizuku) permission card -->
+    <string name="home_card_advanced_title">고급 기능 (선택 사항)</string>
+    <string name="home_card_advanced_subtitle">보호된 팝업 처리 및 보안 창 캡처</string>
+    <string name="advanced_dialog_title">Shizuku를 통해 고급 기능 활성화</string>
+    <string name="advanced_dialog_intro">기본적으로 Android 접근성 API가 사용되며, 대부분의 앱 작업에 충분합니다. 일부 기능은 Shizuku가 필요합니다:
+
+• 권한/시스템 팝업 탭 (FLAG_SECURE)
+• DRM 보호 화면 캡처
+• 앱 강제 종료, 시스템 설정 수정
+
+Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
+    <string name="advanced_dialog_steps">설정 단계:\n1. Play Store 또는 GitHub에서 Shizuku 설치\n2. 무선 디버깅(Android 11+) 또는 PC ADB를 통해 한 번 시작\n3. 여기로 돌아오면 Octopus가 자동으로 감지합니다</string>
+    <string name="advanced_dialog_status_ready">✓ Shizuku가 준비되었으며, 고급 기능이 활성화되었습니다</string>
+    <string name="advanced_dialog_status_installed_no_perm">Shizuku가 설치되었지만 인증되지 않았습니다. 인증을 완료하려면 Shizuku를 여세요.</string>
+    <string name="advanced_dialog_status_not_installed">Shizuku가 아직 설치되지 않았습니다.</string>
+    <string name="advanced_action_open_shizuku">Shizuku 열기</string>
+    <string name="advanced_action_install">Shizuku 설치</string>
+    <string name="advanced_action_downloading">다운로드 중…</string>
+    <string name="advanced_install_fetching">Octopus 공식 사이트에 연결 중…</string>
+    <string name="advanced_install_downloading">Shizuku 설치 프로그램 다운로드 중…</string>
+    <string name="advanced_install_opening">설치 프로그램이 다운로드되었습니다. 시스템 설치 프로그램을 엽니다.</string>
+    <string name="advanced_install_not_configured">공식 사이트에 Shizuku 설치 프로그램이 구성되지 않았습니다. 나중에 다시 시도하세요.</string>
+    <string name="advanced_install_verify_failed">설치 프로그램 인증에 실패했습니다. 나중에 다시 시도하세요.</string>
+    <string name="advanced_install_failed">다운로드 및 설치에 실패했습니다. 네트워크를 확인하고 다시 시도하세요.</string>
+    <string name="advanced_install_unknown_sources_required">먼저 Octopus가 출처를 알 수 없는 앱을 설치하도록 허용한 다음 돌아와서 다시 시도하세요.</string>
+    <string name="advanced_action_learn_more">자세히 알아보기</string>
+    <string name="advanced_action_close">닫기</string>
+    <string name="advanced_url_download">https://shizuku.rikka.app/download/</string>
+    <string name="advanced_url_guide">https://shizuku.rikka.app/guide/setup/</string>
+
+    <!-- Home -->
+    <string name="home_need_notification_permission">알림 권한이 필요합니다</string>
+    <string name="home_enable_accessibility">Octopus Mobile 접근성 서비스를 활성화하세요</string>
+    <string name="home_accessibility_enabled">접근성 서비스가 활성화되었습니다</string>
+    <string name="home_notification_enabled">상태 알림이 활성화되었습니다</string>
+    <string name="home_overlay_enabled">오버레이 권한이 활성화되었습니다</string>
+    <string name="home_battery_ignored">배터리 최적화가 무시되었습니다</string>
+    <string name="home_permission_enabled">활성화됨</string>
+    <string name="home_card_accessibility_title">접근성 서비스</string>
+    <string name="home_card_accessibility_subtitle">자동화된 휴대폰 제어에 사용</string>
+    <string name="home_card_notification_title">상태 알림</string>
+    <string name="home_card_notification_subtitle">실행 상태 표시</string>
+    <string name="home_card_system_window_title">시스템 오버레이</string>
+    <string name="home_card_system_window_subtitle">실행 단계 및 제어판 표시</string>
+    <string name="home_card_battery_title">배터리 화이트리스트</string>
+    <string name="home_card_battery_subtitle">백그라운드 작업이 중단되지 않도록 방지</string>
+    <string name="home_card_storage_title">파일 접근</string>
+    <string name="home_card_storage_subtitle">기기 파일 읽기 및 쓰기</string>
+    <string name="home_storage_enabled">파일 접근 권한이 부여됨</string>
+    <string name="home_enable_storage">모든 파일에 대한 접근을 허용하세요</string>
+    <string name="home_cancel_task">현재 작업 중지</string>
+    <string name="home_cancel_task_success">작업이 중지됨</string>
+    <string name="home_no_task_running">현재 실행 중인 작업이 없습니다</string>
+
+    <!-- Settings -->
+    <string name="settings_title">설정</string>
+    <string name="settings_group_channel">채널</string>
+    <string name="settings_group_model">모델</string>
+
+    <!-- Unbind -->
+    <string name="unbind_title">연결 해제</string>
+    <string name="unbind_message">%1$s 연결을 해제하시겠습니까? 더 이상 %2$s를 통해 메시지를 받지 않습니다.</string>
+    <string name="unbind_action">연결 해제</string>
+
+    <!-- Channel Config -->
+    <string name="channel_config_dingtalk_title">DingTalk 설정</string>
+    <string name="channel_config_feishu_title">Feishu 설정</string>
+    <string name="channel_config_dingtalk_tip">DingTalk에 연결하려면 Client ID와 Client Secret을 입력하세요</string>
+    <string name="channel_config_feishu_tip">Feishu에 연결하려면 App ID와 App Secret을 입력하세요</string>
+    <string name="channel_config_dingtalk_hint1">Client ID 입력</string>
+    <string name="channel_config_dingtalk_hint2">Client Secret 입력</string>
+    <string name="channel_config_feishu_hint1">App ID 입력</string>
+    <string name="channel_config_feishu_hint2">App Secret 입력</string>
+    <string name="channel_config_qq_title">QQ 설정</string>
+    <string name="channel_config_qq_tip">QQ 봇 App ID와 App Secret을 입력하세요 (QQ Open Platform에서)</string>
+    <string name="channel_config_qq_hint1">App ID 입력</string>
+    <string name="channel_config_qq_hint2">App Secret 입력</string>
+    <string name="channel_config_discord_title">Discord 설정</string>
+    <string name="channel_config_discord_tip">Bot Token을 입력하세요 (Discord Developer Portal의 Bot 페이지에서). Message Content Intent를 활성화하세요.</string>
+    <string name="channel_config_discord_hint1">Bot Token 입력</string>
+    <string name="channel_config_telegram_title">Telegram 설정</string>
+    <string name="channel_config_telegram_tip">Bot Token을 입력하세요 (Telegram에서 @BotFather를 통해 봇 생성)</string>
+    <string name="channel_config_telegram_hint1">Bot Token 입력</string>
+    <string name="channel_config_wechat_title">WeChat 설정</string>
+    <string name="channel_config_wechat_tip">WeChat으로 QR 코드를 스캔하여 인증하세요. 확인 후 Token과 API 주소가 자동으로 저장됩니다.</string>
+    <string name="channel_config_wechat_btn_scan">QR 코드 가져오기</string>
+    <string name="channel_config_wechat_scanning">스캔 대기 중…</string>
+    <string name="channel_config_wechat_confirmed">인증 확인됨</string>
+    <string name="wechat_qr_failed">WeChat QR 코드 가져오기 실패</string>
+    <string name="wechat_unsupported_media">%s 메시지를 받았습니다. 지원되지 않는 유형입니다. 텍스트 명령을 보내세요.</string>
+    <string name="wechat_media_image">이미지</string>
+    <string name="wechat_media_video">비디오</string>
+    <string name="wechat_media_file">파일</string>
+    <string name="wechat_media_voice">음성</string>
+    <string name="wechat_media_unknown">미디어</string>
+    <string name="channel_config_saved">구성이 저장되었습니다</string>
+    <string name="channel_config_lan_hint">브라우저를 통해 구성하려면 설정에서 "LAN 구성"을 활성화하세요</string>
+    <string name="channel_config_lan_hint_running">브라우저에서 %s을(를) 열어 구성하세요</string>
+    <string name="channel_config_lan_copied">주소가 복사되었습니다</string>
+
+    <!-- LLM Config -->
+    <string name="llm_config_title">모델 설정</string>
+    <string name="llm_config_tip">모델 API Key, Base URL 및 모델 이름을 입력하세요. 데이터는 로컬에만 저장됩니다.</string>
+    <string name="llm_config_api_key">API Key</string>
+    <string name="llm_config_api_key_hint">예: sk-xxx 또는 공급자 키</string>
+    <string name="llm_config_base_url">Base URL</string>
+    <string name="llm_config_base_url_hint">예: https://api.deepseek.com/v1 (비워두면 DeepSeek 기본값 사용)</string>
+    <string name="llm_config_model_name">모델 이름</string>
+    <string name="llm_config_model_name_hint">예: gpt-4o, gpt-4o-mini, claude-3-5-sonnet</string>
+    <string name="llm_config_saved">모델 구성이 저장되었습니다</string>
+    <string name="llm_config_api_key_required">API Key를 입력하세요</string>
+    <!-- API Key Pool -->
+    <string name="key_pool_section">API Key 풀 (다중 키 자동 전환)</string>
+    <string name="key_pool_tip">기본 키가 실패하면(401/429/5xx) 자동으로 백업 키로 전환하여 가용성을 높입니다. 기본 키는 항상 위에 입력한 키입니다. 이 섹션은 백업 키만 관리합니다.</string>
+    <string name="key_pool_enable">키 풀 활성화</string>
+    <string name="key_pool_add">백업 키 추가</string>
+    <string name="key_pool_add_hint">백업 API Key 입력 (sk-xxx)</string>
+    <string name="key_pool_empty">아직 백업 키가 없습니다</string>
+    <string name="key_pool_status">총 %1$d개 키: %2$s</string>
+    <string name="key_pool_disabled_tag">비활성화됨</string>
+    <string name="key_pool_cooldown_tag">냉각 중</string>
+    <string name="key_pool_primary_tag">기본</string>
+    <string name="key_pool_reset">통계 재설정</string>
+    <string name="key_pool_remove">제거</string>
+    <string name="key_pool_clear_all">백업 키 지우기</string>
+    <string name="key_pool_add_duplicate">이 키는 이미 존재합니다</string>
+    <string name="key_pool_add_empty">키는 비워둘 수 없습니다</string>
+    <string name="key_pool_add_success">백업 키가 추가되었습니다</string>
+    <string name="key_pool_clear_confirm">모든 백업 키를 지우시겠습니까? 기본 키는 유지됩니다.</string>
+    <string name="key_pool_remove_confirm">이 백업 키를 제거하시겠습니까?</string>
+    <string name="key_pool_pick_action">작업 선택</string>
+    <string name="vision_config_section">비전 모델 (화면 읽기)</string>
+    <string name="vision_config_tip">접근성 트리로 화면을 이해하기에 충분하지 않을 때 사용됩니다(게임, 캔버스, 이미지 등). 세 가지를 모두 비워두면 위의 주 모델을 재사용합니다(이미지 입력을 지원해야 함).</string>
+    <string name="vision_config_base_url_hint">예: https://dashscope.aliyuncs.com/compatible-mode/v1</string>
+    <string name="vision_config_model_name_hint">예: qwen-vl-max, gpt-4o, glm-4v</string>
+    <string name="menu_llm_config">모델 설정</string>
+
+    <!-- Settings Menu -->
+    <string name="menu_dingtalk">DingTalk</string>
+    <string name="menu_feishu">Feishu</string>
+    <string name="menu_qq">QQ</string>
+    <string name="menu_discord">Discord</string>
+    <string name="menu_telegram">Telegram</string>
+    <string name="menu_wechat">WeChat</string>
+    <string name="menu_lan_config">LAN 구성</string>
+    <string name="lan_config_stopped">중지됨</string>
+    <string name="lan_config_no_wifi">먼저 Wi-Fi에 연결하세요</string>
+
+    <!-- Protocol -->
+    <string name="protocol_agree_title">개인정보 통지</string>
+    <string name="protocol_alert_title">약관 &amp; 개인정보</string>
+    <string name="protocol_disagree">동의하지 않음</string>
+    <string name="protocol_agree_continue">동의하고 계속</string>
+
+    <!-- Wake Word -->
+    <string name="wakeword_channel_name">웨이크 워드 수신</string>
+    <string name="wakeword_channel_desc">마이크를 통해 웨이크 워드를 수신하는 백그라운드 서비스 알림</string>
+    <string name="wakeword_notification_title">웨이크 워드 수신 중</string>
+    <string name="wakeword_notification_text">"%1$s"라고 말하여 비서를 호출하세요</string>
+    <string name="wakeword_feature_title">웨이크 워드</string>
+    <string name="wakeword_feature_desc">웨이크 워드를 말하여 비서를 호출합니다(지속적인 마이크 필요)</string>
+    <string name="wakeword_privacy_title">지속적인 마이크 알림</string>
+    <string name="wakeword_privacy_body">웨이크 워드를 활성화하면 앱이 백그라운드에서 마이크 오디오를 지속적으로 수신하여 사용자 지정 웨이크 워드를 감지합니다.\n\n· 오디오는 로컬에서 처리되며 업로드되지 않습니다\n· 웨이크 워드가 감지되면 앱이 자동으로 비서 UI를 호출합니다\n· 알림 표시줄이나 설정에서 언제든지 끌 수 있습니다\n· 끄면 마이크 캡처가 즉시 중지됩니다\n\n위 내용을 이해하고 동의하면 계속하세요.</string>
+
+    <!-- Floating -->
+    <string name="floating_ai_label">AI</string>
+    <string name="floating_task_received">수신됨: "%s"</string>
+
+    <!-- Foreground Service Notification -->
+    <string name="notification_channel_name">Octopus Mobile 상태</string>
+    <string name="notification_channel_description">Octopus Mobile의 실행 상태 및 통계를 표시합니다</string>
+    <string name="notification_content_title">Octopus Mobile이 실행 중입니다</string>
+    <string name="notification_content_text">스마트 작업 서비스가 실행 중입니다</string>
+
+    <!-- Channel Messages -->
+    <string name="channel_msg_task_cancelled">작업이 수동으로 취소되었습니다</string>
+    <string name="channel_msg_service_not_ready">서비스가 준비되지 않았습니다. 나중에 다시 시도하세요</string>
+    <string name="channel_msg_tool_success">성공</string>
+    <string name="channel_msg_tool_failure">실패</string>
+    <string name="channel_msg_tool_execution">[%1$s]: %2$s</string>
+    <string name="channel_msg_task_error">오류: %s</string>
+    <string name="channel_msg_no_accessibility">접근성 권한이 없어 작업을 실행할 수 없습니다</string>
+    <string name="channel_msg_task_in_progress">이미 작업이 실행 중입니다. 기다려 주세요</string>
+    <string name="channel_msg_system_dialog_blocked">시스템 대화상자가 화면을 가로막고 있을 수 있습니다. 수동으로 처리한 후 다시 시도하세요.</string>
+
+    <!-- Accessibility -->
+    <string name="cd_back_button">뒤로</string>
+    <string name="cd_settings">설정</string>
+    <string name="cd_clear_input">입력 지우기</string>
+    <string name="cd_checkbox">옵션 전환</string>
+    <string name="cd_selected">선택됨</string>
+    <string name="cd_task_success">작업 성공</string>
+    <string name="cd_task_error">작업 실패</string>
+    <string name="cd_channel_logo">채널 아이콘</string>
+    <string name="cd_app_logo">앱 아이콘</string>
+    <string name="cd_qr_code">QR 코드</string>
+    <string name="cd_toggle_password">비밀번호 표시 또는 숨기기</string>
+    <string name="cd_copy">복사</string>
+    <string name="cd_arrow_right">더보기</string>
+    <string name="cd_empty_state">데이터 없음</string>
+    <string name="cd_error_state">로드 실패</string>
+
+    <!-- Agent -->
+    <string name="agent_accessibility_not_enabled">접근성 서비스가 활성화되지 않았습니다</string>
+    <string name="agent_task_cancelled">작업이 취소되었습니다</string>
+    <string name="agent_task_completed">작업이 완료되었습니다</string>
+    <string name="agent_task_cancel">작업 취소</string>
+    <string name="agent_api_call_failed">스마트 서비스 호출 실패: %s</string>
+    <string name="agent_empty_response">모델이 일시적으로 응답하지 않습니다(업스트림 서비스 변동일 수 있음)</string>
+    <string name="agent_max_iterations">최대 반복에 도달함(%d), 작업이 아직 완료되지 않음</string>
+
+    <!-- File Tool -->
+    <string name="tool_no_storage_permission">파일 읽기/쓰기 권한이 없습니다</string>
+    <string name="tool_file_not_found">파일을 찾을 수 없음: %s</string>
+    <string name="tool_not_a_file">경로가 파일이 아님: %s</string>
+    <string name="tool_no_task_channel">활성 작업 채널이 없습니다</string>
+    <string name="tool_file_sent">파일 전송됨: %s</string>
+    <string name="tool_file_send_failed">파일 전송 실패: %s</string>
+
+    <!-- Tool Names -->
+    <string name="tool_name_screenshot">스크린샷</string>
+    <string name="tool_name_send_file">파일 보내기</string>
+    <string name="tool_name_wait">대기</string>
+
+    <!-- 100 행扩展示例工具（EXTENDING.md） -->
+    <string name="tool_name_current_time">현재 시간</string>
+    <string name="tool_name_device_info">기기 정보</string>
+    <string name="tool_name_hello_world">샘플 도구</string>
+    <string name="tool_name_get_screen_info">화면 읽기</string>
+    <string name="tool_name_finish">작업 종료</string>
+    <string name="tool_name_open_app">앱 열기</string>
+    <string name="tool_name_get_installed_apps">설치된 앱</string>
+    <string name="tool_name_system_key">시스템 키</string>
+    <string name="tool_name_tap">탭</string>
+    <string name="tool_name_swipe">스와이프</string>
+    <string name="tool_name_input_text">텍스트 입력</string>
+    <string name="tool_name_find_node_info">노드 찾기</string>
+    <string name="tool_name_long_press">길게 누르기</string>
+    <string name="tool_name_repeat_actions">작업 반복</string>
+    <string name="tool_name_volume_up">볼륨 증가</string>
+    <string name="tool_name_volume_down">볼륨 감소</string>
+    <string name="tool_name_dpad_up">D-pad 위</string>
+    <string name="tool_name_dpad_down">D-pad 아래</string>
+    <string name="tool_name_dpad_left">D-pad 왼쪽</string>
+    <string name="tool_name_dpad_right">D-pad 오른쪽</string>
+    <string name="tool_name_dpad_center">D-pad 중앙</string>
+    <string name="tool_name_press_menu">메뉴 키</string>
+    <string name="tool_name_press_power">전원 키</string>
+    <string name="tool_name_search_app">앱 검색</string>
+    <string name="tool_name_clipboard">클립보드</string>
+    <string name="tool_name_scroll_to_find">스크롤하여 찾기</string>
+
+    <!-- Path A: 个人上下文工具 -->
+    <string name="tool_name_send_intent">인텐트 보내기</string>
+    <string name="tool_name_read_sms">SMS 읽기</string>
+    <string name="tool_name_read_calendar">캘린더 읽기</string>
+    <string name="tool_name_get_usage_stats">앱 사용 통계</string>
+    <string name="tool_name_send_sms">SMS 보내기</string>
+
+    <!-- Extendroid Window Management Tools -->
+    <string name="tool_name_launch_freeform">자유 형식 창 열기</string>
+    <string name="tool_name_resize_window">창 크기 조정</string>
+    <string name="tool_name_get_window_info">창 정보 가져오기</string>
+
+    <!-- AI NAS File Management Tools -->
+    <string name="tool_name_browse_files">파일 탐색</string>
+    <string name="tool_name_search_files">파일 검색</string>
+    <string name="tool_name_file_ops">파일 작업</string>
+    <string name="tool_name_backup_app">앱 백업</string>
+    <string name="tool_name_navigate">스마트 탐색</string>
+    <string name="tool_name_media_player">미디어 플레이어</string>
+
+    <!-- Input Dialog -->
+    <string name="input_dialog_need_more">최소 %d자 이상 입력하세요</string>
+    <string name="input_dialog_need_less">최대 %d자 이하로 입력하세요</string>
+    <string name="input_dialog_no_zero">0이 아닌 값을 입력하세요</string>
+
+    <!-- DiscoverScreen (Compose) -->
+    <string name="discover_search_hint">검색하거나 명령을 입력하세요…</string>
+    <string name="discover_shortcut_browser">브라우저</string>
+    <string name="discover_shortcut_clouddrive">클라우드 드라이브</string>
+    <string name="discover_shortcut_video">비디오</string>
+    <string name="discover_shortcut_plugin">스킬</string>
+    <string name="discover_shortcut_extension">확장 프로그램</string>
+    <string name="discover_shortcut_cast">캐스트</string>
+    <string name="discover_shortcut_multiwindow">멀티 창</string>
+    <string name="discover_shortcut_memory">메모리</string>
+    <string name="discover_shortcut_evolution">자가 최적화</string>
+    <string name="discover_suggest_weather">날씨</string>
+    <string name="discover_suggest_organize">클라우드 드라이브 정리</string>
+    <string name="discover_suggest_resume">이어보기</string>
+    <string name="discover_status_memory">5개 메모리</string>
+    <string name="discover_status_rules">2개 규칙</string>
+    <string name="discover_stat_sessions">%1$d 세션</string>
+    <string name="discover_stat_a11y_on">접근성 켜짐</string>
+    <string name="discover_stat_a11y_off">접근성 꺼짐</string>
+    <string name="discover_stat_llm_on">모델 준비됨</string>
+    <string name="discover_stat_llm_off">모델이 구성되지 않음</string>
+    <string name="workbench_title">휴대폰 작업 워크벤치</string>
+    <string name="workbench_subtitle">이 기기를 온라인 상태로 유지하고, 조작 가능하며, 작업을 자동으로 완료할 수 있게 합니다</string>
+    <string name="workbench_agent_ready">준비됨</string>
+    <string name="workbench_agent_incomplete">설정 필요</string>
+    <string name="workbench_device_card_title">이 휴대폰은 온라인 상태를 유지하고 작업할 수 있습니다</string>
+    <string name="workbench_device_card_target">대상: %1$s</string>
+    <string name="workbench_lan_off">LAN 꺼짐</string>
+    <string name="workbench_action_chat">비서에 넘기기</string>
+    <string name="workbench_metric_sessions">세션</string>
+    <string name="workbench_metric_routines">작업</string>
+    <string name="workbench_metric_target">대상</string>
+    <string name="workbench_section_tasks">작업 공간</string>
+    <string name="workbench_routines_desc">%1$d개 저장된 자동화, 예약 또는 요청 시 실행 가능</string>
+    <string name="workbench_skills_desc">이 휴대폰이 호출할 수 있는 기능 및 도구 관리</string>
+    <string name="workbench_devices_desc">이전 휴대폰 발견 및 온라인 기기 일괄 제어</string>
+    <string name="workbench_activity_desc">최근 완료된 작업 및 감사 로그 검토</string>
+    <string name="workbench_section_templates">작업 템플릿</string>
+    <string name="workbench_section_tools">기기 도구</string>
+    <string name="ai_browser_title">스마트 브라우저</string>
+    <string name="ai_browser_subtitle">웹페이지를 검색, 읽기, 요약 및 조작합니다</string>
+    <string name="ai_browser_omnibox_hint">검색 또는 URL 입력</string>
+    <string name="ai_browser_clean_home">클린 홈</string>
+    <string name="ai_browser_mode_web">웹</string>
+    <string name="ai_browser_mode_ai">스마트 검색</string>
+    <string name="ai_browser_mode_all">전체 웹 검색</string>
+    <string name="ai_browser_voice">음성</string>
+    <string name="ai_browser_camera">카메라</string>
+    <string name="ai_browser_clean">정리</string>
+    <string name="ai_browser_action_ask">현재 페이지에 물어보기</string>
+    <string name="ai_browser_action_ask_desc">브라우저를 열어 ask-page를 통해 요약하거나 번역</string>
+    <string name="ai_browser_action_operate">페이지 조작</string>
+    <string name="ai_browser_action_operate_desc">클릭, 양식 작성 및 웹 작업 완료</string>
+    <string name="ai_browser_extensions_desc">GeckoView 확장 프로그램으로 모바일 브라우저 강화</string>
+    <string name="ai_browser_files_desc">브라우저 작업에서 클라우드 드라이브 및 로컬 파일 접근</string>
+    <string name="ai_browser_section_quick_search">빠른 검색</string>
+    <string name="ai_browser_quick_news">오늘의 AI 휴대폰 뉴스 요약</string>
+    <string name="ai_browser_quick_research">Android 자동화에 대한 신뢰할 수 있는 3개 출처 찾기</string>
+    <string name="ai_browser_quick_shopping">상시 실행 작업용 중고 Android 휴대폰 비교</string>
+    <string name="ai_browser_section_agent">페이지 비서</string>
+    <string name="ai_browser_agent_desc">브라우저는 접근성을 통해 현재 페이지를 읽고, 클릭, 입력, 요약, 번역 또는 웹 작업을 실행할 수 있습니다.</string>
+    <string name="ai_browser_section_automation">자동화</string>
+    <string name="ai_browser_routines_desc">%1$d개 브라우저/기기 자동화</string>
+    <string name="browser_home_title">스마트 브라우저 홈</string>
+    <string name="browser_home_subtitle">검색 또는 URL 입력</string>
+    <string name="browser_home_favorites">즐겨찾기</string>
+    <string name="browser_home_tools">빠른 접근</string>
+    <string name="browser_home_miniapps">내 미니 앱</string>
+    <string name="discover_group_apps">내 앱</string>
+    <string name="discover_group_web">웹</string>
+    <string name="browser_home_miniapp_tag">미니 앱</string>
+    <string name="browser_home_bookmarks">북마크</string>
+    <string name="browser_home_common_sites">자주 방문하는 사이트</string>
+    <string name="browser_home_remove_common_site_title">자주 방문하는 사이트에서 제거하시겠습니까?</string>
+    <string name="browser_home_removed_toast">제거됨</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_discover">발견</string>
+    <string name="nav_workbench">워크벤치</string>
+    <string name="nav_browser">브라우저</string>
+    <string name="nav_chat">채팅</string>
+    <string name="nav_device">기기</string>
+    <string name="nav_settings">설정</string>
+    <string name="nav_agent_square">영감의 광장</string>
+    <string name="nav_universe">유니버스</string>
+
+    <!-- SettingsScreen (Compose) -->
+    <string name="settings_center_badge">기기 제어 센터</string>
+    <string name="settings_subtitle">권한, 모델, 연결 및 이전 휴대폰 런타임 관리</string>
+    <string name="settings_metric_permissions">권한</string>
+    <string name="settings_metric_model">모델</string>
+    <string name="settings_metric_lan">LAN</string>
+    <string name="settings_section_permissions">권한</string>
+    <string name="perm_accessibility">접근성</string>
+    <string name="perm_notification">알림</string>
+    <string name="perm_overlay">오버레이</string>
+    <string name="perm_battery">배터리</string>
+    <string name="perm_storage">저장공간</string>
+    <string name="settings_section_model">모델</string>
+    <string name="settings_local_fallback">로컬 폴백 ✓</string>
+    <string name="settings_section_channels">채널</string>
+    <string name="status_connected">연결됨</string>
+    <string name="status_not_configured">구성되지 않음</string>
+    <string name="status_not_connected">연결되지 않음</string>
+    <string name="settings_section_other">기타</string>
+    <string name="settings_lan_config">LAN 구성</string>
+    <string name="settings_device_mgmt">기기 관리</string>
+    <string name="settings_val_devices">2개 기기</string>
+    <string name="settings_browser_engine">브라우저 엔진</string>
+    <string name="settings_cast_control">캐스트 제어</string>
+    <string name="settings_remote_workspace">원격 워크스페이스</string>
+    <string name="settings_plugin_mgmt">플러그인 관리</string>
+    <string name="settings_val_plugins_loaded">3개 로드됨</string>
+    <string name="settings_device_control_section">화면 &amp; 원격 제어</string>
+    <string name="settings_device_mgmt_desc">연결되고 제어 가능한 이전 휴대폰 관리</string>
+    <string name="settings_plugin_desc">에이전트가 호출할 수 있는 스킬 및 확장 프로그램 관리</string>
+
+    <!-- Shared status -->
+    <string name="status_online">온라인</string>
+    <string name="status_offline">오프라인</string>
+
+    <!-- ChatScreen (Compose) -->
+    <string name="chat_remote">원격</string>
+    <string name="chat_local">로컬</string>
+    <string name="chat_input_hint">휴대폰에서 할 일을 알려주세요...</string>
+    <string name="chat_ack">알겠습니다. 기기에서 실행 중…</string>
+    <string name="chat_thinking">생각 중</string>
+    <string name="chat_empty_hint">한 줄로 알림 확인, 앱 작업, 파일 정리 및 교차 기기 작업을 예약하세요.</string>
+    <string name="chat_empty_title">오늘 휴대폰이 무엇을 해주길 원하시나요?</string>
+    <string name="chat_suggestion_notifications">알림을 보고 중요한 내용을 요약해 주세요</string>
+    <string name="chat_suggestion_files">오늘의 스크린샷을 찾아 폴더로 정리해 주세요</string>
+    <string name="chat_suggestion_app">WeChat을 열어 읽지 않은 메시지를 확인해 주세요</string>
+    <string name="chat_prompt_monitor">알림 확인</string>
+    <string name="chat_prompt_organize">파일 정리</string>
+    <string name="chat_prompt_control">앱 심부름</string>
+    <string name="chat_home_prompts_title">일반 작업</string>
+    <string name="chat_tool_steps">%1$d 도구 단계</string>
+    <string name="chat_new">새 채팅</string>
+    <string name="chat_sessions">세션</string>
+    <string name="chat_agent_ready">준비됨</string>
+    <string name="chat_agent_setup_needed">설정 필요</string>
+    <string name="chat_status_running">실행 중</string>
+    <string name="chat_drawer_subtitle">세션, 대상 기기 및 작업 상태</string>
+    <string name="chat_home_status_title">작업 콘솔</string>
+    <string name="chat_metric_model">모델</string>
+    <string name="chat_metric_target">대상</string>
+    <string name="chat_metric_devices">기기</string>
+    <string name="chat_sessions_today">오늘</string>
+    <string name="chat_sessions_recent">최근 7일</string>
+    <string name="chat_sessions_earlier">이전</string>
+    <string name="chat_clear_current">현재 채팅 지우기</string>
+    <string name="setup_title">시작하려면 설정을 완료하세요</string>
+    <string name="setup_llm">LLM 구성(API Key)</string>
+    <string name="setup_a11y">접근성 서비스 활성화</string>
+    <string name="setup_go">설정으로 이동 ›</string>
+
+    <!-- DeviceScreen (Compose) -->
+    <string name="device_title">기기</string>
+    <string name="device_online_count">%1$d/%2$d 온라인</string>
+    <string name="device_cast">캐스트</string>
+    <string name="device_cast_disconnected">연결되지 않음</string>
+    <string name="device_vision">비전</string>
+    <string name="device_vision_desc">비전 모델 다중 모달 분석\n시스템 대화상자에서 자동 폴백</string>
+    <string name="device_this_device">이 기기</string>
+    <string name="ctrl_screenshot">스크린샷</string>
+    <string name="ctrl_tap">탭</string>
+    <string name="ctrl_open">열기</string>
+    <string name="ctrl_back">뒤로</string>
+    <string name="ctrl_home">홈</string>
+    <string name="ctrl_recents">최근</string>
+    <string name="ctrl_notifications">알림</string>
+    <string name="ctrl_lock">잠금</string>
+    <string name="device_controls">빠른 제어</string>
+    <string name="device_a11y_required">이 기기를 제어하려면 접근성 서비스를 활성화하세요</string>
+    <string name="device_a11y_enable">활성화 ›</string>
+    <string name="device_screenshot_saved">스크린샷이 갤러리에 저장됨</string>
+    <string name="device_screenshot_failed">스크린샷 실패(접근성 또는 Shizuku 필요)</string>
+    <string name="device_android_version">Android %1$s</string>
+    <string name="device_nearby">주변 기기</string>
+    <string name="device_nearby_empty">검색 중… 같은 Wi-Fi의 다른 기기에서 Octopus를 여세요</string>
+    <string name="device_discoverable">%1$s을(를) 검색할 수 있습니다</string>
+    <string name="device_discoverable_off">검색 가능하려면 Wi-Fi에 연결하세요</string>
+    <string name="device_cmd_sent">%1$s에 전송됨</string>
+    <string name="device_cmd_failed">전송 실패(기기가 오프라인일 수 있음)</string>
+    <string name="device_allow_control">LAN 원격 제어 허용</string>
+    <string name="device_allow_control_desc">같은 Wi-Fi의 다른 기기가 이 휴대폰을 제어할 수 있도록 허용합니다. 기본적으로 꺼져 있으며, 신뢰할 수 있는 네트워크에서만 활성화하세요.</string>
+    <string name="device_browser">브라우저</string>
+    <string name="device_tabs">탭</string>
+    <string name="device_extensions">확장 프로그램</string>
+    <string name="badge_active">활성</string>
+    <string name="floating_circle_running_state">실행 중…</string>
+    <string name="floating_circle_success_state">완료</string>
+    <string name="floating_circle_error_state">종료됨</string>
+    <string name="routine_alarm_running_title">루틴 실행 중</string>
+    <string name="routine_alarm_running_text">%1$s\n%2$s</string>
+    <string name="routine_alarm_skipped_title">루틴 건너뜀</string>
+    <string name="routine_alarm_skipped_text">"%1$s"이(가) 트리거되었지만 모델이 구성되지 않았습니다</string>
+    <string name="routine_alarm_retry_title">루틴 대기 중</string>
+    <string name="routine_alarm_retry_text">"%1$s"이(가) 트리거되었지만 에이전트가 사용 중입니다. 재시도 %2$d/%3$d이(가) 나중에 실행됩니다.</string>
+    <string name="routine_alarm_busy_give_up_text">"%1$s"이(가) 트리거되었지만 여러 번 재시도 후에도 에이전트가 여전히 사용 중입니다</string>
+    <string name="browser_loading_text">로드 중...</string>
+    <string name="browser_engine_chip_description">검색 엔진 전환</string>
+    <string name="browser_url_hint">검색 또는 URL 입력</string>
+    <string name="browser_ai_operate_toast">현재 페이지 조작 중...</string>
+    <string name="browser_refresh_button">새로고침</string>
+    <string name="browser_ask_ai_button">AI에게 물어보기</string>
+    <string name="browser_back_button">뒤로</string>
+    <string name="browser_forward_button">앞으로</string>
+    <string name="browser_home_button">홈</string>
+    <string name="browser_bookmarks_button">북마크</string>
+    <string name="browser_ai_sheet_title">AI에 묻기 · 이 페이지에 대하여</string>
+    <string name="browser_accessibility_warning">페이지 내용을 읽으려면 접근성 서비스를 활성화하세요</string>
+    <string name="browser_reading_page">페이지 내용 읽는 중…</string>
+    <string name="browser_ask_page_hint">이 페이지에 물어보기...</string>
+    <string name="browser_chip_summarize">요약</string>
+    <string name="browser_chip_key_points">핵심 포인트</string>
+    <string name="browser_chip_translate">번역</string>
+    <string name="browser_chip_reader">리더 모드</string>
+    <string name="browser_chip_speak">소리 내어 읽기</string>
+    <string name="browser_input_ask_or_operate">이 페이지에 물어보거나 AI가 조작하게 하세요...</string>
+    <string name="browser_ask_button">질문</string>
+    <string name="browser_execute_button">실행</string>
+    <string name="browser_cannot_read_content">페이지 내용을 읽을 수 없습니다(접근성 활성화)</string>
+    <string name="browser_no_content_to_speak">소리 내어 읽을 내용이 없습니다</string>
+    <string name="browser_configure_api_key">먼저 설정 → 모델에서 API Key를 구성하세요</string>
+    <string name="browser_configure_api_key_text">먼저 설정 → 모델에서 API Key를 구성하세요.</string>
+    <string name="browser_thinking_status">생각 중...</string>
+    <string name="browser_error_message">오류: %1$s</string>
+    <string name="browser_load_error">로드 오류: %1$s</string>
+    <string name="browser_download_notification">다운로드: %1$s</string>
+    <string name="browser_download_started">다운로드 시작됨: %1$s</string>
+    <string name="browser_remove_bookmark">북마크 제거</string>
+    <string name="browser_bookmark_current">☆ 이 페이지 북마크</string>
+    <string name="browser_add_common_site">＋ 홈 자주 방문하는 사이트에 추가</string>
+    <string name="browser_remove_common_site">홈 자주 방문하는 사이트에서 제거</string>
+    <string name="browser_common_site_added">홈 자주 방문하는 사이트에 추가됨</string>
+    <string name="browser_saved_bookmarks_header">── 저장된 북마크 ──</string>
+    <string name="browser_bookmark_removed">북마크 제거됨</string>
+    <string name="browser_bookmarked">북마크됨</string>
+    <string name="browser_engine_no_extensions">현재 엔진(%1$s)은 확장 프로그램을 지원하지 않습니다</string>
+    <string name="browser_extension_xpi_hint">확장 프로그램 .xpi 링크(Firefox)</string>
+    <string name="browser_extension_dialog_message">권장: "AMO 스토어 탐색"을 탭하여 Firefox 부가기능 마켓을 열고, 확장 프로그램 페이지에서 "Firefox에 추가"를 탭하여 설치하세요.\n아래에 .xpi 링크를 붙여넣어 설치할 수도 있습니다.\n서명 제한으로 인해 Chrome 확장 프로그램은 Firefox 엔진에 설치할 수 없습니다.</string>
+    <string name="browser_install_button">설치</string>
+    <string name="browser_browse_amo_button">AMO 스토어 탐색</string>
+    <string name="browser_installing_extension">확장 프로그램 설치 중...</string>
+    <string name="browser_install_success">설치됨: %1$s v%2$s</string>
+    <string name="browser_install_failed">설치 실패: %1$s</string>
+    <string name="browser_install_error">설치 오류: %1$s</string>
+    <string name="browser_home_search_hint">검색 또는 URL 입력</string>
+    <string name="browser_chip_search">조사</string>
+    <string name="browser_chip_buy">가격 비교</string>
+    <string name="browser_chip_read">기사 읽기</string>
+    <string name="browser_chip_download">파일 다운로드</string>
+    <string name="browser_sources_count">%1$d개 출처</string>
+    <string name="browser_follow_up_title">후속 질문</string>
+    <string name="browser_follow_up_detail">더 자세히</string>
+    <string name="browser_follow_up_example">실제 예시 보여주기</string>
+    <string name="browser_follow_up_summary">핵심 포인트로 요약</string>
+    <string name="browser_reader_button">리더 모드</string>
+    <string name="browser_reader_title">리더 모드</string>
+    <string name="browser_reader_empty">읽을 내용이 없습니다</string>
+    <string name="browser_menu_downloads">다운로드</string>
+    <string name="browser_menu_share">공유</string>
+    <string name="browser_menu_dark_mode">다크 모드</string>
+    <string name="browser_menu_light_mode">라이트 모드</string>
+    <string name="browser_menu_translate">번역</string>
+    <string name="browser_menu_mobile_mode">모바일 모드</string>
+    <string name="browser_menu_desktop_mode">데스크톱 모드</string>
+    <string name="browser_menu_userscript_store">유저스크립트 스토어</string>
+    <string name="browser_menu_record_agent">에이전트 작업 기록</string>
+    <string name="browser_menu_stop_recording">기록 중지</string>
+    <string name="browser_menu_cloud_sync">클라우드 동기화</string>
+    <string name="browser_menu_stealth_protection">지문 보호</string>
+    <string name="browser_menu_stealth_on">지문 보호 켜짐</string>
+    <string name="browser_menu_stealth_off">지문 보호 꺼짐</string>
+    <string name="browser_stealth_switched">%1$s 지문으로 전환됨</string>
+    <string name="browser_timeline_title">기록</string>
+    <string name="browser_timeline_empty">아직 기록이 없습니다</string>
+    <string name="browser_share_chooser">공유</string>
+    <string name="browser_desktop_mode_on">데스크톱 모드로 전환됨</string>
+    <string name="browser_desktop_mode_off">모바일 모드로 전환됨</string>
+    <string name="browser_search_prompt">당신은 스마트 검색 비서입니다. 사용자의 질문에 간결하게 답변하세요. 최신 정보를 검색하기 위해 브라우저 도구를 사용할 수 있습니다.\n사용자 질문: %1$s</string>
+    <string name="screen_cast_status_title">캐스트 상태</string>
+    <string name="screen_cast_not_casting">● 캐스트 중 아님</string>
+    <string name="screen_cast_stop_button">캐스트 중지</string>
+    <string name="screen_cast_start_button">캐스트 시작</string>
+    <string name="screen_cast_preview_label">원격 화면 미리보기</string>
+    <string name="screen_cast_preview_button">미리보기</string>
+    <string name="screen_cast_connecting_toast">연결 중...</string>
+    <string name="screen_cast_remote_control_title">원격 제어</string>
+    <string name="screen_cast_launch_external_title">외부 화면에서 실행</string>
+    <string name="screen_cast_custom_package_menu">사용자 지정 패키지 이름</string>
+    <string name="screen_cast_casting">● 캐스트 중</string>
+    <string name="screen_cast_not_casting_indicator">○ 캐스트 중 아님</string>
+    <string name="screen_cast_service_not_running">접근성 서비스가 실행 중이 아닙니다</string>
+    <string name="screen_cast_action_sent">%1$s 전송됨</string>
+    <string name="screen_cast_screenshot_api_required">스크린샷은 ConfigServer API가 필요합니다</string>
+    <string name="screen_cast_send_button">전송</string>
+    <string name="screen_cast_text_copied">텍스트가 클립보드에 복사됨</string>
+    <string name="screen_cast_app_launched">외부 화면에서 %1$s 실행됨</string>
+    <string name="screen_cast_launch_failed">실행 실패(먼저 캐스트 시작)</string>
+    <string name="screen_cast_enter_package_name">패키지 이름 입력</string>
+    <string name="screen_cast_launch_button">실행</string>
+    <string name="chat_agent_bridge_busy_error">다른 작업이 실행 중입니다. 기다려 주세요</string>
+    <string name="chat_agent_bridge_preparing">준비 중…</string>
+    <string name="chat_agent_bridge_thinking">생각 중…</string>
+    <string name="chat_agent_bridge_error">오류</string>
+    <string name="chat_agent_bridge_call_failed">호출 실패</string>
+    <string name="chat_agent_bridge_manual_required">수동 처리 필요</string>
+    <string name="chat_agent_bridge_dialog_detected">시스템 대화상자 감지됨, 일시 중지</string>
+    <string name="chat_agent_bridge_dialog_detected_full">시스템 대화상자 감지됨, 일시 중지(수동 처리 필요)</string>
+    <string name="chat_agent_bridge_manually_stopped">수동으로 중지됨</string>
+    <string name="chat_mic_permission_granted">인증됨. 길게 눌러 말하세요</string>
+    <string name="chat_mic_permission_denied">마이크가 인증되지 않았습니다. 음성 입력을 사용할 수 없습니다</string>
+    <!-- 실시간 음성 통화 -->
+    <string name="voice_call_title">실시간 음성 통화</string>
+    <string name="voice_call_connecting">연결 중…</string>
+    <string name="voice_call_listening">수신 중… 말하세요</string>
+    <string name="voice_call_speaking">응답 중</string>
+    <string name="voice_call_hangup">전화 끊기</string>
+    <string name="voice_call_retry">다시 걸기</string>
+    <string name="voice_call_close">닫기</string>
+    <string name="voice_call_ended">통화 종료</string>
+    <string name="voice_call_billing_free">무료 분</string>
+    <string name="voice_call_billing_paid">%1$d 크레딧 청구됨</string>
+    <string name="voice_call_reason_insufficient">크레딧이 부족합니다. 충전하거나 구독하세요</string>
+    <string name="voice_call_reason_limit">단일 통화 최대 통화시간에 도달했습니다</string>
+    <string name="voice_call_entry">음성 통화</string>
+    <string name="voice_settings_title">음성 설정</string>
+    <string name="chat_voice_stop_agent">■  작업 중지</string>
+    <string name="chat_voice_listening_release">수신 중… 놓으면 전송</string>
+    <string name="chat_voice_hold_to_speak">길게 눌러 말하기</string>
+    <string name="chat_scroll_bottom">맨 아래로</string>
+    <string name="chat_target_local_device">이 기기</string>
+    <string name="chat_target_virtual_pc">TV 모드</string>
+    <string name="chat_demo_open_wechat">WeChat을 열어 샤오밍에게 메시지 보내기</string>
+    <string name="chat_demo_main_screen">✓ 홈 화면</string>
+    <string name="chat_demo_search">✓ 검색</string>
+    <string name="chat_demo_xiaoming">✓ 샤오밍</string>
+    <string name="chat_demo_send">✓ 전송</string>
+    <string name="chat_demo_wechat_sent">WeChat을 열고 샤오밍의 채팅을 찾아 "오늘 저녁 같이 먹을래?"라는 메시지를 보냈습니다.</string>
+    <string name="chat_demo_check_weather">내일 날씨 확인</string>
+    <string name="chat_demo_weather_details">✓ 날씨 상세</string>
+    <string name="chat_demo_weather_forecast">베이징 내일: 맑음 후 흐림, 최고 28°C, 최저 16°C, 공기질 양호.</string>
+    <string name="chat_save_as_routine">루틴으로 저장</string>
+    <string name="chat_routine_saved_toast">루틴으로 저장됨(보기)</string>
+    <string name="fast_replay_activity_log_message">빠른 경로가 %1$d단계 재생됨</string>
+    <string name="routine_runner_target_offline">(대상 "%1$s" 오프라인, 이 기기로 전환)</string>
+    <string name="routine_runner_model_not_configured">모델이 구성되지 않았습니다. 설정 → 모델로 이동</string>
+    <string name="routine_runner_fast_path">빠른 경로</string>
+    <string name="routine_runner_starting_execution">실행 시작 중</string>
+    <string name="settings_llm_api_key_configured">구성됨</string>
+    <string name="settings_rpc_url_default">구성되지 않음(기본값: ws://10.0.2.2:8765)</string>
+    <string name="settings_octopus_runtime_title">호스트 연결 · Octopus Runtime</string>
+    <string name="settings_rpc_remote_brain_description">RPC 원격 실행(호스트가 도구/실행을 디스패치)</string>
+    <string name="settings_pc_remote_desktop_title">호스트 원격 데스크톱</string>
+    <string name="settings_pc_remote_h264_description">PC 화면 보기 + 터치/키보드 제어(H.264/WS, 같은 LAN)</string>
+    <string name="settings_webrtc_remote_desktop_title">원격 데스크톱(WebRTC)</string>
+    <string name="settings_webrtc_p2p_description">P2P 직접 연결(WebView/STUN 홀 펀칭, 크로스 네트워크, 호스트에서 pc_remote_webrtc.py 필요)</string>
+    <string name="device_detail_toolbar_title">기기 상세</string>
+    <string name="device_detail_status_online">● 온라인</string>
+    <string name="device_detail_status_offline">○ 오프라인</string>
+    <string name="device_detail_name_label">이름</string>
+    <string name="device_detail_address_label">주소</string>
+    <string name="device_detail_android_label">Android</string>
+    <string name="device_detail_app_version_label">앱 버전</string>
+    <string name="device_detail_last_seen_label">마지막 확인</string>
+    <string name="device_detail_screenshot_button">스크린샷 미리보기</string>
+    <string name="device_detail_screenshot_failed_toast">스크린샷 실패</string>
+    <string name="device_detail_operation_failed_toast">작업 실패</string>
+    <string name="device_detail_remote_input_dialog_title">원격 텍스트 입력</string>
+    <string name="device_detail_launched_toast">%1$s 실행됨</string>
+    <string name="device_detail_launch_failed_toast">실행 실패(캐스트 필요)</string>
+    <string name="device_list_toolbar_title">LAN 기기</string>
+    <string name="device_list_online_group_title">온라인 기기</string>
+    <string name="device_list_offline_group_title">오프라인 기기</string>
+    <string name="device_list_empty_state_text">LAN 기기 스캔 중...</string>
+    <string name="device_list_refresh_button_text">스캔 새로고침</string>
+    <string name="device_batch_group_title">일괄 제어</string>
+    <string name="device_batch_home">모두 홈</string>
+    <string name="device_batch_back">모두 뒤로</string>
+    <string name="device_batch_recent">모두 최근</string>
+    <string name="device_batch_input_text">모든 기기에 텍스트 입력</string>
+    <string name="device_batch_open_app">모든 기기에서 앱 열기</string>
+    <string name="device_batch_no_online">온라인 기기 없음</string>
+    <string name="device_batch_result">%1$d/%2$d 완료</string>
+    <string name="activity_outcome_cancelled">취소됨</string>
+    <string name="activity_time_just_now">방금</string>
+    <string name="activity_time_minutes_ago">%1$d분 전</string>
+    <string name="activity_time_hours_ago">%1$d시간 전</string>
+    <string name="activity_screen_title">활동</string>
+    <string name="activity_clear_button">지우기</string>
+    <string name="activity_empty_state">아직 활동이 없습니다. 완료된 각 작업은 검토 가능한 감사(명령 / 대상 / 단계 / 결과)를 여기에 남깁니다.</string>
+    <string name="activity_summary_count">%1$d개 기록 · 모든 세션 및 기기에 걸쳐</string>
+    <string name="activity_steps_and_time">%1$d단계 · %2$s</string>
+    <string name="clouddrive_empty_or_auth_failed">디렉토리가 비어 있거나 서버에 접근할 수 없거나 / 인증 실패</string>
+    <string name="clouddrive_title">클라우드 드라이브 / NAS</string>
+    <string name="clouddrive_add_button">+ 추가</string>
+    <string name="clouddrive_empty_state_hint">아직 마운트 지점이 없습니다. 오른쪽 상단의 "+ 추가"를 탭하고 NAS/클라우드 드라이브(Synology, Nextcloud, Jianguoyun, AList 등 지원)의 WebDAV 주소를 입력하여 탐색 및 재생하세요.</string>
+    <string name="clouddrive_empty_directory">디렉토리가 비어 있습니다</string>
+    <string name="clouddrive_add_mount_dialog_title">WebDAV 마운트 추가</string>
+    <string name="clouddrive_label_server_address">서버 주소</string>
+    <string name="clouddrive_label_start_path">시작 경로(예: / 또는 /dav)</string>
+    <string name="clouddrive_label_username">사용자 이름(선택 사항)</string>
+    <string name="clouddrive_label_password">비밀번호(선택 사항)</string>
+    <string name="evolution_empty_state">아직 최적화 기록이 없습니다. 각 작업 후 교훈이 추출되어 카나리 릴리스를 통해 점진적으로 적용되며, 결과가 여기에 표시됩니다.</string>
+    <string name="evolution_lessons_section_title">추출된 교훈(%1$d)</string>
+    <string name="evolution_no_lessons">아직 교훈이 없습니다</string>
+    <string name="evolution_hit_count">히트: %1$d</string>
+    <string name="evolution_canary_section_title">카나리 릴리스(%1$d)</string>
+    <string name="evolution_no_canaries">카나리 릴리스 없음</string>
+    <string name="evolution_canary_stats">샘플 %1$d · 성공 %2$d · 실패 %3$d</string>
+    <string name="evolution_effectiveness">효과 %1$d%%</string>
+    <string name="extensions_title">브라우저 확장 프로그램</string>
+    <string name="extensions_install_from_amo">Firefox 스토어(AMO)에서 설치</string>
+    <string name="extensions_install_instructions">addons.mozilla.org를 열고 확장 프로그램 페이지에서 "Firefox에 추가"를 탭하세요</string>
+    <string name="extensions_go_install_button">설치</string>
+    <string name="extensions_installed_section">설치됨</string>
+    <string name="extensions_empty_state">설치된 확장 프로그램이 없습니다.\n위의 "설치"를 탭하여 Firefox 스토어를 방문하고, 확장 프로그램을 선택한 다음 페이지에서 "Firefox에 추가"를 탭하세요.</string>
+    <string name="extensions_enabled_status">● 활성화됨</string>
+    <string name="extensions_disabled_status">○ 비활성화됨</string>
+    <string name="extensions_disable_button">비활성화</string>
+    <string name="extensions_enable_button">활성화</string>
+    <string name="extensions_uninstall_button">제거</string>
+    <string name="extensions_uninstalled_toast">%1$s 제거됨</string>
+    <string name="memory_type_preference">선호도</string>
+    <string name="memory_type_context">컨텍스트</string>
+    <string name="memory_type_fact">팩트</string>
+    <string name="memory_empty_state">아직 메모리가 없습니다. 채팅 중에 선호도와 팩트가 자동으로 기록되며, 오른쪽 상단의 +를 탭하여 수동으로 추가할 수도 있습니다.</string>
+    <string name="memory_count_info">%1$d개 기록 · 작업 시스템 프롬프트에 주입됨</string>
+    <string name="memory_source_reference_count">출처 %1$s · %2$d회 참조됨</string>
+    <string name="memory_add_dialog_title">메모리 추가</string>
+    <string name="memory_input_placeholder">예: 간결한 답변을 선호합니다</string>
+    <string name="memory_add_button">추가</string>
+    <string name="multiwindow_shizuku_ready">Shizuku 준비됨</string>
+    <string name="multiwindow_shizuku_required">자유 형식 창은 Shizuku가 필요합니다</string>
+    <string name="multiwindow_available">사용 가능</string>
+    <string name="multiwindow_unauthorized">인증되지 않음</string>
+    <string name="multiwindow_instruction">앱을 탭하여 자유 형식 창에서 열기</string>
+    <string name="multiwindow_loading">앱 목록 로드 중...</string>
+    <string name="multiwindow_no_apps">실행 가능한 앱이 없습니다</string>
+    <string name="multiwindow_shizuku_unauthorized">Shizuku가 인증되지 않아 자유 형식 창을 열 수 없습니다</string>
+    <string name="multiwindow_opened_success">%1$s을(를) 자유 형식 창에서 열었습니다</string>
+    <string name="multiwindow_opened_failed">열기 실패: %1$s</string>
+    <string name="pcremote_waiting_screen">호스트에 연결됨, 화면 대기 중...\n(호스트에서 pc_remote_server.py가 실행 중인지 확인하세요)</string>
+    <string name="pcremote_not_connected">호스트에 연결되지 않음.\n설정 → 호스트 연결에서 구성하고 연결하세요.</string>
+    <string name="pcremote_back_button">‹ 뒤로</string>
+    <string name="pcremote_frame_count">▶ H264 %1$d</string>
+    <string name="pcremote_status_connected">● 연결됨</string>
+    <string name="pcremote_status_disconnected">○ 연결되지 않음</string>
+    <string name="pcremote_input_dialog_title">PC에 텍스트 입력</string>
+    <string name="pcremote_enter_button">입력</string>
+    <string name="pc_remote_webrtc_webview_unavailable">시스템 WebView를 사용할 수 없어 원격 데스크톱을 시작할 수 없습니다.</string>
+    <string name="routines_title">루틴</string>
+    <string name="routines_empty_state">아직 루틴이 없습니다.\n\n채팅에서 명령을 길게 눌러 저장하거나, 영감의 광장에서 템플릿을 복제하여 여기서 재생, 예약 또는 개선하세요.</string>
+    <string name="routines_count_summary">총 %1$d개 · 학습된 빠른 경로는 더 빠르게 실행됩니다. 그렇지 않으면 에이전트가 실행 시 화면에서 다시 계획합니다</string>
+    <string name="routines_item_target_and_count">대상 %1$s · %2$d회 실행</string>
+    <string name="routines_item_schedule_daily"> · 매일 %1$s</string>
+    <string name="routines_item_schedule_once"> · 1회 %1$s</string>
+    <string name="routines_item_lightning_steps">%1$d</string>
+    <string name="routines_item_run_button">실행</string>
+    <string name="routines_forget_fastpath_title">빠른 경로 잊기</string>
+    <string name="routines_forget_fastpath_message">"%1$s"은(는) %2$d단계 빠른 경로를 학습했습니다. 잊으면 에이전트가 화면에서 다시 계획하고 다음 실행 시 다시 기록합니다.</string>
+    <string name="routines_forget_button">잊기</string>
+    <string name="routines_forgotten_toast">빠른 경로가 잊혀졌습니다</string>
+    <string name="routines_schedule_dialog_title">%1$s 예약</string>
+    <string name="routines_schedule_daily_option">매일 반복</string>
+    <string name="routines_schedule_once_option">1회만</string>
+    <string name="routines_schedule_cancel_option">예약 취소</string>
+    <string name="routines_set_daily_toast">%1$s에 매일 반복으로 설정됨</string>
+    <string name="routines_set_once_toast">%1$s에 1회 실행으로 설정됨</string>
+    <string name="routines_cancel_scheduling_toast">예약 취소됨</string>
+    <string name="skills_screen_title">스킬 &amp; 도구</string>
+    <string name="skills_screen_description">에이전트는 %1$d개 도구를 호출할 수 있습니다. 핵심 제어/인식 도구는 잠겨 있으며, 나머지는 오용과 프라이버시 노출을 줄이기 위해 필요에 따라 비활성화할 수 있습니다.</string>
+    <string name="skills_badge_core">핵심</string>
+    <string name="trustcenter_title">신뢰 센터</string>
+    <string name="trustcenter_description">다음 권한을 통해 기기를 조작합니다. 상태를 보거나, 관리를 열거나, 언제든지 접근을 취소할 수 있습니다.</string>
+    <string name="trustcenter_section_capabilities">기기 제어 기능</string>
+    <string name="trustcenter_capability_accessibility_desc">핵심: 화면 읽기, 탭, 입력 및 기기 제어</string>
+    <string name="trustcenter_capability_overlay_desc">실시간 제어 레이어: 실행 중 단계 및 중지 버튼 표시</string>
+    <string name="trustcenter_capability_battery">배터리 최적화 면제</string>
+    <string name="trustcenter_capability_battery_desc">장시간 실행되는 백그라운드 작업이 시스템에 의해 종료되지 않도록 방지</string>
+    <string name="trustcenter_capability_notification_desc">포그라운드 서비스 알림 / 작업 알림</string>
+    <string name="trustcenter_capability_shizuku">Shizuku</string>
+    <string name="trustcenter_capability_shizuku_desc">셸 수준 향상: 자유 형식 창, 스크린샷, 시스템 설정</string>
+    <string name="trustcenter_capability_storage_desc">미디어 파일 읽기 및 쓰기(예: 스크린샷 저장)</string>
+    <string name="trustcenter_section_lannetwork">LAN</string>
+    <string name="trustcenter_lan_allow_toggle">LAN 제어 허용</string>
+    <string name="trustcenter_lan_allow_desc">활성화하면 이 기기가 같은 Wi-Fi 네트워크에 제어 자격 증명을 브로드캐스트합니다</string>
+    <string name="trustcenter_lan_discoverable_label">기기 검색 가능</string>
+    <string name="trustcenter_lan_not_started">시작되지 않음</string>
+    <string name="trustcenter_section_target">현재 실행 대상</string>
+    <string name="trustcenter_target_label">조작 예정</string>
+    <string name="trustcenter_action_revoke">네트워크 제어 취소</string>
+    <string name="trustcenter_action_revoke_desc">LAN 브로드캐스트를 비활성화하고 실행 대상을 이 기기로 재설정</string>
+    <string name="trustcenter_instruction_manual_disable">접근성 및 오버레이와 같은 시스템 권한은 시스템 설정에서 수동으로 꺼야 합니다(위의 해당 항목을 탭하세요).</string>
+    <string name="videolibrary_scanning">로컬 비디오 스캔 중...</string>
+    <string name="videolibrary_no_files">비디오 파일을 찾을 수 없습니다. 휴대폰 저장공간에 비디오를 넣고 다시 시도하거나, 채팅에서 비서에게 온라인/클라우드 비디오 재생을 요청하세요.</string>
+    <string name="videolibrary_count">총 %1$d개 비디오</string>
+    <string name="videolibrary_bluray_label"> · 블루레이</string>
+    <string name="plugin_loaded_group_title">로드된 스킬</string>
+    <string name="plugin_available_group_title">사용 가능한 스킬</string>
+    <string name="plugin_empty_state">사용 가능한 스킬이 없습니다</string>
+    <string name="plugin_install_button">파일에서 설치</string>
+    <string name="plugin_install_note">참고: 스킬은 .dex 파일 + manifest.json이 필요합니다. 설치 후 에이전트가 호출 가능한 도구로 등록됩니다.</string>
+    <string name="plugin_error_status">오류</string>
+    <string name="plugin_load_action">로드</string>
+    <string name="plugin_load_success_toast">스킬이 로드됨</string>
+    <string name="plugin_load_failure_toast">로드 실패: %1$s</string>
+    <string name="plugin_unload_success_toast">스킬이 언로드됨</string>
+    <string name="plugin_select_manifest_toast">manifest.json 파일을 선택하세요</string>
+    <string name="plugin_install_success_toast">스킬 설치됨: %1$s</string>
+    <string name="plugin_install_failure_toast">스킬 설치 실패</string>
+    <string name="plugin_read_dex_failure_toast">파일 읽기 실패: %1$s</string>
+    <string name="plugin_read_manifest_failure_toast">매니페스트 읽기 실패: %1$s</string>
+    <string name="plugin_unknown_error">알 수 없는 오류</string>
+    <string name="runtime_config_auth_token_label">인증 토큰(선택 사항)</string>
+    <string name="runtime_config_auth_hint">비워두면 인증 건너뜀</string>
+    <string name="runtime_config_launch_mode_label">실행 모드</string>
+    <string name="runtime_config_mode_local_only">LOCAL_ONLY — 순수 로컬 실행</string>
+    <string name="runtime_config_mode_rpc_only">RPC_ONLY — 순수 원격(호스트 필요)</string>
+    <string name="runtime_config_mode_dual">DUAL — 원격 우선, 오프라인 폴백</string>
+    <string name="runtime_config_auto_connect">실행 시 자동 연결</string>
+    <string name="runtime_config_status_label">연결 상태</string>
+    <string name="runtime_config_connect_button">연결</string>
+    <string name="runtime_config_disconnect_button">연결 해제</string>
+    <string name="runtime_config_save_button">구성 저장</string>
+    <string name="runtime_config_empty_url_toast">먼저 Runtime URL을 입력하세요</string>
+    <string name="settings_runtime_connecting">● 연결 중...</string>
+    <string name="settings_runtime_offline">○ 연결 해제됨</string>
+    <string name="trust_center_granted">부여됨</string>
+    <string name="trust_center_not_granted">부여되지 않음</string>
+    <string name="chat_demo_contact_name">샤오밍</string>
+    <string name="chat_demo_dinner_msg">오늘 저녁 같이 먹을래?</string>
+    <string name="control_target_local">이 기기</string>
+    <string name="channels_hub_title">메시지 채널</string>
+    <string name="channels_hub_desc">IM 봇을 연결한 후 채팅 앱에서 작업을 구동할 수 있습니다. 채널을 탭하여 구성하세요.</string>
+    <string name="wechat_login_title">WeChat QR 로그인</string>
+    <string name="wechat_login_hint">WeChat → 스캔을 열고, 아래 QR 코드를 가리킨 후 휴대폰에서 확인하세요.</string>
+    <string name="wechat_login_get_qr">QR 코드 가져오기</string>
+    <string name="wechat_login_waiting">스캔 대기 중…</string>
+    <string name="wechat_login_success">로그인됨, WeChat 채널 연결됨 ✓</string>
+    <string name="wechat_login_failed">QR 코드 가져오기 실패. 네트워크를 확인하고 다시 시도하세요.</string>
+    <string name="wechat_login_linked">WeChat이 연결되었습니다.</string>
+    <string name="wechat_login_relogin">다시 스캔하여 로그인</string>
+    <string name="wechat_login_done">완료</string>
+    <string name="nav_features">광장</string>
+    <string name="feat_section_automation">자동화</string>
+    <string name="feat_section_data">데이터 &amp; 메모리</string>
+    <string name="feat_section_advanced">고급</string>
+    <string name="feat_skills">스킬</string>
+    <string name="feat_extensions">브라우저 플러그인</string>
+    <string name="feat_routines">루틴</string>
+    <string name="feat_miniapps">미니 앱</string>
+    <string name="feat_clouddrive">클라우드 드라이브</string>
+    <string name="feat_memory">메모리</string>
+    <string name="feat_video">비디오 라이브러리</string>
+    <!-- Desktop mode (横屏桌面) -->
+    <string name="desktop_chat_label">채팅</string>
+    <string name="desktop_collapse_chat">채팅 축소</string>
+    <string name="desktop_expand_chat">채팅 확장</string>
+    <string name="desktop_opening_host">%1$s 여는 중…</string>
+    <string name="desktop_address_placeholder">URL 입력…</string>
+    <string name="desktop_conn_online">호스트 온라인</string>
+    <string name="desktop_conn_connecting">연결 중…</string>
+    <string name="desktop_conn_disconnected">연결되지 않음</string>
+    <string name="desktop_idle_hint">에이전트 데스크톱 · 대기 중, 오른쪽 채팅에서 명령을 내리세요</string>
+    <string name="desktop_launch_pinned">★ 실행 바로가기로 설정</string>
+    <string name="desktop_launch_pin">☆ 실행 데스크톱으로 설정</string>
+    <string name="desktop_launch_pinned_toast">부팅 시 데스크톱 모드로 직접 진입</string>
+    <string name="desktop_launch_unpinned_toast">실행 바로가기 취소됨</string>
+    <string name="desktop_date_format">MMM d EEEE</string>
+    <string name="feat_multiwindow">멀티 창</string>
+    <string name="feat_evolution">자가 최적화</string>
+    <string name="feat_trust">신뢰 센터</string>
+    <string name="feat_toolbox_title">마켓</string>
+    <string name="feat_explore">탐색</string>
+    <string name="feat_explore_title">영감</string>
+    <string name="feat_explore_hot">인기</string>
+    <string name="feat_explore_recent">최근</string>
+    <string name="feat_explore_office">오피스 &amp; 학습</string>
+    <string name="feat_explore_pc">PC 설정</string>
+    <string name="feat_explore_life">일상</string>
+    <string name="feat_explore_coming">출시 예정</string>
+    <string name="feat_explore_hint">엄선된 사례와 스킬이 준비 중입니다</string>
+    <string name="feat_skills_desc">스킬 및 도구 모음</string>
+    <string name="feat_extensions_desc">브라우저 확장 프로그램 및 플러그인</string>
+    <string name="feat_routines_desc">자동화 작업 및 예약</string>
+    <string name="feat_miniapps_desc">나만의 미니 앱 생태계</string>
+    <string name="feat_clouddrive_desc">클라우드 드라이브 파일 접근</string>
+    <string name="feat_memory_desc">교차 세션 선호도 메모리</string>
+    <string name="feat_video_desc">미디어 라이브러리 및 재생</string>
+    <string name="feat_browser_desc">검색 엔진 및 브라우저 설정</string>
+    <string name="feat_multiwindow_desc">자유 형식 창 및 분할 화면</string>
+    <string name="feat_evolution_desc">작업 경험 및 자가 최적화</string>
+    <string name="feat_trust_desc">보안 권한 및 감사 로그</string>
+    <string name="feat_explore_hot_circles">인기 서클</string>
+    <string name="feat_explore_recommended">추천</string>
+    <string name="feat_explore_my_circles">내 서클</string>
+    <string name="feat_explore_members">멤버</string>
+    <string name="feat_explore_all_skills">모든 스킬</string>
+    <string name="feat_explore_all_skills_desc">사용 가능한 모든 스킬 탐색</string>
+    <string name="feat_explore_join_circle">서클 가입</string>
+    <string name="feat_explore_join_circle_hint">커뮤니티와 루틴 및 팁 공유</string>
+    <string name="browser_settings_title">브라우저 설정</string>
+    <string name="browser_settings_search_engine">기본 검색 엔진</string>
+    <string name="browser_settings_engine_kernel">엔진</string>
+    <string name="browser_settings_browsing">브라우징</string>
+    <string name="browser_settings_desktop_mode">데스크톱 모드</string>
+    <string name="browser_settings_desktop_mode_hint">데스크톱 버전 페이지 표시</string>
+    <string name="browser_settings_text_size">텍스트 크기</string>
+    <string name="browser_settings_text_small">작게</string>
+    <string name="browser_settings_text_normal">보통</string>
+    <string name="browser_settings_text_large">크게</string>
+    <string name="browser_settings_text_xlarge">아주 크게</string>
+    <string name="browser_settings_clear_data">브라우징 데이터 지우기</string>
+    <string name="browser_settings_clear_data_hint">캐시 · 쿠키 · 사이트 데이터</string>
+    <string name="browser_settings_cleared">지워짐</string>
+    <string name="browser_settings_wallpaper">배경 화면</string>
+    <string name="browser_settings_wallpaper_hint">이미지를 브라우저 홈 배경으로 표시</string>
+    <string name="browser_settings_wallpaper_upload">배경화면 업로드</string>
+    <string name="browser_settings_wallpaper_change">배경화면 변경</string>
+    <string name="browser_settings_wallpaper_clear">배경화면 지우기</string>
+    <string name="browser_settings_kernel_value">자동 선택</string>
+    <string name="feat_browser_settings">브라우저 설정</string>
+    <string name="settings_remote_pc_title">PC 원격 제어</string>
+    <string name="settings_remote_pc_desc">휴대폰에서 PC 보기 및 제어</string>
+    <string name="settings_advanced_title">고급</string>
+    <string name="settings_advanced_hint">호스트 연결 · LAN 원격 데스크톱</string>
+    <string name="settings_remote_lan_title">원격 데스크톱 · LAN</string>
+    <string name="settings_runtime_plain_desc">PC가 이 휴대폰에 작업을 디스패치하도록 허용</string>
+    <string name="settings_workspace_title">스크립트 워크스페이스</string>
+    <string name="settings_workspace_desc">에이전트 스크립트가 WORKSPACE 상수를 통해 접근하는 기본 디렉토리. readFile/writeFile은 이 디렉토리와 Download/Documents로 제한됩니다. 디렉토리가 없으면 자동 생성됩니다.</string>
+    <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
+    <string name="chat_workspace_pick_title">이 세션의 워크스페이스 선택</string>
+    <string name="chat_workspace_pick_desc">Codex를 실행할 때 --cd로 프로젝트 디렉토리를 선택하는 것과 비슷합니다. 에이전트가 이 디렉토리의 코드와 파일을 읽을 수 있으며, run_code/run_python의 WORKSPACE도 여기로 전환됩니다. 비워두면 전역 기본값을 사용합니다.</string>
+    <string name="chat_workspace_change">워크스페이스 변경</string>
+    <string name="chat_artifact_preview">미리보기</string>
+    <string name="chat_artifact_open">열기</string>
+    <string name="confirm">확인</string>
+
+    <!-- ── account &amp; billing ── -->
+    <string name="menu_account">계정 &amp; 크레딧</string>
+    <string name="account_title">내 계정</string>
+    <string name="account_edit_nickname">편집</string>
+    <string name="account_nickname_title">닉네임 편집</string>
+    <string name="account_nickname_hint">1–24자</string>
+    <string name="account_nickname_unset">닉네임이 설정되지 않음</string>
+    <string name="account_nickname_updated">닉네임이 업데이트됨</string>
+    <string name="account_login_title">로그인</string>
+    <string name="account_login_tip">이메일로 로그인하면 인증 코드를 보내드립니다.</string>
+    <string name="account_mobile_label">전화번호</string>
+    <string name="account_mobile_hint">전화번호 입력</string>
+    <string name="account_code_label">인증 코드</string>
+    <string name="account_code_hint">인증 코드 입력</string>
+    <string name="account_send_code">인증 코드 받기</string>
+    <string name="account_sending">전송 중…</string>
+    <string name="account_resend_in">%1$d초 후 재전송</string>
+    <string name="account_code_sent">인증 코드가 전송됨</string>
+    <string name="account_mock_code_filled">테스트 인증 코드 자동 입력: %1$s</string>
+    <string name="account_code_send_failed">인증 코드 전송 실패</string>
+    <string name="account_login_button">로그인 / 가입</string>
+    <string name="account_login_success">로그인됨</string>
+    <string name="account_login_failed">로그인 실패</string>
+    <string name="account_invalid_mobile">유효한 전화번호를 입력하세요</string>
+    <string name="account_invalid_code">인증 코드를 입력하세요</string>
+    <string name="account_credits_label">크레딧 잔액</string>
+    <string name="account_credits_breakdown">영구 %1$d · 이번달 보너스 %2$d</string>
+    <string name="account_daily_claim">매일 체크인</string>
+    <string name="account_recharge_title">멤버십</string>
+    <string name="account_goods_credits">%1$d 크레딧</string>
+    <string name="account_goods_bonus">(보너스 %1$d)</string>
+    <string name="account_goods_sub_subscription">영구 %1$d · 월간 보너스 %2$d(월말 초기화) · 내장 모델 포함</string>
+    <string name="account_per_month_suffix">/월</string>
+    <string name="account_logout">로그아웃</string>
+    <string name="account_order_failed">주문 생성 실패</string>
+    <string name="account_pay_opened">결제가 열렸습니다. 결제를 완료하세요</string>
+    <string name="account_recharge_success">충전 성공, +%1$d 크레딧</string>
+    <string name="account_recharge_failed">결제 실패</string>
+    <string name="account_recharge_pending">결제 처리 중, 나중에 새로고침하세요</string>
+    <string name="account_claim_success">수령됨 +%1$d 크레딧</string>
+    <string name="account_claim_already">오늘 이미 체크인했습니다</string>
+    <string name="account_claim_failed">체크인 실패</string>
+    <string name="account_invite_title">친구 초대</string>
+    <string name="account_invite_my_code">내 초대 코드</string>
+    <string name="account_invite_copy">복사</string>
+    <string name="account_invite_copied">초대 코드 복사됨</string>
+    <string name="account_invite_sub">%1$d명 초대 · 양쪽 모두 +%2$d 크레딧</string>
+    <string name="account_invite_redeem_hint">초대 코드 입력</string>
+    <string name="account_invite_redeem">사용</string>
+    <string name="account_invite_redeem_success">사용됨 +%1$d 크레딧</string>
+    <string name="account_invite_redeem_failed">사용 실패</string>
+    <string name="account_tier_title">채팅 등급</string>
+    <string name="account_tier_fast">빠름</string>
+    <string name="account_tier_flash">표준</string>
+    <string name="account_tier_premium">프리미엄</string>
+    <string name="account_tier_fast_hint">더 빠름 · 크레딧 적게 소모</string>
+    <string name="account_tier_flash_hint">균형 잡힘 · 일상 복잡 작업용</string>
+    <string name="account_tier_premium_hint">더 똑똑함 · 크레딧 많이 소모</string>
+    <string name="account_byo_locked_title">멤버 전용</string>
+    <string name="account_byo_locked_msg">자신의 모델을 연결하려면 구독하세요. 무료 사용자는 플랫폼 모델을 사용하고 크레딧당 결제합니다.</string>
+    <string name="account_go_recharge">멤버 되기</string>
+    <string name="account_member_active">멤버 · %1$s까지 유효</string>
+    <string name="account_member_inactive">비멤버 · 플랫폼 모델 사용 중</string>
+    <string name="account_tab_phone">전화번호</string>
+    <string name="account_tab_email">이메일</string>
+    <string name="account_email_hint">이메일 입력</string>
+    <string name="account_invalid_email">유효한 이메일을 입력하세요</string>
+    <string name="account_byo_credits_hint">크레딧이 소진되면 자동 활성화</string>
+    <string name="account_byo_member_hint">사용자 지정 모델을 사용하려면 멤버가 되세요(월간 초기화)</string>
+    <string name="settings_appearance">외관</string>
+    <string name="settings_light_mode">라이트 모드</string>
+    <string name="settings_dark_mode">다크 모드</string>
+    <string name="settings_theme_follow_system">시스템 따르기</string>
+    <string name="settings_theme_light">라이트</string>
+    <string name="settings_theme_dark">다크</string>
+    <string name="remote_control_notif_viewing">원격으로 보는 중</string>
+    <string name="remote_control_notif_controlling">원격으로 제어하는 중</string>
+    <string name="remote_control_notif_text">보기 %1$d · 제어 %2$d · 출처: %3$s</string>
+
+    <!-- Browser home categories -->
+    <string name="browser_app_tongyi_qianwen">통이치엔원</string>
+    <string name="browser_home_categories">카테고리</string>
+    <string name="browser_cat_ai">AI 도구</string>
+    <string name="browser_cat_ai_sub">모델, 작문, 연구</string>
+    <string name="browser_cat_video">비디오</string>
+    <string name="browser_cat_video_sub">YouTube, Bilibili</string>
+    <string name="browser_cat_dev">개발</string>
+    <string name="browser_cat_dev_sub">코드, 문서, Q&amp;A</string>
+    <string name="browser_cat_knowledge">지식</string>
+    <string name="browser_cat_knowledge_sub">Q&amp;A, 백과사전, 참조</string>
+
+    <!-- Settings hardcoded fix -->
+    <string name="settings_go_setup">설정으로 이동</string>
+    <string name="settings_status_ok">확인</string>
+    <string name="settings_status_set">설정</string>
+    <string name="settings_version_template">Octopus Mobile v%1$s · Apache 2.0</string>
+    <string name="channel_name_dingtalk">DingTalk</string>
+    <string name="channel_name_feishu">Feishu</string>
+    <string name="channel_name_qq">QQ</string>
+    <string name="channel_name_discord">Discord</string>
+    <string name="channel_name_telegram">Telegram</string>
+    <string name="channel_name_wechat">WeChat</string>
+
+    <!-- Browser hardcoded fix -->
+    <string name="browser_input_url">URL 입력…</string>
+    <string name="browser_current_tab">현재 탭</string>
+    <string name="browser_copy_url">URL 복사</string>
+    <string name="browser_copied">복사됨</string>
+    <string name="browser_ai_prompt_summarize">이 페이지의 주요 내용을 간결한 핵심 포인트로 요약하세요.</string>
+    <string name="browser_ai_prompt_key_points">이 페이지에서 가장 중요한 정보를 추출하세요.</string>
+    <string name="browser_ai_prompt_translate">이 페이지의 주요 내용을 영어로 번역하세요.</string>
+    <string name="browser_chrome_filter">X,Browser,GeckoView,Stop,Ask,Execute,✨,Refresh,Close,Switch search engine,Ask AI,Back,Forward,Home,Bookmarks,Extensions,Search or enter URL,Loading,Loading…,Search or enter</string>
+    <string name="browser_page_cmd_markers">help me,this page,click,fill,add to cart,log in,submit,check the</string>
+    <string name="browser_agent_prompt">앱 내장 브라우저 내에서 현재 웹페이지를 조작하고 있습니다. browser_* 도구를 우선 사용하세요: browser_get_dom으로 페이지 내용 가져오기, browser_click으로 요소 클릭(CSS 선택자), browser_type으로 필드에 텍스트 입력, browser_evaluate로 임의 JS 실행, browser_navigate로 URL 이동, browser_screenshot으로 캡처. browser_* 도구를 사용할 수 없거나 실패할 때만 접근성 경로(get_screen_info로 좌표 + tap/input_text)로 폴백하세요.\n\n작업: %1$s</string>
+    <string name="browser_ai_system_prompt">당신은 웹페이지 읽기 비서입니다. 아래 페이지 내용에만 기반하여 답변하고, 도구를 호출하지 마세요.\n사용자 질문: %1$s%2$s</string>
+    <string name="browser_installing_extension_toast">확장 프로그램 설치 중…</string>
+
+    <!-- Circle names & tags -->
+    <string name="circle_ai_players">AI 플레이어</string>
+    <string name="circle_efficiency">효율 구루</string>
+    <string name="circle_digital">가젯 러버</string>
+    <string name="circle_geek">긱 스페이스</string>
+    <string name="circle_lazy">게으른 해킹</string>
+    <string name="circle_tv_cast">TV 캐스트</string>
+    <string name="circle_tag_hot">인기</string>
+    <string name="circle_tag_recommended">추천</string>
+    <string name="circle_tag_new">신규</string>
+
+    <!-- ChatScreen hardcoded fix -->
+    <string name="chat_loopback">루프백(로컬:9527)</string>
+    <string name="chat_loopback_device">루프백</string>
+
+    <!-- RemoteControl hardcoded fix -->
+    <string name="remote_back">뒤로</string>
+    <string name="remote_home">홈</string>
+    <string name="remote_recents">최근</string>
+    <string name="remote_exit">종료</string>
+
+    <!-- FeatureUi hardcoded fix -->
+    <string name="feature_back">뒤로</string>
+    <string name="feature_close">닫기</string>
+
+    <!-- Wallpaper picker -->
+    <string name="browser_wallpaper_title">배경화면</string>
+    <string name="browser_wallpaper_presets">프리셋 배경화면</string>
+    <string name="browser_wallpaper_upload">배경화면 업로드</string>
+    <string name="browser_wallpaper_upload_hint">갤러리에서 이미지 선택</string>
+    <string name="browser_wallpaper_remove_custom">사용자 지정 배경화면 제거</string>
+    <string name="browser_wallpaper_save_failed">배경화면 저장 실패</string>
+    <string name="feat_explore_circle_avatar">%1$s 아바타</string>
+
+    <!-- Brand header -->
+    <string name="browser_brand_name">Octopus</string>
+    <string name="browser_brand_slogan">스마트 브라우징 재구상</string>
+
+    <!-- Voice assistant overlay -->
+    <string name="voice_assistant_listening">수신 중…</string>
+    <string name="voice_assistant_stop">중지</string>
+    <string name="voice_assistant_need_mic">음성 입력에는 마이크 권한이 필요합니다</string>
+
+    <!-- Floating circle -->
+    <string name="floating_accessibility_hint">접근성 권한을 전환하려면 설정으로 이동하세요</string>
+
+    <!-- Inspiration Square -->
+    <string name="agent_square_title">영감의 광장</string>
+    <string name="agent_square_tab_recommend">추천</string>
+    <string name="agent_square_tab_following">팔로잉</string>
+    <string name="agent_square_tab_hot">인기</string>
+    <string name="agent_square_entry_title">자동화 아이디어 발견</string>
+    <string name="agent_square_entry_desc">복제 가능한 스킬, 튜토리얼 및 작품 탐색</string>
+    <string name="cd_back">뒤로</string>
+    <string name="cd_search">검색</string>
+    <string name="cd_create">생성</string>
+    <string name="agent_trending_now">현재 트렌드</string>
+    <string name="agent_inspiration_plaza">영감의 광장</string>
+    <string name="agent_inspiration_desc">아이디어 탐색, 템플릿 복제 및 실행 가능한 영감 저장</string>
+    <string name="agent_action_search">아이디어 검색</string>
+    <string name="agent_action_universe">내 고스트</string>
+    <string name="agent_action_publish">아이디어 게시</string>
+    <string name="agent_action_favorite">즐겨찾기</string>
+    <string name="agent_action_reproduce">복제</string>
+    <string name="agent_topic_inspiration">%1$s 영감</string>
+    <string name="agent_reproduce_prefix">영감 복제: </string>
+    <string name="cancel">취소</string>
+    <string name="status_loading">처리 중…</string>
+    <string name="remote_console_title">웹 콘솔</string>
+    <string name="remote_console_status_connected">페어링됨 · 웹 온라인</string>
+    <string name="remote_console_status_paired">페어링됨 · 연결 대기 중</string>
+    <string name="remote_console_status_unpaired">웹 페어링 코드를 입력하여 이 기기를 크로스 네트워크로 원격 제어하세요</string>
+    <string name="remote_console_login_required">웹 콘솔을 페어링하기 전에 로그인하세요</string>
+    <string name="remote_console_pair_title">웹 콘솔 페어링</string>
+    <string name="remote_console_pair_desc">웹 콘솔에서 페어링 코드를 생성한 후 여기에 입력하세요. 페어링 후 이 기기가 웹에 능동적으로 연결됩니다. 공인 IP가 필요 없습니다.</string>
+    <string name="remote_console_pair_code_label">페어링 코드</string>
+    <string name="remote_console_pair_confirm">페어링 시작</string>
+    <string name="remote_console_pair_failed">페어링 실패</string>
+
+    <!-- Agent discovery posts -->
+    <string name="agent_post_travel_title">여행 플래너: 한 번의 탭으로 항공편에서 일정까지</string>
+    <string name="agent_post_travel_desc">목적지와 예산을 입력하면 명소를 자동 검색하고, 경로를 계획하며, 공유 가능한 체크리스트를 생성합니다.</string>
+    <string name="agent_post_travel_author">여행 영감</string>
+    <string name="agent_post_travel_initial">T</string>
+    <string name="agent_post_travel_duration">약 4분</string>
+    <string name="agent_post_weekly_title">주간 보고서 자동 저장 템플릿</string>
+    <string name="agent_post_weekly_desc">채팅 로그, 작업 목록 및 일정을 가져와 상사가 좋아할 보고서를 자동으로 작성합니다.</string>
+    <string name="agent_post_weekly_author">효율 플레이어</string>
+    <string name="agent_post_weekly_initial">E</string>
+    <string name="agent_post_weekly_duration">약 2분</string>
+    <string name="agent_post_phone_title">이전 휴대폰을 24시간 실행기로 전환</string>
+    <string name="agent_post_phone_desc">백업 휴대폰이 메시지, 스크린샷, 전달 및 예약된 작업을 처리하는 동안 메인 휴대폰은 조용히 유지하세요.</string>
+    <string name="agent_post_phone_author">긱 허브</string>
+    <string name="agent_post_phone_initial">G</string>
+    <string name="agent_post_phone_duration">약 6분</string>
+    <string name="agent_post_shopping_title">가격 추적기가 2000+ 절약</string>
+    <string name="agent_post_shopping_desc">과거 가격, 쿠폰 및 플랫폼 프로모션을 모니터링하고 가격이 하락하면 알림을 보냅니다.</string>
+    <string name="agent_post_shopping_author">절약 봇</string>
+    <string name="agent_post_shopping_initial">S</string>
+    <string name="agent_post_shopping_duration">약 3분</string>
+    <string name="agent_post_paper_title">논문 리더: 10분 안에 핵심 포인트</string>
+    <string name="agent_post_paper_desc">PDF, 웹페이지 및 스크린샷을 읽고 결론과 인용 가능한 인사이트를 자동 추출합니다.</string>
+    <string name="agent_post_paper_author">학술 비서</string>
+    <string name="agent_post_paper_initial">A</string>
+    <string name="agent_post_paper_duration">약 5분</string>
+    <string name="agent_post_voice_title">음성 비서: 운전 중 메시지 처리</string>
+    <string name="agent_post_voice_desc">누르고 말하면, 수신자 자동 감지, 어조 조정 및 전송.</string>
+    <string name="agent_post_voice_author">자동차 애호가</string>
+    <string name="agent_post_voice_initial">C</string>
+    <string name="agent_post_voice_duration">약 2분</string>
+
+    <!-- Agent topics & tags -->
+    <string name="agent_topic_automation">자동화</string>
+    <string name="agent_topic_efficiency">효율</string>
+    <string name="agent_topic_life">라이프스타일</string>
+    <string name="agent_topic_learning">학습</string>
+    <string name="agent_topic_device">기기</string>
+    <string name="agent_tag_voice">음성</string>
+
+    <!-- Agent permissions -->
+    <string name="agent_perm_browser">브라우저</string>
+    <string name="agent_perm_location">위치</string>
+    <string name="agent_perm_screenshot">스크린샷</string>
+    <string name="agent_perm_calendar">캘린더</string>
+    <string name="agent_perm_clipboard">클립보드</string>
+    <string name="agent_perm_document">문서</string>
+    <string name="agent_perm_accessibility">접근성</string>
+    <string name="agent_perm_notification">알림</string>
+    <string name="agent_perm_background">백그라운드</string>
+    <string name="agent_perm_timer">타이머</string>
+    <string name="agent_perm_file">파일</string>
+    <string name="agent_perm_mic">마이크</string>
+
+    <!-- Agent metrics & detail -->
+    <string name="agent_metric_usage">사용량</string>
+    <string name="agent_metric_success_rate">성공률</string>
+    <string name="agent_metric_duration">소요 시간</string>
+    <string name="agent_detail_how_to_use">사용 방법</string>
+    <string name="agent_detail_prerequisites">실행 전</string>
+    <string name="agent_detail_permissions">필요한 권한</string>
+    <string name="agent_detail_use_1">나만의 자동화 템플릿으로 복제</string>
+    <string name="agent_detail_use_2">시나리오별 권한 및 대상 앱 추가</string>
+    <string name="agent_detail_use_3">빠른 접근을 위해 즐겨찾기에 저장</string>
+    <string name="agent_detail_prereq_1">접근성 서비스가 활성화되어 있는지 확인</string>
+    <string name="agent_detail_prereq_2">로컬 또는 LAN 기기 선택</string>
+    <string name="agent_detail_prereq_3">첫 실행 시 프롬프트에 따라 인증</string>
+    <string name="agent_reproduce_target">. 목표: </string>
+    <string name="agent_reproduce_suffix"> 먼저 접근성, 알림 및 대상 앱 상태를 확인한 후 단계별로 계획하고 실행하세요. 로그인, 결제 또는 민감한 확인을 만나면 일시 중지하고 사용자 확인을 기다리세요.</string>
+    <string name="agent_reproduce_toast">루틴으로 복제됨: %s</string>
+
+    <!-- Browser hardcoded fix (round 2) -->
+    <string name="browser_app_doubao">더우바오</string>
+    <string name="browser_app_tongyi">통이</string>
+    <string name="browser_app_zhihu">즈후</string>
+    <string name="browser_windows">창</string>
+    <string name="browser_refresh_page">새로고침</string>
+    <string name="browser_engine_settings">브라우저 &amp; 엔진 설정</string>
+    <string name="browser_change_wallpaper">배경화면 변경</string>
+    <string name="browser_extensions">확장 프로그램</string>
+    <string name="browser_copy_link">링크 복사</string>
+    <string name="browser_link_copied">링크 복사됨</string>
+    <string name="browser_open_in_system">시스템 브라우저에서 열기</string>
+    <string name="browser_new_tab">새 탭</string>
+    <string name="browser_windows_count">창(%1$d)</string>
+    <string name="browser_new_window">+ 새 창</string>
+    <!-- Cast approval gate -->
+    <string name="cast_approval_channel_name">캐스트 승인</string>
+    <string name="cast_approval_channel_desc">원격 요청이 캐스트를 시작하거나 외부 화면에서 앱을 실행할 때 표시되는 확인 알림</string>
+    <string name="cast_approval_title">원격 캐스트 요청</string>
+    <string name="cast_approval_text">출처 %1$s이(가) 외부 화면 제어를 요청하고 있습니다. 허용하시겠습니까?</string>
+    <string name="cast_approval_allow">허용</string>
+    <string name="cast_approval_deny">거부</string>
+
+    <!-- 技能商城(广场 → 能力) -->
+    <string name="common_back">뒤로</string>
+    <string name="skill_marketplace_title">스킬 마켓</string>
+    <string name="skill_marketplace_subtitle">설치됨 %1$d · 전체 %2$d</string>
+    <string name="skill_marketplace_entry_desc">주문형 클라우드 스킬, 내장 스킬과 함께</string>
+    <string name="skill_filter_all">전체</string>
+    <string name="skill_filter_mobile">모바일 전용</string>
+    <string name="skill_search_hint">스킬 검색</string>
+    <string name="skill_load_failed">로드 실패, 네트워크를 확인하고 다시 시도하세요</string>
+    <string name="skill_empty">일치하는 스킬 없음</string>
+    <string name="skill_install">설치</string>
+    <string name="skill_installing">다운로드 중</string>
+    <string name="skill_installed">설치됨</string>
+    <string name="skill_installed_toast">%1$s 설치됨</string>
+    <string name="skill_uninstalled_toast">%1$s 제거됨</string>
+
+    <!-- 插件商城 -->
+    <string name="plugin_marketplace_title">플러그인 마켓</string>
+    <string name="plugin_marketplace_subtitle">설치됨 %1$d · 전체 %2$d</string>
+    <string name="plugin_marketplace_entry_desc">클라우드 다운로드 미니 앱 및 확장 플러그인</string>
+    <string name="plugin_marketplace_search_hint">플러그인 검색</string>
+    <string name="plugin_marketplace_load_failed">로드 실패, 네트워크를 확인하고 다시 시도하세요</string>
+    <string name="plugin_marketplace_empty">일치하는 플러그인 없음</string>
+    <string name="plugin_marketplace_download_failed">다운로드 실패: 네트워크 또는 서비스에 접근할 수 없음</string>
+    <string name="plugin_marketplace_installed_toast">%1$s 설치됨</string>
+    <string name="plugin_marketplace_uninstalled_toast">%1$s 제거됨</string>
+
+    <!-- 创作者中心(分成闭环) -->
+    <string name="creator_center_title">크리에이터 센터</string>
+    <string name="creator_center_entry_desc">작품을 게시하고 70% 수익 분배 받기</string>
+    <string name="creator_center_login_required">크리에이터 데이터를 보려면 로그인하세요</string>
+    <string name="creator_center_load_failed">로드 실패, 아래로 당겨서 재시도</string>
+    <string name="creator_center_empty">아직 크리에이터 데이터가 없습니다</string>
+    <string name="creator_center_metric_earnings">총 수익(크레딧)</string>
+    <string name="creator_center_metric_downloads">총 다운로드</string>
+    <string name="creator_center_metric_published">게시됨</string>
+    <string name="creator_center_section_assets">내 작품</string>
+    <string name="creator_center_section_revenue">최근 30일 수익</string>
+    <string name="creator_center_section_ranking">크리에이터 순위표</string>
+    <string name="creator_center_my_rank">내 순위</string>
+    <string name="creator_center_no_rank">순위 없음</string>
+    <string name="creator_center_revenue_empty">아직 수익 기록이 없습니다</string>
+    <string name="creator_center_assets_empty">아직 게시된 작품이 없습니다</string>
+    <string name="creator_center_status_published">게시됨</string>
+    <string name="creator_center_status_pending">검토 중</string>
+    <string name="creator_center_status_rejected">거부됨</string>
+    <string name="creator_center_earnings_suffix">수익 %1$d</string>
+    <string name="creator_center_downloads_suffix">다운로드 %1$d</string>
+    <string name="creator_center_rank_format">순위 %1$d</string>
+    <string name="creator_center_retry">재시도</string>
+
+    <!-- 发帖(小红书式图文帖) -->
+    <string name="create_post_title">새 게시물</string>
+    <string name="create_post_publish">게시</string>
+    <string name="create_post_publishing">게시 중</string>
+    <string name="create_post_title_label">제목(필수)</string>
+    <string name="create_post_content_label">무언가 말하세요...</string>
+    <string name="create_post_images_label">이미지(최대 9장)</string>
+    <string name="create_post_tag_label">태그(선택 사항)</string>
+
+    <!-- 帖子详情 -->
+    <string name="post_detail_title">게시물 상세</string>
+    <string name="post_detail_comments_section">댓글 %1$d</string>
+    <string name="post_detail_no_comments">아직 댓글이 없습니다. 첫 번째로 작성하세요</string>
+    <string name="post_detail_comment_hint">무언가 말하세요...</string>
+    <string name="post_detail_send">전송</string>
+
+    <string name="square_search_title">검색</string>
+    <string name="square_search_hint">아이디어, 튜토리얼, 작품 검색</string>
+    <string name="square_search_empty">광장을 검색하려면 키워드를 입력하세요</string>
+    <string name="square_search_no_result">결과 없음</string>
+    <string name="square_search_loading">검색 중…</string>
+    <string name="square_search_failed">검색 실패, 나중에 다시 시도하세요</string>
+
+    <string name="user_profile_title">사용자 프로필</string>
+    <string name="user_profile_posts">작품 %1$d</string>
+    <string name="user_profile_following">팔로잉 %1$d</string>
+    <string name="user_profile_followers">팔로워 %1$d</string>
+    <string name="user_profile_follow">팔로우</string>
+    <string name="user_profile_following_tag">팔로잉</string>
+    <string name="user_profile_no_posts">아직 게시된 작품이 없습니다</string>
+    <string name="user_profile_load_failed">사용자 정보 로드 실패</string>
+
+    <string name="market_kind_skill">스킬</string>
+    <string name="market_kind_plugin">플러그인</string>
+    <string name="market_kind_app">앱</string>
+    <string name="market_sort_ranking">순위</string>
+    <string name="market_sort_latest">최신</string>
+    <string name="market_sort_trending">트렌딩</string>
+    <string name="market_category_all">전체</string>
+    <string name="market_empty">이 카테고리에 아직 아무것도 없습니다. 나중에 다시 확인하세요</string>
+    <string name="feat_more_title">더보기</string>
+    <string name="market_mine_skills">내 스킬</string>
+    <string name="market_mine_apps">내 미니 앱</string>
+
+    <!-- 油猴脚本商店 -->
+    <string name="userscript_store_title">유저스크립트 스토어</string>
+    <string name="userscript_tab_installed">설치됨</string>
+    <string name="userscript_tab_recommend">추천</string>
+    <string name="userscript_install">설치</string>
+    <string name="userscript_uninstall">제거</string>
+    <string name="userscript_installed_label">설치됨</string>
+    <string name="userscript_install_from_url">URL에서 설치</string>
+    <string name="userscript_empty_installed">아직 설치된 스크립트가 없습니다. "추천" 탭에서 하나를 선택하세요.</string>
+    <string name="userscript_installed_toast">설치됨: %1$s</string>
+    <string name="userscript_install_failed_toast">설치 실패: %1$s</string>
+
+    <!-- Agent 动作录制 -->
+    <string name="agent_record_started">기록 중…</string>
+    <string name="agent_record_saved">루틴으로 저장됨: %1$s</string>
+    <string name="agent_record_empty">기록된 도구 호출이 없습니다</string>
+
+    <string name="remote_workspace_title">원격 워크스페이스</string>
+    <string name="remote_workspace_empty">구성된 마운트가 없습니다</string>
+    <string name="remote_workspace_add">마운트 추가</string>
+    <string name="remote_workspace_mount">마운트</string>
+
+    <!-- LLM Provider UI -->
+    <string name="provider_selector_label">공급자</string>
+
+    <!-- Language switcher -->
+    <string name="language_menu_title">언어</string>
+    <string name="language_follow_system">시스템 따르기</string>
+    <string name="language_dialog_title">언어 선택</string>
+    <string name="language_name_en">English</string>
+    <string name="language_name_zh">简体中文</string>
+    <string name="language_name_ja">日本語</string>
+    <string name="language_name_ko">한국어</string>
+    <string name="language_name_es">Español</string>
+    <string name="language_name_pt">Português</string>
+</resources>

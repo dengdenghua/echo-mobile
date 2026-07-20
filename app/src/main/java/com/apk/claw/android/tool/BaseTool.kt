@@ -52,6 +52,8 @@ abstract class BaseTool {
             // SSH/SFTP:有状态副作用,失败不应自动重试
             "ssh_connect", "ssh_disconnect", "ssh_exec",
             "sftp_write", "sftp_rm", "sftp_mv", "sftp_mkdir",
+            // 远程工作空间:有状态副作用,失败不应自动重试
+            "workspace_mount", "workspace_unmount", "workspace_push", "workspace_sync",
         )
 
         /**
@@ -94,6 +96,8 @@ abstract class BaseTool {
             "list_scheduled_tasks",
             // SSH/SFTP 只读(查询类,可并行;但会占用同一 SSH session 的 channel,JSch 支持并发)
             "ssh_list", "sftp_ls", "sftp_read", "sftp_stat",
+            // 远程工作空间列表/拉取(只读,可并行)
+            "workspace_list", "workspace_pull",
             // 本地模型推理(纯计算,无外部副作用)
             "run_local_model"
         )

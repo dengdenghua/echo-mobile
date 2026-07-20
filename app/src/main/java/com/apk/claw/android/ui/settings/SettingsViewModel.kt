@@ -59,7 +59,8 @@ class SettingsViewModel : ViewModel() {
             MenuAction.DEVICE_LIST.name to SettingValue.Text(""),
             MenuAction.BROWSER.name to SettingValue.Text(""),
             MenuAction.SCREEN_CAST.name to SettingValue.Text(""),
-            MenuAction.PLUGIN.name to SettingValue.Text("")
+            MenuAction.PLUGIN.name to SettingValue.Text(""),
+            MenuAction.REMOTE_WORKSPACE.name to SettingValue.Text("")
         )
         _settingItems.value = map
     }
@@ -338,6 +339,7 @@ class SettingsViewModel : ViewModel() {
         DEVICE_LIST,
         BROWSER,
         SCREEN_CAST,
-        PLUGIN
+        PLUGIN,
+        REMOTE_WORKSPACE
     }
 }

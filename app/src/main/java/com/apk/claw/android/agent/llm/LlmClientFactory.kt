@@ -14,8 +14,19 @@ object LlmClientFactory {
             }
         }
         return when (config.provider) {
-            LlmProvider.OPENAI -> OpenAiLlmClient(config, httpClientBuilder)
+            LlmProvider.OPENAI,
+            LlmProvider.XAI,
+            LlmProvider.OLLAMA,
+            LlmProvider.DEEPSEEK,
+            LlmProvider.DASHSCOPE,
+            LlmProvider.BAIDU_BAILING,
+            LlmProvider.SILICONFLOW,
+            LlmProvider.NOVITA,
+            LlmProvider.NVIDIA_NIM,
+            LlmProvider.OPENROUTER,
+            LlmProvider.LMSTUDIO -> OpenAiLlmClient(config, httpClientBuilder)
             LlmProvider.ANTHROPIC -> AnthropicLlmClient(config, httpClientBuilder)
+            LlmProvider.GEMINI -> GeminiLlmClient(config, httpClientBuilder)
             LlmProvider.LOCAL -> LocalLlmClient(config)
         }
     }
