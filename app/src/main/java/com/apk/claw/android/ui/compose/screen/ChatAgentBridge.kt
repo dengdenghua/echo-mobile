@@ -13,6 +13,7 @@ import com.apk.claw.android.octopus_mobile.ActionRecorder
 import com.apk.claw.android.octopus_mobile.ActivityLog
 import com.apk.claw.android.octopus_mobile.ControlTarget
 import com.apk.claw.android.octopus_mobile.ReflexArc
+import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.tool.ToolRegistry
 import com.apk.claw.android.tool.ToolResult
 import com.apk.claw.android.utils.KVUtils
@@ -248,6 +249,12 @@ object ChatAgentBridge {
         conversationContext: String? = null,
         persona: String? = null,
         workspace: String? = null,
+        /**
+         * 非空时覆盖当前激活 Persona 执行本次任务(用于互聊模式：每个 Persona 轮流发言)。
+         * 实现方式：在 executeTask 前临时 setActive(override)，在 onDone/onError 恢复原 active。
+         * 为 null 时行为与从前一致（用全局激活 Persona）。
+         */
+        personaIdOverride: String? = null,
     ) {
         // 忙判断必须在改动任何共享状态(updateConfig/curTask)之前,拒绝并发任务。
         if (!busy.compareAndSet(false, true)) {
@@ -298,6 +305,14 @@ object ChatAgentBridge {
         // 注入会话级工作空间(类似 Codex --cd 选定项目目录):execTool 时通过 ThreadLocal
         // 透传给 ScriptSandbox/PythonSandbox,影响 run_code/run_python 的 WORKSPACE 全局变量。
         service.setWorkspace(workspace)
+        // 互聊模式：临时切换激活 Persona，任务结束后恢复原激活（保证不污染全局 Persona 状态）。
+        // saveActive 为 null 表示原本无激活；override 为 null 表示不覆盖。
+        val ctx = ClawApplication.instance
+        val saveActive = if (personaIdOverride != null) PersonaStore.getActive(ctx) else null
+        if (personaIdOverride != null) PersonaStore.setActive(ctx, personaIdOverride)
+        val restorePersona = {
+            if (personaIdOverride != null) PersonaStore.setActive(ctx, saveActive)
+        }
         service.executeTask(taskPrompt, object : AgentCallback {
             override fun onLoopStart(round: Int) {
                 LiveControlOverlay.updateStep(ClawApplication.instance.getString(R.string.chat_agent_bridge_thinking))
@@ -358,6 +373,7 @@ object ChatAgentBridge {
                 LiveControlOverlay.finish(true, ClawApplication.instance.getString(R.string.floating_circle_success_state))
                 finalize("success", cleaned)
                 busy.set(false)
+                restorePersona()
                 main.post { onDone(cleaned) }
             }
 
@@ -366,6 +382,7 @@ object ChatAgentBridge {
                 LiveControlOverlay.finish(false, error.message?.take(20) ?: ClawApplication.instance.getString(R.string.chat_agent_bridge_error))
                 finalize("error", error.message ?: ClawApplication.instance.getString(R.string.chat_agent_bridge_call_failed))
                 busy.set(false)
+                restorePersona()
                 main.post { onError(error.message ?: ClawApplication.instance.getString(R.string.chat_agent_bridge_call_failed)) }
             }
 
@@ -373,6 +390,7 @@ object ChatAgentBridge {
                 LiveControlOverlay.finish(false, ClawApplication.instance.getString(R.string.chat_agent_bridge_manual_required))
                 finalize("error", ClawApplication.instance.getString(R.string.chat_agent_bridge_dialog_detected))
                 busy.set(false)
+                restorePersona()
                 main.post { onError(ClawApplication.instance.getString(R.string.chat_agent_bridge_dialog_detected_full)) }
             }
         }, untrusted)

@@ -237,6 +237,8 @@ fun ChatScreen() {
         mutableStateOf(KVUtils.getString(CHAT_CHARACTER_KEY, SessionStore.CHARACTER_DEFAULT))
     }
     var charMenuOpen by remember { mutableStateOf(false) }
+    // 互聊花名册管理对话框
+    var multiRosterDialogOpen by remember { mutableStateOf(false) }
 
     var inputText by remember { mutableStateOf("") }
     var isRunning by remember { mutableStateOf(false) }
@@ -494,6 +496,54 @@ fun ChatScreen() {
                     }
                     streamId = null; buf = StringBuilder()
                 }
+                // ── 互聊模式分支：多 Persona 轮流发言 ──
+                // 花名册非空时走 MultiPersonaOrchestrator；为空则走下面的单 Agent 路径（保持原行为）。
+                val multiRosterIds = PersonaStore.MultiMode.getRoster()
+                if (multiRosterIds.isNotEmpty()) {
+                    showThinking()
+                    val priorTurns = messages.dropLast(1).mapNotNull {
+                        when (it) {
+                            is ChatMessage.UserMessage -> true to it.text
+                            is ChatMessage.AgentMessage -> false to it.text
+                            else -> null
+                        }
+                    }
+                    com.apk.claw.android.octopus_mobile.persona.MultiPersonaOrchestrator.run(
+                        topic = t,
+                        priorTurns = priorTurns,
+                        onTurnStart = { persona ->
+                            // 切到下一个 Persona：重置流式缓冲，重新显示思考气泡
+                            finalizeStream(null)
+                            hideThinking()
+                            val turnThinking = ChatMessage.Thinking("${persona.avatar} ${persona.name} 正在思考…")
+                            if (!messages.contains(turnThinking)) { messages.add(turnThinking); scrollEnd() }
+                        },
+                        onTurnDone = { persona, reply ->
+                            // 每个 Persona 的回复作为独立 AgentMessage 落盘，前缀带 avatar+name 以便区分
+                            val tagged = "**${persona.avatar} ${persona.name}**\n\n$reply"
+                            finalizeStream(tagged)
+                            scrollEnd(); persist()
+                        },
+                        onAllDone = {
+                            hideThinking()
+                            isRunning = false
+                            scrollEnd(); persist()
+                        },
+                        onTool = { icon, name, args, res ->
+                            com.apk.claw.android.agent.AgentProgressBus.set(null)
+                            finalizeStream(null); hideThinking()
+                            messages.add(ChatMessage.ToolCall(icon, name, args, res))
+                            showThinking(); persist()
+                        },
+                        onText = { txt -> appendStream(txt) },
+                        onError = { e ->
+                            com.apk.claw.android.agent.AgentProgressBus.set(null)
+                            hideThinking(); finalizeStream(null)
+                            messages.add(ChatMessage.AgentMessage("⚠️ $e"))
+                            isRunning = false; scrollEnd(); persist()
+                        },
+                    )
+                } else {
                 showThinking()
                 // 多轮上下文:带上最近几轮 user/agent 消息摘要(dropLast 排除刚 add 的本条),
                 // 让「换成蓝牙的」这类指代能接上文。工具卡片/思考气泡不算轮次。
@@ -602,6 +652,7 @@ fun ChatScreen() {
                         }
                     },
                 )
+                }  // 关闭单 Agent 分支的 else
             } else {
                 messages.add(ChatMessage.AgentMessage(ackText))
                 scrollEnd(); persist()
@@ -739,6 +790,29 @@ fun ChatScreen() {
                             onClick = {
                                 charMenuOpen = false
                                 context.startActivity(Intent(context, PersonasActivity::class.java))
+                            },
+                        )
+                        // 互聊模式：多个 Persona 轮流发言。状态由 PersonaStore.MultiMode 持久化。
+                        val multiRoster = remember(refreshTick) { PersonaStore.MultiMode.getRoster() }
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(
+                                        if (multiRoster.isEmpty()) "互聊模式：关闭"
+                                        else "互聊模式：${multiRoster.size} 人",
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Text(
+                                        if (multiRoster.isEmpty()) "选 2-4 个 Persona 轮流发言"
+                                        else "点击管理花名册 / 关闭",
+                                        fontSize = OctopusType.tag, color = TextMuted,
+                                    )
+                                }
+                            },
+                            trailingIcon = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextMuted) },
+                            onClick = {
+                                charMenuOpen = false
+                                multiRosterDialogOpen = true
                             },
                         )
                     }
@@ -1153,7 +1227,92 @@ fun ChatScreen() {
             },
         )
     }
+    // 互聊花名册管理对话框：勾选 2-4 个 Persona，按勾选顺序发言
+    if (multiRosterDialogOpen) {
+        MultiRosterPickerDialog(
+            onDismiss = {
+                multiRosterDialogOpen = false
+                refreshTick++  // 触发顶部菜单的 roster 计数刷新
+            },
+        )
     }
+    }
+}
+
+/**
+ * 互聊花名册选择对话框。直接读写 [PersonaStore.MultiMode] 持久化状态，
+ * 关闭时通过 onDismiss 通知调用方刷新依赖 roster 状态的 UI。
+ */
+@Composable
+private fun MultiRosterPickerDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val allPersonas = remember { PersonaStore.list(context) }
+    var roster by remember { mutableStateOf(PersonaStore.MultiMode.getRoster()) }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("互聊花名册") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(OctopusSpacing.xs)) {
+                Text(
+                    "选 ${PersonaStore.MultiMode.MAX_ROSTER} 以内的 Persona 加入花名册，" +
+                        "勾选顺序即发言顺序。空花名册 = 关闭互聊模式。",
+                    color = TextMuted,
+                    fontSize = OctopusType.caption,
+                    lineHeight = 16.sp,
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                allPersonas.forEach { p ->
+                    val order = roster.indexOf(p.id)  // -1 = 未选
+                    val selected = order >= 0
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val newRoster = if (selected) {
+                                    roster.filterNot { it == p.id }
+                                } else {
+                                    if (roster.size >= PersonaStore.MultiMode.MAX_ROSTER) return@clickable  // 满员
+                                    roster + p.id
+                                }
+                                PersonaStore.MultiMode.setRoster(newRoster)
+                                roster = newRoster
+                            }
+                            .padding(vertical = OctopusSpacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(p.avatar, fontSize = OctopusType.body)
+                        Spacer(Modifier.width(OctopusSpacing.sm))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(p.name, fontWeight = FontWeight.SemiBold, fontSize = OctopusType.body)
+                            if (p.styleHint.isNotEmpty()) {
+                                Text(p.styleHint, fontSize = OctopusType.tag, color = TextMuted, maxLines = 1)
+                            }
+                        }
+                        if (selected) {
+                            Text(
+                                "#${order + 1}",
+                                color = TextMuted,
+                                fontSize = OctopusType.tag,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Spacer(Modifier.width(OctopusSpacing.xs))
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = SuccessColor,
+                                modifier = Modifier.size(OctopusIconSize.small))
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("完成") }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                PersonaStore.MultiMode.clear()
+                roster = emptyList()
+            }) { Text("清空") }
+        },
+    )
 }
 
 /**

@@ -212,6 +212,60 @@ object PersonaStore {
         KVUtils.putString(KEY_ACTIVE, id)
     }
 
+    /**
+     * 互聊模式：多个 Persona 在同一会话里轮流发言。
+     *
+     * 与单 Persona 模式区别：
+     *  - 单 Persona：用户每次发指令，激活的 Persona 应答（一问一答）
+     *  - 互聊模式：用户抛出一个话题，花名册里的 Persona 依次发言，
+     *    每个 Persona 看到前面所有人的话作为上下文，形成多人对话。
+     *
+     * 花名册为 Persona id 列表，顺序即发言顺序。上限 [MAX_ROSTER] 人。
+     * 由 ChatAgentBridge + MultiPersonaOrchestrator 驱动；UI 入口在 ChatScreen。
+     */
+    object MultiMode {
+        private const val KEY_ROSTER = "persona_multi_roster_v1"
+        /** 花名册上限：超过会让对话过长且 LLM 难以区分角色。 */
+        const val MAX_ROSTER = 4
+
+        fun getRoster(): List<String> {
+            val raw = KVUtils.getString(KEY_ROSTER, "") ?: ""
+            if (raw.isEmpty()) return emptyList()
+            return try {
+                val arr = JSONArray(raw)
+                (0 until arr.length()).map { it -> arr.optString(it) }.filter { it.isNotEmpty() }
+            } catch (_: Throwable) { emptyList() }
+        }
+
+        fun setRoster(ids: List<String>) {
+            // 去重 + 截断 + 过滤未知 id（避免花名册里残留已删除角色）
+            val ctx = com.apk.claw.android.ClawApplication.instance
+            val valid = ids.distinct().filter { PersonaStore.get(ctx, it) != null }.take(MAX_ROSTER)
+            val arr = JSONArray()
+            valid.forEach { arr.put(it) }
+            KVUtils.putString(KEY_ROSTER, arr.toString())
+        }
+
+        fun isEnabled(): Boolean = getRoster().isNotEmpty()
+
+        /** 切换某 Persona 是否在花名册里；返回切换后是否在册。 */
+        fun toggle(id: String): Boolean {
+            val cur = getRoster().toMutableList()
+            val nowIn = if (cur.contains(id)) {
+                cur.remove(id); false
+            } else {
+                if (cur.size >= MAX_ROSTER) return false  // 满员不能加
+                cur.add(id); true
+            }
+            setRoster(cur)
+            return nowIn
+        }
+
+        fun clear() {
+            KVUtils.remove(KEY_ROSTER)
+        }
+    }
+
     fun getActivePersona(context: Context): Persona? {
         val id = getActive(context) ?: return null
         return get(context, id)
