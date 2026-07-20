@@ -841,7 +841,22 @@ private fun BrowserSearchOverlay(
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    EngineGlyph(engineId = engineId)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(OctopusShape.capsule)
+                            .clickable { showEngines = true }
+                            .padding(vertical = 4.dp, horizontal = 2.dp),
+                    ) {
+                        EngineGlyph(engineId = engineId)
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = OctopusColors.TextMuted,
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
                     Spacer(Modifier.width(8.dp))
                     Box(modifier = Modifier.weight(1f)) {
                         if (text.isEmpty()) {
@@ -898,16 +913,6 @@ private fun BrowserSearchOverlay(
                     .padding(horizontal = 6.dp, vertical = 10.dp),
             )
         }
-
-        // 切换搜索引擎
-        Text(
-            text = "切换搜索引擎",
-            fontSize = 14.sp,
-            color = OctopusColors.TextMuted,
-            modifier = Modifier
-                .clickable { showEngines = true }
-                .padding(horizontal = OctopusSpacing.lg, vertical = 8.dp),
-        )
 
         // 下方内容
         Column(
