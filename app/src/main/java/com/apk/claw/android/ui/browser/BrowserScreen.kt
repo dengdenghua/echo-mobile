@@ -11,6 +11,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -47,10 +52,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -107,9 +115,6 @@ fun BrowserScreen(
     var isLoading by remember { mutableStateOf(false) }
     var progress by remember { mutableIntStateOf(0) }
 
-    var answerText by remember { mutableStateOf("") }
-    var sources by remember { mutableStateOf<List<String>>(emptyList()) }
-    var thinking by remember { mutableStateOf(false) }
     val messages = remember { mutableStateListOf<ChatMsg>() }
 
     var showMenu by remember { mutableStateOf(false) }
@@ -256,7 +261,9 @@ fun BrowserScreen(
         if (t.isNotEmpty()) {
             messages.add(ChatMsg(isUser = true, text = t))
             messages.add(ChatMsg(isUser = false, text = context.getString(R.string.browser_thinking_status)))
-            runAiStream(context, t) { full, srcs, done ->
+            // 多轮上下文：传入当前问题之前的所有消息（不含刚加的 placeholder）
+            val history = messages.subList(0, messages.size - 2).toList()
+            runAiStream(context, t, history) { full, srcs, done ->
                 if (messages.isNotEmpty() && !messages.last().isUser) {
                     messages[messages.lastIndex] = ChatMsg(isUser = false, text = full, sources = srcs, done = done)
                 }
@@ -364,25 +371,92 @@ fun BrowserScreen(
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(end = OctopusSpacing.lg, bottom = 72.dp),
+                .padding(bottom = 16.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .shadow(10.dp, CircleShape)
-                    .clip(CircleShape)
-                    .background(OctopusColors.Primary)
-                    .clickable { showAi = true },
-                contentAlignment = Alignment.Center,
+            // 底部浮动工具栏（胶囊样式，与首页/Tab 风格一致）
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = OctopusColors.Surface,
+                shadowElevation = 4.dp,
             ) {
-                Text(
-                    text = "AI",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = OctopusColors.OnPrimary,
-                )
+                Row(
+                    modifier = Modifier.height(52.dp).padding(horizontal = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // 后退
+                    BrowserCapsuleButton(
+                        onClick = { engine.evaluateJs("window.history.back()") },
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = OctopusColors.TextSecondary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    // 分享
+                    BrowserCapsuleButton(
+                        onClick = {
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, currentUrl)
+                            }
+                            runCatching { context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.browser_share_chooser))) }
+                        },
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = null,
+                            tint = OctopusColors.TextSecondary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    // 收藏
+                    BrowserCapsuleButton(
+                        onClick = { showBookmark = true },
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.Bookmark,
+                            contentDescription = null,
+                            tint = OctopusColors.TextSecondary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    // 菜单
+                    BrowserCapsuleButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.MoreHoriz,
+                            contentDescription = null,
+                            tint = OctopusColors.TextSecondary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    Spacer(Modifier.width(2.dp))
+                    // AI 问答（主操作，蓝色高亮）
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(OctopusColors.Primary)
+                            .clickable { showAi = true },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "AI",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = OctopusColors.OnPrimary,
+                        )
+                    }
+                }
             }
         }
 
@@ -1287,6 +1361,20 @@ private fun ChatBubble(
     } else {
         RoundedCornerShape(4.dp, 16.dp, 16.dp, 16.dp)
     }
+    // 流式打字光标：AI 未 done 时末尾闪烁 ▍
+    val cursorAlpha = if (!msg.isUser && !msg.done) {
+        rememberInfiniteTransition(label = "cursor").let {
+            it.animateFloat(
+                initialValue = 0.2f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(500),
+                    repeatMode = RepeatMode.Reverse,
+                ),
+                label = "cursorAlpha",
+            ).value
+        }
+    } else 0f
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1313,13 +1401,30 @@ private fun ChatBubble(
                 shape = bubbleShape,
                 color = bubbleColor,
             ) {
-                Text(
-                    text = msg.text,
-                    fontSize = 14.sp,
-                    color = textColor,
-                    lineHeight = 22.sp,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                )
+                if (cursorAlpha > 0f) {
+                    // 流式输出中：文本 + 闪烁光标
+                    val annotated = buildAnnotatedString {
+                        append(msg.text)
+                        withStyle(SpanStyle(color = textColor.copy(alpha = cursorAlpha))) {
+                            append("▍")
+                        }
+                    }
+                    Text(
+                        text = annotated,
+                        fontSize = 14.sp,
+                        color = textColor,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                    )
+                } else {
+                    Text(
+                        text = msg.text,
+                        fontSize = 14.sp,
+                        color = textColor,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                    )
+                }
             }
 
             if (!msg.isUser && msg.sources.isNotEmpty()) {
@@ -1382,20 +1487,6 @@ private fun BubbleAction(icon: ImageVector, text: String, onClick: () -> Unit) {
         Spacer(Modifier.width(4.dp))
         Text(text, fontSize = 11.sp, color = OctopusColors.TextMuted)
     }
-}
-
-@Composable
-private fun SuggestionChip(text: String, onClick: () -> Unit) {
-    Text(
-        text = text,
-        fontSize = 13.sp,
-        color = OctopusColors.Primary,
-        modifier = Modifier
-            .clip(OctopusShape.capsule)
-            .background(OctopusColors.Primary.copy(alpha = 0.15f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = OctopusSpacing.sm),
-    )
 }
 
 // ── P1-3: 网页模式全屏沉浸 ──
@@ -2134,42 +2225,12 @@ private fun runAi(context: Context, engine: BrowserEngine, question: String, onA
     }
 }
 
-private fun runAiSearch(
-    context: Context,
-    question: String,
-    onAnswer: (String) -> Unit,
-    onDone: (String) -> Unit,
-) {
-    if (!com.apk.claw.android.ui.compose.screen.ChatAgentBridge.isConfigured()) {
-        val msg = context.getString(R.string.browser_configure_api_key_text)
-        onAnswer(msg)
-        onDone(msg)
-        return
-    }
-    val prompt = context.getString(R.string.browser_search_prompt, question)
-    val sb = StringBuilder()
-    onAnswer(context.getString(R.string.browser_thinking_status))
-    com.apk.claw.android.ui.compose.screen.ChatAgentBridge.run(
-        prompt,
-        onTool = { _, _, _, _ -> },
-        onText = { t -> sb.append(t); onAnswer(sb.toString()) },
-        onDone = { d ->
-            val final = if (sb.isNotEmpty()) sb.toString() else d
-            onAnswer(final)
-            onDone(final)
-        },
-        onError = { e ->
-            val msg = context.getString(R.string.browser_error_message, e)
-            onAnswer(msg)
-            onDone(msg)
-        },
-    )
-}
-
-/** 流式 AI 回答：实时回传 text/sources/done，用于多轮对话 UI */
+/** 流式 AI 回答：实时回传 text/sources/done，用于多轮对话 UI。
+ *  [history] 传入之前的对话消息（不含当前问题），用于让 AI 保持多轮上下文。*/
 private fun runAiStream(
     context: Context,
     question: String,
+    history: List<ChatMsg> = emptyList(),
     onUpdate: (text: String, sources: List<String>, done: Boolean) -> Unit,
 ) {
     if (!com.apk.claw.android.ui.compose.screen.ChatAgentBridge.isConfigured()) {
@@ -2177,7 +2238,19 @@ private fun runAiStream(
         onUpdate(msg, emptyList(), true)
         return
     }
-    val prompt = context.getString(R.string.browser_search_prompt, question)
+    // 拼接多轮上下文：最多取最近 6 条已完成的消息（3 轮 QA），避免 prompt 过长
+    val ctxMsgs = history.takeLast(6).filter { it.done || it.isUser }
+    val ctxBlock = if (ctxMsgs.isEmpty()) {
+        ""
+    } else {
+        val sb = StringBuilder("\n\n【之前的对话】\n")
+        ctxMsgs.forEach { m ->
+            sb.append(if (m.isUser) "用户: " else "助手: ")
+            sb.append(m.text.take(800)).append("\n")
+        }
+        sb.toString()
+    }
+    val prompt = context.getString(R.string.browser_search_prompt, question) + ctxBlock
     val sb = StringBuilder()
     onUpdate(context.getString(R.string.browser_thinking_status), emptyList(), false)
     com.apk.claw.android.ui.compose.screen.ChatAgentBridge.run(
