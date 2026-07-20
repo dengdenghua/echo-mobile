@@ -37,6 +37,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import android.content.Intent
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -110,9 +112,11 @@ import com.apk.claw.android.ui.voice.VoiceCallActivity
 import com.apk.claw.android.ui.featurescreens.ActivityActivity
 import com.apk.claw.android.ui.featurescreens.MemoryActivity
 import com.apk.claw.android.ui.featurescreens.MiniAppListActivity
+import com.apk.claw.android.ui.featurescreens.PersonasActivity
 import com.apk.claw.android.ui.featurescreens.RoutinesActivity
 import com.apk.claw.android.ui.featurescreens.SkillsActivity
 import com.apk.claw.android.ui.featurescreens.TrustCenterActivity
+import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.ui.plugin.PluginActivity
 import android.Manifest
 import android.content.pm.PackageManager
@@ -716,6 +720,27 @@ fun ChatScreen() {
                                 onClick = { charMenuOpen = false; switchCharacter(c.id) },
                             )
                         }
+                        // ── 分隔：上面是 character 空间（会话隔离），下面是 Persona 人设（systemPrompt 注入） ──
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        val activePersona = remember(refreshTick) { PersonaStore.getActivePersona(context) }
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(if (activePersona != null) "人设：${activePersona.name}" else "管理 Persona 人设",
+                                        fontWeight = FontWeight.SemiBold)
+                                    Text(
+                                        if (activePersona != null) "${activePersona.avatar} ${activePersona.styleHint.take(20)}"
+                                        else "切换/自定义 AI 性格与语气",
+                                        fontSize = OctopusType.tag, color = TextMuted,
+                                    )
+                                }
+                            },
+                            trailingIcon = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextMuted) },
+                            onClick = {
+                                charMenuOpen = false
+                                context.startActivity(Intent(context, PersonasActivity::class.java))
+                            },
+                        )
                     }
                 }
                 Spacer(Modifier.width(OctopusSpacing.sm))

@@ -332,6 +332,7 @@ private fun WorkflowEditorDialog(
                     StepEditor(
                         step = step,
                         index = idx,
+                        allStepNames = steps.map { it.name },
                         onChange = { newStep -> steps[idx] = newStep },
                         onRemove = { steps.removeAt(idx) },
                     )
@@ -351,6 +352,7 @@ private fun WorkflowEditorDialog(
 private fun StepEditor(
     step: WorkflowStep,
     index: Int,
+    allStepNames: List<String>,
     onChange: (WorkflowStep) -> Unit,
     onRemove: () -> Unit,
 ) {
@@ -415,20 +417,102 @@ private fun StepEditor(
                             }
                         }
                     }
+                    // 工具参数编辑：选中工具后显示该工具声明的参数 schema，
+                    // 让用户填值（支持 ${var} 模板引用前序步骤输出）。
+                    if (step.content.isNotBlank() && toolNames.contains(step.content)) {
+                        Spacer(Modifier.height(6.dp))
+                        val tool = remember(step.content) {
+                            runCatching { ToolRegistry.getInstance().getTool(step.content) }.getOrNull()
+                        }
+                        val params = tool?.getParameters() ?: emptyList()
+                        if (params.isNotEmpty()) {
+                            FLabel("参数（支持 \${var} 引用前序输出）")
+                            params.forEach { p ->
+                                val current = step.params[p.name] ?: ""
+                                FParamField(
+                                    label = "${p.name} (${p.type})" + if (p.isRequired) " *" else "",
+                                    value = current,
+                                    onChange = { v ->
+                                        val newMap = step.params.toMutableMap()
+                                        if (v.isBlank()) newMap.remove(p.name) else newMap[p.name] = v
+                                        onChange(step.copy(params = newMap))
+                                    },
+                                )
+                                Spacer(Modifier.height(4.dp))
+                            }
+                        }
+                    }
                 }
                 WorkflowStep.StepType.PROMPT -> {
                     FLabel("自然语言指令")
                     FTextField(step.content, minLines = 2) { onChange(step.copy(content = it)) }
                 }
                 WorkflowStep.StepType.CONDITION -> {
-                    FLabel("条件表达式（如 \${var} == \"value\"）")
-                    FTextField(step.content, minLines = 1) { onChange(step.copy(content = it)) }
+                    FLabel("条件 → 跳转目标（每行一条，格式：表达式 => stepId）")
+                    Text(
+                        "示例：\${status} == \"ok\" => step_done\n" +
+                            "支持运算符：== != contains > <",
+                        color = FMuted, fontSize = 10.sp, lineHeight = 13.sp,
+                        modifier = Modifier.padding(start = 2.dp, bottom = 4.dp),
+                    )
+                    // 把 branches Map 转成可编辑的多行文本
+                    val branchesText = remember(step.branches) {
+                        step.branches.entries.joinToString("\n") { (expr, target) -> "$expr => $target" }
+                    }
+                    var textState by remember(branchesText) { mutableStateOf(branchesText) }
+                    OutlinedTextField(
+                        value = textState,
+                        onValueChange = { newText ->
+                            textState = newText
+                            val parsed = newText.lines()
+                                .mapNotNull { line ->
+                                    val arrow = line.indexOf("=>")
+                                    if (arrow < 0) null
+                                    else line.substring(0, arrow).trim() to line.substring(arrow + 2).trim()
+                                }
+                                .filter { it.first.isNotEmpty() && it.second.isNotEmpty() }
+                                .toMap()
+                            if (parsed != step.branches) {
+                                onChange(step.copy(branches = parsed))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp, color = FText),
+                        shape = OctopusShape.small,
+                    )
+                    // 显示所有可选 stepId（同 workflow 内的其他 step）作为提示
+                    Text(
+                        "可选 stepId：${allStepNames.take(8).joinToString(" · ")}",
+                        color = FMuted, fontSize = 9.sp, lineHeight = 12.sp,
+                        modifier = Modifier.padding(start = 2.dp, top = 2.dp),
+                    )
                 }
             }
             Spacer(Modifier.height(6.dp))
             FLabel("输出变量名（可选，后续步骤可用 \${名称} 引用）")
             FTextField(step.outputVar ?: "") { onChange(step.copy(outputVar = it.ifBlank { null })) }
         }
+    }
+}
+
+/** 把 step 列表的 name 转成可选 stepId 提示（用于 CONDITION branches 编辑） */
+private fun List<WorkflowStep>.allIdsHint(): String =
+    take(8).joinToString(" · ") { it.name }
+
+@Composable
+private fun FParamField(label: String, value: String, onChange: (String) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(label, color = FSub, fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onChange,
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 1,
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp, color = FText),
+            shape = OctopusShape.small,
+        )
     }
 }
 

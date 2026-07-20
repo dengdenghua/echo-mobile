@@ -30,12 +30,16 @@ public class GetScreenInfoTool extends BaseTool {
 
     @Override
     public String getDescriptionEN() {
-        return "Get the current screen's UI hierarchy tree, including all visible elements with their properties (text, id, bounds, clickable, etc.). Use this to understand what is currently displayed on the screen. Optional 'format' parameter: 'text' (default, backward-compatible) or 'json' (structured, more stable for LLM parsing).";
+        return "Get the current screen's UI hierarchy tree, including all visible elements with their properties (text, id, bounds, clickable, etc.). Use this to understand what is currently displayed on the screen. "
+            + "Recommended: pass format=json to get structured output with stableId (per-node composite id) and normBounds (0..1 normalized). "
+            + "Then pass the target node's stableId to tap/long_press tools' stableId parameter — this is more robust to layout changes than raw x/y coordinates.";
     }
 
     @Override
     public String getDescriptionCN() {
-        return "获取当前屏幕的UI层级树，包括所有可见元素的属性（文本、ID、边界、可点击状态等）。用于了解当前屏幕显示的内容。可选 'format' 参数：'text'（默认，向后兼容）或 'json'（结构化，LLM 解析更稳）。";
+        return "获取当前屏幕的UI层级树，包括所有可见元素的属性（文本、ID、边界、可点击状态等）。用于了解当前屏幕显示的内容。"
+            + "建议传 format=json 获取结构化输出，每个节点含 stableId（复合稳定 id）和 normBounds（0..1 归一化坐标）。"
+            + "随后把目标节点的 stableId 传给 tap/long_press 工具的 stableId 参数，比直接传 x/y 坐标更抗界面变化。";
     }
 
     @Override
