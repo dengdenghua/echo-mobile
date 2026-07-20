@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Octopus Mobile</string>
 
+    <!-- AppWidget -->
+    <string name="widget_subtitle_default">タップで起動 · 長押しで音声</string>
+    <string name="widget_voice">音声アシスタント</string>
+    <string name="widget_browser">ブラウザ</string>
+
     <!-- 共通 -->
     <string name="common_confirm">OK</string>
     <string name="common_cancel">キャンセル</string>
@@ -143,6 +148,26 @@
     <string name="llm_config_model_name_hint">例: gpt-4o、gpt-4o-mini、claude-3-5-sonnet</string>
     <string name="llm_config_saved">LLM設定を保存しました</string>
     <string name="llm_config_api_key_required">API Keyを入力してください</string>
+    <!-- API Key プール -->
+    <string name="key_pool_section">API Key プール（複数 Key 自動切替）</string>
+    <string name="key_pool_tip">主 Key が故障（401/429/5xx）した際、自動的に予備 Key に切り替えます。主 Key は常に上記の入力欄のものです。ここでは予備 Key のみ管理します。</string>
+    <string name="key_pool_enable">Key プールを有効化</string>
+    <string name="key_pool_add">予備 Key を追加</string>
+    <string name="key_pool_add_hint">予備 API Key を入力（sk-xxx）</string>
+    <string name="key_pool_empty">予備 Key なし</string>
+    <string name="key_pool_status">Key 合計 %1$d 個：%2$s</string>
+    <string name="key_pool_disabled_tag">無効</string>
+    <string name="key_pool_cooldown_tag">クールダウン中</string>
+    <string name="key_pool_primary_tag">主</string>
+    <string name="key_pool_reset">統計リセット</string>
+    <string name="key_pool_remove">削除</string>
+    <string name="key_pool_clear_all">予備 Key を全削除</string>
+    <string name="key_pool_add_duplicate">この Key は既に存在します</string>
+    <string name="key_pool_add_empty">Key を入力してください</string>
+    <string name="key_pool_add_success">予備 Key を追加しました</string>
+    <string name="key_pool_clear_confirm">予備 Key を全て削除しますか？主 Key は保持されます。</string>
+    <string name="key_pool_remove_confirm">この予備 Key を削除しますか？</string>
+    <string name="key_pool_pick_action">操作を選択</string>
     <string name="vision_config_section">ビジョンモデル（画面を見る）</string>
     <string name="vision_config_tip">アクセシビリティ情報が不十分なとき（ゲーム、Canvas、画像）に look_at_screen ツールが使用します。3つとも空欄なら上のメインモデルを再利用します（画像対応モデルのみ）。</string>
     <string name="vision_config_base_url_hint">例: https://dashscope.aliyuncs.com/compatible-mode/v1</string>

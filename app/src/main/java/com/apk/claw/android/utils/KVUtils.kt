@@ -630,4 +630,9 @@ object KVUtils {
     private const val KEY_ACTIVE_LOCAL_MODEL = "KEY_ACTIVE_LOCAL_MODEL"
     fun getActiveLocalModel(): String = getString(KEY_ACTIVE_LOCAL_MODEL, "")
     fun setActiveLocalModel(value: String) = putString(KEY_ACTIVE_LOCAL_MODEL, value)
+
+    // ── 离线模式开关:true = 走本地 GGUF 模型驱动主对话,不联网 ──
+    private const val KEY_LLM_OFFLINE_MODE = "KEY_LLM_OFFLINE_MODE"
+    fun isLlmOfflineMode(): Boolean = getBoolean(KEY_LLM_OFFLINE_MODE, false)
+    fun setLlmOfflineMode(value: Boolean) = putBoolean(KEY_LLM_OFFLINE_MODE, value)
 }

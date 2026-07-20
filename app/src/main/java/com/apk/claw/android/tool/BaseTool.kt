@@ -48,7 +48,54 @@ abstract class BaseTool {
             "preview_html",
             "generate_app",
             "edit_file",
-            "spawn_subagent"
+            "spawn_subagent",
+            // SSH/SFTP:有状态副作用,失败不应自动重试
+            "ssh_connect", "ssh_disconnect", "ssh_exec",
+            "sftp_write", "sftp_rm", "sftp_mv", "sftp_mkdir",
+        )
+
+        /**
+         * 只读工具名集合。这些工具纯查询/无副作用,可在同一轮 ReAct 中并行执行,
+         * 显著加速 LLM 同时发起多个 get_xxx / list_xxx / search_xxx / read_xxx 的场景。
+         *
+         * 判定原则(保守):
+         *  - 仅查询不修改任何状态(get/list/read/search/look/browse/take_screenshot/wait)
+         *  - 子 Agent 派生虽不改外部状态,但占用大量 Agent 资源,不算只读
+         *  - 本地推理(run_local_model)无外部 egress 且无设备状态变更,归只读
+         *  - 流程控制(finish)虽无副作用,但与 ReAct 主循环强耦合,保守不并行——单独走原路径
+         *  - browser_evaluate 看似查询,但会执行 JS 改网页状态,不算只读
+         *
+         * 不在集合里的工具默认非只读,走串行执行。
+         */
+        @JvmField
+        val READONLY_TOOLS: MutableSet<String> = hashSetOf(
+            // 屏幕感知
+            "get_screen_info", "look_at_screen", "vision_markers", "find_node_info",
+            "take_screenshot", "get_window_info",
+            // 视频理解(纯查询 VLM,无设备状态变更)
+            "analyze_video",
+            // 设备查询
+            "get_installed_apps", "get_usage_stats", "wait",
+            // 文件浏览(只读)
+            "browse_files", "search_files",
+            // 个人上下文(只读)
+            "read_sms", "read_calendar",
+            // PM 任务
+            "list_pm_projects",
+            // 生图/视频查询
+            "check_video", "search_image",
+            // mini-app
+            "list_apps", "read_app_events",
+            // VPN 状态
+            "vpn_status",
+            // 浏览器(只读)
+            "browser_get_dom", "browser_screenshot",
+            // 定时任务查询
+            "list_scheduled_tasks",
+            // SSH/SFTP 只读(查询类,可并行;但会占用同一 SSH session 的 channel,JSch 支持并发)
+            "ssh_list", "sftp_ls", "sftp_read", "sftp_stat",
+            // 本地模型推理(纯计算,无外部副作用)
+            "run_local_model"
         )
 
         private val threadCancelToken = ThreadLocal<CancellationToken>()
@@ -80,6 +127,22 @@ abstract class BaseTool {
      * 子类可覆写此方法，或在 NON_IDEMPOTENT_TOOLS 中注册工具名。
      */
     open fun isIdempotent(): Boolean = getName() !in NON_IDEMPOTENT_TOOLS
+
+    /**
+     * 是否为只读工具(纯查询/无副作用)。
+     *
+     * 与 [isIdempotent] 区别:
+     *  - isIdempotent=true 表示"重复执行结果一致",允许失败自动重试
+     *  - isReadOnly=true 表示"完全不修改任何状态",允许并行执行
+     *
+     * 例:`open_app` 是 idempotent(重试仍打开同一 App),但不是 readonly(改变设备前台状态)。
+     *     `reset_config` 是 idempotent(重置一次=重置两次),但不是 readonly(改了配置)。
+     *     `get_screen_info` 既是 idempotent 也是 readonly。
+     *
+     * 默认基于 [READONLY_TOOLS] 集合判断;子类可覆写以覆盖默认行为
+     * (如 MCP 工具可根据 schema 的 readOnly hint 自动判断)。
+     */
+    open fun isReadOnly(): Boolean = getName() in READONLY_TOOLS
 
     /**
      * 返回工具参数列表 + wait_after 通用参数。

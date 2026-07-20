@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Octopus Mobile</string>
 
+    <!-- AppWidget -->
+    <string name="widget_subtitle_default">点按启动 · 长按语音</string>
+    <string name="widget_voice">语音助手</string>
+    <string name="widget_browser">浏览器</string>
+
     <!-- Common -->
     <string name="common_confirm">确定</string>
     <string name="common_cancel">取消</string>
@@ -163,6 +168,26 @@ Shizuku 是安全、开源的本地辅助工具。</string>
     <string name="llm_config_model_name_hint">例如 gpt-4o、gpt-4o-mini、claude-3-5-sonnet</string>
     <string name="llm_config_saved">模型配置已保存</string>
     <string name="llm_config_api_key_required">请输入 API Key</string>
+    <!-- API Key 池 -->
+    <string name="key_pool_section">API Key 池（多 Key 自动切换）</string>
+    <string name="key_pool_tip">主 Key 故障（401/429/5xx）时自动切到备用 Key,提升可用性。主 Key 始终是上方填写的那个,这里只管理备用 Key。</string>
+    <string name="key_pool_enable">启用密钥池</string>
+    <string name="key_pool_add">添加备用 Key</string>
+    <string name="key_pool_add_hint">输入备用 API Key（sk-xxx）</string>
+    <string name="key_pool_empty">暂无备用 Key</string>
+    <string name="key_pool_status">共 %1$d 个 Key：%2$s</string>
+    <string name="key_pool_disabled_tag">已禁用</string>
+    <string name="key_pool_cooldown_tag">冷却中</string>
+    <string name="key_pool_primary_tag">主</string>
+    <string name="key_pool_reset">重置统计</string>
+    <string name="key_pool_remove">删除</string>
+    <string name="key_pool_clear_all">清空备用 Key</string>
+    <string name="key_pool_add_duplicate">该 Key 已存在</string>
+    <string name="key_pool_add_empty">Key 不能为空</string>
+    <string name="key_pool_add_success">已添加备用 Key</string>
+    <string name="key_pool_clear_confirm">确定清空所有备用 Key？主 Key 保留。</string>
+    <string name="key_pool_remove_confirm">删除此备用 Key？</string>
+    <string name="key_pool_pick_action">选择操作</string>
     <string name="vision_config_section">视觉模型（看屏幕）</string>
     <string name="vision_config_tip">当无障碍树不足以理解屏幕时使用（游戏、画布、图片等）。三项都留空则复用上方主模型（需支持图片输入）。</string>
     <string name="vision_config_base_url_hint">e.g. https://dashscope.aliyuncs.com/compatible-mode/v1</string>
@@ -185,6 +210,16 @@ Shizuku 是安全、开源的本地辅助工具。</string>
     <string name="protocol_alert_title">服务条款与隐私</string>
     <string name="protocol_disagree">不同意</string>
     <string name="protocol_agree_continue">同意并继续</string>
+
+    <!-- Wake Word 唤醒词 -->
+    <string name="wakeword_channel_name">唤醒词监听</string>
+    <string name="wakeword_channel_desc">常驻麦克风监听唤醒词的后台服务通知</string>
+    <string name="wakeword_notification_title">正在监听唤醒词</string>
+    <string name="wakeword_notification_text">说「%1$s」唤起助手</string>
+    <string name="wakeword_feature_title">唤醒词</string>
+    <string name="wakeword_feature_desc">说唤醒词即可唤起助手(需常驻麦克风)</string>
+    <string name="wakeword_privacy_title">常驻麦克风告知</string>
+    <string name="wakeword_privacy_body">开启唤醒词后,App 将在后台持续监听麦克风音频,以检测你设定的唤醒词。\n\n· 音频在本地处理,不会上传\n· 检测到唤醒词后,App 会自动唤起助手界面\n· 你可以随时在通知栏或设置中关闭\n· 关闭后麦克风立即停止采集\n\n请确认你已知晓上述行为并同意继续。</string>
 
     <!-- Floating -->
     <string name="floating_ai_label">AI</string>

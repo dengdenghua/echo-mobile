@@ -68,6 +68,15 @@ object ToolRiskPolicy {
         // 分享到广场:把本地小程序 html 对外发布到公开广场。高危 → 不可信来源须弹审批,
         // 防远端静默把用户/攻击者内容刷上广场。见 ShareToSquareTool。
         "share_to_square",
+        // SSH 远程命令执行:可 rm -rf / 重启服务等任意远程操作,且远程主机常是生产服务器。
+        // 高危 → 不可信来源走来源闸门 + 全程审计。见 SshExecTool。
+        "ssh_exec",
+        // SSH 远程文件写/删/移:可改写关键配置(/etc/ssh/sshd_config、~/.ssh/authorized_keys 等)。
+        // 高危 → 不可信来源走来源闸门 + 全程审计。
+        "sftp_write", "sftp_rm", "sftp_mv", "sftp_mkdir",
+        // SSH 建立连接:凭据泄漏可被持久化利用,且后续高危操作的入口。
+        // 高危 → 不可信来源走来源闸门 + 全程审计。
+        "ssh_connect",
     )
 
     val MEDIUM_RISK_TOOLS: Set<String> = setOf(
@@ -118,6 +127,9 @@ object ToolRiskPolicy {
         // 会话重置:销毁会话 scope、释放持久状态。本身无外部副作用,但可丢弃用户/Agent 在会话里
         // 累积的变量与函数定义 —— 纳入审计便于排查「为何我的会话状态没了」。
         "run_code_reset",
+        // SSH/SFTP 只读类:读取远程目录/文件内容/元数据,可能暴露敏感配置(/etc/passwd、~/.ssh 等)。
+        // 与 browse_files/read_sms 同级 MEDIUM —— 纳入审计,便于追溯「谁在何时读了哪台机器的什么文件」。
+        "sftp_ls", "sftp_read", "sftp_stat",
     )
 
     /**
@@ -134,6 +146,8 @@ object ToolRiskPolicy {
         "get_screen_info", "look_at_screen", "find_node_info", "get_installed_apps",
         "get_window_info", "take_screenshot", "browser_get_dom", "browser_screenshot",
         "current_time", "device_info", "echo_observe", "list_pm_projects",
+        // 视频内容理解(纯 VLM 查询,读取本地文件不改设备状态)
+        "analyze_video",
         // 控制 / 无副作用
         "finish", "wait", "hello_world",
         // 视频生成状态查询（只读轮询，无副作用）
@@ -146,6 +160,9 @@ object ToolRiskPolicy {
         // 输入按键事件：TV 遥控导航键，低危且高频，审计价值低于噪音成本，保留 LOW。
         "dpad_up", "dpad_down", "dpad_left", "dpad_right", "dpad_center",
         "press_menu", "press_power", "volume_up", "volume_down",
+        // SSH 连接管理:ssh_list 列出本机活跃连接(无远程数据);ssh_disconnect 关闭用户主动建的连接(纯清理)。
+        // 均无数据出口/状态变更,LOW 与其他只读观察类一致。
+        "ssh_list", "ssh_disconnect",
     )
 
     /** 已知未注册但有意保留在风险名单中的工具名（前向兼容），供漂移守护排除。 */

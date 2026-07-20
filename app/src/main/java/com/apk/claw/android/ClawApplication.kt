@@ -5,6 +5,7 @@ import com.apk.claw.android.agent.DefaultAgentService
 import com.apk.claw.android.base.BaseApp
 import com.apk.claw.android.channel.ChannelManager
 import com.apk.claw.android.crash.CrashReporter
+import com.apk.claw.android.octopus_mobile.ApiKeyPool
 import com.apk.claw.android.octopus_mobile.BrainModeSelector
 import com.apk.claw.android.octopus_mobile.ConnectionState
 import com.apk.claw.android.octopus_mobile.DeviceDiscoveryManager
@@ -101,6 +102,9 @@ open class ClawApplication : BaseApp() {
         registerNetworkCallback()
         appViewModelInstance = getAppViewModelProvider()[AppViewModel::class.java]
         KVUtils.init(this)
+        // LLM API Key 池初始化(读取持久化的多 key + 统计)。
+        // 必须在 KVUtils 之后;在 Agent initialize 之前,使后续 chatWithRetry 可 acquireKey。
+        runCatching { ApiKeyPool.init() }.onFailure { XLog.e(TAG, "ApiKeyPool init failed", it) }
         // 主题：由 OctopusTheme 在 Compose 入口根据系统暗色模式 + 用户偏好同步，
         // 不再在此处手动初始化（避免与 Theme.kt 的 SideEffect 冲突）。
         // 旧的 KEY_LIGHT_THEME 偏好会被 getThemeMode() 自动迁移。
@@ -165,6 +169,14 @@ open class ClawApplication : BaseApp() {
         // ── 方案 F · 启动 Octopus Mobile 决策层 ──
         initOctopusMobile()
         RemoteConsoleGateway.connect()
+
+        // MCP server 恢复:后台线程重连所有 autoConnect=true 的 server(子进程启动 + JSON-RPC
+        // 握手可能耗时,避免阻塞主线程)。失败不阻塞 App 启动。
+        Thread({
+            runCatching {
+                com.apk.claw.android.tool.mcp.McpServerConfigStore.restoreAll()
+            }.onFailure { XLog.e(TAG, "MCP restoreAll failed", it) }
+        }, "mcp-restore").start()
 
         Thread({
             if (KVUtils.hasLlmConfig()) {

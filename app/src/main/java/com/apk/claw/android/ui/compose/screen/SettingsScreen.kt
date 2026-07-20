@@ -18,12 +18,14 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -73,10 +75,12 @@ import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.ui.compose.theme.tvFocusable
 import com.apk.claw.android.ui.compose.theme.tvOverscan
 import com.apk.claw.android.ui.featurescreens.EvolutionActivity
+import com.apk.claw.android.ui.featurescreens.FileManagerActivity
 import com.apk.claw.android.ui.featurescreens.MemoryActivity
 import com.apk.claw.android.ui.featurescreens.McpServersActivity
 import com.apk.claw.android.ui.featurescreens.PersonasActivity
 import com.apk.claw.android.ui.featurescreens.TrustCenterActivity
+import com.apk.claw.android.ui.featurescreens.WakeWordSettingsActivity
 import com.apk.claw.android.ui.featurescreens.WorkflowsActivity
 import com.apk.claw.android.ui.settings.LlmConfigActivity
 import com.apk.claw.android.ui.settings.RuntimeConfigActivity
@@ -760,6 +764,22 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     "多步骤编排（工具+Prompt+条件）",
                 ) {
                     context.startActivity(Intent(context, WorkflowsActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.Folder,
+                    "文件管理",
+                    "浏览 /sdcard 文件系统(需 Shizuku)",
+                ) {
+                    context.startActivity(Intent(context, FileManagerActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.Mic,
+                    stringResource(R.string.wakeword_feature_title),
+                    stringResource(R.string.wakeword_feature_desc),
+                ) {
+                    context.startActivity(Intent(context, WakeWordSettingsActivity::class.java))
                 }
             }
         }

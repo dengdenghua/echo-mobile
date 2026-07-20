@@ -131,19 +131,25 @@ class LightweightLlmClient(
                 }
                 is ChatMessage.User -> {
                     msgObj.put("role", "user")
-                    // 如果携带图片，构建 OpenAI 多模态格式
-                    if (msg.imageBase64 != null) {
+                    // 归一化图片列表:images 优先,否则用单图 imageBase64(向后兼容)
+                    val allImages: List<String> = msg.images
+                        ?: msg.imageBase64?.let { listOf(it) }
+                        ?: emptyList()
+                    if (allImages.isNotEmpty()) {
+                        // 多模态格式:content 是数组,先放文本再放每张图
                         val contentArray = JSONArray()
                         val textObj = JSONObject()
                         textObj.put("type", "text")
                         textObj.put("text", msg.content)
                         contentArray.put(textObj)
-                        val imageObj = JSONObject()
-                        imageObj.put("type", "image_url")
-                        val imageUrlObj = JSONObject()
-                        imageUrlObj.put("url", "data:image/jpeg;base64,${msg.imageBase64}")
-                        imageObj.put("image_url", imageUrlObj)
-                        contentArray.put(imageObj)
+                        for (img in allImages) {
+                            val imageObj = JSONObject()
+                            imageObj.put("type", "image_url")
+                            val imageUrlObj = JSONObject()
+                            imageUrlObj.put("url", "data:image/jpeg;base64,$img")
+                            imageObj.put("image_url", imageUrlObj)
+                            contentArray.put(imageObj)
+                        }
                         msgObj.put("content", contentArray)
                     } else {
                         msgObj.put("content", msg.content)

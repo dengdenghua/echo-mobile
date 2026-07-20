@@ -2,6 +2,7 @@ package com.apk.claw.android
 
 import androidx.lifecycle.ViewModel
 import com.apk.claw.android.agent.AgentConfig
+import com.apk.claw.android.agent.LlmProvider
 import com.apk.claw.android.agent.llm.LlmClientFactory
 import com.apk.claw.android.channel.Channel
 import com.apk.claw.android.channel.ChannelManager
@@ -98,11 +99,39 @@ class AppViewModel : ViewModel() {
     }
 
     fun initAgent() {
+        // 离线模式:无需云端 LLM 配置,只要有活跃本地模型即可初始化
+        if (KVUtils.isLlmOfflineMode()) {
+            if (KVUtils.getActiveLocalModel().isBlank()) return
+            taskOrchestrator.initAgent()
+            return
+        }
         if (!KVUtils.hasLlmConfig()) return
         taskOrchestrator.initAgent()
     }
 
     fun getAgentConfig(): AgentConfig {
+        // 离线模式:走本地 GGUF 模型,不联网。本地模型不支持 function calling,
+        // Agent 会自然降级为纯对话(无设备控制)。用户需在设置→本地大模型开关。
+        if (KVUtils.isLlmOfflineMode()) {
+            val modelPath = KVUtils.getActiveLocalModel()
+            val promptSuffix = (lessonStore?.buildPromptSection() ?: "") +
+                com.apk.claw.android.octopus_mobile.skill.PromptSkillStore.buildPromptSection()
+            val memorySuffix = memoryStore?.buildPromptSection() ?: ""
+            return AgentConfig.Builder()
+                .apiKey("")
+                .baseUrl("")
+                .modelName(modelPath.substringAfterLast('/'))
+                .temperature(0.7)
+                .maxIterations(3)
+                .provider(LlmProvider.LOCAL)
+                .streaming(false)
+                .enableVision(false)
+                .enableAutoScreenshot(false)
+                .dynamicPromptSuffix(promptSuffix)
+                .memoryPromptSuffix(memorySuffix)
+                .build()
+        }
+
         // 路由：默认走平台中转(共享 MiMo key + 扣积分),会员且显式选择才用自己的模型;
         // 中转未配置/未登录时回退到本地 LLM 配置(不破坏现有行为)。
         val eff = com.apk.claw.android.account.LlmRouting.effective()

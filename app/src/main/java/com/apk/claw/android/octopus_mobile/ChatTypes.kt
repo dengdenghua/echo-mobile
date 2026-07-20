@@ -16,8 +16,12 @@ sealed class ChatMessage {
     data class User(
         override val role: String = "user",
         val content: String,
-        /** 图片的 base64 编码数据（JPEG格式），用于 VLM 视觉理解 */
-        val imageBase64: String? = null
+        /** 单张图片的 base64(JPEG)。向后兼容字段,等价于 [images] = listOf(imageBase64)。
+         *  新代码应优先用 [images] 传多图(视频帧序列)。 */
+        val imageBase64: String? = null,
+        /** 多张图片的 base64 列表(JPEG)。用于视频理解:把多个关键帧一次喂给 VLM。
+         *  留空 + [imageBase64] 非空时,自动回退到单图模式。 */
+        val images: List<String>? = null,
     ) : ChatMessage()
 
     data class Assistant(

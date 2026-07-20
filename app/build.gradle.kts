@@ -77,12 +77,13 @@ android {
         resourceConfigurations += setOf("en", "zh", "ja")
 
         // ABI 由下方 splits 块按架构分包(每个 APK 只带自己架构);另出一个
-        // universal 通用包(含两套 .so,一个包 32/64 位都能装,省得分辨给哪台)。GeckoView 已移除,
-        // 通用包也就 ~两套 .so 的体积(几十 MB),不像当年 370MB 那么夸张。
+        // universal 通用包(含所有 .so,一个包多架构都能装)。GeckoView 已移除,
+        // 通用包体积可控(几十 MB),不像当年 370MB 那么夸张。
         // Chaquopy(Python 原生解释器)需要 abiFilters 显式声明支持的 ABI,以决定打包哪些
-        // Python .so。此处与 splits.include 保持一致(arm64-v8a + armeabi-v7a),不会冲突。
+        // Python .so。此处与 splits.include 保持一致(arm64-v8a + armeabi-v7a + x86_64)。
+        // x86_64 用于模拟器调试(开发期跑 llama.cpp JNI 冒烟测试),不发布给最终用户。
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
     }
 
@@ -97,14 +98,14 @@ android {
         }
     }
 
-    // 按 ABI 分包:arm64-v8a / armeabi-v7a 各生成一个独立 APK,只含自身架构;另出一个
-    // universal 通用包(含两套 .so,一个包 32/64 位都能装,省得分辨给哪台)。GeckoView 已移除,
-    // 通用包也就 ~两套 .so 的体积(几十 MB),不像当年 370MB 那么夸张。
+    // 按 ABI 分包:arm64-v8a / armeabi-v7a / x86_64 各生成一个独立 APK,只含自身架构;另出一个
+    // universal 通用包(含所有 .so,多架构都能装)。GeckoView 已移除,通用包体积可控。
+    // x86_64 APK 仅用于模拟器调试(开发期跑 llama.cpp JNI 冒烟测试),不发布给最终用户。
     splits {
         abi {
             isEnable = true
             reset()
-            include("arm64-v8a", "armeabi-v7a")
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = true
         }
     }
@@ -229,6 +230,11 @@ dependencies {
     // Apache Commons Compress —— tar.gz 解压,用于 Linux 容器(LinuxSandbox)解压 Alpine minirootfs。
     // 纯 Java 实现,不依赖系统 tar 命令。同时 commons-compress 自带 Zip Slip 防护。
     implementation("org.apache.commons:commons-compress:1.26.1")
+
+    // JSch —— 纯 Java SSH/SFTP 客户端(~280KB),用于 ssh_connect / sftp_* 工具。
+    // 选型理由:Android 上最成熟的 SSH 库,无 Native 依赖,与 conscrypt 共存良好。
+    // 替代方案 sshj API 更现代但社区维护弱;libssh-android 需 Native 编译,体积更大。
+    implementation("com.github.mwiede:jsch:0.2.20")
 
     // GeckoView(Firefox 内核)已移除以瘦身 APK(约 -180MB:libxul.so 144MB + omni.ja
     // 13MB + 一众 mozilla .so)。浏览器统一用系统 WebView(SystemWebViewEngine,0 包体)。

@@ -52,9 +52,31 @@ cmake \
 
 cmake --build "$BUILD_DIR" --config Release --parallel
 
-# 拷贝产物到 jniLibs
+# 拷贝产物到 jniLibs(libllama-jni.so 依赖 libllama.so + libggml.so,三件套缺一不可)
 mkdir -p "$JNILIBS_DIR"
-cp "$BUILD_DIR/libllama-jni.so" "$JNILIBS_DIR/"
 
-echo "=== Done: $JNILIBS_DIR/libllama-jni.so ==="
-ls -lh "$JNILIBS_DIR/libllama-jni.so"
+# strip 工具(NDK 自带 llvm-strip,可去掉 debug_info 把体积减半)
+STRIP="$NDK_ROOT/toolchains/llvm/prebuilt/$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin/darwin-x86_64/')/bin/llvm-strip"
+if [ ! -x "$STRIP" ]; then
+    # 兜底:macOS 上 NDK 目录名可能是 darwin-x86_64 或 host-tag
+    STRIP="$(find "$NDK_ROOT/toolchains/llvm/prebuilt" -name llvm-strip -type f 2>/dev/null | head -1)"
+fi
+
+# 拷贝并 strip 三个 .so
+copy_and_strip() {
+    local src="$1"
+    local name="$(basename "$src")"
+    cp "$src" "$JNILIBS_DIR/$name"
+    if [ -x "$STRIP" ]; then
+        "$STRIP" --strip-debug "$JNILIBS_DIR/$name" 2>/dev/null || true
+    fi
+    echo "  $name: $(du -h "$JNILIBS_DIR/$name" | cut -f1)"
+}
+
+echo "=== Installing native libs to $JNILIBS_DIR ==="
+copy_and_strip "$BUILD_DIR/libllama-jni.so"
+copy_and_strip "$BUILD_DIR/_deps/llama_cpp-build/src/libllama.so"
+copy_and_strip "$BUILD_DIR/_deps/llama_cpp-build/ggml/src/libggml.so"
+
+echo "=== Done: $JNILIBS_DIR ==="
+ls -lh "$JNILIBS_DIR/"

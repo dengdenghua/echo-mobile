@@ -147,6 +147,7 @@ object ToolRegistry {
         register(LookAtScreenTool())
         register(VisionMarkersTool())
         register(FindNodeInfoTool())
+        register(com.apk.claw.android.tool.impl.AnalyzeVideoTool())
         register(InputTextTool())
         register(SystemKeyTool())
         register(OpenAppTool())
@@ -199,6 +200,19 @@ object ToolRegistry {
         register(com.apk.claw.android.tool.impl.ListAppsTool())
         register(com.apk.claw.android.tool.impl.AppActionTool())
         register(com.apk.claw.android.tool.impl.ReadAppEventsTool())
+
+        // SSH/SFTP 工作区 —— 远程服务器管理(连接复用,JSch 实现)
+        register(com.apk.claw.android.tool.impl.ssh.SshConnectTool())
+        register(com.apk.claw.android.tool.impl.ssh.SshDisconnectTool())
+        register(com.apk.claw.android.tool.impl.ssh.SshListTool())
+        register(com.apk.claw.android.tool.impl.ssh.SshExecTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpLsTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpReadTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpWriteTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpRmTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpMvTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpMkdirTool())
+        register(com.apk.claw.android.tool.impl.ssh.SftpStatTool())
     }
 
     private fun registerTvTools() {

@@ -36,6 +36,12 @@ object TextSimilarity {
         // 抽不出关键词(太短/纯停用词)→ 退回精确比较(上面已比过,这里即 false)。
         if (ka.isEmpty() || kb.isEmpty()) return false
 
+        // keywords 完全相同但文本不同:分词粒度不足以区分两者
+        // (如 "事实0号" vs "事实1号" 被 2-gram 断成相同片段 {事实},
+        //  或 "事实编号1" vs "事实编号2" 断成 {事实,实编,编号})。
+        // 保守不判近似,避免误去重 —— 漏抓近似(用 contains 兜底)代价小于误合并。
+        if (ka == kb && ta != tb) return false
+
         val intersection = ka.count { it in kb }
         if (intersection == 0) return false
         val union = (ka + kb).size

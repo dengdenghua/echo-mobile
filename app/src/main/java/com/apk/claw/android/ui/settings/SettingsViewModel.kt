@@ -47,6 +47,7 @@ class SettingsViewModel : ViewModel() {
         val wechatBotToken = KVUtils.getWechatBotToken().isNotEmpty()
         val map = mapOf(
             MenuAction.LLM_CONFIG.name to SettingValue.Text(if (KVUtils.hasLlmConfig()) KVUtils.getLlmModelName() else ClawApplication.instance.getString(R.string.common_unconfigured)),
+            MenuAction.LOCAL_MODEL.name to SettingValue.Text(getLocalModelTrailingText()),
             MenuAction.DINGDING.name to SettingValue.Text(ClawApplication.instance.getString(if (dingtalkAppKey && dingtalkAppSecret) R.string.common_bound else R.string.common_unbound)),
             MenuAction.FEISHU.name to SettingValue.Text(ClawApplication.instance.getString(if (feishuAppId && feishuAppSecret) R.string.common_bound else R.string.common_unbound)),
             MenuAction.QQ.name to SettingValue.Text(ClawApplication.instance.getString(if (qqAppId && qqAppSecret) R.string.common_bound else R.string.common_unbound)),
@@ -215,6 +216,16 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+    /** 本地模型菜单尾部文字:离线模式开关状态 + 活跃模型名。 */
+    private fun getLocalModelTrailingText(): String {
+        val path = KVUtils.getActiveLocalModel()
+        val modelName = if (path.isBlank()) "未设置"
+            else path.substringAfterLast('/').take(24)
+        return if (KVUtils.isLlmOfflineMode()) "● 离线 · $modelName"
+            else if (path.isNotBlank()) "$modelName"
+            else "未配置"
+    }
+
     fun isDingtalkBound(): Boolean {
         return KVUtils.getDingtalkAppKey().isNotEmpty() && KVUtils.getDingtalkAppSecret().isNotEmpty()
     }
@@ -322,6 +333,7 @@ class SettingsViewModel : ViewModel() {
         DINGDING, FEISHU, QQ, DISCORD, TELEGRAM, WECHAT,
         LAN_CONFIG,
         LLM_CONFIG,
+        LOCAL_MODEL,
         OCTOPUS_RUNTIME,
         DEVICE_LIST,
         BROWSER,

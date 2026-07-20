@@ -40,7 +40,12 @@ object LocalModelManager {
         val ptr: Long,
         val contextSize: Int,
         val loadedAt: Long,
+        /** 加载时文件大小(字节),用于 UI 展示内存占用估算。 */
+        val fileSizeBytes: Long,
     )
+
+    /** 当前已加载模型路径列表(快照,用于 UI 列表)。 */
+    fun listLoaded(): List<ModelHandle> = loadedModels.values.toList().sortedBy { it.loadedAt }
 
     /**
      * 加载 GGUF 模型。
@@ -77,7 +82,12 @@ object LocalModelManager {
             if (ptr == 0L) {
                 return Result.failure(IllegalStateException("模型加载失败(内存不足?文件损坏?)"))
             }
-            val handle = ModelHandle(modelPath, ptr, contextSize, System.currentTimeMillis())
+            val handle = ModelHandle(
+                path = modelPath, ptr = ptr,
+                contextSize = contextSize,
+                loadedAt = System.currentTimeMillis(),
+                fileSizeBytes = file.length(),
+            )
             loadedModels[modelPath] = handle
             Log.i(TAG, "Model loaded: ${file.name} (ctx=$contextSize, ptr=$ptr)")
             Result.success(handle)

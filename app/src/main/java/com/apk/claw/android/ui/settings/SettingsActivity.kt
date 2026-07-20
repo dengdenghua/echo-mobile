@@ -151,6 +151,14 @@ class SettingsActivity : BaseActivity() {
         )
         menuItems[SettingsViewModel.MenuAction.LLM_CONFIG.name]?.setLeadingIconColor(getColor(R.color.colorTextPrimary))
 
+        menuItems[SettingsViewModel.MenuAction.LOCAL_MODEL.name] = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.icon_current_model,
+            title = "本地大模型",
+            onClick = { viewModel.onMenuItemClick(SettingsViewModel.MenuAction.LOCAL_MODEL) },
+            showDivider = false
+        )
+        menuItems[SettingsViewModel.MenuAction.LOCAL_MODEL.name]?.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+
         menuItems[SettingsViewModel.MenuAction.OCTOPUS_RUNTIME.name] = modelGroup.addMenuItem(
             leadingIcon = R.drawable.ic_runtime,
             title = "Octopus Runtime",
@@ -305,6 +313,9 @@ class SettingsActivity : BaseActivity() {
                                 } else {
                                     llmConfigLauncher.launch(Intent(this@SettingsActivity, LlmConfigActivity::class.java))
                                 }
+                            }
+                            SettingsViewModel.MenuAction.LOCAL_MODEL -> {
+                                llmConfigLauncher.launch(Intent(this@SettingsActivity, com.apk.claw.android.ui.featurescreens.LocalModelActivity::class.java))
                             }
                             SettingsViewModel.MenuAction.OCTOPUS_RUNTIME -> {
                                 startActivity(Intent(this@SettingsActivity, RuntimeConfigActivity::class.java))

@@ -3,6 +3,11 @@
 //
 // 构建: 见 CMakeLists.txt + build-native.sh
 // 产物: libllama-jni.so (arm64-v8a / x86_64)
+//
+// 适配 llama.cpp b3600+ API(2024-12 之后):
+//  - llama_tokenize 改为 C 风格 buffer API(返回 int32_t,需两段式调用)
+//  - llama_batch_get_one 需要 4 个参数(tokens, n_tokens, pos_0, seq_id)
+//  - llama_context_params.no_perf 字段已移除
 
 #include <jni.h>
 #include <android/log.h>
@@ -21,12 +26,39 @@ struct ModelHandle {
 };
 
 // 全局模型表(ptr → ModelHandle),用 jlong 传递给 Java
-// 简化实现:用 static map;生产代码应加锁
 #include <unordered_map>
 #include <mutex>
 static std::unordered_map<jlong, ModelHandle*> g_models;
 static jlong g_next_id = 1;
 static std::mutex g_mutex;
+
+/** 新版 llama_tokenize 封装:返回 token vector(两段式调用)。 */
+static std::vector<llama_token> tokenize_safe(
+    struct llama_model* model, const std::string& text, bool add_special, bool parse_special) {
+    // 第一段:查询所需大小
+    int32_t n_needed = llama_tokenize(
+        model, text.c_str(), (int32_t)text.size(),
+        nullptr, 0, add_special, parse_special);
+    if (n_needed <= 0) return {};
+
+    // 第二段:实际 tokenize
+    std::vector<llama_token> tokens(n_needed);
+    int32_t n_got = llama_tokenize(
+        model, text.c_str(), (int32_t)text.size(),
+        tokens.data(), (int32_t)tokens.size(),
+        add_special, parse_special);
+    if (n_got < 0) {
+        // 缓冲区不够(理论上不会,但兜底)
+        tokens.resize(-n_got);
+        n_got = llama_tokenize(
+            model, text.c_str(), (int32_t)text.size(),
+            tokens.data(), (int32_t)tokens.size(),
+            add_special, parse_special);
+    }
+    if (n_got > 0) tokens.resize(n_got);
+    else tokens.clear();
+    return tokens;
+}
 
 extern "C" {
 
@@ -57,7 +89,7 @@ Java_com_apk_claw_android_tool_localmodel_LlamaJni_nativeLoadModel(
     llama_context_params ctx_params = llama_context_default_params();
     ctx_params.n_ctx = context_size;
     ctx_params.n_batch = 512;
-    ctx_params.no_perf = false;
+    // 注:no_perf 字段在 b3600+ 已移除,不再设置
 
     struct llama_context* ctx = llama_new_context_with_model(model, ctx_params);
     if (!ctx) {
@@ -119,9 +151,8 @@ Java_com_apk_claw_android_tool_localmodel_LlamaJni_nativeComplete(
     std::string stop(stop_c);
     env->ReleaseStringUTFChars(stop_str, stop_c);
 
-    // Tokenize prompt
-    std::vector<llama_token> tokens = llama_tokenize(
-        handle->model, prompt_str, true, true);
+    // Tokenize prompt(新版 API)
+    std::vector<llama_token> tokens = tokenize_safe(handle->model, prompt_str, true, true);
 
     // 检查上下文长度
     int n_ctx = llama_n_ctx(handle->ctx);
@@ -129,8 +160,8 @@ Java_com_apk_claw_android_tool_localmodel_LlamaJni_nativeComplete(
         tokens.resize(n_ctx - 4);
     }
 
-    // Evaluate prompt
-    llama_batch batch = llama_batch_get_one(tokens.data(), tokens.size());
+    // Evaluate prompt(新版 batch_get_one:tokens, n_tokens, pos_0, seq_id)
+    llama_batch batch = llama_batch_get_one(tokens.data(), (int32_t)tokens.size(), 0, 0);
     if (llama_decode(handle->ctx, batch) != 0) {
         LOGE("Failed to evaluate prompt");
         return env->NewStringUTF("[Error: failed to evaluate prompt]");
@@ -140,17 +171,13 @@ Java_com_apk_claw_android_tool_localmodel_LlamaJni_nativeComplete(
     std::string result;
     int n_generated = 0;
     llama_token new_token_id;
+    int32_t cur_pos = (int32_t)tokens.size();
 
     while (n_generated < max_tokens) {
         float* logits = llama_get_logits_ith(handle->ctx, batch.n_tokens - 1);
 
-        // 简化采样:temperature + top_p
-        llama_token_data_array candidates;
-        // (生产代码应使用 llama_sample_* 函数族)
-        // 这里用最简方案:argmax with temperature
+        // 简化采样:argmax(生产代码应使用 llama_sample_* 函数族)
         // TODO: 完整实现 llama_sample_temp + llama_sample_top_p + llama_sample_token
-
-        // 简化版:取 argmax
         new_token_id = 0;
         float max_logit = logits[0];
         int vocab_size = llama_n_vocab(handle->model);
@@ -178,10 +205,10 @@ Java_com_apk_claw_android_tool_localmodel_LlamaJni_nativeComplete(
             }
         }
 
-        // 继续解码
-        batch = llama_batch_get_one(&new_token_id, 1);
+        // 继续解码(新版 batch_get_one:pos_0 = cur_pos, seq_id = 0)
+        batch = llama_batch_get_one(&new_token_id, 1, cur_pos, 0);
         if (llama_decode(handle->ctx, batch) != 0) break;
-
+        cur_pos++;
         n_generated++;
     }
 
@@ -210,8 +237,7 @@ Java_com_apk_claw_android_tool_localmodel_LlamaJni_nativeTokenCount(
     std::string text_str(text_c);
     env->ReleaseStringUTFChars(text, text_c);
 
-    std::vector<llama_token> tokens = llama_tokenize(
-        it->second->model, text_str, true, true);
+    std::vector<llama_token> tokens = tokenize_safe(it->second->model, text_str, true, true);
     return (jint)tokens.size();
 }
 

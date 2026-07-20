@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Octopus 桌面小组件布局(4x1 横条)。
+     扁平设计:深色背景 + 章鱼 icon + 应用名 + 两个快捷按钮(语音 / 浏览器)。
+     所有元素均无阴影、无圆角气泡,与主 App Obsidian 风格一致。 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#111827"
+    android:padding="6dp"
+    android:gravity="center_vertical">
+
+    <!-- 章鱼 logo(点击启动 App 到主界面) -->
+    <ImageView
+        android:id="@+id/widget_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_launcher"
+        android:contentDescription="@string/app_name"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp" />
+
+    <!-- 应用名 + 状态文本(点击同 icon) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/widget_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_subtitle_default"
+            android:textColor="#9CA3AF"
+            android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- 语音按钮:直启 VoiceCallActivity -->
+    <ImageView
+        android:id="@+id/widget_btn_voice"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_btn_speak_now"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/widget_voice"
+        android:padding="4dp"
+        android:layout_marginStart="4dp" />
+
+    <!-- 浏览器按钮:直启 BrowserActivity -->
+    <ImageView
+        android:id="@+id/widget_btn_browser"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_menu_search"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/widget_browser"
+        android:padding="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp" />
+
+</LinearLayout>
