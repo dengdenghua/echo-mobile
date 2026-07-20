@@ -48,10 +48,12 @@ class WorkflowAlarmReceiver : BroadcastReceiver() {
         }
 
         // 异步执行（WorkflowEngine.execute 是 suspend）
+        // 定时触发=无人值守=不可信来源：HIGH/MEDIUM 工具走 ApprovalFlow，
+        // 用户不在场时被策略拦截是预期行为（避免定时闹钟偷偷干高危操作）。
         scope.launch {
             val startMs = System.currentTimeMillis()
             val result = try {
-                WorkflowEngine(context).execute(wf)
+                WorkflowEngine(context, untrustedSource = true).execute(wf)
             } catch (e: Throwable) {
                 XLog.e(TAG, "workflow ${wf.id} crashed", e)
                 notify(context, wf.id.hashCode(),
