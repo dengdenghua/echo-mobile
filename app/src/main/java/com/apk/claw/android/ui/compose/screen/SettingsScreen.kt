@@ -13,9 +13,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Undo
@@ -72,7 +74,10 @@ import com.apk.claw.android.ui.compose.theme.tvFocusable
 import com.apk.claw.android.ui.compose.theme.tvOverscan
 import com.apk.claw.android.ui.featurescreens.EvolutionActivity
 import com.apk.claw.android.ui.featurescreens.MemoryActivity
+import com.apk.claw.android.ui.featurescreens.McpServersActivity
+import com.apk.claw.android.ui.featurescreens.PersonasActivity
 import com.apk.claw.android.ui.featurescreens.TrustCenterActivity
+import com.apk.claw.android.ui.featurescreens.WorkflowsActivity
 import com.apk.claw.android.ui.settings.LlmConfigActivity
 import com.apk.claw.android.ui.settings.RuntimeConfigActivity
 import com.apk.claw.android.account.AccountStore
@@ -731,6 +736,30 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     stringResource(R.string.feat_memory_desc),
                 ) {
                     context.startActivity(Intent(context, MemoryActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.Api,
+                    "MCP Server",
+                    "外部工具协议服务器(Model Context Protocol)",
+                ) {
+                    context.startActivity(Intent(context, McpServersActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.Face,
+                    "角色卡",
+                    "自定义 AI 人设性格/开场白/说话风格",
+                ) {
+                    context.startActivity(Intent(context, PersonasActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.AccountTree,
+                    "工作流",
+                    "多步骤编排（工具+Prompt+条件）",
+                ) {
+                    context.startActivity(Intent(context, WorkflowsActivity::class.java))
                 }
             }
         }

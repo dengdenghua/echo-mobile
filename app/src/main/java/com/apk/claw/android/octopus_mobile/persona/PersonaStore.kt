@@ -96,6 +96,63 @@ object PersonaStore {
         ),
     )
 
+    /**
+     * 独立对话历史：每个 Persona 维护自己的最近 N 条对话记录。
+     *
+     * 与 ChatViewModel 的全局历史区别：这里是 Persona 维度，切换角色即切换上下文，
+     * 让不同角色的人设有"独立记忆"，不会串戏。
+     *
+     * 数据格式：JSON 数组 [{role, content, ts}]，role ∈ {user, ai}。
+     * 上限 [HISTORY_MAX] 条（FIFO 截断）。
+     *
+     * 当前由 PersonaStore 提供 API,UI / ChatViewModel 在后续迭代按 personaId 维度接入。
+     */
+    object History {
+        private const val KEY_PREFIX = "persona_history_"
+        private const val HISTORY_MAX = 50
+
+        data class Entry(val role: String, val content: String, val ts: Long)
+
+        fun get(context: Context, personaId: String): List<Entry> {
+            val raw = KVUtils.getString(KEY_PREFIX + personaId, "")
+            if (raw.isEmpty()) return emptyList()
+            return try {
+                val arr = JSONArray(raw)
+                (0 until arr.length()).map { i ->
+                    val o = arr.getJSONObject(i)
+                    Entry(
+                        role = o.optString("role", "user"),
+                        content = o.optString("content", ""),
+                        ts = o.optLong("ts", 0),
+                    )
+                }
+            } catch (_: Throwable) { emptyList() }
+        }
+
+        fun append(context: Context, personaId: String, role: String, content: String) {
+            val list = get(context, personaId).toMutableList()
+            list.add(Entry(role, content, System.currentTimeMillis()))
+            // FIFO 截断
+            val trimmed = if (list.size > HISTORY_MAX) list.subList(list.size - HISTORY_MAX, list.size) else list
+            val arr = JSONArray()
+            trimmed.forEach { e ->
+                arr.put(JSONObject().apply {
+                    put("role", e.role)
+                    put("content", e.content)
+                    put("ts", e.ts)
+                })
+            }
+            KVUtils.putString(KEY_PREFIX + personaId, arr.toString())
+        }
+
+        fun clear(context: Context, personaId: String) {
+            KVUtils.remove(KEY_PREFIX + personaId)
+        }
+
+        /** 删除某 Persona 的历史（用于角色被删除时清理） */
+        fun clearAll(context: Context, personaId: String) = clear(context, personaId)
+    }
+
     private var cache: MutableList<Persona>? = null
 
     fun list(context: Context): List<Persona> {
@@ -141,6 +198,8 @@ object PersonaStore {
         list.removeAll { it.id == id }
         persist(context, list)
         if (getActive(context) == id) setActive(context, null)
+        // 清理该角色的独立对话历史
+        History.clear(context, id)
         return true
     }
 

@@ -15,10 +15,13 @@ import com.apk.claw.android.agent.llm.LlmResponse
 import com.apk.claw.android.agent.llm.StreamingListener
 import com.apk.claw.android.service.ClawAccessibilityService
 import com.apk.claw.android.octopus_mobile.ControlTarget
+import com.apk.claw.android.octopus_mobile.ApiKeyPool
 import com.apk.claw.android.utils.KVUtils
 import com.apk.claw.android.octopus_mobile.GoalVerifier
 import com.apk.claw.android.octopus_mobile.VisionAnalyzer
 import com.apk.claw.android.octopus_mobile.ActionRecorder
+import com.apk.claw.android.octopus_mobile.persona.PersonaPromptBuilder
+import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.octopus_mobile.safety.ErrorClassifier
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -87,10 +90,26 @@ class DefaultAgentService : AgentService {
 
     private lateinit var config: AgentConfig
     private lateinit var llmClient: LlmClient
+    /**
+     * 当前 LLM 客户端实际使用的 API Key(可能与 [config].apiKey 不同 —— 当 [ApiKeyPool] 启用且
+     * 主 key 故障时,会切换到池中其他 key 并重建 llmClient)。在 [chatWithRetry] 中用于上报
+     * 成功/失败到 ApiKeyPool,以驱动冷却/禁用/统计。
+     */
+    @Volatile
+    private var currentApiKey: String = ""
     private lateinit var toolSpecs: List<dev.langchain4j.agent.tool.ToolSpecification>
     private var executor: ExecutorService? = null
     /** 后台单线程执行器:异步写 TaskCheckpoint(MMKV 同步写盘),避免阻塞 Agent executor 线程。 */
     private var checkpointExecutor: ExecutorService? = null
+    /**
+     * 只读工具并行执行线程池。
+     *
+     * 同一轮 ReAct 中,LLM 可能同时发起多个 get_xxx / list_xxx / search_xxx / read_xxx 查询,
+     * 这些工具无副作用可安全并行执行,显著降低响应延迟。
+     * 线程数 4(保守,避免大量并发工具压垮 Shizuku/ContentProvider/MediaProjection 等系统资源)。
+     * Agent 任务结束统一 shutdown。
+     */
+    private var toolParallelExecutor: ExecutorService? = null
     private val running = AtomicBoolean(false)
     @Volatile
     private var cancelToken: CancellationToken = CancellationToken()
@@ -105,13 +124,22 @@ class DefaultAgentService : AgentService {
 
     override fun initialize(config: AgentConfig) {
         this.config = config
-        this.llmClient = LlmClientFactory.create(config)
+        // ApiKeyPool 启用时,优先用池中当前可用 key 构造客户端(可能是主 key,也可能是冷却后切到的 fallback)。
+        // 池禁用 / 池为空 / 池只有主 key 时,acquireKey 返回 KVUtils.getLlmApiKey()(与 config.apiKey 一致),
+        // 行为完全等价于"未接入池"。
+        val poolKey = if (ApiKeyPool.isEnabled()) ApiKeyPool.acquireKey() else config.apiKey
+        currentApiKey = poolKey
+        val effectiveConfig = if (poolKey != config.apiKey) config.copy(apiKey = poolKey) else config
+        this.llmClient = LlmClientFactory.create(effectiveConfig)
         this.toolSpecs = LangChain4jToolBridge.buildToolSpecifications()
         this.executor = Executors.newSingleThreadExecutor()
         this.checkpointExecutor = Executors.newSingleThreadExecutor { r ->
             Thread(r, "checkpoint").apply { isDaemon = true }
         }
-        XLog.i(TAG, "Agent initialized: provider=${config.provider}, model=${config.modelName}, streaming=${config.streaming}")
+        this.toolParallelExecutor = Executors.newFixedThreadPool(4) { r ->
+            Thread(r, "tool-parallel").apply { isDaemon = true }
+        }
+        XLog.i(TAG, "Agent initialized: provider=${config.provider}, model=${config.modelName}, streaming=${config.streaming}, poolEnabled=${ApiKeyPool.isEnabled()}")
     }
 
     override fun updateConfig(config: AgentConfig) {
@@ -457,6 +485,8 @@ class DefaultAgentService : AgentService {
                 if (response.text.isNullOrEmpty() && !response.hasToolExecutionRequests()) {
                     throw RuntimeException(ClawApplication.instance.getString(R.string.agent_empty_response))
                 }
+                // 成功上报到 ApiKeyPool(重置 consecutiveFailures,池禁用时 no-op)
+                if (ApiKeyPool.isEnabled()) ApiKeyPool.reportSuccess(currentApiKey)
                 return response
             } catch (e: Exception) {
                 lastException = e
@@ -475,9 +505,23 @@ class DefaultAgentService : AgentService {
                 if (!classification.isRetryable) {
                     throw e
                 }
-                // SWITCH_KEY：移动端无多凭证轮换能力，直接抛出
+                // SWITCH_KEY:认证失败 / 限流 → 切到池中其他 key 后立即重试(无 backoff)。
+                // 池禁用 / 池无备选 key 时退化为旧行为(直接抛出)。
                 if (classification.action == ErrorClassifier.RecoveryAction.SWITCH_KEY) {
-                    throw e
+                    if (!ApiKeyPool.isEnabled()) throw e
+                    ApiKeyPool.reportFailure(currentApiKey, statusCode)
+                    val newKey = ApiKeyPool.acquireKey()
+                    if (newKey == currentApiKey) {
+                        XLog.w(TAG, "SWITCH_KEY but no alternative key available in pool")
+                        throw e
+                    }
+                    rebuildLlmClientWithKey(newKey)
+                    XLog.w(TAG, "Switched API key (status=$statusCode), retrying without backoff")
+                    continue
+                }
+                // 非 SWITCH_KEY 的 HTTP 错误(429/5xx 等)同样上报池以驱动冷却统计
+                if (ApiKeyPool.isEnabled() && statusCode != null) {
+                    ApiKeyPool.reportFailure(currentApiKey, statusCode)
                 }
                 // CONTEXT_LENGTH：压缩上下文后立即重试（backoff=0）
                 if (classification.action == ErrorClassifier.RecoveryAction.REDUCE_CONTEXT) {
@@ -544,6 +588,19 @@ class DefaultAgentService : AgentService {
             return e.statusCode()
         }
         return null
+    }
+
+    /**
+     * 用新 API Key 重建 LlmClient(用于 ApiKeyPool 切换 key)。
+     *
+     * 仅替换 [llmClient] 与 [currentApiKey],[config] 保持原样(下次 initialize 仍用主 key 起步)。
+     * 重建成本低:仅构造 OkHttp + ChatModel,无网络握手。线程安全:llmClient 用 volatile 写,
+     * 与 executor 单线程串行调用 LLM 的语义一致(无并发请求)。
+     */
+    private fun rebuildLlmClientWithKey(newKey: String) {
+        val effectiveConfig = config.copy(apiKey = newKey)
+        this.llmClient = LlmClientFactory.create(effectiveConfig)
+        this.currentApiKey = newKey
     }
 
     // ==================== 死循环检测 ====================
@@ -837,12 +894,23 @@ class DefaultAgentService : AgentService {
     private fun buildInitialMessages(userPrompt: String): MutableList<ChatMessage> {
         // GUI 交互经验:把这台设备过往界面失败的规避策略追加进系统提示(每任务重算,故实时反映最新教训)。
         val guiLessons = com.apk.claw.android.octopus_mobile.InteractionLedger.getMitigationsSection()
+        // 角色卡注入:读取当前激活 Persona,把 systemPrompt + styleHint 追加到系统提示尾部。
+        // 不覆盖 config.systemPrompt(开发者基线),而是作为「当前角色设定」叠加,保证可逆切换。
+        val persona = runCatching { PersonaStore.getActivePersona(ClawApplication.instance) }
+            .getOrNull()
+        val personaAppendix = PersonaPromptBuilder.buildSystemAppendix(persona)
         val fullSystemPrompt = config.systemPrompt + buildDeviceContext() +
             config.dynamicPromptSuffix + config.memoryPromptSuffix +
-            (if (guiLessons.isNotBlank()) "\n\n$guiLessons" else "")
+            (if (guiLessons.isNotBlank()) "\n\n$guiLessons" else "") +
+            personaAppendix
         val msgs = mutableListOf<ChatMessage>(
             SystemMessage.from(fullSystemPrompt),
         )
+        // 角色卡开场白:新对话时把 greeting 作为第一条 AI 消息注入,让用户立刻感知到角色存在。
+        // 仅在 userPrompt 不是续接历史时注入(简单判断:无 checkpoint 恢复走这条路径,都有 persona 上下文)。
+        if (persona != null && persona.greeting.isNotBlank()) {
+            msgs.add(AiMessage.from(persona.greeting))
+        }
         // few-shot: 标准工具调用流程示范(帮小模型快速对齐格式,~100 token 开销)
         // 展示 User → Assistant(tool_calls) → ToolResult → Assistant(完成) 的完整闭环
         msgs.add(UserMessage.from("[示例] 帮我打开设置"))
@@ -968,21 +1036,229 @@ class DefaultAgentService : AgentService {
         val llmResponse = callLlm(callback) ?: return IterationOutcome.TERMINATE
         if (handleLlmResponse(llmResponse, callback)) return IterationOutcome.TERMINATE
 
-        var skipRemaining = false
-        for (toolRequest in llmResponse.toolExecutionRequests) {
+        val requests = llmResponse.toolExecutionRequests
+        if (requests.isEmpty()) {
+            return if (handleLoopDetection(callback)) IterationOutcome.TERMINATE else IterationOutcome.CONTINUE
+        }
+
+        // ── 分组:只读工具(并行) + 其他工具(串行) ──────────────────────────
+        //
+        // LLM 一轮里可能同时发起多个 get_*/list_*/search_*/read_* 查询,这些纯查询无副作用
+        // 可安全并行;但 tap/swipe/input_text/open_app/file_ops 等有状态副作用的工具必须串行,
+        // 否则会有竞态(如两个 tap 同时执行会乱序,两个 file_ops 同时写会冲突)。
+        //
+        // 策略:
+        //  1. 只读组(>=2 个)用 toolParallelExecutor 并行执行 execTool,结果按提交顺序串行 commit
+        //  2. 只读组(1 个)直接串行执行,省线程开销
+        //  3. 非只读组保持原顺序串行执行(走完整 executeSingleTool 含 UI 状态校验/动作录制等副作用)
+        //
+        // 并行阶段只调 execTool(纯计算/IO),messages 状态修改在主 Agent 线程上串行 commit,避免竞态。
+        val (readonlyReqs, serialReqs) = requests.partition { req ->
+            val name = req.name() ?: ""
+            // ToolRegistry.getTool 可能返回 null(MCP 工具未连接时),null 时保守走串行
+            ToolRegistry.getInstance().getTool(name)?.isReadOnly() == true
+        }
+
+        // 1) 只读组:并行执行 execTool,串行 commit 结果
+        if (readonlyReqs.isNotEmpty()) {
+            val commitResult = commitReadonlyToolsParallel(readonlyReqs, callback)
+            when (commitResult) {
+                ToolHandleResult.TERMINATE -> return IterationOutcome.TERMINATE
+                ToolHandleResult.SKIP_REMAINING -> return IterationOutcome.CONTINUE
+                ToolHandleResult.CONTINUE -> { }
+            }
+        }
+
+        // 2) 非只读组:串行执行(保留 UI 状态校验/动作录制/导航图谱等副作用逻辑)
+        for (toolRequest in serialReqs) {
             if (cancelToken.isCancelled()) {
                 callback.onComplete(iterations, ClawApplication.instance.getString(R.string.agent_task_cancel), totalTokens)
                 return IterationOutcome.TERMINATE
             }
             when (executeSingleTool(toolRequest, callback)) {
                 ToolHandleResult.TERMINATE -> return IterationOutcome.TERMINATE
-                ToolHandleResult.SKIP_REMAINING -> { skipRemaining = true; break }
+                ToolHandleResult.SKIP_REMAINING -> return IterationOutcome.CONTINUE
                 ToolHandleResult.CONTINUE -> { }
             }
         }
 
-        if (skipRemaining) return IterationOutcome.CONTINUE
         return if (handleLoopDetection(callback)) IterationOutcome.TERMINATE else IterationOutcome.CONTINUE
+    }
+
+    /**
+     * 并行执行多个只读工具,串行 commit 结果到 messages。
+     *
+     * 分两阶段:
+     *  1. **并行执行阶段**:所有 readonly 工具提交到 [toolParallelExecutor],
+     *     每个工具独立调用 [execTool] 拿 [ToolResult]。此阶段不修改任何共享状态(messages、callback)。
+     *  2. **串行 commit 阶段**:按 LLM 提交顺序依次等待 Future,在每个工具结果出来后:
+     *     - callback.onToolCall / onToolResult(主线程串行)
+     *     - appendToolResult 修改 messages(避免竞态)
+     *     - 处理 finish/参数错误 等特殊情况
+     *
+     * 单个 readonly 工具时直接串行执行,省去线程池开销。
+     *
+     * @return TERMINATE 表示有 finish 工具触发任务完成或 cancel;CONTINUE 表示正常完成。
+     */
+    private fun AgentLoopState.commitReadonlyToolsParallel(
+        readonlyReqs: List<ToolExecutionRequest>,
+        callback: AgentCallback,
+    ): ToolHandleResult {
+        // 单个 readonly 工具:直接串行执行(省线程开销)
+        if (readonlyReqs.size == 1) {
+            return executeReadonlyTool(readonlyReqs[0], callback)
+        }
+
+        // 多个 readonly 工具:并行执行,串行 commit
+        val pool = toolParallelExecutor ?: return ToolHandleResult.CONTINUE
+        val cancelTask = cancelToken
+
+        // ── 阶段 1:并行提交 execTool ──
+        data class ReadonlyExec(
+            val request: ToolExecutionRequest,
+            val toolName: String,
+            val displayName: String,
+            val args: String,
+            val params: Map<String, Any>?,
+            val parseError: String?,  // 非 null 表示参数解析失败,params 为 null
+            val result: ToolResult?,  // 参数解析失败时为 null
+        )
+
+        val futures = readonlyReqs.map { req ->
+            pool.submit<ReadonlyExec> {
+                val toolName = req.name() ?: ""
+                val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
+                val toolArgs = req.arguments() ?: "{}"
+
+                // 参数解析在 worker 线程上做(纯字符串解析,无副作用)
+                val params = parseToolArgs(toolName, toolArgs)
+                if (params == null) {
+                    val schema = formatToolSchema(toolName)
+                    val err = "参数解析失败:JSON 格式有误。原始参数: $toolArgs" +
+                        (if (schema.isNotEmpty()) "\n正确参数格式: $schema" else "") +
+                        "\n请按此格式重新调用。"
+                    return@submit ReadonlyExec(req, toolName, displayName, toolArgs, null, err, null)
+                }
+
+                // 执行工具(纯查询,无副作用;cancelToken 通过 ToolRegistry.executeTool 内部 ThreadLocal 传递)
+                AgentMetrics.toolCall()
+                val rawResult = execTool(toolName, params)
+                if (!rawResult.isSuccess) AgentMetrics.toolFailure()
+                ReadonlyExec(req, toolName, displayName, toolArgs, params, null, rawResult)
+            }
+        }
+
+        // ── 阶段 2:按提交顺序串行 commit ──
+        for (future in futures) {
+            if (cancelTask.isCancelled()) {
+                callback.onComplete(iterations, ClawApplication.instance.getString(R.string.agent_task_cancel), totalTokens)
+                return ToolHandleResult.TERMINATE
+            }
+
+            val exec: ReadonlyExec = try {
+                future.get()  // 阻塞等单个工具完成(按提交顺序)
+            } catch (e: Exception) {
+                // 线程被中断或工具抛异常:构造错误结果
+                val req = readonlyReqs[futures.indexOf(future)]
+                val toolName = req.name() ?: ""
+                val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
+                val args = req.arguments() ?: "{}"
+                val errResult = ToolResult.error("工具执行异常: ${e.message}")
+                callback.onToolCall(iterations, toolName, displayName, args)
+                callback.onToolResult(iterations, toolName, displayName, args, errResult)
+                appendToolResult(req, errResult)
+                continue
+            }
+
+            // 构造最终 ToolResult
+            val result: ToolResult = exec.parseError?.let { ToolResult.error(it) } ?: exec.result!!
+
+            // UI callback(主 Agent 线程串行)
+            val paramsStr = if (exec.params.isNullOrEmpty()) "" else exec.params.toString()
+            callback.onToolCall(iterations, exec.toolName, exec.displayName, exec.args)
+            callback.onToolResult(iterations, exec.toolName, exec.displayName, paramsStr, result)
+
+            // finish 工具特殊处理(虽不算 readonly,但若 LLM 错调到 finish 仍要走原流程)
+            if (exec.toolName == "finish" && result.isSuccess) {
+                val repair = shouldRepairForGoal(callback)
+                if (repair != null) {
+                    appendToolResult(exec.request, result)
+                    messages.add(UserMessage.from(repair))
+                    return ToolHandleResult.CONTINUE
+                }
+                taskSucceeded = true
+                callback.onComplete(iterations, result.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)
+                return ToolHandleResult.TERMINATE
+            }
+
+            recordFingerprint(exec.toolName, exec.args, result)
+            appendToolResult(exec.request, result)
+        }
+
+        return ToolHandleResult.CONTINUE
+    }
+
+    /**
+     * 单个只读工具的简化执行路径:并行阶段不会调用此方法(走 [commitReadonlyToolsParallel]),
+     * 仅在 readonly 组只有 1 个工具时使用(省线程开销)。
+     *
+     * 与 [executeSingleTool] 区别:
+     *  - 跳过 UI 状态比对(readonly 工具无 UI 副作用)
+     *  - 跳过 PopupDetector.tryDismiss(readonly 工具不触发弹窗)
+     *  - 跳过动作录制 ActionRecorder(readonly 工具不算"动作")
+     *  - 跳过导航图谱学习 NavigateTool.recorder(readonly 工具不改导航状态)
+     *  - 跳过非幂等失败警告(readonly 工具失败可重试,无需警告)
+     */
+    @Suppress("ReturnCount")
+    private fun AgentLoopState.executeReadonlyTool(
+        toolRequest: ToolExecutionRequest,
+        callback: AgentCallback,
+    ): ToolHandleResult {
+        val toolName = toolRequest.name() ?: ""
+        val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
+        val toolArgs = toolRequest.arguments() ?: "{}"
+        callback.onToolCall(iterations, toolName, displayName, toolArgs)
+
+        val params = parseToolArgs(toolName, toolArgs) ?: run {
+            val schema = formatToolSchema(toolName)
+            val errorResult = ToolResult.error(
+                "参数解析失败:JSON 格式有误。原始参数: $toolArgs" +
+                (if (schema.isNotEmpty()) "\n正确参数格式: $schema" else "") +
+                "\n请按此格式重新调用。"
+            )
+            appendToolResult(toolRequest, errorResult)
+            callback.onToolResult(iterations, toolName, displayName, toolArgs, errorResult)
+            return ToolHandleResult.CONTINUE
+        }
+
+        if (cancelToken.isCancelled()) {
+            callback.onComplete(iterations, ClawApplication.instance.getString(R.string.agent_task_cancel), totalTokens)
+            return ToolHandleResult.TERMINATE
+        }
+
+        AgentMetrics.toolCall()
+        val rawResult = execTool(toolName, params)
+        if (!rawResult.isSuccess) AgentMetrics.toolFailure()
+
+        val paramsString = if (params.isEmpty()) "" else params.toString()
+        callback.onToolResult(iterations, toolName, displayName, paramsString, rawResult)
+
+        // finish 工具特殊处理(保守:即使被归为 readonly 也保留主循环耦合逻辑)
+        if (toolName == "finish" && rawResult.isSuccess) {
+            val repair = shouldRepairForGoal(callback)
+            if (repair != null) {
+                appendToolResult(toolRequest, rawResult)
+                messages.add(UserMessage.from(repair))
+                return ToolHandleResult.CONTINUE
+            }
+            taskSucceeded = true
+            callback.onComplete(iterations, rawResult.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)
+            return ToolHandleResult.TERMINATE
+        }
+
+        recordFingerprint(toolName, toolArgs, rawResult)
+        appendToolResult(toolRequest, rawResult)
+        return ToolHandleResult.CONTINUE
     }
 
     private fun AgentLoopState.callLlm(callback: AgentCallback): LlmResponse? {
@@ -1438,6 +1714,7 @@ class DefaultAgentService : AgentService {
         cancel()
         executor?.shutdownNow()
         checkpointExecutor?.shutdown()
+        toolParallelExecutor?.shutdownNow()
     }
 
     override fun isRunning(): Boolean = running.get()
