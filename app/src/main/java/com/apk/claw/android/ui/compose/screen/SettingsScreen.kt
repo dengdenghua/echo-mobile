@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.SettingsAccessibility
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
@@ -780,6 +781,14 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     stringResource(R.string.wakeword_feature_desc),
                 ) {
                     context.startActivity(Intent(context, WakeWordSettingsActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.Terminal,
+                    "Linux 容器",
+                    "PRoot 沙箱(Alpine 内置 / Ubuntu 需下载)",
+                ) {
+                    context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.LinuxSandboxSettingsActivity::class.java))
                 }
             }
         }
