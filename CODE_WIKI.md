@@ -29,7 +29,7 @@ Octopus Mobile 是一款 **AI 驱动的 Android 自动化应用**。用户通过
 - **工具系统**：通过无障碍服务（AccessibilityService）执行手势、读屏、截图；Shizuku 提供 shell 级增强。
 - **Octopus Mobile 触手层**：将设备变为 octopus-agent Runtime 的物理触手。**入站**远程控制(母体下发 `tool/execute`)已真实接线并经安全闸门;屏幕串流「可用但未完;**出站**任务委托给 Runtime 尚未接线(见 §2.3 步骤 6 与 README 实现状态表)。
 - **安全护栏**：SafetyGate（密钥正则扫描;LLM 宪法判官以 judge=null 构造,当前不运行）、ToolCallGuardrail、断路器、审批流、来源信任闸门。
-- **自进化**：TurnScorer 打分 + EvolutionEngine 反思，教训持久化并注入系统提示词(**B1/B2 活跃;B3 deepEvolve 已实现未接线**)。
+- **自进化**：TurnScorer 打分 + EvolutionEngine 反思，教训持久化并注入系统提示词(**B1/B2 活跃;B3 deepEvolve 已废弃——函数从未存在,历史文档误称,实际仅有 deepReflect**)。
 
 ---
 
@@ -78,7 +78,9 @@ Octopus Mobile 是一款 **AI 驱动的 Android 自动化应用**。用户通过
           Android 设备 / 远程设备
 ```
 
-### 2.2 三种运行模式（StartupMode）
+### 2.2 三种运行模式（StartupMode）—— ⚠️ 已废弃
+
+> **已删除（PROJECT_ANALYSIS P2 死代码清理,2026-07）**：`StartupMode.kt` 枚举与 `StartupModeResolver` 在生产代码中无任何实际使用方(仅 import 与注释引用),已整体删除。`ClawApplication.isRuntimeReachable()` 同步删除。下表保留仅供历史追溯。
 
 | 模式 | 行为 | 适用场景 |
 |------|------|----------|
@@ -191,8 +193,8 @@ octopus-mobile/
 | 子领域 | 关键文件 | 职责 |
 |--------|----------|------|
 | RPC 协议 | `Protocol.kt` `OctopusMobileClient.kt` | JSON-RPC 2.0 + WebSocket 通道 |
-| 连接管理 | `ConnectionStateMachine.kt` `StartupMode.kt` | 7 态 FSM + Full-Jitter 退避 |
-| 决策层 | `BrainModeSelector.kt` `IntentClassifier.kt` | 本地/远程切换 + 意图分类 |
+| 连接管理 | ~~`ConnectionStateMachine.kt`~~ ~~`StartupMode.kt`~~ | ⚠️ 均已删除：ConnectionStateMachine 文件从未存在(仅文档残留),StartupMode 枚举无生产调用方 |
+| 决策层 | `BrainModeSelector.kt`(已废弃) `IntentClassifier.kt` | ⚠️ BrainModeSelector 路由裁决未接线,仅用于日志;IntentClassifier 仍活跃 |
 | 本地 ReAct | `LightweightLlmClient.kt` `LightweightReAct.kt` | 无 LangChain 的轻量 ReAct 循环 |
 | 工具分发 | `ToolCallDispatcher.kt` `RemoteActions.kt` | Runtime→设备 / 设备→远程设备 |
 | 屏幕串流 | `ScreenStreamer.kt` `H264Decoder.kt` | 增量屏幕上报 + PC 远程桌面解码 |
@@ -435,12 +437,14 @@ WebSocket 客户端。`connect()` 发送 `device/hello`（含设备元数据）�
 #### `ToolCallDispatcher` — [octopus_mobile/ToolCallDispatcher.kt](app/src/main/java/com/apk/claw/android/octopus_mobile/ToolCallDispatcher.kt)
 Runtime → 设备工具执行：`stripAndroidPrefix`（`android.tap`→`tap`）→ `ToolRegistry.withUntrustedSource { executeTool }`（Runtime 来源视为 untrusted）→ `sendToolResult`。
 
-#### `BrainModeSelector` — [octopus_mobile/BrainModeSelector.kt](app/src/main/java/com/apk/claw/android/octopus_mobile/BrainModeSelector.kt)
+#### `BrainModeSelector` — [octopus_mobile/BrainModeSelector.kt](app/src/main/java/com/apk/claw/android/octopus_mobile/BrainModeSelector.kt) — ⚠️ 已废弃
 30s 健康检查：Runtime `ONLINE` → `EXECUTOR_ONLY`；否则 `LOCAL_FALLBACK`。`decide(task)`：
 1. `IntentClassifier.classify`（关键词 BROWSER/MOBILE/MIXED）
 2. 浏览器域自动选择 `BrowserEngineFactory.selectBest`
 3. 远程：`rpcClient.executeRemoteTask`；失败降级本地
 4. 本地：`LightweightReAct.run`（轻量 ReAct 循环）
+
+> ⚠️ **已废弃（PROJECT_ANALYSIS P2 死代码清理,2026-07）**：上述 `decide(task)` 路由流程从未真正接线。`BrainModeSelector` 被 AppViewModel 实例化、被 TaskOrchestrator 读取 `currentMode()`/`currentDomain()`,但读取结果仅用于日志输出,`startNewTask` 中的远程委托是字面 `TODO`。类已加 `@Deprecated` 注解,保留以避免破坏编译。
 
 #### `LightweightReAct` — [octopus_mobile/LightweightReAct.kt](app/src/main/java/com/apk/claw/android/octopus_mobile/LightweightReAct.kt)
 无 LangChain 的 ReAct 循环：语义排序技能 → 每步压缩历史 → LLM 调用 → 工具执行 → 4 轮指纹死循环检测 → `GoalVerifier` VLM 目标校验（fail-open，1 次修复机会）。
@@ -453,7 +457,7 @@ MMKV ↔ Runtime 配置双写。**安全 blocklist**：Runtime URL/authToken/LLM
 - **B1**（免费，✅ 活跃）：`TurnScorer` 启发式打分 + 趋势
 - **B2 deepReflect**（廉价，✅ 活跃）：单次 LLM 调用评估近 N 轮 → JSON 裁决 → 自动存教训
 - **B3 deepEvolve**（昂贵，手动）：提 K 候选 → LLM 评判 → 应用胜出者
-  > ⚠️ **B3 目前无生产调用入口**（`deepEvolve` 无调用方、`CanaryManager` 灰度晋级仅由 `EvolutionActivity` 只读展示,无写入端）。只有 B1/B2 的教训闭环是真正活跃的。参见 README 实现状态表(💤 已实现未接线)。
+  > ⚠️ **B3 已废弃（PROJECT_ANALYSIS P2 死代码清理,2026-07）**：`deepEvolve` 函数在 EvolutionEngine.kt 中**从未存在**(历史文档误称,实际仅有 `deepReflect`)。`CanaryManager` 已加 `@Deprecated`,灰度晋级写入端从未接线,仅 `EvolutionActivity` 只读调用 `listAll()`。只有 B1/B2 的教训闭环是真正活跃的。
 
 教训写入 `LessonStore`，经 `TaskOrchestrator` 注入 `AgentConfig.dynamicPromptSuffix`。
 
@@ -621,7 +625,7 @@ cd octopus-mobile
 # 指定测试
 ./gradlew :app:testDebugUnitTest --tests "*HelloWorldToolsTest*"
 ```
-覆盖：AgentConfig、DefaultAgentService、TaskQueue、ConnectionStateMachine、IntentClassifier、ToolRegistry、ShizukuShellService、ConfigServer 等。
+覆盖：AgentConfig、DefaultAgentService、TaskQueue、IntentClassifier、ToolRegistry、ShizukuShellService、ConfigServer 等（ConnectionStateMachine 引用为文档残留,文件从未存在）。
 
 ### 7.8 后端部署（可选）
 
@@ -651,9 +655,9 @@ uvicorn app:app --host 127.0.0.1 --port 8081
 | 浏览器自动化 | ✅ 完整 | 系统 WebView(Chromium 内核),evaluateJavascript / click / type / get_dom / screenshot 均可用 |
 | Shizuku shell 提权 | ⚠️ 受限 | exec 回退 app 进程；需 IUserService 绑定才能 shell UID |
 | 投屏 / 外接屏工作台 | ⚠️ 可用不完整 | 检测/渲染/REST 通；窗口跟踪未实现 |
-| 自进化 L3 deepEvolve / Canary | 💤 已实现未接线 | 无调用入口 |
+| 自进化 L3 deepEvolve / Canary | ⚠️ 已废弃 | deepEvolve 函数从未存在;CanaryManager 已加 @Deprecated,仅 EvolutionActivity 只读展示 |
 | 插件系统 | 💤 休眠 | 仅 assets 内置可加载；外部 dex fail-closed |
-| mpv 媒体播放 | 🔴 Stub | 播放方法 no-op；媒体扫描可用 |
+| mpv 媒体播放 | ⚠️ 已废弃(@Deprecated) | Stub: IS_AVAILABLE=false,所有方法 noop;MediaTools/PlayerActivity 仍引用以保持编译 |
 
 **图例**：✅ 完整可用 · ⚠️ 部分可用/受限 · 💤 已实现未接线 · 🔴 占位待实现
 

@@ -20,7 +20,7 @@ import kotlinx.coroutines.*
  *
  * 设计要点：
  *  - 与 ConnectionState 联动：仅在 ONLINE 时发送
- *  - 与 ConnectionStateMachine.getBackoffDelayMs 协同：断线时不发浪费
+ *  - 断线时不发浪费（ConnectionStateMachine 文档残留已废弃,实际退避由 OctopusMobileClient 内置全抖动算法承担）
  *  - 后台协程：SupervisorJob 隔离异常，避免影响主流程
  *  - 极简 payload：< 1KB
  */

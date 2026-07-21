@@ -179,6 +179,8 @@
         <activity android:name=".ui.featurescreens.ActivityActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.RoutinesActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.UserscriptStoreActivity" android:exported="false" />
+        <!-- DiffView:LLM 改文件后展示 unified diff,逐 hunk accept/reject(Task 6) -->
+        <activity android:name=".code.DiffViewActivity" android:exported="false" />
         <activity
             android:name=".plugin.MiniAppActivity"
             android:exported="false"
@@ -203,6 +205,7 @@
         <activity android:name=".ui.featurescreens.LocalModelActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.FileManagerActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.WakeWordSettingsActivity" android:exported="false" />
+        <activity android:name=".ui.featurescreens.LinuxSandboxSettingsActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.ChannelsActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.WeChatLoginActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.BrowserSettingsActivity" android:exported="false" />

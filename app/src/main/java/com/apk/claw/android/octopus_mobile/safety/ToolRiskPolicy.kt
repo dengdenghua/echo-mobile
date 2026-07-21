@@ -137,6 +137,8 @@ object ToolRiskPolicy {
         "workspace_mount", "workspace_unmount",
         // 远程工作空间文件操作:拉取/同步,可能暴露远程敏感配置。
         "workspace_pull", "workspace_sync",
+        // Git 工具集(Task 7):写外部仓库 + 网络操作,纳入审计;不可信来源走来源闸门
+        "git_clone", "git_commit", "git_push", "github_create_pr",
     )
 
     /**
@@ -172,6 +174,10 @@ object ToolRiskPolicy {
         "ssh_list", "ssh_disconnect",
         // 远程工作空间列表:纯查询,无副作用。
         "workspace_list",
+        // 代码检索(Task 5):BM25+dense 融合检索项目代码,纯查询无副作用。
+        "search_code",
+        // PLAN 模式收尾:仅切换 PermissionMode,无设备/外部状态变更。
+        "exit_plan_mode",
     )
 
     /** 已知未注册但有意保留在风险名单中的工具名（前向兼容），供漂移守护排除。 */

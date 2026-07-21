@@ -1395,4 +1395,18 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="language_name_ko">한국어</string>
     <string name="language_name_es">Español</string>
     <string name="language_name_pt">Português</string>
+
+    <!-- Agent permission mode (4-tier: DEFAULT / ACCEPT_EDITS / BYPASS_PERMISSIONS / PLAN) -->
+    <string name="permission_mode_menu_title">Permission Mode</string>
+    <string name="permission_mode_dialog_title">Select permission mode</string>
+
+    <!-- polish-and-surpass-operit integration: MCP / Tentacle / Git / Diff View -->
+    <string name="mcp_server_menu_title">MCP Server</string>
+    <string name="mcp_server_dialog_title">MCP Server Configuration</string>
+    <string name="tentacle_config_menu_title">Runtime Bridge</string>
+    <string name="tentacle_config_dialog_title">Runtime Bridge Configuration</string>
+    <string name="github_token_menu_title">GitHub Token</string>
+    <string name="github_token_dialog_title">GitHub Token (for git_push / github_create_pr)</string>
+    <string name="diff_view_menu_title">Diff View</string>
+    <string name="diff_view_dialog_title">Diff View (show diff before file write)</string>
 </resources>

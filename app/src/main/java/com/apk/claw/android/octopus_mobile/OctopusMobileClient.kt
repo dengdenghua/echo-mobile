@@ -433,7 +433,9 @@ open class OctopusMobileClient(
     /**
      * 向母体发送远程任务请求，等待结果.
      *
-     * 这是 BrainModeSelector.decideRemotely() 的核心调用.
+     * ⚠️ 注意：原本设计为 BrainModeSelector.decideRemotely() 的核心调用,
+     * 但 BrainModeSelector 的路由裁决从未真正接线（已加 @Deprecated）,
+     * 本方法目前无生产调用方,保留以备未来接线。
      */
     suspend fun executeRemoteTask(task: String, intent: IntentClassifier.ClassificationResult): RemoteTaskResult {
         val ws = webSocket

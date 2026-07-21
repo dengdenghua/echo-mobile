@@ -132,10 +132,65 @@ open class ClawApplication : BaseApp() {
         ToolRegistry.getInstance().registerAllTools(deviceType)
         // 注入 Application Context 供审批弹窗使用
         ToolRegistry.getInstance().appContext = this
+        // LinuxSandbox 注入 Context(供 PRoot 容器 bootstrap + Ubuntu rootfs 下载)
+        runCatching { com.apk.claw.android.tool.impl.LinuxSandbox.init(this) }
+            .onFailure { XLog.e(TAG, "LinuxSandbox init failed", it) }
         // 加载插件生态:dex 工具(assets 签名)+ 非 dex 的 browser-script/tool/mini-app。
         // assets-only fail-closed,无插件时为廉价 no-op。详见 PLUGIN_ECOSYSTEM.md。
         runCatching { pluginManager.loadAll() }.onFailure { XLog.e(TAG, "pluginManager.loadAll failed", it) }
         XLog.e(TAG, "ClawApplication initialized | device=${DeviceUtils.getDeviceDescription(this)} | tools=${ToolRegistry.getInstance().getAllTools().size}")
+
+        // ── Phase A 差异化下沉集成(polish-and-surpass-operit spec)──
+        // 1. SKILL.md 协议 + 技能热加载:扫描 assets/skills/ + filesDir/skills/,解析 frontmatter + body
+        runCatching {
+            com.apk.claw.android.skill.SkillRegistry.loadAll(this)
+            XLog.i(TAG, "SkillRegistry loaded: ${com.apk.claw.android.skill.SkillRegistry.list().size} skills")
+        }.onFailure { XLog.e(TAG, "SkillRegistry loadAll failed", it) }
+
+        // 2. ApprovalGate 第 8 道闸门:PLAN 模式拦写工具 / ACCEPT_EDITS 自动放行编辑 / BYPASS 全放行 / DEFAULT 委托
+        runCatching {
+            val approvalProvider = com.apk.claw.android.agent.RuleBasedProvider(
+                com.apk.claw.android.agent.AutoApproveProvider()
+            )
+            ToolRegistry.getInstance().approvalGate = com.apk.claw.android.agent.ApprovalGate(approvalProvider)
+            XLog.i(TAG, "ApprovalGate installed (mode=${com.apk.claw.android.agent.AgentConfig.currentPermissionMode()})")
+        }.onFailure { XLog.e(TAG, "ApprovalGate install failed", it) }
+
+        // 3. Tentacle WS 通路:连母本 Runtime,接收 tool/execute 帧。
+        // LOCAL_ONLY 模式(无 URL)完全 no-op,确保 INV-T4(无母本时现有功能不受影响)。
+        runCatching {
+            val tentacleConfig = com.apk.claw.android.tentacle.TentacleConfig.load()
+            if (tentacleConfig.enabled && tentacleConfig.runtimeUrl.isNotBlank()) {
+                com.apk.claw.android.tentacle.TentacleManager.init(this)
+                com.apk.claw.android.tentacle.TentacleManager.setToolCallHandler { toolName, params ->
+                    // 母本下发的工具调用必经 ToolRegistry 全套闸门 + ApprovalGate(不可信来源)
+                    ToolRegistry.getInstance().withUntrustedSource {
+                        ToolRegistry.getInstance().executeTool(toolName, params)
+                    }
+                }
+                com.apk.claw.android.tentacle.TentacleManager.start(tentacleConfig.runtimeUrl, tentacleConfig.authToken)
+                XLog.i(TAG, "Tentacle started: ${tentacleConfig.runtimeUrl}")
+            } else {
+                XLog.i(TAG, "Tentacle skipped (LOCAL_ONLY mode) — INV-T4")
+            }
+        }.onFailure { XLog.e(TAG, "Tentacle start failed", it) }
+
+        // 4. MCP 服务端:把 Android 工具暴露给外部 MCP 客户端(Claude Desktop / Cursor / 母本 Runtime)
+        // 默认关闭,需用户在 Settings 中开启。
+        runCatching {
+            if (KVUtils.isMcpServerEnabled()) {
+                com.apk.claw.android.mcp.McpServerBootstrap.setProvider(
+                    com.apk.claw.android.mcp.ToolRegistryMcpProvider()
+                )
+                com.apk.claw.android.mcp.McpServerBootstrap.setApprovalGate(
+                    com.apk.claw.android.mcp.SystemApprovalGate()
+                )
+                com.apk.claw.android.mcp.McpServerBootstrap.start(this, KVUtils.getMcpServerPort())
+                XLog.i(TAG, "MCP server started on port ${KVUtils.getMcpServerPort()}")
+            } else {
+                XLog.i(TAG, "MCP server skipped (disabled by default)")
+            }
+        }.onFailure { XLog.e(TAG, "MCP server start failed", it) }
 
         runCatching { ExperienceLedger.init(filesDir) }.onFailure { XLog.e(TAG, "ExperienceLedger init failed", it) }
         runCatching { InteractionLedger.init(filesDir) }.onFailure { XLog.e(TAG, "InteractionLedger init failed", it) }
@@ -208,33 +263,6 @@ open class ClawApplication : BaseApp() {
      */
     private fun initOctopusMobile() {
         appViewModelInstance.initOctopusMobile()
-    }
-
-    /**
-     * 探测 Runtime 连通性（用于 StartupModeResolver 决策）.
-     */
-    fun isRuntimeReachable(): Boolean {
-        val url = KVUtils.getOctopusRpcUrl().ifEmpty { return false }
-        val httpUrl = url.replaceFirst("ws://", "http://").replaceFirst("wss://", "https://")
-            .substringBeforeLast("/")
-        val conn = try {
-            java.net.URL(httpUrl).openConnection() as java.net.HttpURLConnection
-        } catch (e: Exception) {
-            XLog.d(TAG, "Runtime not reachable: ${e.message}")
-            return false
-        }
-        return try {
-            conn.connectTimeout = 3_000
-            conn.readTimeout = 3_000
-            conn.requestMethod = "HEAD"
-            val code = conn.responseCode
-            code in 200..499
-        } catch (e: Exception) {
-            XLog.d(TAG, "Runtime not reachable: ${e.message}")
-            false
-        } finally {
-            conn.disconnect()
-        }
     }
 
     private var networkListener: NetworkUtils.OnNetworkStatusChangedListener? = null

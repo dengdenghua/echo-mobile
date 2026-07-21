@@ -27,7 +27,16 @@ import java.util.concurrent.atomic.AtomicReference
  *  - **30s 健康检查**：自动检测母体可达性，挂了切本地
  *  - **工具名前缀剥离**：`android.tap` → `tap`（对齐 ToolRegistry 短名）
  *  - **意图自动分类**：基于关键词规则，零 LLM 调用，μs 级
+ *
+ * ⚠️ 已废弃（PROJECT_ANALYSIS P2 死代码清理,2026-07）：
+ *     本类被 AppViewModel/TaskOrchestrator/ClawApplication 实例化并读取 currentMode()/currentDomain()
+ *     仅用于日志输出,实际"出站任务委派给母体"的路由裁决在 `TaskOrchestrator.startNewTask` 中
+ *     仍是字面 `TODO`,从未真正生效。保留以避免破坏编译,后续应整体重构或删除。
  */
+@Deprecated(
+    "BrainModeSelector 的本地/远程路由裁决从未接线,仅用于日志。详见类注释与 PROJECT_ANALYSIS P2。",
+    level = DeprecationLevel.WARNING,
+)
 class BrainModeSelector(
     private val context: Context,
     private val rpcClient: OctopusMobileClient,

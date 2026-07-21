@@ -149,7 +149,25 @@
 
 ### P2 —— 死代码 / 上帝类 / 覆盖缺口
 
+> **🧹 死代码清理已执行(2026-07-20,Task 9):** 本节首项所列死/愿景代码已按"无生产调用方则删,有调用方则 @Deprecated"原则处理。最终状态见下表。`ConnectionStateMachine.kt` 与 `EvolutionEngine.deepEvolve` 经核验**从未存在**(仅文档误称),`StartupModeResolver` 同样无此文件;`cerebrum/ThinkingMode.kt` 与 `StartupMode.kt` 已整文件删除;`BrainModeSelector` / `CanaryManager` / `MpvController` / `ReflexRouter.learnFromPattern` 因有生产调用方保留并加 `@Deprecated`;`ClawApplication.isRuntimeReachable()` 已删除。CODE_WIKI.md 已同步标注。EventBus 未用事件、上帝类、`runBlocking`、`!!` 等其他 P2 项不在本次清理范围。
+
 - **大面积死/愿景代码(文档与现实的系统性落差):** `BrainModeSelector.decide` 整条本地/远程路由、`ConnectionStateMachine`(完整却未用)、`CanaryManager`(~251 LOC 全死)、`EvolutionEngine.deepEvolve`(B3)、`ReflexRouter.learnFromPattern`、`cerebrum/ThinkingMode`、`StartupModeResolver`、`MpvController`(确认死桩)、EventBus ~11 类事件中仅 3 类真正发布。**这是阅读者最容易被误导的地方 —— class 文档与 CODE_WIKI 描述的能力远超实际接线。**
+
+#### P2 死代码清理最终状态(2026-07-20)
+
+| 项 | 处理 | 说明 |
+|---|---|---|
+| `cerebrum/ThinkingMode.kt` | ✅ 已删除 | 无生产调用方,整文件删除(cerebrum 包随之空) |
+| `StartupMode.kt` | ✅ 已删除 | 枚举无任何代码使用方(仅 import 与注释引用) |
+| `ClawApplication.isRuntimeReachable()` | ✅ 已删除 | 仅自身定义 + PROJECT_ANALYSIS 引用,无生产调用方 |
+| `BrainModeSelector.kt` | ⚠️ 保留+@Deprecated | AppViewModel 实例化、TaskOrchestrator 读取 currentMode/currentDomain(仅日志),删除会破坏编译 |
+| `CanaryManager.kt` | ⚠️ 保留+@Deprecated | EvolutionActivity.kt:34 调用 listAll() 只读展示,删除会破坏编译 |
+| `MpvController.kt` | ⚠️ 保留+@Deprecated | MediaTools.kt 与 PlayerActivity.kt 大量引用(IS_AVAILABLE=false,全 noop),删除会破坏编译 |
+| `ReflexRouter.learnFromPattern` | ⚠️ 保留+@Deprecated | DefaultAgentService.kt:1416 在 open_app 频次≥3 时调用,删除会破坏编译 |
+| `ConnectionStateMachine.kt` | ✅ 无需处理 | 文件从未存在(仅 HeartbeatReporter 注释与 README/CODE_WIKI 文档残留),已同步修正文档 |
+| `EvolutionEngine.deepEvolve` | ✅ 无需处理 | 函数从未存在(历史文档误称,实际仅有 `deepReflect` 且活跃),已同步修正文档 |
+| `StartupModeResolver` | ✅ 无需处理 | 文件从未存在(仅 ClawApplication 注释引用),isRuntimeReachable 已删,注释同步消失 |
+
 - **风险分类硬编码名单静默漂移**:3 份名单(`NON_IDEMPOTENT_TOOLS` / wait_after 黑名单 / `ToolRiskPolicy` HIGH/MEDIUM)需手工同步,无测试守护,"因遗漏而不安全"是工具层主导风险。
 - **上帝类**:`ChatScreen.kt` 1743 LOC / 25 composable、`BrowserActivity.kt` 1496、`ShizukuShellService.kt` 1041、`DefaultAgentService.kt` 1004。
 - **26 处 `runBlocking`**(根因:`BaseTool.execute()` 非 suspend)集中在 `RemoteActions`(12)/`EchoUniverseTools`(7),有 ANR/线程池饥饿风险。
@@ -186,7 +204,7 @@
 
 **P2 —— 结构与流程**
 10. **接入 detekt/ktlint 作为回归门禁**(最高杠杆);CI 增加 release 构建 + APK 体积门禁。
-11. **清理死/愿景代码**:或接线或删除 `CanaryManager`/`deepEvolve`/`ConnectionStateMachine`/`BrainModeSelector` 路由/`MpvController`,并同步修正 CODE_WIKI 与 `AUDIT_REPORT.md` 的过时结论。
+11. ~~**清理死/愿景代码**:或接线或删除 `CanaryManager`/`deepEvolve`/`ConnectionStateMachine`/`BrainModeSelector` 路由/`MpvController`,并同步修正 CODE_WIKI 与 `AUDIT_REPORT.md` 的过时结论。~~ **已执行(2026-07-20,Task 9)**:ThinkingMode/StartupMode/isRuntimeReachable 已删;BrainModeSelector/CanaryManager/MpvController/learnFromPattern 因有生产调用方加 @Deprecated;ConnectionStateMachine/deepEvolve/StartupModeResolver 经核验从未存在(文档误称),CODE_WIKI 已同步修正。详见 §5 P2 清理最终状态表。
 12. 把 `BaseTool.execute()` 改为 suspend(消除结构性 `runBlocking` 与 ANR);加固 `AppViewModel` init 去除 `!!`;拆解 `ChatScreen.kt`/`BrowserActivity.kt`。
 13. 用编译期校验把 3 份硬编码工具名单与实际注册集对齐(防"因遗漏而不安全")。
 14. ~~缩小/模块化 GeckoView;外置并轮换签名密钥。~~ **GeckoView 已移除**;签名密钥仍需外置到 env/CI secret。

@@ -1,4 +1,4 @@
-﻿# Octopus Mobile · Octopus Mobile 端集成
+# Octopus Mobile · Octopus Mobile 端集成
 
 > **让 Octopus Mobile 成为 octopus-agent 的物理触手**
 
@@ -12,7 +12,7 @@ octopus_mobile/
 ├── README.md                   # 本文件
 ├── Protocol.kt                 # JSON-RPC 2.0 envelope 定义（Kotlin data class）
 ├── OctopusMobileClient.kt      # WebSocket 客户端（OkHttp）
-└── StartupMode.kt              # 启动模式决策（LOCAL/RPC/DUAL）
+└── (StartupMode.kt 已删除 — PROJECT_ANALYSIS P2 死代码清理)
 ```
 
 ## Phase 状态
@@ -27,9 +27,9 @@ octopus_mobile/
 |---|---|
 | `Protocol.kt` | ✅ JSON-RPC 2.0 envelope（sealed class + 工厂方法 + 标准错误码） |
 | `OctopusMobileClient.kt` | ✅ OkHttp WebSocket，已接 ToolCallDispatcher / HeartbeatReporter，含全抖动退避重连 |
-| `StartupMode.kt` | ✅ LOCAL/RPC/DUAL 决策逻辑，已由 ClawApplication 调用 |
+| ~~`StartupMode.kt`~~ | ⚠️ 已删除（PROJECT_ANALYSIS P2 死代码清理,无生产调用方） |
 | `ToolCallDispatcher.kt` | ✅ tool/execute → 本地 ToolRegistry 路由（响应 32KB 截断） |
-| `ConnectionStateMachine.kt` | ✅ 7 态严格 FSM + 退避 |
+| ~~`ConnectionStateMachine.kt`~~ | ⚠️ 文件从未存在（仅文档残留,已修正） |
 
 ## 设计原则
 

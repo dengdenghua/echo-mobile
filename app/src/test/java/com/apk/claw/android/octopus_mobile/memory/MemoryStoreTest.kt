@@ -1,4 +1,4 @@
-@file:Suppress("PackageNaming") // 包名 octopus_mobile 带下划线,历史遗留,与 StartupMode.kt 同待遇
+@file:Suppress("PackageNaming") // 包名 octopus_mobile 带下划线,历史遗留(原与 StartupMode.kt 同待遇,该文件已于 P2 清理中删除)
 
 package com.apk.claw.android.octopus_mobile.memory
 

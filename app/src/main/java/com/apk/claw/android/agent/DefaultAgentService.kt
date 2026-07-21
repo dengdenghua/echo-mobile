@@ -1,6 +1,8 @@
 package com.apk.claw.android.agent
 
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import android.graphics.Bitmap
@@ -23,6 +25,8 @@ import com.apk.claw.android.octopus_mobile.ActionRecorder
 import com.apk.claw.android.octopus_mobile.persona.PersonaPromptBuilder
 import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.octopus_mobile.safety.ErrorClassifier
+import com.apk.claw.android.widget.ConfirmDialog
+import com.blankj.utilcode.util.ActivityUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import com.apk.claw.android.tool.ToolRegistry
@@ -45,6 +49,8 @@ import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.CountDownLatch
 
 class DefaultAgentService : AgentService {
 
@@ -181,6 +187,26 @@ class DefaultAgentService : AgentService {
     /** 不可信来源运行时，把工具调用包进来源闸门：高危工具默认拦截，满血/远程放行时通过。 */
     private fun execTool(toolName: String, params: Map<String, Any>): com.apk.claw.android.tool.ToolResult {
         val reg = ToolRegistry.getInstance()
+
+        // ── Plan 模式拦截(双重防御:ToolRegistry.ApprovalGate 也会拦,这里更早返回更友好的错误)──
+        // 写工具直接返回 permission_denied,提示 LLM 输出方案而非执行,并引导调用 exit_plan_mode 切换。
+        // exit_plan_mode 本身不算写工具,允许在 PLAN 模式下调用以切换出去。
+        val currentMode = AgentConfig.currentPermissionMode()
+        if (currentMode == PermissionMode.PLAN && toolName in RuleBasedProvider.WRITE_TOOLS) {
+            return ToolResult.error(
+                "plan_mode_blocked: tool '$toolName' is a write tool, " +
+                    "output a plan instead and call 'exit_plan_mode' to switch to default mode",
+                com.apk.claw.android.tool.ToolErr.PERMISSION,
+            )
+        }
+
+        // ── exit_plan_mode 拦截:LLM 在 PLAN 模式下完成方案后调用此工具,弹用户确认后切换到 DEFAULT ──
+        // 用户同意:AgentConfig.setPermissionMode(DEFAULT),返回成功,后续工具调用恢复正常执行。
+        // 用户拒绝:返回失败,LLM 应继续在 PLAN 模式下规划或调 finish 终止。
+        if (toolName == "exit_plan_mode") {
+            return handleExitPlanMode()
+        }
+
         // 会话级工作空间注入 ThreadLocal —— run_code/run_python 通过 currentWorkspace() 读取。
         // 类似 Codex --cd 选定项目目录,影响 ScriptSandbox/PythonSandbox 的 WORKSPACE 全局变量。
         return ToolRegistry.withWorkspace(workspaceOverride) {
@@ -189,6 +215,74 @@ class DefaultAgentService : AgentService {
             } else {
                 reg.executeTool(toolName, params, cancelToken)
             }
+        }
+    }
+
+    /**
+     * 处理 exit_plan_mode 工具调用:弹用户确认对话框,确认后切换到 DEFAULT 模式。
+     *
+     * LLM 在 PLAN 模式下输出完整方案后调用 exit_plan_mode,本方法在主线程弹 ConfirmDialog:
+     * - 用户点"确认切换":持久化 DEFAULT 模式 + 清缓存,返回成功 ToolResult,LLM 后续可继续执行。
+     * - 用户点"取消"或超时:返回失败 ToolResult,LLM 应继续在 PLAN 模式下规划。
+     *
+     * 无可用 Activity 时(App 后台/无 UI)直接拒绝,避免静默切换权限模式。
+     */
+    private fun handleExitPlanMode(): ToolResult {
+        val activity = ActivityUtils.getTopActivity()
+        if (activity == null) {
+            XLog.w(TAG, "exit_plan_mode: no top activity, deny")
+            return ToolResult.error(
+                "exit_plan_mode_failed: no UI available to confirm. " +
+                    "Please retry when the app is in the foreground.",
+                com.apk.claw.android.tool.ToolErr.PERMISSION,
+            )
+        }
+
+        val approved = AtomicBoolean(false)
+        val latch = CountDownLatch(1)
+        val mainHandler = Handler(Looper.getMainLooper())
+
+        mainHandler.post {
+            try {
+                ConfirmDialog.showWarm(
+                    context = activity,
+                    title = "切换权限模式",
+                    message = "Agent 已在规划模式下输出方案,是否同意切换到默认模式继续执行?\n\n" +
+                        "默认模式下高危工具调用会按原有审批流程处理。",
+                    actionTitle = "确认切换",
+                    cancelTitle = "取消",
+                    isDismissible = false,
+                    onAction = {
+                        approved.set(true)
+                        latch.countDown()
+                    },
+                    onCancel = {
+                        approved.set(false)
+                        latch.countDown()
+                    },
+                )
+            } catch (e: Exception) {
+                XLog.e(TAG, "exit_plan_mode dialog error", e)
+                latch.countDown()
+            }
+        }
+
+        try {
+            // 最多等 60s,避免 Agent 线程被无限阻塞
+            latch.await(60, java.util.concurrent.TimeUnit.SECONDS)
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
+
+        return if (approved.get()) {
+            AgentConfig.setPermissionMode(PermissionMode.DEFAULT)
+            ToolResult.success("permission_mode_switched: plan → default. Continue executing the plan.")
+        } else {
+            ToolResult.error(
+                "exit_plan_mode_denied: user rejected switching to default mode. " +
+                    "Continue planning or call finish to terminate.",
+                com.apk.claw.android.tool.ToolErr.PERMISSION,
+            )
         }
     }
 

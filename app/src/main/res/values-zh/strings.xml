@@ -1333,6 +1333,20 @@
     <string name="language_name_es">Español</string>
     <string name="language_name_pt">Português</string>
 
+    <!-- Agent permission mode (4-tier: DEFAULT / ACCEPT_EDITS / BYPASS_PERMISSIONS / PLAN) -->
+    <string name="permission_mode_menu_title">权限模式</string>
+    <string name="permission_mode_dialog_title">选择权限模式</string>
+
+    <!-- polish-and-surpass-operit integration: MCP / Tentacle / Git / Diff View -->
+    <string name="mcp_server_menu_title">MCP 服务端</string>
+    <string name="mcp_server_dialog_title">MCP 服务端配置</string>
+    <string name="tentacle_config_menu_title">母本 Runtime 桥接</string>
+    <string name="tentacle_config_dialog_title">母本 Runtime 桥接配置</string>
+    <string name="github_token_menu_title">GitHub Token</string>
+    <string name="github_token_dialog_title">GitHub Token(用于 git_push / github_create_pr)</string>
+    <string name="diff_view_menu_title">Diff 视图</string>
+    <string name="diff_view_dialog_title">Diff 视图(文件写入前展示差异)</string>
+
     <!-- 历史缺失 key 补齐 -->
     <!-- Browser -->
     <string name="browser_chip_buy">比价</string>

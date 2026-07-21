@@ -293,7 +293,15 @@ class ReflexRouter(
      *
      * 当某个 "open_app(package=X)" 模式在最近 N 次调用中出现超过阈值时，
      * 自动生成一条 ReflexRouter 规则.
+     *
+     * ⚠️ 已废弃（PROJECT_ANALYSIS P2 死代码清理,2026-07）：
+     *     仅 `DefaultAgentService` 在 open_app 频次≥3 时调用,自动学习的规则从不持久化
+     *     也未被任何热路径读取生效,属"学习闭环未完成"的死代码。保留以避免破坏编译。
      */
+    @Deprecated(
+        "learnFromPattern 学习的规则不持久化、不被热路径读取,学习闭环未完成。详见 PROJECT_ANALYSIS P2。",
+        level = DeprecationLevel.WARNING,
+    )
     fun learnFromPattern(toolName: String, args: Map<String, Any>, frequency: Int) {
         // 只学习 open_app 类的高频模式
         if (toolName != "open_app") return

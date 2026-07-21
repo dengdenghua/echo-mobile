@@ -19,7 +19,15 @@ import java.io.File
  * 手机版简化：
  *  - 状态持久化到 SharedPreferences 或 JSON 文件
  *  - 不需要分布式协调（单设备）
+ *
+ * ⚠️ 已废弃（PROJECT_ANALYSIS P2 死代码清理,2026-07）：
+ *     灰度晋级的写入端从未接线,仅 `EvolutionActivity` 只读调用 `listAll()` 展示状态。
+ *     无任何代码触发 phase 迁移或采样统计,整体属死代码。保留以避免破坏 EvolutionActivity 编译。
  */
+@Deprecated(
+    "CanaryManager 灰度晋级写入端从未接线,仅 EvolutionActivity 只读展示。详见 PROJECT_ANALYSIS P2。",
+    level = DeprecationLevel.WARNING,
+)
 class CanaryManager(
     private val dataDir: File,
 ) {

@@ -98,6 +98,8 @@ abstract class BaseTool {
             "ssh_list", "sftp_ls", "sftp_read", "sftp_stat",
             // 远程工作空间列表/拉取(只读,可并行)
             "workspace_list", "workspace_pull",
+            // 代码检索(纯查询,可并行)
+            "search_code",
             // 本地模型推理(纯计算,无外部副作用)
             "run_local_model"
         )

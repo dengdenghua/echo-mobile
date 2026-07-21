@@ -17,7 +17,15 @@ import com.apk.claw.android.utils.XLog
  *
  * TODO: 按 abdallahmehiz/mpvKt 源码重写,使用 `is.xyz.mpv.MPV` instance
  * 形式 (val mpv = MPV(); mpv.create(); mpv.observeProperty(...) etc.).
+ *
+ * ⚠️ 已废弃（PROJECT_ANALYSIS P2 死代码清理,2026-07）：
+ *     `IS_AVAILABLE = false`,所有方法均为 noop。MediaTools 与 PlayerActivity 仍引用
+ *     本对象以保持编译,但视频播放功能从未真正接通。后续应整体移除或按新 API 重写。
  */
+@Deprecated(
+    "MpvController 是 stub,视频播放未接通(IS_AVAILABLE=false,所有方法 noop)。详见 PROJECT_ANALYSIS P2。",
+    level = DeprecationLevel.WARNING,
+)
 object MpvController {
 
     private const val TAG = "MpvController"

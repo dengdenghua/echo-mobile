@@ -21,9 +21,16 @@ import com.apk.claw.android.appViewModel
 import com.apk.claw.android.server.ConfigServerManager
 import com.apk.claw.android.account.AccountConfig
 import com.apk.claw.android.account.AccountStore
+import com.apk.claw.android.agent.AgentConfig
+import com.apk.claw.android.agent.PermissionMode
+import com.apk.claw.android.tentacle.TentacleConfig
 import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.account.LoginActivity
 import com.apk.claw.android.utils.KVUtils
+import android.text.InputType
+import android.widget.EditText
+import android.widget.LinearLayout
+import androidx.appcompat.widget.SwitchCompat
 
 /**
  * 设置页面
@@ -64,6 +71,8 @@ class SettingsActivity : BaseActivity() {
         refreshSettings()
         // 刷新语言项的副标题(切换语言后 Activity 重建,onResume 重新设置当前语言名)
         menuItems["LANGUAGE"]?.setTrailingText(getCurrentLanguageDisplayName())
+        // 刷新权限模式项的副标题
+        menuItems["PERMISSION_MODE"]?.setTrailingText(getCurrentPermissionModeDisplayName())
     }
 
     private fun initToolbar() {
@@ -222,6 +231,66 @@ class SettingsActivity : BaseActivity() {
         languageItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
         languageItem.setTrailingText(getCurrentLanguageDisplayName())
         menuItems["LANGUAGE"] = languageItem
+
+        // 权限模式(4 档:DEFAULT / ACCEPT_EDITS / BYPASS_PERMISSIONS / PLAN)
+        // 借鉴母本 octopus-agent runtime/safety/approval/approval_gate.py,
+        // 控制 Agent 执行工具时的审批策略。默认 DEFAULT(高危需确认)。
+        val permissionModeItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_shizuku,
+            title = getString(R.string.permission_mode_menu_title),
+            onClick = { showPermissionModeDialog() },
+            showDivider = false
+        )
+        permissionModeItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        permissionModeItem.setTrailingText(getCurrentPermissionModeDisplayName())
+        menuItems["PERMISSION_MODE"] = permissionModeItem
+
+        // MCP 服务端开关(集成 polish-and-surpass-operit)
+        // 在 ClawApplication.onCreate 启动 McpServer, 此处仅持久化配置, 重启 App 后生效
+        val mcpServerItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.mcp_server_menu_title),
+            onClick = { showMcpServerDialog() },
+            showDivider = false
+        )
+        mcpServerItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        mcpServerItem.setTrailingText(getCurrentMcpServerDisplayText())
+        menuItems["MCP_SERVER"] = mcpServerItem
+
+        // 母本 Runtime 桥接(Tentacle WS 通路)
+        // 配置 wss URL + token + 总开关, 重启 App 后 TentacleManager.start 生效
+        val tentacleConfigItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.tentacle_config_menu_title),
+            onClick = { showTentacleConfigDialog() },
+            showDivider = false
+        )
+        tentacleConfigItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        tentacleConfigItem.setTrailingText(getCurrentTentacleDisplayText())
+        menuItems["TENTACLE_CONFIG"] = tentacleConfigItem
+
+        // GitHub Token(给 Git 工具集: git_push / github_create_pr)
+        // 加密存储, 由 KVUtils.SECURE_KEYS 处理
+        val githubTokenItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.github_token_menu_title),
+            onClick = { showGithubTokenDialog() },
+            showDivider = false
+        )
+        githubTokenItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        githubTokenItem.setTrailingText(getCurrentGithubTokenDisplayText())
+        menuItems["GITHUB_TOKEN"] = githubTokenItem
+
+        // Diff View 开关(LLM 改文件后展示 unified diff)
+        val diffViewItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.diff_view_menu_title),
+            onClick = { showDiffViewDialog() },
+            showDivider = false
+        )
+        diffViewItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        diffViewItem.setTrailingText(getCurrentDiffViewDisplayText())
+        menuItems["DIFF_VIEW"] = diffViewItem
     }
 
     private fun observeViewModel() {
@@ -431,5 +500,223 @@ class SettingsActivity : BaseActivity() {
             "pt" -> getString(R.string.language_name_pt)
             else -> KVUtils.getAppLanguage()
         }
+    }
+
+    /**
+     * 权限模式选择对话框:4 档(DEFAULT / ACCEPT_EDITS / BYPASS_PERMISSIONS / PLAN)。
+     * 选中后持久化到 KVUtils 并清缓存,下次 Agent 工具调用时生效。
+     *
+     * - DEFAULT(默认):高危工具需用户确认
+     * - ACCEPT_EDITS:文件编辑(file_write/edit_file)自动通过,其他高危仍需确认
+     * - BYPASS_PERMISSIONS:全部自动通过(需用户显式开启,记录到审计)
+     * - PLAN:只读 + 出方案,禁止执行写工具(tap/swipe/file_write/send_sms 等)
+     */
+    private fun showPermissionModeDialog() {
+        val modes = PermissionMode.entries.toTypedArray()
+        val labels = modes.map { it.displayName }.toTypedArray()
+        val current = AgentConfig.currentPermissionMode()
+        val checked = modes.indexOf(current).coerceAtLeast(0)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.permission_mode_dialog_title)
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                val mode = modes[which]
+                KVUtils.setPermissionMode(mode.name)
+                AgentConfig.invalidatePermissionModeCache()
+                menuItems["PERMISSION_MODE"]?.setTrailingText(mode.displayName)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /**
+     * 返回当前权限模式的可读名称(用于菜单项副标题)。
+     */
+    private fun getCurrentPermissionModeDisplayName(): String {
+        return AgentConfig.currentPermissionMode().displayName
+    }
+
+    /**
+     * MCP 服务端配置弹窗。
+     * - Switch: 总开关
+     * - EditText: 监听端口(默认 9528)
+     * 保存后提示重启 App(MCP server 在 ClawApplication.onCreate 启动,本次会话不重启不生效)。
+     */
+    private fun showMcpServerDialog() {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 24, 48, 24)
+        }
+        val switch = SwitchCompat(this).apply {
+            text = "Enable MCP Server"
+            isChecked = KVUtils.isMcpServerEnabled()
+        }
+        val portEdit = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            hint = "Port (default 9528)"
+            setText(KVUtils.getMcpServerPort().toString())
+        }
+        container.addView(switch)
+        container.addView(portEdit)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.mcp_server_dialog_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val enabled = switch.isChecked
+                val port = portEdit.text.toString().trim().toIntOrNull()
+                    ?.takeIf { it in 1..65535 }
+                    ?: 9528
+                KVUtils.setMcpServerEnabled(enabled)
+                KVUtils.setMcpServerPort(port)
+                menuItems["MCP_SERVER"]?.setTrailingText(getCurrentMcpServerDisplayText())
+                Toast.makeText(
+                    this,
+                    "Saved. Restart app to apply (MCP server starts in onCreate).",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** MCP 服务端菜单项副标题: ON · :port / OFF */
+    private fun getCurrentMcpServerDisplayText(): String {
+        return if (KVUtils.isMcpServerEnabled()) {
+            "ON · :${KVUtils.getMcpServerPort()}"
+        } else {
+            "OFF"
+        }
+    }
+
+    /**
+     * 母本 Runtime 桥接(Tentacle WS 通路)配置弹窗。
+     * 3 个输入:URL / Token / 总开关。
+     * 保存调用 TentacleConfig.save,重启 App 后 TentacleManager.start 生效。
+     */
+    private fun showTentacleConfigDialog() {
+        val current = TentacleConfig.load()
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 24, 48, 24)
+        }
+        val urlEdit = EditText(this).apply {
+            inputType = InputType.TYPE_TEXT_VARIATION_URI
+            hint = "Runtime WebSocket URL (wss://...)"
+            setText(current.runtimeUrl)
+        }
+        val tokenEdit = EditText(this).apply {
+            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+            hint = "Auth Token"
+            setText(current.authToken)
+        }
+        val switch = SwitchCompat(this).apply {
+            text = "Enable Runtime Bridge"
+            isChecked = current.enabled
+        }
+        container.addView(switch)
+        container.addView(urlEdit)
+        container.addView(tokenEdit)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.tentacle_config_dialog_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                TentacleConfig.save(
+                    TentacleConfig(
+                        runtimeUrl = urlEdit.text.toString().trim(),
+                        authToken = tokenEdit.text.toString().trim(),
+                        enabled = switch.isChecked,
+                    )
+                )
+                menuItems["TENTACLE_CONFIG"]?.setTrailingText(getCurrentTentacleDisplayText())
+                Toast.makeText(
+                    this,
+                    "Saved. Restart app to apply (TentacleManager.start on next launch).",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** Tentacle 配置菜单项副标题: 已连接 / 未配置 */
+    private fun getCurrentTentacleDisplayText(): String {
+        return if (KVUtils.getBoolean("DEFAULT_TENTACLE_ENABLED", false)) {
+            "已连接"
+        } else {
+            "未配置"
+        }
+    }
+
+    /**
+     * GitHub Token 配置弹窗(password inputType)。
+     * 用于 Git 工具集(git_push / github_create_pr),加密存储。
+     */
+    private fun showGithubTokenDialog() {
+        val edit = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            hint = "ghp_xxx (encrypted)"
+            setText(KVUtils.getGithubToken())
+        }
+        val container = LinearLayout(this).apply {
+            setPadding(48, 24, 48, 24)
+            addView(edit)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.github_token_dialog_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                KVUtils.setGithubToken(edit.text.toString().trim())
+                menuItems["GITHUB_TOKEN"]?.setTrailingText(getCurrentGithubTokenDisplayText())
+                Toast.makeText(
+                    this,
+                    "Token saved (encrypted). Used by git_push / github_create_pr.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** GitHub Token 菜单项副标题: 已设置 / 未设置 */
+    private fun getCurrentGithubTokenDisplayText(): String {
+        return if (KVUtils.getGithubToken().isNotEmpty()) {
+            "已设置"
+        } else {
+            "未设置"
+        }
+    }
+
+    /**
+     * Diff View 开关弹窗。
+     * 开启后 LLM 写文件前展示 unified diff,默认随 KVUtils 当前状态。
+     */
+    private fun showDiffViewDialog() {
+        val switch = SwitchCompat(this).apply {
+            text = "Show unified diff before file write"
+            isChecked = KVUtils.isDiffViewEnabled()
+        }
+        val container = LinearLayout(this).apply {
+            setPadding(48, 24, 48, 24)
+            addView(switch)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.diff_view_dialog_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                KVUtils.setDiffViewEnabled(switch.isChecked)
+                menuItems["DIFF_VIEW"]?.setTrailingText(getCurrentDiffViewDisplayText())
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** Diff View 菜单项副标题: ON / OFF */
+    private fun getCurrentDiffViewDisplayText(): String {
+        return if (KVUtils.isDiffViewEnabled()) "ON" else "OFF"
     }
 }

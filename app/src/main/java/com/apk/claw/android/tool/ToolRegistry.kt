@@ -18,6 +18,9 @@ import com.apk.claw.android.octopus_mobile.safety.ApprovalFlow
 import com.apk.claw.android.octopus_mobile.safety.IrreversibleActions
 import com.apk.claw.android.octopus_mobile.safety.UndoWindow
 import com.apk.claw.android.octopus_mobile.safety.DryRunGate
+import com.apk.claw.android.agent.ApprovalGate
+import com.apk.claw.android.agent.ApprovalRisk
+import com.apk.claw.android.agent.AgentConfig
 import com.apk.claw.android.octopus_mobile.ToolAuditLog
 import com.apk.claw.android.octopus_mobile.MobileActionTimeline
 import com.apk.claw.android.octopus_mobile.evolution.TurnScorer
@@ -42,6 +45,11 @@ object ToolRegistry {
     /** 安全门（PII/Secret 扫描 + LLM 法官） */
     @Volatile
     var safetyGate: SafetyGate? = null
+
+    /** 审批闸门(第 8 道闸门,在 SafetyGate 之后、audit 之前)。
+     *  由 Application/Activity 注入 RuleBasedProvider;未注入时跳过此闸门(向后兼容)。 */
+    @Volatile
+    var approvalGate: ApprovalGate? = null
 
     /** 回合打分器（自进化 L1 层） */
     @Volatile
@@ -179,6 +187,19 @@ object ToolRegistry {
         register(ClipboardTool())
         register(SendFileTool())
         register(FinishTool())
+        // exit_plan_mode:PLAN 模式下 LLM 输出方案后调用此工具,经用户确认后切换到 DEFAULT 模式
+        register(com.apk.claw.android.tool.impl.ExitPlanModeTool())
+
+        // 代码工作流(Task 5/7):search_code / git_clone / git_commit / git_push / github_create_pr
+        // search_code:LOW 风险只读工具,可参与并行;BM25+dense 融合检索项目代码
+        register(com.apk.claw.android.tool.impl.SearchCodeTool())
+        // Git 工具集(在 LinuxSandbox 内调 git CLI):解锁"克隆→改→提 PR"完整 Codex 工作流
+        register(com.apk.claw.android.tool.impl.GitCloneTool())
+        register(com.apk.claw.android.tool.impl.GitCommitTool())
+        register(com.apk.claw.android.tool.impl.GitPushTool())
+        // GithubCreatePrTool 需注入 GithubTokenProvider;默认 NoopGithubTokenProvider 返回 null,
+        // 集成阶段(见 ClawApplication)注入 KVUtilsGithubTokenProvider 读 KEY_GITHUB_TOKEN。
+        register(com.apk.claw.android.tool.impl.GithubCreatePrTool())
         // 生图/生视频(Agnes 增值;会员免费/非会员扣积分由服务端处理)
         register(com.apk.claw.android.tool.impl.GenerateImageTool())
         // 生视频:提交返回 video_id,check_video 凭它轮询 /agnesapi(视频约 2 分钟生成)
@@ -544,6 +565,27 @@ object ToolRegistry {
             }
         }
 
+        // ── 第 8 道闸门:ApprovalGate(根据 PermissionMode + 工具风险等级决定是否拦截)──
+        // 在 SafetyGate 之后、guardrail 之前。不变量 INV-T1:所有 touch 操作必经此闸门。
+        // 未注入 approvalGate 时跳过(向后兼容);PLAN 模式拦写工具,ACCEPT_EDITS 自动放行编辑,
+        // BYPASS_PERMISSIONS 全放行,DEFAULT 委托 fallback provider。
+        approvalGate?.let { gate ->
+            val mode = AgentConfig.currentPermissionMode()
+            val risk = when (ToolRiskPolicy.riskOf(name)) {
+                ToolRiskPolicy.RISK_HIGH -> ApprovalRisk.HIGH
+                ToolRiskPolicy.RISK_MEDIUM -> ApprovalRisk.MEDIUM
+                else -> ApprovalRisk.LOW
+            }
+            val decision = gate.check(name, params, risk, mode)
+            if (!decision.approved) {
+                eventBus?.publish(EventBus.ToolBlockedEvent(name, "approval_denied: ${decision.reason}", "approval"))
+                return audited(
+                    ToolResult.error("permission_denied: ${decision.reason}", ToolErr.PERMISSION),
+                    blockedBy = "approval",
+                )
+            }
+        }
+
         // ── 护栏预检（只读，重复失败 / 同工具失败达阈值则拦截）──
         val preCheck = guardrail.precheck(name, params)
         if (preCheck.shouldHalt) {
@@ -583,5 +625,70 @@ object ToolRegistry {
         turnScorer?.record(name, success = finalResult.isSuccess, reason = finalResult.data ?: finalResult.error ?: "")
 
         return audited(finalResult)
+    }
+
+    private val batchExecutor by lazy {
+        java.util.concurrent.Executors.newFixedThreadPool(4) { r ->
+            Thread(r, "tool-batch-${System.nanoTime()}").apply { isDaemon = true }
+        }
+    }
+
+    /**
+     * 批量执行工具调用,DAG 依赖感知:无依赖只读工具并行,写工具强制串行。
+     *
+     * 借鉴母本 `runtime/execution/swarm/runtime.py` + `_is_dangerous()` 自动识别危险工具:
+     *  - 只读 + LOW 风险(search_code/get_screen_info/take_screenshot 等)→ 并行(线程池 4)
+     *  - MEDIUM/HIGH 风险或非只读(tap/swipe/file_write/git_xxx/run_code 等)→ 串行
+     *  - 显式 dependsOn 非空 → 等依赖完成后再串行执行
+     *
+     * 每个子调用仍走完整 [executeTool] 管线(8 道闸门 + 审计),不变量 INV-T1 等保持成立。
+     *
+     * **不可信来源透传**:`untrustedDepth` 是 ThreadLocal,跨线程不自动传播。本方法在调用线程
+     * 上捕捉 [isUntrustedSource] 状态,在并行工作线程上用 [withUntrustedSource] 显式重放,
+     * 确保并行子调用与串行子调用遵循同一来源闸门契约(不可信来源调高危工具仍被拦截)。
+     *
+     * @param calls 有序工具调用列表
+     * @return 与 calls 顺序一一对应的 ToolResult 列表
+     */
+    fun executeToolsBatch(calls: List<ToolCall>): List<ToolResult> {
+        if (calls.isEmpty()) return emptyList()
+        val results = arrayOfNulls<ToolResult>(calls.size)
+        val parallelIndices = mutableListOf<Int>()
+        val serialIndices = mutableListOf<Int>()
+        for ((i, call) in calls.withIndex()) {
+            val tool = getTool(call.name)
+            val isReadonly = tool?.isReadOnly() == true
+            val isLowRisk = ToolRiskPolicy.riskOf(call.name) == ToolRiskPolicy.RISK_LOW
+            val hasDeps = call.dependsOn.isNotEmpty()
+            // 只读 + LOW 风险 + 无显式依赖 → 并行;否则串行
+            if (isReadonly && isLowRisk && !hasDeps) {
+                parallelIndices += i
+            } else {
+                serialIndices += i
+            }
+        }
+        // 阶段 1:并行执行只读无依赖调用
+        // 捕捉调用线程的不可信来源标志,在工作线程上重放(ThreadLocal 不跨线程自动传播)
+        val callerUntrusted = isUntrustedSource()
+        val futures = parallelIndices.map { idx ->
+            batchExecutor.submit<ToolResult> {
+                val run: () -> ToolResult = { executeTool(calls[idx].name, calls[idx].params) }
+                if (callerUntrusted) withUntrustedSource(run) else run()
+            }
+        }
+        for ((k, idx) in parallelIndices.withIndex()) {
+            results[idx] = try { futures[k].get() } catch (e: Exception) {
+                ToolResult.error("parallel execution failed: ${e.message}", ToolErr.INTERNAL)
+            }
+        }
+        // 阶段 2:串行执行写工具/有依赖调用(按原顺序,在调用线程上,ThreadLocal 自然生效)
+        for (idx in serialIndices) {
+            val call = calls[idx]
+            // 等待显式依赖完成(dependsOn 索引的结果已就绪)
+            // 简化:依赖结果不作为输入参数传递,只确保执行顺序(LLM 若需把上一步结果作为参数,应自行在 params 中提供)
+            results[idx] = executeTool(call.name, call.params)
+        }
+        @Suppress("UNCHECKED_CAST")
+        return results.map { it as ToolResult }
     }
 }

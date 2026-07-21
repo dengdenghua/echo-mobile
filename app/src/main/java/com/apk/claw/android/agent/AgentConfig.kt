@@ -1,5 +1,7 @@
 package com.apk.claw.android.agent
 
+import com.apk.claw.android.utils.KVUtils
+
 enum class LlmProvider(
     val displayName: String,
     val defaultBaseUrl: String,
@@ -38,6 +40,9 @@ data class AgentConfig(
     val enableAutoScreenshot: Boolean = true,
     /** 是否跳过 TaskCheckpoint 持久化（子 Agent 设为 true 避免与主 Agent 冲突） */
     val skipCheckpoint: Boolean = false,
+    /** Agent 权限模式(4 档:DEFAULT / ACCEPT_EDITS / BYPASS_PERMISSIONS / PLAN)，默认 DEFAULT。
+     *  持久化到 KVUtils.KEY_PERMISSION_MODE，运行时通过 [currentPermissionMode] 读取以响应设置页切换。 */
+    val permissionMode: PermissionMode = PermissionMode.DEFAULT,
 ) {
     companion object {
         const val DEFAULT_SYSTEM_PROMPT =
@@ -188,6 +193,45 @@ run_code 适用：纯计算、数据处理、文件读写、API 调用、UI 自�
 - 生成的应用会自动存成小程序，用户之后能在「小程序」列表里重新打开，不需要额外发布步骤
 - 仍然没有云端后端/多设备同步，只适合小游戏/计算器/工具/可视化这类个人单机应用；如果用户明确要
   "多人共用/跨设备同步数据"，如实告知当前做不到，不要假装能做"""
+
+        // ==================== Permission Mode 运行时读取 ====================
+        /**
+         * 缓存的当前权限模式。设置页切换后调用 [invalidatePermissionModeCache] 失效。
+         * 用 volatile 保证多线程可见性(ToolRegistry.executeTool 在 Agent 线程读,设置页在主线程写)。
+         */
+        @Volatile
+        private var cachedPermissionMode: PermissionMode? = null
+
+        /**
+         * 当前生效的权限模式。
+         *
+         * 优先级:
+         *  1. 调用方通过 [permissionMode] 显式传入(如子 Agent 用 BYPASS_PERMISSIONS)
+         *  2. 缓存
+         *  3. KVUtils 持久化值
+         *
+         * ToolRegistry.executeTool 第 8 道闸门从这里读 mode,无需重新构造 AgentConfig。
+         */
+        @JvmStatic
+        fun currentPermissionMode(): PermissionMode {
+            cachedPermissionMode?.let { return it }
+            val mode = PermissionMode.fromName(KVUtils.getPermissionMode())
+            cachedPermissionMode = mode
+            return mode
+        }
+
+        /** 设置页切换权限模式后调用,清缓存让下次 [currentPermissionMode] 重新读 KVUtils。 */
+        @JvmStatic
+        fun invalidatePermissionModeCache() {
+            cachedPermissionMode = null
+        }
+
+        /** 直接切换并持久化权限模式(同时清缓存)。 */
+        @JvmStatic
+        fun setPermissionMode(mode: PermissionMode) {
+            KVUtils.setPermissionMode(mode.name)
+            invalidatePermissionModeCache()
+        }
     }
 
     /** Java-friendly Builder，保持与现有Java调用方兼容 */
@@ -206,6 +250,7 @@ run_code 适用：纯计算、数据处理、文件读写、API 调用、UI 自�
         private var enableVision: Boolean = true
         private var enableAutoScreenshot: Boolean = true
         private var skipCheckpoint: Boolean = false
+        private var permissionMode: PermissionMode = PermissionMode.DEFAULT
 
         fun apiKey(apiKey: String) = apply { this.apiKey = apiKey }
         fun baseUrl(baseUrl: String) = apply { this.baseUrl = baseUrl }
@@ -222,6 +267,8 @@ run_code 适用：纯计算、数据处理、文件读写、API 调用、UI 自�
             apply { this.enableAutoScreenshot = enableAutoScreenshot }
         fun skipCheckpoint(skipCheckpoint: Boolean) =
             apply { this.skipCheckpoint = skipCheckpoint }
+        fun permissionMode(permissionMode: PermissionMode) =
+            apply { this.permissionMode = permissionMode }
 
         fun build(): AgentConfig {
             require(apiKey.isNotEmpty()) { "API key is required" }
@@ -229,6 +276,7 @@ run_code 适用：纯计算、数据处理、文件读写、API 调用、UI 自�
                 apiKey, baseUrl, modelName, systemPrompt, maxIterations,
                 temperature, provider, streaming, dynamicPromptSuffix,
                 memoryPromptSuffix, enableVision, enableAutoScreenshot, skipCheckpoint,
+                permissionMode,
             )
         }
     }

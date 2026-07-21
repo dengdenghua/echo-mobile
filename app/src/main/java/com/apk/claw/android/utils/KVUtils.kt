@@ -93,6 +93,10 @@ object KVUtils {
         // CloudDrive2 网盘凭据(CloudDriveManager)—— bearer 级秘密,泄漏可访问用户网盘
         "cd2_username",
         "cd2_password",
+        // GitHub Personal Access Token(GithubCreatePrTool)—— bearer 级秘密,泄漏可写仓库
+        "KEY_GITHUB_TOKEN",
+        // Tentacle 母本 Runtime 认证 token(TentacleConfig.KEY_TENTACLE_AUTH_TOKEN)—— bearer 级秘密
+        "DEFAULT_TENTACLE_AUTH_TOKEN",
     )
 
     /** 必须走加密存储的敏感 Key 前缀集合（用于动态 key，如按 mountId 分键的挂载凭据）。
@@ -592,6 +596,37 @@ object KVUtils {
     fun getAppLanguage(): String = getString(KEY_APP_LANGUAGE, "")
 
     fun setAppLanguage(tag: String) = putString(KEY_APP_LANGUAGE, tag)
+
+    // ==================== Agent 权限模式 ====================
+    private const val KEY_PERMISSION_MODE = "KEY_PERMISSION_MODE"
+
+    /** 当前 Agent 权限模式(DEFAULT / ACCEPT_EDITS / BYPASS_PERMISSIONS / PLAN)。 */
+    fun getPermissionMode(): String = getString(KEY_PERMISSION_MODE, "DEFAULT")
+
+    fun setPermissionMode(mode: String) = putString(KEY_PERMISSION_MODE, mode)
+
+    // ==================== MCP 服务端(把 Android 工具暴露给 MCP 客户端)====================
+    private const val KEY_MCP_SERVER_ENABLED = "KEY_MCP_SERVER_ENABLED"
+    private const val KEY_MCP_SERVER_PORT = "KEY_MCP_SERVER_PORT"
+    private const val MCP_SERVER_DEFAULT_PORT = 9528
+
+    fun isMcpServerEnabled(): Boolean = getBoolean(KEY_MCP_SERVER_ENABLED, false)
+    fun setMcpServerEnabled(enabled: Boolean) = putBoolean(KEY_MCP_SERVER_ENABLED, enabled)
+    fun getMcpServerPort(): Int = getInt(KEY_MCP_SERVER_PORT, MCP_SERVER_DEFAULT_PORT)
+    fun setMcpServerPort(port: Int) = putInt(KEY_MCP_SERVER_PORT, port)
+
+    // ==================== GitHub Token(Git 工具集用,加密存储)====================
+    private const val KEY_GITHUB_TOKEN = "KEY_GITHUB_TOKEN"
+
+    fun getGithubToken(): String = getString(KEY_GITHUB_TOKEN, "")
+    fun setGithubToken(token: String) = putString(KEY_GITHUB_TOKEN, token)
+
+    // ==================== Diff View 自动弹出(file_write/edit_file 后展示 diff)====================
+    private const val KEY_DIFF_VIEW_ENABLED = "KEY_DIFF_VIEW_ENABLED"
+
+    /** 文件修改后是否自动弹出 DiffView 让用户 accept/reject 每个 hunk(默认 true)。 */
+    fun isDiffViewEnabled(): Boolean = getBoolean(KEY_DIFF_VIEW_ENABLED, true)
+    fun setDiffViewEnabled(enabled: Boolean) = putBoolean(KEY_DIFF_VIEW_ENABLED, enabled)
 
     private const val KEY_LLM_API_KEY = "KEY_LLM_API_KEY"
     private const val KEY_LLM_BASE_URL = "KEY_LLM_BASE_URL"
