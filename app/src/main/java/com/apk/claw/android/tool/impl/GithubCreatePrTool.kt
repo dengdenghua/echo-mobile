@@ -4,6 +4,7 @@ import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolParameter
 import com.apk.claw.android.tool.ToolResult
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -65,6 +66,26 @@ class GithubCreatePrTool(
                 .find(trimmed)?.let { return it.groupValues[1] to it.groupValues[2] }
 
             return null
+        }
+
+        /**
+         * 构建 refine-chat-interaction Task 6 结构化结果 JSON。
+         *
+         * 含 title / url / body 三字段,供 DefaultAgentService 解析后生成 TEXT Artifact。
+         * 暴露为 companion 方法便于单测直接验证 JSON 格式,无需发真实 HTTP 请求。
+         */
+        fun buildResultJson(title: String, url: String?, body: String): String {
+            val json = JSONObject()
+            json.put("title", title)
+            json.put("url", url ?: JSONObject.NULL)
+            json.put("body", body)
+            return json.toString()
+        }
+
+        /** 从 PR URL 中提取 PR 编号,用于 title。URL 形如 `https://github.com/owner/repo/pull/42`。 */
+        internal fun extractPrNumber(prUrl: String): String? {
+            val regex = Regex("""/pull/(\d+)""")
+            return regex.find(prUrl)?.groupValues?.getOrNull(1)
         }
     }
 
@@ -152,7 +173,7 @@ class GithubCreatePrTool(
 
         val jsonBody = buildJsonBody(title, body, head, base)
         return try {
-            createPrViaApi(owner, repo, token, jsonBody)
+            createPrViaApi(owner, repo, token, jsonBody, title, body)
         } catch (e: IOException) {
             ToolResult.error("GitHub API 请求失败: ${e.message}", ToolErr.UPSTREAM)
         }
@@ -195,6 +216,8 @@ class GithubCreatePrTool(
         repo: String,
         token: String,
         jsonBody: String,
+        prTitle: String,
+        prBody: String,
     ): ToolResult {
         val urlStr = "$API_BASE/repos/$owner/$repo/pulls"
         val conn = (URL(urlStr).openConnection() as HttpURLConnection).apply {
@@ -226,7 +249,9 @@ class GithubCreatePrTool(
                     "GitHub API 返回成功但未解析到 PR URL。响应: ${respBody.take(500)}",
                     ToolErr.UPSTREAM,
                 )
-            return ToolResult.success("已创建 PR: $prUrl")
+            val prNumber = extractPrNumber(prUrl)
+            val resultTitle = if (prNumber != null) "PR #$prNumber: $prTitle" else "PR: $prTitle"
+            return ToolResult.success(buildResultJson(resultTitle, prUrl, prBody))
         } finally {
             conn.disconnect()
         }

@@ -1347,6 +1347,12 @@
     <string name="diff_view_menu_title">Diff 视图</string>
     <string name="diff_view_dialog_title">Diff 视图(文件写入前展示差异)</string>
 
+    <!-- refine-chat-interaction: 折叠并行工具 + 右侧栏详情 开关 -->
+    <string name="settings_collapse_parallel_tools_title">折叠并行工具</string>
+    <string name="settings_collapse_parallel_tools_subtitle">多工具并行执行时聚合为单张卡片</string>
+    <string name="settings_detail_drawer_title">右侧栏详情</string>
+    <string name="settings_detail_drawer_subtitle">点击产物卡片在右侧栏展开详情</string>
+</resources>
     <!-- 历史缺失 key 补齐 -->
     <!-- Browser -->
     <string name="browser_chip_buy">比价</string>

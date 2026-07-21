@@ -58,7 +58,16 @@ class RunCodeTool : BaseTool() {
             .coerceIn(1_000L, MAX_TIMEOUT_MS)
         // 把当前任务取消令牌传给沙箱,使事件循环等待可被中断,避免 Thread.sleep 阻塞。
         // ScriptSandbox 为 object 单例,RunCodeTool/RunCodeSessionTool/RunCodeResetTool 共享同一份会话状态。
-        return ScriptSandbox.execute(code, timeout, currentCancellationToken())
+        val raw = ScriptSandbox.execute(code, timeout, currentCancellationToken())
+        // run_code 输出走 TEXT Artifact(spec refine-chat-interaction Task 8):
+        // 把 stdout 包装为结构化 ToolResult.textBody,UI 据此生成 TEXT 类 Artifact 卡片
+        // (折叠态前 3 行预览,右侧栏 TextDetailPane 显示全文)。data 仍照常喂给 LLM 做决策。
+        // 失败结果不包装(textBody 仅用于成功输出的展示),原样返回保留 errorCode/errorLine。
+        return if (raw.isSuccess && !raw.data.isNullOrEmpty()) {
+            ToolResult.successWithText(raw.data!!, raw.data!!)
+        } else {
+            raw
+        }
     }
 
     override fun getDescriptionEN() = """

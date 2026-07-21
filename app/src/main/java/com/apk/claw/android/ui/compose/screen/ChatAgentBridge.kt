@@ -246,6 +246,29 @@ object ChatAgentBridge {
         onFile: ((toolName: String, filePath: String) -> Unit)? = null,
         onDiff: ((toolName: String, diff: String) -> Unit)? = null,
         onForm: ((toolName: String, formJson: String) -> Unit)? = null,
+        onTextArtifact: ((toolName: String, title: String, refId: String) -> Unit)? = null,
+        /**
+         * search_code 工具结果回调(spec refine-chat-interaction Task 5)。
+         * search_code 的结果 data 已改为结构化 JSON(含 file/startLine/endLine/snippet 4 字段),
+         * 本桥把完整 [ToolResult] 透传给 UI,由 UI 调用
+         * [com.apk.claw.android.tool.impl.handleSearchCodeResult] 生成 CODE_SNIPPET Artifact。
+         * 仅当工具名为 "search_code" 且结果成功时触发。
+         */
+        onCodeSnippet: ((toolName: String, result: ToolResult) -> Unit)? = null,
+        /**
+         * 纯文本产物回调(run_code stdout 等)。UI 据此生成 TEXT 类 Artifact 卡片:
+         * 折叠态显示前 3 行预览,右侧栏 TextDetailPane 显示全文。
+         * 参数:toolName 触发工具名,body 文本正文。
+         */
+        onTextBody: ((toolName: String, body: String) -> Unit)? = null,
+        /**
+         * Plan 模式产物回调。LLM 在 PLAN 模式下输出步骤数组后调 exit_plan_mode,
+         * 经用户确认切换回 DEFAULT 模式时,DefaultAgentService 从 LLM 文本提取 plan JSON
+         * 通过 ToolResult.planJson 回传,本桥据此触发本回调。
+         * UI 据此生成 PLAN 类 Artifact 卡片(标题「计划(N 步)」,详情走右侧栏 PlanDetailPane)。
+         * 参数:toolName 固定为 "exit_plan_mode",planJson 为步骤数组 JSON 字符串。
+         */
+        onPlan: ((toolName: String, planJson: String) -> Unit)? = null,
         conversationContext: String? = null,
         persona: String? = null,
         workspace: String? = null,
@@ -357,6 +380,18 @@ object ChatAgentBridge {
                 if (form != null && onForm != null) {
                     main.post { onForm(toolName, form) }
                 }
+                // search_code 结构化结果:透传 ToolResult 给 UI 生成 CODE_SNIPPET Artifact
+                if (toolId == "search_code" && result.isSuccess && onCodeSnippet != null) {
+                    main.post { onCodeSnippet(toolId, result) }
+                }
+                val txt = result.textBody
+                if (txt != null && onTextBody != null) {
+                    main.post { onTextBody(toolName, txt) }
+                }
+                val plan = result.planJson
+                if (plan != null && onPlan != null) {
+                    main.post { onPlan(toolName, plan) }
+                }
             }
 
             override fun onComplete(round: Int, finalAnswer: String, totalTokens: Int) {
@@ -392,6 +427,10 @@ object ChatAgentBridge {
                 busy.set(false)
                 restorePersona()
                 main.post { onError(ClawApplication.instance.getString(R.string.chat_agent_bridge_dialog_detected_full)) }
+            }
+
+            override fun onTextArtifact(round: Int, toolName: String, title: String, refId: String) {
+                onTextArtifact?.let { main.post { it(toolName, title, refId) } }
             }
         }, untrusted)
     }

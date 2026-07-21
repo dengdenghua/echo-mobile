@@ -4,6 +4,7 @@ import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolParameter
 import com.apk.claw.android.tool.ToolResult
+import org.json.JSONObject
 import java.io.File
 
 /**
@@ -23,6 +24,20 @@ class GitPushTool : BaseTool() {
     companion object {
         private const val DEFAULT_REMOTE = "origin"
         private const val TIMEOUT_SEC = 60L
+
+        /**
+         * 构建 refine-chat-interaction Task 6 结构化结果 JSON。
+         *
+         * 含 title / url / body 三字段,供 DefaultAgentService 解析后生成 TEXT Artifact。
+         * 暴露为 companion 方法便于单测直接验证 JSON 格式。
+         */
+        fun buildResultJson(title: String, url: String?, body: String): String {
+            val json = JSONObject()
+            json.put("title", title)
+            json.put("url", url ?: JSONObject.NULL)
+            json.put("body", body)
+            return json.toString()
+        }
     }
 
     override fun getName(): String = "git_push"
@@ -98,9 +113,18 @@ class GitPushTool : BaseTool() {
             )
         }
         val tail = result.stderr.ifBlank { result.stdout }
-        return ToolResult.success(
-            "已推送${if (force) "(force)" else ""}。" +
-                if (tail.isNotBlank()) "\n${tail.trim().take(1000)}" else "",
-        )
+        val title = buildString {
+            append("pushed to ")
+            append(remote)
+            if (branch.isNotEmpty()) append("/").append(branch)
+            if (force) append(" (force)")
+        }
+        val body = buildString {
+            append("已推送")
+            if (force) append("(force)")
+            append("。")
+            if (tail.isNotBlank()) append("\n").append(tail.trim().take(1000))
+        }
+        return ToolResult.success(buildResultJson(title, null, body))
     }
 }

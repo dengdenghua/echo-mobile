@@ -126,6 +126,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.ContextCompat
+import com.apk.claw.android.ui.compose.screen.detail.CodeDetailPane
+import com.apk.claw.android.ui.compose.screen.detail.DetailDrawer
+import com.apk.claw.android.ui.compose.screen.detail.DetailPane
+import com.apk.claw.android.ui.compose.screen.detail.DiffDetailPane
+import com.apk.claw.android.ui.compose.screen.detail.PlanDetailPane
+import com.apk.claw.android.ui.compose.screen.detail.TextDetailPane
+import com.apk.claw.android.ui.compose.screen.detail.ToolsDetailPane
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusThemeStyle
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -172,8 +179,25 @@ sealed class ChatMessage {
         val toolName: String,
         val args: String,
         val result: String?,
-        override val id: Long = nextId()
+        override val id: Long = nextId(),
+        /**
+         * 批量并行执行标识 —— 同一次 [ToolRegistry.executeToolsBatch] 调用产生的 ToolCall 共享同一 batchId。
+         *
+         * - `null`:串行执行的独立工具调用,UI 渲染为独立卡片(现状行为,INV-U3)
+         * - 非 null:同 batchId 的 ToolCall 在 UI 层聚合为单张折叠卡片([ToolBatchCard])
+         *
+         * 见 `refine-chat-interaction` spec Task 2。
+         */
+        val batchId: String? = null,
+        /** 工具执行耗时(ms),完成后由 [DefaultAgentService] 填入,UI 用于折叠卡片展开态显示。 */
+        val durationMs: Long? = null,
+        /** 工具执行状态:running / success / failure。null 表示未启动(默认)。 */
+        val status: ToolCallStatus = ToolCallStatus.SUCCESS,
     ) : ChatMessage()
+
+    /** 工具执行状态(用于 [ToolBatchCard] 展开态图标渲染)。 */
+    enum class ToolCallStatus { RUNNING, SUCCESS, FAILURE }
+
     data class Thinking(val text: String, override val id: Long = nextId()) : ChatMessage()
 
     /**
@@ -185,6 +209,16 @@ sealed class ChatMessage {
      *
      * 持久化策略:大 payload(HTML/图片 base64)存到独立的 MMKV 键([artifactPayloadKey]),
      * 主消息列表只存引用键 + 元信息(类型/标题/路径),避免主列表臃肿。
+     *
+     * ## refine-chat-interaction 扩展
+     *
+     * 新增 3 个 ArtifactKind:
+     * - [ArtifactKind.PLAN]:Plan 模式产物,标题「计划(N 步)」,详情走右侧栏 PlanDetailPane
+     * - [ArtifactKind.CODE_SNIPPET]:search_code 产物,标题「file.kt:42-58」,详情走右侧栏 CodeDetailPane
+     * - [ArtifactKind.TEXT]:Git 工具结果 + run_code stdout,标题如「commit abc123」,详情走右侧栏 TextDetailPane
+     *
+     * 新增字段 [collapsed]:默认 true,符合极简偏好(INV-U2)。消息流只显示标题 + preview,
+     * 详情一律走右侧栏 DetailDrawer,不在消息流展开。
      */
     data class Artifact(
         val kind: ArtifactKind,
@@ -192,9 +226,17 @@ sealed class ChatMessage {
         /** 文件路径(文件类产物用)或 payload 引用键(HTML/图片用)。 */
         val payloadRef: String,
         override val id: Long = nextId(),
+        /**
+         * 是否折叠展示。默认 true(INV-U2) —— 消息流只显示标题 + preview,
+         * 点击卡片打开右侧栏 DetailDrawer 展开详情,不在消息流内展开。
+         *
+         * 仅 HTML/IMAGE 类(需要全屏预览)和既有 DIFF(向后兼容)会用到 false,
+         * 新增 PLAN/CODE_SNIPPET/TEXT 一律 true。
+         */
+        val collapsed: Boolean = true,
     ) : ChatMessage()
 
-    enum class ArtifactKind { HTML, IMAGE, FILE, DIFF }
+    enum class ArtifactKind { HTML, IMAGE, FILE, DIFF, PLAN, CODE_SNIPPET, TEXT }
 }
 
 /**
@@ -251,6 +293,9 @@ fun ChatScreen() {
     var showNewChatWorkspaceDialog by remember { mutableStateOf(false) }
     // 当前会话工作空间更改对话框(已有会话改工作空间)
     var showChangeWorkspaceDialog by remember { mutableStateOf(false) }
+    // refine-chat-interaction Task 3:右侧详情抽屉当前面板。
+    // null = 关闭,消息流可独立浏览(INV-U4)。具体 DetailPane 实例化由 Task 4 完成。
+    var currentDetail by remember { mutableStateOf<DetailPane?>(null) }
     val context = LocalContext.current
     val devices by ClawApplication.instance.deviceRegistry.deviceList.collectAsState()
     // 设备已不再独立成页：在主对话界面启动局域网发现 + 配置服务，
@@ -651,6 +696,59 @@ fun ChatScreen() {
                             scrollEnd()
                         }
                     },
+                    // ── search_code 代码片段产物(spec refine-chat-interaction Task 5)──
+                    // search_code 结果 data 已改为结构化 JSON(含 file/startLine/endLine/snippet),
+                    // 调用 handleSearchCodeResult 解析 JSON → 存 snippet 到 ChatStore → 生成 CODE_SNIPPET Artifact。
+                    // 卡片在消息流中折叠展示(CodeSnippetPreview 占位已在 Task 1 实现),
+                    // 标题「file.kt:42-58」,详情走右侧栏 CodeDetailPane。
+                    onCodeSnippet = { toolName, result ->
+                        val artifact = com.apk.claw.android.tool.impl.handleSearchCodeResult(result, currentId)
+                        if (artifact != null) {
+                            messages.add(artifact)
+                            scrollEnd(); persist()
+                        }
+                    },
+                    // ── run_code 输出产物(spec refine-chat-interaction Task 8)──
+                    // run_code 的 stdout 经 RunCodeTool 包装为 ToolResult.textBody,
+                    // 这里生成 TEXT 类 Artifact:body 存到 ChatStore,卡片在消息流中折叠展示,
+                    // 右侧栏 TextDetailPane 显示全文。stdout 超 500 字符时保持折叠(默认 true),
+                    // 否则展开(body 短,直接看预览更顺手)。
+                    onTextBody = { toolName, body ->
+                        val refId = "${currentId}_${System.currentTimeMillis()}_text"
+                        ChatStore.savePayload(refId, body)
+                        val title = if (toolName == "run_code") "运行输出" else "文本输出"
+                        // 超 500 字符保持折叠(默认 true);短输出直接展开,预览更直观
+                        val collapsed = body.length > 500
+                        messages.add(ChatMessage.Artifact(
+                            ChatMessage.ArtifactKind.TEXT, title, refId, collapsed = collapsed,
+                        ))
+                        scrollEnd(); persist()
+                    },
+                    // ── Plan 模式产物(spec refine-chat-interaction Task 7)──
+                    // LLM 在 PLAN 模式下输出步骤数组后调 exit_plan_mode,经用户确认切换回 DEFAULT,
+                    // DefaultAgentService 从 LLM 文本提取 plan JSON 经 ToolResult.planJson 回传,
+                    // 这里生成 PLAN 类 Artifact:plan JSON 存到 ChatStore,卡片在消息流中折叠展示,
+                    // 标题「计划(N 步)」,详情走右侧栏 PlanDetailPane(PlanPreview 占位已在 Task 1 实现)。
+                    onPlan = { toolName, planJson ->
+                        val refId = "${currentId}_${System.currentTimeMillis()}_plan"
+                        ChatStore.savePayload(refId, planJson)
+                        val stepCount = runCatching { org.json.JSONArray(planJson).length() }.getOrDefault(0)
+                        messages.add(ChatMessage.Artifact(
+                            ChatMessage.ArtifactKind.PLAN, "计划($stepCount 步)", refId,
+                        ))
+                        scrollEnd(); persist()
+                    },
+                    // ── Git 工具结果产物(spec refine-chat-interaction Task 6)──
+                    // git_commit / git_push / github_create_pr 成功后,DefaultAgentService
+                    // 已把结构化 JSON 解析为 title + body(URL 拼在 body 头部),存到 ChatStore,
+                    // 这里生成 TEXT 类 Artifact 卡片。body 以 "URL: " 开头时,TextPreview
+                    // 会显示「打开」按钮(Intent.ACTION_VIEW),例如 PR 卡片可一键跳转浏览器。
+                    onTextArtifact = { toolName, title, refId ->
+                        messages.add(ChatMessage.Artifact(
+                            ChatMessage.ArtifactKind.TEXT, title, refId,
+                        ))
+                        scrollEnd(); persist()
+                    },
                 )
                 }  // 关闭单 Agent 分支的 else
             } else {
@@ -1000,13 +1098,36 @@ fun ChatScreen() {
                                     is ChatMessage.AgentMessage -> AgentBubble(msg.text)
                                     is ChatMessage.ToolCall -> ToolCallItem(msg)
                                     is ChatMessage.Thinking -> ThinkingItem(msg.text)
-                                    is ChatMessage.Artifact -> ArtifactCard(msg)
+                                    is ChatMessage.Artifact -> ArtifactCard(
+                                        artifact = msg,
+                                        onClick = {
+                                            // refine-chat-interaction Task 4:根据 artifact.kind 创建对应 DetailPane。
+                                            // 关闭右侧栏详情开关时点击无操作(回退到现状,INV-U3)。
+                                            if (KVUtils.isDetailDrawerEnabled()) {
+                                                currentDetail = artifactDetailPane(msg) { currentDetail = null }
+                                            }
+                                        },
+                                    )
                                 }
                                 is ChatRow.ToolGroup -> ToolGroupItem(
                                     tools = row.tools,
                                     expanded = expandedGroups[row.tools.first().id] == true,
                                     onToggle = { id -> expandedGroups[id] = expandedGroups[id] != true },
                                 )
+                                is ChatRow.ToolBatch -> {
+                                    // refine-chat-interaction:折叠并行工具开关。
+                                    // 开启时聚合为单张 ToolBatchCard;关闭时每个 ToolCall 独立渲染(回退到现状,INV-U3)。
+                                    if (KVUtils.isCollapseParallelTools()) {
+                                        ToolBatchCard(
+                                            calls = row.calls,
+                                            onShowDetail = { currentDetail = ToolsDetailPane(row.calls) },
+                                        )
+                                    } else {
+                                        row.calls.forEach { call ->
+                                            ToolCallItem(call)
+                                        }
+                                    }
+                                }
                             }
                         }
                         item { Spacer(modifier = Modifier.height(OctopusSpacing.sm)) }
@@ -1234,6 +1355,16 @@ fun ChatScreen() {
                 multiRosterDialogOpen = false
                 refreshTick++  // 触发顶部菜单的 roster 计数刷新
             },
+        )
+    }
+    // refine-chat-interaction Task 3:右侧详情抽屉。
+    // currentDetail = null 时 DetailDrawer 直接 return,消息流可独立浏览(INV-U4)。
+    // 占位接入:具体 DetailPane 实例化由 ArtifactCard.onClick 触发,Task 4 子代理实现。
+    // 关闭右侧栏详情开关时不渲染 DetailDrawer(回退到现状,INV-U3)。
+    if (KVUtils.isDetailDrawerEnabled()) {
+        DetailDrawer(
+            currentPane = currentDetail,
+            onClose = { currentDetail = null },
         )
     }
     }
@@ -2179,11 +2310,55 @@ private fun SetupRow(label: String, done: Boolean, onClick: () -> Unit) {
 
 // ── 工具步骤折叠 ──────────────────────────────────────
 
-/** 渲染行：普通消息 or 连续工具调用组。 */
+/** 渲染行：普通消息 or 连续工具调用组 or 同 batchId 并行批次。 */
 private sealed class ChatRow {
     abstract val key: String
     data class Single(val msg: ChatMessage) : ChatRow() { override val key = "m${msg.id}" }
     data class ToolGroup(val tools: List<ChatMessage.ToolCall>) : ChatRow() { override val key = "g${tools.first().id}" }
+    /** refine-chat-interaction Task 2:同 batchId 的并行 ToolCall 聚合为一行,由 [ToolBatchCard] 渲染。 */
+    data class ToolBatch(val batchId: String, val calls: List<ChatMessage.ToolCall>) : ChatRow() { override val key = "b$batchId" }
+}
+
+/**
+ * 同 batchId 聚合的渲染项 —— 纯数据视图,不依赖 [ChatRow](private),便于单元测试覆盖。
+ *
+ * - [Single]:batchId == null 的 ToolCall 或任何非 ToolCall 消息(保持原样,走 [ToolGroupItem] 路径)
+ * - [Batch]:同 batchId 聚合的 ToolCall 组(走 [ToolBatchCard] 路径)
+ *
+ * 见 `refine-chat-interaction` spec Task 2。
+ */
+internal sealed class BatchAggregation {
+    data class Single(val msg: ChatMessage) : BatchAggregation()
+    data class Batch(val calls: List<ChatMessage.ToolCall>) : BatchAggregation()
+}
+
+/**
+ * 把同 batchId 的 ToolCall 跨位置聚合为 [BatchAggregation.Batch];其余消息保持为 [BatchAggregation.Single]。
+ *
+ * - batchId == null 的 ToolCall:保持 Single(交给 [turnRows] 内 consecutive 折叠,向后兼容)
+ * - batchId != null 的 ToolCall:首次出现位置发射整组,同 batchId 的后续 ToolCall 跳过(已聚合)
+ *
+ * 纯函数,refine-chat-interaction Task 2 单元测试直接覆盖([ToolBatchCardTest])。
+ */
+internal fun groupToolCallsByBatch(messages: List<ChatMessage>): List<BatchAggregation> {
+    val batchCalls = mutableMapOf<String, MutableList<ChatMessage.ToolCall>>()
+    messages.filterIsInstance<ChatMessage.ToolCall>().forEach { c ->
+        c.batchId?.let { batchCalls.getOrPut(it) { mutableListOf() }.add(c) }
+    }
+    val emittedBatches = mutableSetOf<String>()
+    val result = mutableListOf<BatchAggregation>()
+    for (msg in messages) {
+        if (msg is ChatMessage.ToolCall && msg.batchId != null) {
+            if (msg.batchId !in emittedBatches) {
+                emittedBatches.add(msg.batchId)
+                result.add(BatchAggregation.Batch(batchCalls[msg.batchId]!!))
+            }
+            // 同 batchId 后续 ToolCall 跳过(已聚合到首次出现位置)
+        } else {
+            result.add(BatchAggregation.Single(msg))
+        }
+    }
+    return result
 }
 
 /**
@@ -2213,20 +2388,33 @@ private fun nextTurnEnd(msgs: List<ChatMessage>, start: Int): Int {
     return j
 }
 
-/** 一轮助手消息成行:连续 ToolCall 折叠;产物行整体后移到末尾,其余保持原序。 */
+/** 一轮助手消息成行:同 batchId 并行批聚合;连续 batchId==null ToolCall 折叠;产物行整体后移到末尾,其余保持原序。 */
 private fun turnRows(turn: List<ChatMessage>): List<ChatRow> {
     val rows = mutableListOf<ChatRow>()
+    val aggregated = groupToolCallsByBatch(turn)
     var i = 0
-    while (i < turn.size) {
-        val m = turn[i]
-        if (m is ChatMessage.ToolCall) {
-            val group = mutableListOf<ChatMessage.ToolCall>()
-            while (i < turn.size && turn[i] is ChatMessage.ToolCall) {
-                group.add(turn[i] as ChatMessage.ToolCall); i++
+    while (i < aggregated.size) {
+        when (val item = aggregated[i]) {
+            is BatchAggregation.Batch -> {
+                // refine-chat-interaction Task 2:同 batchId 跨位置聚合为一张 ToolBatchCard
+                val firstBatchId = item.calls.first().batchId
+                rows.add(ChatRow.ToolBatch(firstBatchId!!, item.calls))
+                i++
             }
-            rows.add(ChatRow.ToolGroup(group))
-        } else {
-            rows.add(ChatRow.Single(m)); i++
+            is BatchAggregation.Single -> {
+                val m = item.msg
+                if (m is ChatMessage.ToolCall) {
+                    // batchId == null:保持 consecutive 折叠(向后兼容,ToolGroupItem 渲染)
+                    val group = mutableListOf<ChatMessage.ToolCall>()
+                    while (i < aggregated.size && aggregated[i] is BatchAggregation.Single &&
+                        (aggregated[i] as BatchAggregation.Single).msg is ChatMessage.ToolCall) {
+                        group.add((aggregated[i] as BatchAggregation.Single).msg as ChatMessage.ToolCall); i++
+                    }
+                    rows.add(ChatRow.ToolGroup(group))
+                } else {
+                    rows.add(ChatRow.Single(m)); i++
+                }
+            }
         }
     }
     val (artifacts, others) = rows.partition { it is ChatRow.Single && it.msg is ChatMessage.Artifact }
@@ -2391,6 +2579,100 @@ private fun ToolCallItem(msg: ChatMessage.ToolCall) {
     }
 }
 
+/**
+ * 并行工具批次折叠卡(refine-chat-interaction Task 2)。
+ *
+ * 同 batchId 的多个 ToolCall 聚合为单张卡片:
+ * - 折叠态(默认):「N 个工具并行执行中…」(全部完成则「N 个工具已执行」),副标题工具名列表
+ *   (3 个以上显示前 2 个 + 「等 N 个」)
+ * - 展开态:逐行工具名 + 状态图标(✓ 绿/✗ 红/⏳ 主色)+ 耗时(ms),并提供「详情」入口
+ *   打开 [ToolsDetailPane] 查看完整 result(refine-chat-interaction Task 4)
+ *
+ * 极简 flat UI(INV-U5):OctopusShape.small 圆角、SurfaceDeepColor 单色实底、无阴影、无渐变。
+ * 用既有 OctopusColors / OctopusShape / OctopusSpacing / OctopusType,不引入新颜色。
+ *
+ * @param onShowDetail 点击「详情」按钮打开 ToolsDetailPane 的回调
+ */
+@Composable
+private fun ToolBatchCard(
+    calls: List<ChatMessage.ToolCall>,
+    onShowDetail: () -> Unit = {},
+) {
+    require(calls.isNotEmpty()) { "ToolBatchCard requires at least one call" }
+    val firstId = calls.first().id
+    var expanded by remember(firstId) { mutableStateOf(false) }
+    val allDone = calls.all { it.status != ChatMessage.ToolCallStatus.RUNNING }
+    val title = if (allDone) "${calls.size} 个工具已执行" else "${calls.size} 个工具并行执行中…"
+    val names = buildString {
+        calls.take(2).joinToString(", ") { it.toolName }.let { append(it) }
+        if (calls.size > 2) append(" 等 ${calls.size} 个")
+    }
+    Surface(
+        shape = OctopusShape.small,
+        color = SurfaceDeepColor,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = OctopusSpacing.xs)
+            .clickable { expanded = !expanded },
+    ) {
+        Column(modifier = Modifier.padding(OctopusSpacing.sm)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    title,
+                    fontSize = OctopusType.caption,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f),
+                )
+                if (expanded && allDone) {
+                    TextButton(
+                        onClick = onShowDetail,
+                        contentPadding = PaddingValues(horizontal = OctopusSpacing.sm, vertical = 0.dp),
+                    ) {
+                        Text("详情", fontSize = OctopusType.tag)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(OctopusSpacing.xs))
+            Text(names, fontSize = OctopusType.tag, color = TextMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (expanded) {
+                Spacer(modifier = Modifier.height(OctopusSpacing.sm))
+                calls.forEach { call ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            when (call.status) {
+                                ChatMessage.ToolCallStatus.SUCCESS -> "✓"
+                                ChatMessage.ToolCallStatus.FAILURE -> "✗"
+                                ChatMessage.ToolCallStatus.RUNNING -> "⏳"
+                            },
+                            color = when (call.status) {
+                                ChatMessage.ToolCallStatus.SUCCESS -> SuccessColor
+                                ChatMessage.ToolCallStatus.FAILURE -> ErrorColor
+                                ChatMessage.ToolCallStatus.RUNNING -> PrimaryColor
+                            },
+                            fontSize = OctopusType.caption,
+                        )
+                        Spacer(modifier = Modifier.width(OctopusSpacing.sm))
+                        Text(
+                            call.toolName,
+                            fontSize = OctopusType.caption,
+                            color = TextSecondary,
+                            fontFamily = FontFamily.Monospace,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        call.durationMs?.let {
+                            Spacer(modifier = Modifier.width(OctopusSpacing.xs))
+                            Text("${it}ms", fontSize = OctopusType.tag, color = TextMuted)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 /** ⋮ 菜单里的一行功能快捷入口:图标 + 标题,点了收起菜单并打开对应功能页。 */
 @Composable
 private fun MoreMenuLink(
@@ -2461,13 +2743,19 @@ private fun ThinkingItem(text: String) {
  * - FILE: 文件路径卡片(run_code writeFile / file_ops / generate_app 等产生的文件)。
  * - DIFF: diff 文本渲染块(edit_file 等)。
  *
+ * refine-chat-interaction Task 3:新增 [onClick] 回调,卡片整体可点击,
+ * 由调用方注入「打开右侧详情抽屉」逻辑(INV-U2:详情不在消息流展开)。
+ *
  * 大 payload(HTML/图片 base64)从 [ChatStore.loadPayload] 按需读取,主消息列表只存引用。
+ *
+ * @param onClick 卡片点击回调;Task 4 在此处根据 artifact.kind 创建对应 DetailPane
  */
 @Composable
-private fun ArtifactCard(artifact: ChatMessage.Artifact) {
+private fun ArtifactCard(artifact: ChatMessage.Artifact, onClick: () -> Unit = {}) {
     val tint = artifactTint(artifact.kind)
     val icon = artifactIcon(artifact.kind)
     Surface(
+        modifier = Modifier.clickable(onClick = onClick),
         shape = OctopusShape.medium,
         color = tint.copy(alpha = 0.08f),
         border = BorderStroke(1.dp, tint.copy(alpha = 0.18f)),
@@ -2534,6 +2822,104 @@ private fun ArtifactBody(artifact: ChatMessage.Artifact, kind: ChatMessage.Artif
             if (diff != null) DiffView(diff)
         }
         ChatMessage.ArtifactKind.HTML -> Unit // 只显示预览按钮
+        // refine-chat-interaction:3 个新类型的详情走右侧栏 DetailDrawer,消息流只显示 preview。
+        // preview 渲染由 Task 4 子代理在 DetailPane 实现中补全;此处先放占位,
+        // 不在消息流展开详情(INV-U2)。
+        ChatMessage.ArtifactKind.PLAN -> PlanPreview(artifact)
+        ChatMessage.ArtifactKind.CODE_SNIPPET -> CodeSnippetPreview(artifact)
+        ChatMessage.ArtifactKind.TEXT -> TextPreview(artifact)
+    }
+}
+
+// refine-chat-interaction Task 1:3 个新 ArtifactKind 的 preview 占位。
+// 消息流只显示简短预览(标题 + 1-3 行),详情由 Task 3/4 子代理实现右侧栏 DetailPane。
+@Composable
+private fun PlanPreview(artifact: ChatMessage.Artifact) {
+    val plan = remember(artifact.payloadRef) { ChatStore.loadPayload(artifact.payloadRef) }
+    val stepCount = remember(plan) {
+        runCatching {
+            org.json.JSONArray(plan).length()
+        }.getOrDefault(0)
+    }
+    Text(
+        "计划 · $stepCount 步 · 点击查看详情",
+        fontSize = OctopusType.caption,
+        color = TextMuted,
+        modifier = Modifier.padding(top = OctopusSpacing.xs),
+    )
+}
+
+@Composable
+private fun CodeSnippetPreview(artifact: ChatMessage.Artifact) {
+    val snippet = remember(artifact.payloadRef) { ChatStore.loadPayload(artifact.payloadRef) }
+    val preview = remember(snippet) {
+        snippet?.lineSequence()?.take(2)?.joinToString("\n") ?: ""
+    }
+    Text(
+        preview.ifBlank { "代码片段 · 点击查看详情" },
+        fontSize = OctopusType.caption,
+        color = TextSecondary,
+        fontFamily = FontFamily.Monospace,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(top = OctopusSpacing.xs),
+    )
+}
+
+@Composable
+private fun TextPreview(artifact: ChatMessage.Artifact) {
+    val context = LocalContext.current
+    val body = remember(artifact.payloadRef) { ChatStore.loadPayload(artifact.payloadRef) }
+    // refine-chat-interaction Task 6:Git 工具产物 body 形如 "URL: https://...\n\n正文",
+    // 解析首行 URL 前缀。若存在则显示「打开」按钮(Intent.ACTION_VIEW),例如 PR 卡片
+    // 可一键跳转浏览器查看。其余行作为预览文本。
+    val urlPrefix = "URL: "
+    val (displayUrl, previewText) = remember(body) {
+        if (body != null && body.startsWith(urlPrefix)) {
+            val firstLine = body.lineSequence().firstOrNull() ?: ""
+            val url = firstLine.removePrefix(urlPrefix).trim()
+            // 跳过首行 URL 和随后的空行,取下一行作为预览
+            val preview = body.lineSequence().drop(1).dropWhile { it.isBlank() }
+                .firstOrNull()?.take(80) ?: artifact.title
+            url to preview
+        } else {
+            null to (body?.lineSequence()?.firstOrNull()?.take(80) ?: "")
+        }
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = OctopusSpacing.xs),
+    ) {
+        Text(
+            previewText.ifBlank { artifact.title },
+            fontSize = OctopusType.caption,
+            color = TextSecondary,
+            fontFamily = FontFamily.Monospace,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        if (displayUrl != null) {
+            Spacer(modifier = Modifier.width(OctopusSpacing.sm))
+            TextButton(
+                onClick = {
+                    val uri = runCatching { android.net.Uri.parse(displayUrl) }.getOrNull()
+                        ?: return@TextButton
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(intent) }
+                },
+                contentPadding = PaddingValues(horizontal = OctopusSpacing.sm, vertical = 0.dp),
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(OctopusIconSize.small),
+                )
+                Spacer(modifier = Modifier.width(ARTIFACT_BTN_GAP))
+                Text(stringResource(R.string.chat_artifact_open), fontSize = OctopusType.caption)
+            }
+        }
     }
 }
 
@@ -2572,6 +2958,10 @@ private fun artifactTint(kind: ChatMessage.ArtifactKind): Color = when (kind) {
     ChatMessage.ArtifactKind.IMAGE -> OctopusTints.Video
     ChatMessage.ArtifactKind.FILE -> OctopusTints.Memory
     ChatMessage.ArtifactKind.DIFF -> PrimaryColor
+    // refine-chat-interaction:3 个新类型沿用 OctopusTints 单色,无渐变(INV-U5)
+    ChatMessage.ArtifactKind.PLAN -> OctopusTints.Skill        // 蓝 —— 计划
+    ChatMessage.ArtifactKind.CODE_SNIPPET -> OctopusTints.CatDev // 蓝 —— 代码
+    ChatMessage.ArtifactKind.TEXT -> OctopusTints.Routine      // 橙 —— 文本结果
 }
 
 private fun artifactIcon(kind: ChatMessage.ArtifactKind): androidx.compose.ui.graphics.vector.ImageVector = when (kind) {
@@ -2579,7 +2969,76 @@ private fun artifactIcon(kind: ChatMessage.ArtifactKind): androidx.compose.ui.gr
     ChatMessage.ArtifactKind.IMAGE -> Icons.Filled.CameraAlt
     ChatMessage.ArtifactKind.FILE -> Icons.Filled.Storage
     ChatMessage.ArtifactKind.DIFF -> Icons.Filled.Build
+    ChatMessage.ArtifactKind.PLAN -> Icons.AutoMirrored.Filled.ListLong  // 计划列表
+    ChatMessage.ArtifactKind.CODE_SNIPPET -> Icons.Filled.Code           // 代码片段
+    ChatMessage.ArtifactKind.TEXT -> Icons.AutoMirrored.Filled.Notes     // 文本
 }
+
+/**
+ * refine-chat-interaction Task 4:根据 [ChatMessage.Artifact.kind] 创建对应的 [DetailPane]。
+ *
+ * - PLAN:解析 payloadRef 中的 planJson,构造 [PlanDetailPane];批准按钮触发 exit_plan_mode 工具
+ * - CODE_SNIPPET:从 title 解析 file/startLine/endLine,snippet 从 payloadRef 读取
+ * - DIFF:从 payloadRef 读取 diff 文本
+ * - TEXT:从 payloadRef 读取 body
+ * - HTML/IMAGE/FILE:不在此打开右侧栏(预览/打开由卡片内独立按钮处理),返回 null
+ *
+ * 返回 null 表示不打开 DetailDrawer(消息流卡片仅做 preview,INV-U2)。
+ *
+ * @param onClose 关闭 DetailDrawer 的回调(由 PlanDetailPane 批准后调用,触发工具并关闭抽屉)
+ */
+private fun artifactDetailPane(
+    artifact: ChatMessage.Artifact,
+    onClose: () -> Unit,
+): DetailPane? = when (artifact.kind) {
+    ChatMessage.ArtifactKind.PLAN -> {
+        val planJson = ChatStore.loadPayload(artifact.payloadRef) ?: ""
+        PlanDetailPane(planJson) {
+            // 触发 exit_plan_mode 工具(简化:直接调用 ToolRegistry,绕过 Agent 流水线)。
+            runCatching {
+                com.apk.claw.android.tool.ToolRegistry.getInstance()
+                    .executeTool("exit_plan_mode", emptyMap())
+            }
+            // 关闭抽屉 —— DetailDrawer 的 onClose 也会触发,这里显式置空保证状态一致。
+            onClose()
+        }
+    }
+    ChatMessage.ArtifactKind.CODE_SNIPPET -> {
+        val snippet = ChatStore.loadPayload(artifact.payloadRef) ?: ""
+        val (file, start, end) = parseCodeSnippetTitle(artifact.title)
+        CodeDetailPane(file, start, end, snippet)
+    }
+    ChatMessage.ArtifactKind.DIFF -> {
+        val diff = ChatStore.loadPayload(artifact.payloadRef) ?: ""
+        DiffDetailPane(diff)
+    }
+    ChatMessage.ArtifactKind.TEXT -> {
+        val body = ChatStore.loadPayload(artifact.payloadRef) ?: ""
+        TextDetailPane(artifact.title, body)
+    }
+    // HTML/IMAGE/FILE 的详情走卡片内既有「预览/打开」按钮,不打开右侧栏。
+    ChatMessage.ArtifactKind.HTML,
+    ChatMessage.ArtifactKind.IMAGE,
+    ChatMessage.ArtifactKind.FILE -> null
+}
+
+/**
+ * 解析 CODE_SNIPPET Artifact 的 title 为 (file, startLine, endLine)。
+ *
+ * - 输入形如 `file.kt:42-58` 或 `path/to/Foo.java:1-100`
+ * - 无法解析时返回 `Triple("", 0, 0)`(DetailPane 仍可渲染,只是标题/行号缺失)
+ *
+ * refine-chat-interaction Task 4:internal 供单元测试直接调用。
+ */
+internal fun parseCodeSnippetTitle(title: String): Triple<String, Int, Int> {
+    val match = CODE_SNIPPET_TITLE_REGEX.find(title) ?: return Triple("", 0, 0)
+    val file = match.groupValues[1]
+    val start = match.groupValues[2].toIntOrNull() ?: 0
+    val end = match.groupValues[3].toIntOrNull() ?: 0
+    return Triple(file, start, end)
+}
+
+private val CODE_SNIPPET_TITLE_REGEX = Regex("^(.+):(\\d+)-(\\d+)\$")
 
 /** diff 渲染块:增行绿色 / 删行红色 / hunk 头主色 / 其余次要色,过长截断。 */
 @Composable

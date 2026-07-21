@@ -773,4 +773,15 @@ object KVUtils {
     private const val KEY_LLM_OFFLINE_MODE = "KEY_LLM_OFFLINE_MODE"
     fun isLlmOfflineMode(): Boolean = getBoolean(KEY_LLM_OFFLINE_MODE, false)
     fun setLlmOfflineMode(value: Boolean) = putBoolean(KEY_LLM_OFFLINE_MODE, value)
+
+    // ==================== refine-chat-interaction ====================
+    // 折叠并行工具:多工具并行执行时聚合为单张 ToolBatchCard。默认 true(开启新行为)。
+    private const val KEY_COLLAPSE_PARALLEL_TOOLS = "KEY_COLLAPSE_PARALLEL_TOOLS"
+    fun isCollapseParallelTools(): Boolean = getBoolean(KEY_COLLAPSE_PARALLEL_TOOLS, true)
+    fun setCollapseParallelTools(enabled: Boolean) = putBoolean(KEY_COLLAPSE_PARALLEL_TOOLS, enabled)
+
+    // 右侧栏详情:点击产物卡片在右侧栏 DetailDrawer 展开详情。默认 true(开启新行为)。
+    private const val KEY_DETAIL_DRAWER_ENABLED = "KEY_DETAIL_DRAWER_ENABLED"
+    fun isDetailDrawerEnabled(): Boolean = getBoolean(KEY_DETAIL_DRAWER_ENABLED, true)
+    fun setDetailDrawerEnabled(enabled: Boolean) = putBoolean(KEY_DETAIL_DRAWER_ENABLED, enabled)
 }

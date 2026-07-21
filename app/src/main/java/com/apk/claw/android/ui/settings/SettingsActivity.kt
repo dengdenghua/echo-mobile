@@ -291,6 +291,28 @@ class SettingsActivity : BaseActivity() {
         diffViewItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
         diffViewItem.setTrailingText(getCurrentDiffViewDisplayText())
         menuItems["DIFF_VIEW"] = diffViewItem
+
+        // refine-chat-interaction:折叠并行工具开关(多工具并行执行时聚合为单张 ToolBatchCard)
+        val collapseParallelToolsItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.settings_collapse_parallel_tools_title),
+            onClick = { showCollapseParallelToolsDialog() },
+            showDivider = false
+        )
+        collapseParallelToolsItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        collapseParallelToolsItem.setTrailingText(getCurrentCollapseParallelToolsDisplayText())
+        menuItems["COLLAPSE_PARALLEL_TOOLS"] = collapseParallelToolsItem
+
+        // refine-chat-interaction:右侧栏详情开关(点击产物卡片在右侧栏 DetailDrawer 展开详情)
+        val detailDrawerItem = modelGroup.addMenuItem(
+            leadingIcon = R.drawable.ic_runtime,
+            title = getString(R.string.settings_detail_drawer_title),
+            onClick = { showDetailDrawerDialog() },
+            showDivider = false
+        )
+        detailDrawerItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
+        detailDrawerItem.setTrailingText(getCurrentDetailDrawerDisplayText())
+        menuItems["DETAIL_DRAWER"] = detailDrawerItem
     }
 
     private fun observeViewModel() {
@@ -718,5 +740,65 @@ class SettingsActivity : BaseActivity() {
     /** Diff View 菜单项副标题: ON / OFF */
     private fun getCurrentDiffViewDisplayText(): String {
         return if (KVUtils.isDiffViewEnabled()) "ON" else "OFF"
+    }
+
+    /**
+     * refine-chat-interaction:折叠并行工具开关弹窗。
+     * 开启后多工具并行执行时聚合为单张 ToolBatchCard,关闭时回退到独立渲染(INV-U3)。
+     */
+    private fun showCollapseParallelToolsDialog() {
+        val switch = SwitchCompat(this).apply {
+            text = getString(R.string.settings_collapse_parallel_tools_subtitle)
+            isChecked = KVUtils.isCollapseParallelTools()
+        }
+        val container = LinearLayout(this).apply {
+            setPadding(48, 24, 48, 24)
+            addView(switch)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.settings_collapse_parallel_tools_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                KVUtils.setCollapseParallelTools(switch.isChecked)
+                menuItems["COLLAPSE_PARALLEL_TOOLS"]?.setTrailingText(getCurrentCollapseParallelToolsDisplayText())
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** 折叠并行工具菜单项副标题: ON / OFF */
+    private fun getCurrentCollapseParallelToolsDisplayText(): String {
+        return if (KVUtils.isCollapseParallelTools()) "ON" else "OFF"
+    }
+
+    /**
+     * refine-chat-interaction:右侧栏详情开关弹窗。
+     * 开启后点击产物卡片在右侧栏 DetailDrawer 展开详情,关闭时回退到现状(INV-U3)。
+     */
+    private fun showDetailDrawerDialog() {
+        val switch = SwitchCompat(this).apply {
+            text = getString(R.string.settings_detail_drawer_subtitle)
+            isChecked = KVUtils.isDetailDrawerEnabled()
+        }
+        val container = LinearLayout(this).apply {
+            setPadding(48, 24, 48, 24)
+            addView(switch)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.settings_detail_drawer_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                KVUtils.setDetailDrawerEnabled(switch.isChecked)
+                menuItems["DETAIL_DRAWER"]?.setTrailingText(getCurrentDetailDrawerDisplayText())
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** 右侧栏详情菜单项副标题: ON / OFF */
+    private fun getCurrentDetailDrawerDisplayText(): String {
+        return if (KVUtils.isDetailDrawerEnabled()) "ON" else "OFF"
     }
 }

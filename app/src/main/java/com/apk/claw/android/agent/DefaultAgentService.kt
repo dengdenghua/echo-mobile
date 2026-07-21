@@ -32,9 +32,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 import com.apk.claw.android.tool.ToolRegistry
 import com.apk.claw.android.tool.impl.GetScreenInfoTool
 import com.apk.claw.android.tool.ToolResult
+import com.apk.claw.android.ui.compose.screen.ChatStore
 import com.apk.claw.android.utils.XLog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.json.JSONObject
 import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.ChatMessage
 import dev.langchain4j.data.message.ImageContent
@@ -92,6 +94,41 @@ class DefaultAgentService : AgentService {
 
         /** 流式连续超时 N 次后降级到非流式(某些代理/CDN 不支持 SSE). */
         private const val STREAMING_DEGRADE_THRESHOLD = 2
+
+        /** refine-chat-interaction Task 6:产生 TEXT Artifact 的 Git 工具集合。 */
+        private val GIT_TEXT_ARTIFACT_TOOLS = setOf("git_commit", "git_push", "github_create_pr")
+    }   /**
+         * 从 LLM 的 AiMessage 文本里提取 plan JSON(步骤数组)。
+         *
+         * PLAN 模式下 LLM 应在调 exit_plan_mode 前,于同一条 AiMessage 文本里输出 JSONArray,
+         * 形如 [{"step":1,"action":"search_code","description":"..."}, ...]。
+         *
+         * 提取策略:取第一个 '[' 到最后一个 ']' 的子串,尝试解析为 JSONArray;
+         * 校验每个元素是 JSONObject 且含 step/action/description 中至少一个字段。
+         * 解析失败或校验不通过返回 null(UI 不生成 PLAN Artifact,不影响模式切换)。
+         *
+         * 抽成伴生纯函数便于 [PlanArtifactTest] 单测,无需启动 Agent。
+         */
+        @JvmStatic
+        fun extractPlanJson(aiText: String?): String? {
+            if (aiText.isNullOrBlank()) return null
+            val start = aiText.indexOf('[')
+            val end = aiText.lastIndexOf(']')
+            if (start < 0 || end <= start) return null
+            val candidate = aiText.substring(start, end + 1)
+            return try {
+                val arr = org.json.JSONArray(candidate)
+                if (arr.length() == 0) return null
+                for (i in 0 until arr.length()) {
+                    val el = arr.optJSONObject(i) ?: return null
+                    // 至少含 step/action/description 之一才算 plan 步骤
+                    if (!el.has("step") && !el.has("action") && !el.has("description")) return null
+                }
+                candidate
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     private lateinit var config: AgentConfig
@@ -127,6 +164,16 @@ class DefaultAgentService : AgentService {
     @Volatile
     private var streamingDegraded = false
     private val streamingTimeoutCount = java.util.concurrent.atomic.AtomicInteger(0)
+
+    /**
+     * 最近一条 LLM AiMessage 的文本。PLAN 模式下 LLM 在调 exit_plan_mode 时,
+     * 通常在同一条 AiMessage 文本里输出 plan JSON(步骤数组)。
+     * [handleExitPlanMode] 拦截 exit_plan_mode 工具调用时,从这里提取 plan JSON
+     * 注入 [ToolResult.planJson],经 [com.apk.claw.android.ui.compose.screen.ChatAgentBridge]
+     * 回传到 UI 层生成 PLAN 类 Artifact 卡片。
+     */
+    @Volatile
+    private var lastAiText: String = ""
 
     override fun initialize(config: AgentConfig) {
         this.config = config
@@ -276,7 +323,18 @@ class DefaultAgentService : AgentService {
 
         return if (approved.get()) {
             AgentConfig.setPermissionMode(PermissionMode.DEFAULT)
-            ToolResult.success("permission_mode_switched: plan → default. Continue executing the plan.")
+            // PLAN 模式产物:从最近一条 AiMessage 文本提取 plan JSON(步骤数组),
+            // 注入 ToolResult.planJson 经 ChatAgentBridge 回传到 UI 生成 PLAN Artifact 卡片。
+            // 提取失败不影响模式切换,只是 UI 不显示 plan 卡片。
+            val planJson = extractPlanJson(lastAiText)
+            if (planJson != null) {
+                ToolResult.successWithPlan(
+                    "permission_mode_switched: plan → default. Continue executing the plan.",
+                    planJson,
+                )
+            } else {
+                ToolResult.success("permission_mode_switched: plan → default. Continue executing the plan.")
+            }
         } else {
             ToolResult.error(
                 "exit_plan_mode_denied: user rejected switching to default mode. " +
@@ -1203,6 +1261,18 @@ class DefaultAgentService : AgentService {
             return executeReadonlyTool(readonlyReqs[0], callback)
         }
 
+        // TODO refine-chat-interaction Task 2(SubTask 2.5):
+        //  在此生成 `val batchId = java.util.UUID.randomUUID().toString()`,把 batchId 透传到
+        //  chat 层的 ChatMessage.ToolCall.batchId,使同批并行工具在 UI 聚合为单张 ToolBatchCard
+        //  (见 ChatScreen.kt 的 ToolBatchCard / groupToolCallsByBatch)。
+        //
+        //  当前阻塞:
+        //   1. AgentCallback.onToolCall/onToolResult 签名不含 batchId 字段(AgentCallback.kt:12-13),
+        //      ChatAgentBridge.onTool 回调同样未携带 batchId —— 需先扩展回调签名或新增 onBatchStart/End。
+        //   2. 本方法走 toolParallelExecutor 线程池,而 [ToolRegistry.executeToolsBatch](ToolRegistry.kt:653)
+        //      未在此处被调用 —— SubTask 2.5 待 ReAct 循环接入 executeToolsBatch 后再统一生成 batchId。
+        //  Task 2 子代理仅完成 UI 侧 ToolBatchCard + 消息渲染聚合,batchId 生成留作此 TODO。
+
         // 多个 readonly 工具:并行执行,串行 commit
         val pool = toolParallelExecutor ?: return ToolHandleResult.CONTINUE
         val cancelTask = cancelToken
@@ -1374,6 +1444,10 @@ class DefaultAgentService : AgentService {
     private fun AgentLoopState.handleLlmResponse(llmResponse: LlmResponse, callback: AgentCallback): Boolean {
         llmResponse.tokenUsage?.totalTokenCount()?.let { totalTokens += it }
 
+        // 捕获最近一条 AiMessage 文本,供 PLAN 模式下 handleExitPlanMode 提取 plan JSON。
+        // LLM 调 exit_plan_mode 时通常在同一条 AiMessage 文本里输出步骤数组。
+        lastAiText = llmResponse.text ?: ""
+
         val aiMessage = if (llmResponse.hasToolExecutionRequests()) {
             if (llmResponse.text.isNullOrEmpty()) {
                 AiMessage.from(llmResponse.toolExecutionRequests)
@@ -1528,7 +1602,44 @@ class DefaultAgentService : AgentService {
 
         recordFingerprint(toolName, toolArgs, result)
         appendToolResult(toolRequest, result)
+        emitGitTextArtifactIfNeeded(toolName, result, callback, iterations)
         return ToolHandleResult.CONTINUE
+    }
+
+    /**
+     * refine-chat-interaction Task 6:Git 工具结果 → TEXT Artifact。
+     *
+     * git_commit / git_push / github_create_pr 成功后返回结构化 JSON(title/url/body),
+     * 此处解析 JSON,把 body(若 url 非空则前缀 `URL: ...\n\n`)保存到 [ChatStore],
+     * 再通过 [AgentCallback.onTextArtifact] 通知 UI 创建 TEXT 类 Artifact 卡片。
+     *
+     * - body 前缀 `URL: ` 的约定让 UI 渲染时([TextPreview])能识别并显示「打开」按钮。
+     * - JSON 解析失败时静默跳过(fail-open,不阻塞 Agent 循环)。
+     */
+    private fun emitGitTextArtifactIfNeeded(
+        toolName: String,
+        result: ToolResult,
+        callback: AgentCallback,
+        round: Int,
+    ) {
+        if (!result.isSuccess) return
+        if (toolName !in GIT_TEXT_ARTIFACT_TOOLS) return
+        val data = result.data ?: return
+        val json = try {
+            JSONObject(data)
+        } catch (_: Exception) {
+            XLog.w(TAG, "Git tool result is not valid JSON, skip TEXT artifact: $toolName")
+            return
+        }
+        val title = json.optString("title", toolName)
+        val url: String? = if (json.has("url") && !json.isNull("url")) {
+            json.optString("url").takeIf { it.isNotBlank() }
+        } else null
+        val body = json.optString("body", "")
+        val refId = "git_${toolName}_${System.currentTimeMillis()}_text"
+        val bodyWithUrl = if (!url.isNullOrBlank()) "URL: $url\n\n$body" else body
+        ChatStore.savePayload(refId, bodyWithUrl)
+        callback.onTextArtifact(round, toolName, title, refId)
     }
 
     private fun AgentLoopState.parseToolArgs(toolName: String, toolArgs: String): Map<String, Any>? {
@@ -1580,6 +1691,17 @@ class DefaultAgentService : AgentService {
 
     private fun AgentLoopState.appendToolResult(toolRequest: ToolExecutionRequest, result: ToolResult) {
         messages.add(ToolExecutionResultMessage.from(toolRequest, GSON.toJson(toolResultForJson(result))))
+
+        // ── run_code 输出 → TEXT Artifact(spec refine-chat-interaction Task 8)──
+        // RunCodeTool 已把 stdout 包装进 ToolResult.textBody, DefaultAgentService 这里只做透传:
+        // textBody 不喂给 LLM(避免冗余 token), 由 ChatAgentBridge.onToolResult 检测后回调
+        // ChatScreen.onTextBody 生成 ChatMessage.Artifact(kind=TEXT, title="运行输出") 卡片,
+        // body 存入 ChatStore, 折叠态显示前 3 行预览, 右侧栏 TextDetailPane 显示全文。
+        // 此处不直接构造 Artifact(UI 层概念), 仅保证 textBody 透传到 callback 不被吞掉。
+        val textBody = result.textBody
+        if (textBody != null && textBody.isNotEmpty()) {
+            XLog.d(TAG, "run_code textBody carried through: ${textBody.length} chars → TEXT Artifact")
+        }
 
         // 工具返回图片时（如 preview_html），追加视觉消息供多模态 LLM 直接查看并自迭代。
         val img = result.imageBase64

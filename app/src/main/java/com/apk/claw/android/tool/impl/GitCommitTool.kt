@@ -4,6 +4,7 @@ import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolParameter
 import com.apk.claw.android.tool.ToolResult
+import org.json.JSONObject
 import java.io.File
 
 /**
@@ -21,6 +22,27 @@ class GitCommitTool : BaseTool() {
 
     companion object {
         private const val TIMEOUT_SEC = 30L
+
+        /**
+         * 构建 refine-chat-interaction Task 6 结构化结果 JSON。
+         *
+         * 含 title / url / body 三字段,供 DefaultAgentService 解析后生成 TEXT Artifact。
+         * 暴露为 companion 方法便于单测直接验证 JSON 格式,无需跑真实 git 命令。
+         */
+        fun buildResultJson(title: String, url: String?, body: String): String {
+            val json = JSONObject()
+            json.put("title", title)
+            json.put("url", url ?: JSONObject.NULL)
+            json.put("body", body)
+            return json.toString()
+        }
+
+        /** 从 `git commit` 输出中提取短 commit hash,用于 title。 */
+        internal fun extractShortHash(output: String): String? {
+            // [main abc1234] commit message
+            val regex = Regex("""\[[\w/.-]+ ([0-9a-f]{7,40})\]""")
+            return regex.find(output)?.groupValues?.getOrNull(1)
+        }
     }
 
     override fun getName(): String = "git_commit"
@@ -105,7 +127,8 @@ class GitCommitTool : BaseTool() {
                 combined.contains("no changes", ignoreCase = true) ||
                 combined.contains("nothing added", ignoreCase = true)
             ) {
-                return ToolResult.success("无变更可提交: ${combined.trim().take(500)}")
+                val body = "无变更可提交: ${combined.trim().take(500)}"
+                return ToolResult.success(buildResultJson("commit (no changes)", null, body))
             }
             val msg = combined.ifBlank { "(no output)" }
             return ToolResult.error(
@@ -113,9 +136,12 @@ class GitCommitTool : BaseTool() {
                 ToolErr.INTERNAL,
             )
         }
-        return ToolResult.success(
-            "已提交。" +
-                if (combined.isNotBlank()) "\n${combined.trim().take(1000)}" else "",
-        )
+        val shortHash = extractShortHash(combined)
+        val title = if (shortHash != null) "commit $shortHash" else "commit"
+        val body = buildString {
+            append(message)
+            if (combined.isNotBlank()) append("\n\n").append(combined.trim().take(1000))
+        }
+        return ToolResult.success(buildResultJson(title, null, body))
     }
 }

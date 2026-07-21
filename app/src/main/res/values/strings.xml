@@ -1409,4 +1409,10 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="github_token_dialog_title">GitHub Token (for git_push / github_create_pr)</string>
     <string name="diff_view_menu_title">Diff View</string>
     <string name="diff_view_dialog_title">Diff View (show diff before file write)</string>
+
+    <!-- refine-chat-interaction: parallel tool collapse + detail drawer toggles -->
+    <string name="settings_collapse_parallel_tools_title">Collapse Parallel Tools</string>
+    <string name="settings_collapse_parallel_tools_subtitle">Aggregate parallel tool calls into one card</string>
+    <string name="settings_detail_drawer_title">Detail Drawer</string>
+    <string name="settings_detail_drawer_subtitle">Open details in right drawer</string>
 </resources>

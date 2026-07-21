@@ -8,6 +8,8 @@ import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolParameter
 import com.apk.claw.android.tool.ToolRegistry
 import com.apk.claw.android.tool.ToolResult
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.util.Locale
 
@@ -127,36 +129,56 @@ class SearchCodeTool : BaseTool() {
         stats: com.apk.claw.android.code.IndexStats,
     ): ToolResult {
         if (results.isEmpty()) {
-            return ToolResult.success(
-                buildString {
-                    append("No code chunks matched the query.\n")
-                    append("(indexed ${stats.totalFiles} files / ${stats.totalChunks} chunks in ${stats.durationMs}ms)")
-                },
+            val json = JSONObject()
+            json.put("totalMatches", 0)
+            json.put("message", "No code chunks matched the query.")
+            json.put(
+                "indexStats",
+                "indexed ${stats.totalFiles} files / ${stats.totalChunks} chunks in ${stats.durationMs}ms",
             )
+            return ToolResult.success(json.toString())
         }
 
-        val sb = StringBuilder()
-        sb.append("Found ${results.size} code chunks")
-        sb.append(" (indexed ${stats.totalFiles} files / ${stats.totalChunks} chunks in ${stats.durationMs}ms):\n\n")
+        // top-1 命中:作为结构化 4 字段(file/startLine/endLine/snippet)供 Artifact 提取,
+        // 也是 LLM 最关心的"最相关片段"。
+        val top = results[0]
+        val topSnippet = truncateContent(top.content)
 
-        for ((idx, r) in results.withIndex()) {
-            sb.append("### ${idx + 1}. ${r.filePath}:${r.startLine}-${r.endLine}\n")
-            sb.append("score=${formatScore(r.score)}")
-            sb.append(" (bm25=${formatScore(r.bm25Score)}")
-            r.denseScore?.let { sb.append(", dense=${formatScore(it)}") }
-            sb.append(")\n")
-            sb.append("```\n")
-            val content = if (r.content.length > MAX_CONTENT_CHARS) {
-                r.content.substring(0, MAX_CONTENT_CHARS).trimEnd() + "\n…(truncated)"
-            } else {
-                r.content
-            }
-            sb.append(content)
-            if (!content.endsWith('\n')) sb.append('\n')
-            sb.append("```\n\n")
+        val json = JSONObject()
+        json.put("file", top.filePath)
+        json.put("startLine", top.startLine)
+        json.put("endLine", top.endLine)
+        json.put("snippet", topSnippet)
+        json.put("totalMatches", results.size)
+        json.put(
+            "indexStats",
+            "indexed ${stats.totalFiles} files / ${stats.totalChunks} chunks in ${stats.durationMs}ms",
+        )
+
+        // 完整命中列表:保留 top-K 全部结果(含得分)供 LLM 参考,向后兼容旧消费者可见性。
+        val allMatches = JSONArray()
+        for (r in results) {
+            val item = JSONObject()
+            item.put("file", r.filePath)
+            item.put("startLine", r.startLine)
+            item.put("endLine", r.endLine)
+            item.put("snippet", truncateContent(r.content))
+            item.put("score", formatScore(r.score))
+            item.put("bm25", formatScore(r.bm25Score))
+            r.denseScore?.let { item.put("dense", formatScore(it)) }
+            allMatches.put(item)
         }
-        return ToolResult.success(sb.toString())
+        json.put("allMatches", allMatches)
+
+        return ToolResult.success(json.toString())
     }
+
+    private fun truncateContent(content: String): String =
+        if (content.length > MAX_CONTENT_CHARS) {
+            content.substring(0, MAX_CONTENT_CHARS).trimEnd() + "\n…(truncated)"
+        } else {
+            content
+        }
 
     private fun formatScore(d: Double): String =
         String.format(Locale.US, "%.3f", d)

@@ -44,6 +44,25 @@ class ToolResult private constructor(
      * 为 null 表示该工具调用不需要问卷。
      */
     val formData: String? = null,
+    /**
+     * 纯文本产物(类 Claude Artifacts 的 TEXT 产物)。
+     *
+     * run_code 等脚本类工具的 stdout 输出填上此字段,对话页据此生成 TEXT 类 Artifact 卡片,
+     * 折叠态显示前 3 行预览,展开态/右侧栏显示全文。[data] 仍照常喂给 LLM 做决策。
+     *
+     * 为 null 表示该工具调用未产生文本产物。
+     */
+    val textBody: String? = null,
+    /**
+     * Plan 模式产物 —— LLM 在 PLAN 模式下输出步骤数组(JSONArray)后调用 exit_plan_mode,
+     * [com.apk.claw.android.agent.DefaultAgentService] 从最近一条 AiMessage 文本里提取出 plan JSON,
+     * 通过本字段回传,对话页据此生成 [com.apk.claw.android.ui.compose.screen.ChatMessage.Artifact]
+     * (kind=PLAN) 卡片,标题「计划(N 步)」,详情走右侧栏 PlanDetailPane。
+     *
+     * JSON 格式:[{"step":1,"action":"search_code","description":"..."}, ...]
+     * 为 null 表示该工具调用未产生 plan(非 PLAN 模式或 LLM 未输出可解析步骤)。
+     */
+    val planJson: String? = null,
 ) {
     companion object {
         @JvmStatic
@@ -85,10 +104,25 @@ class ToolResult private constructor(
         @JvmStatic
         fun successWithForm(data: String, formData: String): ToolResult =
             ToolResult(true, data, null, null, null, null, null, null, null, formData)
+
+        /**
+         * 返回成功结果，同时携带纯文本产物 body（run_code stdout 等）。
+         * [data] 照常喂给 LLM；[textBody] 由 UI 渲染为 TEXT 类 Artifact 卡片。
+         */
+        @JvmStatic
+        fun successWithText(data: String, textBody: String): ToolResult =
+            ToolResult(true, data, null, null, null, null, null, null, null, null, textBody)
+
+        /** 返回成功结果，同时携带 Plan 模式产物(plan JSON 数组),让 UI 生成 PLAN Artifact 卡片。 */
+        @JvmStatic
+        fun successWithPlan(data: String, planJson: String): ToolResult =
+            ToolResult(true, data, null, null, null, null, null, null, null, null, null, planJson)
     }
 
     override fun toString(): String = when {
+        planJson != null -> "ToolResult{success=$isSuccess, data='$data', planJson=${planJson.length}chars}"
         formData != null -> "ToolResult{success=$isSuccess, data='$data', formData=${formData.length}chars}"
+        textBody != null -> "ToolResult{success=$isSuccess, data='$data', textBody=${textBody.length}chars}"
         imageBase64 != null -> "ToolResult{success=$isSuccess, data='$data', imageBase64='${imageBase64.take(30)}...'}"
         htmlContent != null -> "ToolResult{success=$isSuccess, data='$data', htmlContent=${htmlContent.length}chars}"
         diff != null -> "ToolResult{success=$isSuccess, data='$data', diff=${diff.length}chars}"
