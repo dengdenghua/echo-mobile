@@ -1,0 +1,290 @@
+name: Release
+
+# 可验证 release —— 对齐 echo-os / echo-ai 家族的发布纪律:
+#   版本契约门(tag == versionName) → versionCode 单调递增门 → 同 SHA 前置证据(单测/lint/detekt)
+#   → 签名制品(AAB + 分 ABI APK) → SHA-256 清单 → SBOM → GitHub 构建来源证明(attestation)。
+#
+# 与 ci.yml 的分工:
+#   ci.yml      每次 push/PR 跑,产出 debug APK,只做质量门;
+#   release.yml 只在打 tag 时跑,产出可分发的签名制品与可独立验证的哈希/SBOM/来源证明。
+#
+# 需求(仓库 Secrets):
+#   KEYSTORE_BASE64    release 密钥库的 base64(例如 base64 -w0 release.jks)
+#   KEYSTORE_PASSWORD
+#   KEY_ALIAS
+#   KEY_PASSWORD
+#
+# 发布方式:git tag v1.0.0 && git push origin v1.0.0
+#
+# 实测要点(2026-09-22 本机核验):
+#   - `:app:assembleRelease` 可跑通(约 5m30s,R8 minify + shrinkResources + Chaquopy 全开)。
+#   - `:app:bundleRelease` 直接跑会失败:ABI splits 与 AAB 在 AGP 中互斥,报
+#     "Multiple shrunk-resources files found in directory ...shrunk_resources_proto_format"。
+#     已加 -PechoBundle 开关关掉分包来产出 AAB,故本流水线分两次 gradle 调用。
+#   - 产出的 APK 同时带 v2+v3 签名块(v1/v4 未启用):v2 兼容 API 24+ 与只认 v2 的渠道/校验器,
+#     v3 在 API 28+ 原生支持并提供签名密钥轮换能力;minSdk=28 使二者对全部目标设备均可用。
+#     实测 apksigner 默认按 APK 自身 minSdk(28) 报告 "v2 scheme: false" —— 这是 minSdk 感知行为(该范围内
+#     v3 已完全覆盖,v2 视为冗余)。故下方签名验证对 v2 显式加 --min-sdk-version 24 断言,防止将来 AGP
+#     升级静默丢掉 v2 兼容块;对 v3 则按默认 minSdk 断言。
+#   - APK 文件名只含 versionName/versionCode/ABI,不再含构建时间戳,便于同 commit 对账。
+#
+# 尚未覆盖(见 Echo_Mobile_升级演变路径.md P2-11):
+#   - Code Transparency(需 Play App Signing 通道)
+#   - v4 签名(会额外产出 .idsig,当前发布链路不需要)
+#   - 逐字节可复现构建:文件名已确定化;两次全量构建 SHA-256 仍不同,需继续定位 R8/Chaquopy/签名差异
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 前置证据门:版本契约 + 同 SHA 全绿 ──────────────────────────────────
+  verify:
+    name: Release prerequisites
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # 版本号必须经 job outputs 传给 release job —— GITHUB_ENV 不跨 job。
+    outputs:
+      version-name: ${{ steps.version.outputs.version_name }}
+      version-code: ${{ steps.version.outputs.version_code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Verify release version contract
+        id: version
+        run: |
+          set -euo pipefail
+
+          VERSION_NAME="$(grep -oP '^\s*versionName = "\K[^"]+' app/build.gradle.kts | head -1)"
+          VERSION_CODE="$(grep -oP '^\s*versionCode = \K[0-9]+' app/build.gradle.kts | head -1)"
+
+          if [ -z "${VERSION_NAME}" ] || [ -z "${VERSION_CODE}" ]; then
+            echo "::error::无法从 app/build.gradle.kts 解析 versionName/versionCode"
+            exit 1
+          fi
+          echo "versionName=${VERSION_NAME}  versionCode=${VERSION_CODE}"
+
+          # 1) tag 必须等于 v + versionName
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            EXPECTED="v${VERSION_NAME}"
+            if [ "${GITHUB_REF_NAME}" != "${EXPECTED}" ]; then
+              echo "::error::tag '${GITHUB_REF_NAME}' 必须等于 '${EXPECTED}' (= v + versionName)"
+              exit 1
+            fi
+            echo "版本契约通过:${GITHUB_REF_NAME}"
+          else
+            echo "::notice::非 tag 触发(workflow_dispatch),跳过 tag 契约校验,且不会创建 Release"
+          fi
+
+          # 2) versionCode 必须严格大于上一个 release tag 的 versionCode
+          #    (Android 升级判据,只增不减;历史上没有 tag 时跳过)
+          PREV_TAG="$(git tag --sort=-v:refname | grep -v "^${GITHUB_REF_NAME}$" | head -1 || true)"
+          if [ -n "${PREV_TAG}" ]; then
+            PREV_CODE="$(git show "${PREV_TAG}:app/build.gradle.kts" 2>/dev/null | grep -oP '^\s*versionCode = \K[0-9]+' | head -1 || true)"
+            if [ -n "${PREV_CODE}" ]; then
+              echo "上一个 release tag ${PREV_TAG} 的 versionCode=${PREV_CODE}"
+              if [ "${VERSION_CODE}" -le "${PREV_CODE}" ]; then
+                echo "::error::versionCode 必须严格递增:当前 ${VERSION_CODE} <= ${PREV_TAG} 的 ${PREV_CODE}"
+                exit 1
+              fi
+            fi
+          else
+            echo "未发现历史 release tag,跳过 versionCode 单调性检查"
+          fi
+
+          {
+            echo "version_name=${VERSION_NAME}"
+            echo "version_code=${VERSION_CODE}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Unit tests
+        run: ./gradlew :app:testDebugUnitTest
+
+      - name: Android Lint (baseline ratchet)
+        run: ./gradlew :app:lintDebug
+
+      - name: detekt (baseline ratchet)
+        run: ./gradlew :app:detekt
+
+  # ── 签名制品 + 可验证性 ────────────────────────────────────────────────
+  release:
+    name: Build, sign & attest
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write        # 创建 Release 并上传制品
+      id-token: write        # attestation
+      attestations: write
+    env:
+      # 经 needs.verify.outputs 传入(GITHUB_ENV 不跨 job)
+      VERSION_NAME: ${{ needs.verify.outputs.version-name }}
+      VERSION_CODE: ${{ needs.verify.outputs.version-code }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            eval "value=\${${name}:-}"
+            if [ -z "${value}" ]; then
+              echo "::error::缺少 secret ${name}"
+              exit 1
+            fi
+          done
+          KS="${RUNNER_TEMP}/echo-release.jks"
+          printf '%s' "${KEYSTORE_BASE64}" | base64 -d > "${KS}"
+          chmod 600 "${KS}"
+          echo "KEYSTORE_FILE=${KS}" >> "$GITHUB_ENV"
+
+      # APK 分包与 AAB 在 AGP 中互斥,必须分两次调用(见 app/build.gradle.kts 的 splits 注释):
+      #   不带属性 → 分 ABI + universal APK;带 -PechoBundle → 单 AAB。
+      # 每次构建后立即收件,不依赖 outputs/ 目录跨构建存活。
+      - name: Assemble signed split APKs
+        run: ./gradlew :app:assembleRelease
+
+      - name: Collect split APKs
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp app/build/outputs/apk/release/*.apk dist/
+          APK_COUNT="$(find dist -name '*.apk' | wc -l)"
+          if [ "${APK_COUNT}" -lt 4 ]; then
+            echo "::error::期望至少 4 个分 ABI/universal APK,实际只有 ${APK_COUNT} 个"
+            exit 1
+          fi
+          ls -la dist/
+
+      - name: Assemble signed AAB
+        run: ./gradlew :app:bundleRelease -PechoBundle
+
+      - name: Collect AAB and generate SHA-256 manifest
+        run: |
+          set -euo pipefail
+          cp app/build/outputs/bundle/release/*.aab "dist/OctopusMobile_v${VERSION_NAME}_vc${VERSION_CODE}.aab"
+          cd dist
+          : > SHA256SUMS.txt
+          for f in *.apk *.aab; do
+            [ -e "${f}" ] || continue
+            sha256sum "${f}" >> SHA256SUMS.txt
+          done
+          cd ..
+          echo "=== SHA256SUMS.txt ==="
+          cat dist/SHA256SUMS.txt
+
+      - name: Verify SHA-256 manifest
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum -c SHA256SUMS.txt)
+
+      - name: Verify APK signatures
+        run: |
+          set -euo pipefail
+          BT="$(ls -d "${ANDROID_HOME}"/build-tools/* 2>/dev/null | sort -V | tail -1)"
+          if [ -z "${BT}" ] || [ ! -x "${BT}/apksigner" ]; then
+            echo "::error::未找到 apksigner(ANDROID_HOME=${ANDROID_HOME})"
+            exit 1
+          fi
+          echo "使用 ${BT}/apksigner"
+          for apk in dist/*.apk; do
+            echo "--- ${apk} ---"
+            OUT="$("${BT}/apksigner" verify --verbose --print-certs "${apk}")"
+            printf '%s\n' "${OUT}" | head -12
+            printf '%s\n' "${OUT}" | grep -q 'Verified using v3 scheme.*true' \
+              || { echo "::error::${apk} 未通过 v3 签名校验"; exit 1; }
+            # v2 块存在性断言:见文件头说明,默认 minSdk 感知会掩盖 v2,需显式降到 24 才能观察到。
+            V2OUT="$("${BT}/apksigner" verify --verbose --min-sdk-version 24 "${apk}")"
+            printf '%s\n' "${V2OUT}" | grep -q 'Verified using v2 scheme.*true' \
+              || { echo "::error::${apk} 缺少可验证的 v2 签名块(只认 v2 的渠道/校验器将无法验证)"; exit 1; }
+          done
+
+      - name: Verify AAB signature
+        run: |
+          set -euo pipefail
+          AAB="$(ls dist/*.aab)"
+          CERT="$(keytool '-J-Duser.language=en' '-J-Duser.country=US' -printcert -jarfile "${AAB}")"
+          printf '%s\n' "${CERT}" | head -6
+          printf '%s\n' "${CERT}" | grep -q '^Signer #1:' \
+            || { echo "::error::AAB JAR 签名校验失败"; exit 1; }
+
+      - name: Archive R8 mapping and native debug symbols
+        run: |
+          set -euo pipefail
+          mkdir -p dist/debug-symbols
+          cp app/build/outputs/mapping/release/mapping.txt dist/debug-symbols/ 2>/dev/null || true
+          if [ -d app/build/outputs/native-debug-symbols ]; then
+            cp -r app/build/outputs/native-debug-symbols/. dist/debug-symbols/ 2>/dev/null || true
+          fi
+          ls -la dist/debug-symbols/ || true
+
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          path: dist
+          format: spdx-json
+          output-file: dist/echo-mobile-sbom.spdx.json
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            dist/*.apk
+            dist/*.aab
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: echo-mobile-release-${{ github.ref_name }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          {
+            echo "versionName=${VERSION_NAME}  versionCode=${VERSION_CODE}"
+            echo ""
+            echo "产物:分 ABI APK + universal APK + AAB。"
+            echo "SHA256SUMS.txt 为各制品 SHA-256;SBOM 见 echo-mobile-sbom.spdx.json。"
+            echo "构建来源证明见本 Release 关联的 attestation。"
+          } > RELEASE_NOTES.md
+
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "Echo Mobile ${GITHUB_REF_NAME}" \
+            --notes-file RELEASE_NOTES.md \
+            dist/*.apk dist/*.aab dist/SHA256SUMS.txt dist/echo-mobile-sbom.spdx.json

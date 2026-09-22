@@ -1,8 +1,6 @@
 import org.jetbrains.kotlin.konan.properties.hasProperty
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Properties
 
 plugins {
@@ -52,6 +50,15 @@ android {
             storePassword = System.getenv("KEYSTORE_PASSWORD") ?: props.getProperty("KEYSTORE_PASSWORD", "")
             keyAlias = System.getenv("KEY_ALIAS") ?: props.getProperty("KEY_ALIAS", "")
             keyPassword = System.getenv("KEY_PASSWORD") ?: props.getProperty("KEY_PASSWORD", "")
+
+            // 同时启用 v2 + v3 签名块:v2 是 API 24+ 设备与只认 v2 的第三方渠道/校验器的兼容锚点,
+            // v3 在 API 28+ 原生支持并提供签名密钥轮换(proof-of-rotation)能力;v1 关闭(minSdk=28,无需 JAR 签名),
+            // v4 会额外产出 .idsig,发布链路暂不需要。
+            // 实测:产物 APK Signing Block 内 v2(0x7109871a) 与 v3(0xf05368c0) 两个签名块同时存在,且各自独立校验通过。
+            // 注意 apksigner 默认按 APK 自身 minSdk(28) 报告 "v2 scheme: false" —— 这是 minSdk 感知行为:
+            // 该 sdk 范围内 v3 已完全覆盖,v2 视为冗余;要单看 v2 块本身需显式加 --min-sdk-version 24。
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
@@ -102,9 +109,14 @@ android {
     // 按 ABI 分包:arm64-v8a / armeabi-v7a / x86_64 各生成一个独立 APK,只含自身架构;另出一个
     // universal 通用包(含所有 .so,多架构都能装)。GeckoView 已移除,通用包体积可控。
     // x86_64 APK 仅用于模拟器调试(开发期跑 llama.cpp JNI 冒烟测试),不发布给最终用户。
+    // ⚠️ APK 分包与 AAB 互斥(AGP 限制):同一 variant 同时开启会在 :app:buildReleasePreBundle
+    // 报 "Multiple shrunk-resources files found in directory ...shrunk_resources_proto_format"。
+    // 因此产 AAB 时用 -PechoBundle 显式关掉分包:
+    //   ./gradlew :app:assembleRelease            → 分 ABI + universal APK(默认路径,不变)
+    //   ./gradlew :app:bundleRelease -PechoBundle  → 单个 AAB
     splits {
         abi {
-            isEnable = true
+            isEnable = !project.hasProperty("echoBundle")
             reset()
             include("arm64-v8a", "armeabi-v7a", "x86_64")
             isUniversalApk = true
@@ -320,13 +332,15 @@ androidComponents {
         variant.outputs.forEach { output ->
             if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
                 val versionName = android.defaultConfig.versionName ?: "0.0.0"
+                val versionCode = android.defaultConfig.versionCode ?: 0
                 // ABI 分包后每个 output 带不同架构 → 文件名必须含 ABI,否则同名冲突打包失败
                 val abi = output.variantOutputConfiguration.filters
                     .find { it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI }
                     ?.identifier
                 // 分包带具体 ABI;universal 通用包无 ABI 过滤 → 标成 _universal 以区分
                 val abiTag = if (abi != null) "_$abi" else "_universal"
-                val fileName = "OctopusMobile_v${versionName}${abiTag}_${getDateTime()}.apk"
+                // 文件名必须可复现:只含版本号、versionCode 与 ABI,不含构建时间戳。
+                val fileName = "OctopusMobile_v${versionName}_vc${versionCode}${abiTag}.apk"
                 println("output file name: $fileName")
                 output.outputFileName.set(fileName)
             }
@@ -352,11 +366,6 @@ fun getVersionGit(): String {
     } catch (e: Exception) {
         "\"unknown_unknown\""
     }
-}
-
-fun getDateTime(): String {
-    val df = SimpleDateFormat("yyyyMMdd_HHmmss");
-    return df.format(Date());
 }
 
 fun getParameter(key: String, defaultValue: String): String {
