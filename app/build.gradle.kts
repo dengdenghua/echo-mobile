@@ -306,6 +306,13 @@ dependencies {
 // 只从单测运行时类路径排除该 artifact,APK 打包与生产代码不受影响。
 configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
     exclude(group = "org.conscrypt", module = "conscrypt-android")
+
+    // Guava 32.0.0-jre 的 TempFileCreator.createTempDir() 无条件传 posix 权限属性,
+    // 在 Windows 上必抛 UnsupportedOperationException("'posix:permissions' not supported
+    // as initial attribute"),使任何走 Robolectric 临时目录的用例失败(本机 122 个)。
+    // 33.3.1-jre 不再无条件传该属性。该版本由 com.larksuite.oapi:oapi-sdk 拉入,
+    // 这里只收紧单测运行时类路径,不影响 APK 打包与生产依赖图。
+    resolutionStrategy.force("com.google.guava:guava:33.3.1-jre")
 }
 
 androidComponents {
