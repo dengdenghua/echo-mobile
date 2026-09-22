@@ -211,9 +211,12 @@ class CodeIndexTest {
         val expectedS3 = expectedIdf * (1.0 * (1.5 + 1.0)) / expectedDenom
         assertEquals("doc3 score matches manual calc", expectedS3, s3, 1e-9)
 
-        // doc1 比 doc3 词频高但更长,bm25 不应简单按词频排
-        // 直观断言:两者都为正且 doc1 > doc3(在此场景下因 tf 更高且 idf 同)
-        assertTrue("doc1 > doc3 (higher tf, same idf)", s1 > s3)
+        // doc1 词频更高(tf=2)但文档更长(3 vs 1),BM25 的长度归一化在这里起决定作用:
+        //   doc1 = idf · 5.0 / 4.40 ≈ 1.136 · idf
+        //   doc3 = idf · 2.5 / 2.05 ≈ 1.220 · idf
+        // 即「短文档命中一次」优于「长文档命中两次」——这正是 BM25 与朴素 TF 排序的差异。
+        // (原断言按直觉写成 s1 > s3,与上面刚手算验证过的公式自相矛盾,已按公式修正。)
+        assertTrue("doc3 > doc1 (长度归一化胜过原始词频)", s3 > s1)
     }
 
     @Test
@@ -242,6 +245,9 @@ class CodeIndexTest {
     fun `path filter restricts search scope`() {
         File(rootDir, "auth").mkdirs()
         File(rootDir, "auth/Login.kt").writeText("class Login { fun doLogin() = Unit }")
+        // 必须先建目录:File.writeText 不会自动创建父目录,少了这行在任何平台上都会
+        // 抛 FileNotFoundException(此前被 Robolectric 初始化失败掩盖,从未真正跑到)。
+        File(rootDir, "ui").mkdirs()
         File(rootDir, "ui/Home.kt").writeText("class Home { fun doLogin() = Unit }")
 
         index.indexDirectory(rootDir.absolutePath, incremental = false)

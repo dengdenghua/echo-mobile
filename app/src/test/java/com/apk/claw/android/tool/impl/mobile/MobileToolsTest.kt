@@ -13,12 +13,12 @@ import org.robolectric.annotation.Config
  *
  * 覆盖：
  *  - 工具名 / 显示名 / 参数定义正确
- *  - 必需参数缺失时抛异常
- *  - 可选参数有默认值
- *  - AccessibilityService 未运行时返回 error（集成测试环境无法模拟）
+ *  - 坐标 / stableId 二选一的参数契约
+ *  - 缺参时返回可读错误
+ *  - 四条执行通道(远程/Shizuku/A11y/Root)全不可用时返回 error
  *
- * 注意：这些工具依赖 ClawAccessibilityService（系统级 Accessibility 服务），
- * 在 Robolectric 单元测试环境中无法真正执行点击/滑动/输入操作。
+ * 注意：这些工具统一走 UiActionRouter，最终依赖 ClawAccessibilityService / Shizuku / Root
+ * 等系统级能力，在 Robolectric 单元测试环境中无法真正执行点击/滑动/长按。
  * 此处只验证参数契约和基础行为。
  * getDisplayName() 读取字符串资源，因此需要 Robolectric 提供的真实 Resources。
  */
@@ -35,22 +35,29 @@ class MobileToolsTest {
     }
 
     @Test
-    fun `TapTool requires x and y parameters`() {
+    fun `TapTool exposes coordinates and stableId params`() {
         val tool = TapTool()
         val params = tool.getParameters()
-        assertEquals(2, params.size)
-        assertEquals("x", params[0].name)
-        assertEquals("y", params[1].name)
-        assertTrue(params[0].isRequired)
-        assertTrue(params[1].isRequired)
+        // 坐标(x,y) 与 stableId 二选一,所以都不是 required —— 缺参由 execute() 给出可读错误。
+        assertEquals(listOf("x", "y", "stableId"), params.map { it.name })
+        assertTrue("x/y/stableId 都应可省略(二选一)", params.none { it.isRequired })
     }
 
     @Test
-    fun `TapTool fails without accessibility service`() {
+    fun `TapTool reports missing coordinates`() {
         val tool = TapTool()
+        val result = tool.execute(emptyMap())
+        assertFalse(result.isSuccess)
+        assertTrue("应指出缺 x: ${result.error}", result.error!!.contains("Missing required parameter: x"))
+    }
+
+    @Test
+    fun `TapTool reports failure when no action channel is available`() {
+        val tool = TapTool()
+        // 参数齐全时会走 UiActionRouter(远程→Shizuku→A11y→Root),单测环境四条通道都不存在。
         val result = tool.execute(mapOf("x" to 100, "y" to 200))
         assertFalse(result.isSuccess)
-        assertTrue(result.error!!.contains("Accessibility"))
+        assertTrue("应说明所有通道都失败: ${result.error}", result.error!!.contains("所有通道都失败"))
     }
 
     @Test
@@ -70,31 +77,39 @@ class MobileToolsTest {
     }
 
     @Test
-    fun `SwipeTool requires start and end coordinates`() {
+    fun `SwipeTool exposes coordinates and stableId params`() {
         val tool = SwipeTool()
         val params = tool.getParameters()
-        assertEquals(5, params.size)
-        assertEquals("start_x", params[0].name)
-        assertEquals("start_y", params[1].name)
-        assertEquals("end_x", params[2].name)
-        assertEquals("end_y", params[3].name)
-        assertEquals("duration_ms", params[4].name)
-        assertTrue(params[0].isRequired)
-        assertTrue(params[1].isRequired)
-        assertTrue(params[2].isRequired)
-        assertTrue(params[3].isRequired)
-        assertFalse(params[4].isRequired)
+        // 坐标 4 个 + stableId 2 个 + duration_ms。坐标与 stableId 二选一(可混用),
+        // 因此没有任何参数被标 required —— 缺参由 execute() 给出可读错误(见下一个用例)。
+        assertEquals(7, params.size)
+        assertEquals(
+            listOf("start_x", "start_y", "end_x", "end_y", "start_stableId", "end_stableId", "duration_ms"),
+            params.map { it.name },
+        )
+        assertTrue("坐标与 stableId 都应可省略(二选一)", params.none { it.isRequired })
     }
 
     @Test
-    fun `SwipeTool fails without accessibility service`() {
+    fun `SwipeTool reports missing coordinates`() {
+        val tool = SwipeTool()
+        val result = tool.execute(emptyMap())
+        assertFalse(result.isSuccess)
+        assertTrue(
+            "错误信息应指引 start_x / start_stableId: ${result.error}",
+            result.error!!.contains("start_x") || result.error!!.contains("start_stableId"),
+        )
+    }
+
+    @Test
+    fun `SwipeTool reports failure when no action channel is available`() {
         val tool = SwipeTool()
         val result = tool.execute(mapOf(
             "start_x" to 100, "start_y" to 200,
             "end_x" to 300, "end_y" to 400
         ))
         assertFalse(result.isSuccess)
-        assertTrue(result.error!!.contains("Accessibility"))
+        assertTrue("应说明所有通道都失败: ${result.error}", result.error!!.contains("所有通道都失败"))
     }
 
     // ── LongPressTool ─────────────────────────────────────
@@ -106,19 +121,19 @@ class MobileToolsTest {
     }
 
     @Test
-    fun `LongPressTool requires x and y`() {
+    fun `LongPressTool exposes coordinates stableId and duration`() {
         val tool = LongPressTool()
         val params = tool.getParameters()
-        assertTrue(params.size >= 2)
-        assertTrue(params.any { it.name == "x" && it.isRequired })
-        assertTrue(params.any { it.name == "y" && it.isRequired })
+        assertEquals(listOf("x", "y", "stableId", "duration_ms"), params.map { it.name })
+        assertTrue("x/y/stableId 都应可省略(二选一)", params.none { it.isRequired })
     }
 
     @Test
-    fun `LongPressTool fails without accessibility service`() {
+    fun `LongPressTool reports failure when no action channel is available`() {
         val tool = LongPressTool()
         val result = tool.execute(mapOf("x" to 100, "y" to 200))
         assertFalse(result.isSuccess)
+        assertTrue("应说明所有通道都失败: ${result.error}", result.error!!.contains("所有通道都失败"))
     }
 
     // ── ScrollToFindTool ──────────────────────────────────

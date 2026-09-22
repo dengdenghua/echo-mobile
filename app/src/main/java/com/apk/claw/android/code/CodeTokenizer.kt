@@ -54,7 +54,10 @@ class DefaultCodeTokenizer : CodeTokenizer {
             "try", "catch", "finally", "throw", "throws", "new", "super",
             "true", "false", "null", "none", "self", "this", "args", "kwargs",
             // 高频类型名(作为单独 token 时区分度低)
-            "value", "result", "data", "item", "items", "name", "list", "dict",
+            // 注意:这里刻意不含 "name" —— 在 user_name / getUserName 这类 identifier 子词里它是有效信号,
+            // 而「出现得多」这件事本该由 BM25 的 idf 自动降权,不该靠把它从索引里删掉
+            // (删掉会让人搜 name 时永远 0 命中,见 CodeIndexTest 的分词用例)。
+            "value", "result", "data", "item", "items", "list", "dict",
             "bool", "float", "tuple", "object", "string", "int", "char",
             // 常见桩词
             "get", "set", "init", "create", "make", "build", "run", "test",

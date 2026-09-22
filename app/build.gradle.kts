@@ -296,6 +296,18 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
+// ── 单元测试类路径修正:Robolectric 必须用桌面版 conscrypt ──────────────────────
+// Robolectric 在桌面 JVM 上模拟 Android 时,会在 setUpApplicationState 阶段把 Conscrypt
+// 注册为 JCE provider。这一步必须由 Robolectric 传递依赖带来的 openjdk 版
+// (conscrypt-openjdk-uber:内含 Windows/Linux/macOS 原生库,由 NativeLibraryLoader 释放)生效。
+// 若生产依赖中的 Android AAR 版(conscrypt-android:只含 Android .so)排在类路径前面,
+// NativeCryptoJni.init() 会走 System.loadLibrary("conscrypt_jni") 并抛 UnsatisfiedLinkError,
+// 导致全部 Robolectric 用例(数百个)在本地与 CI 一起失败。
+// 只从单测运行时类路径排除该 artifact,APK 打包与生产代码不受影响。
+configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
+    exclude(group = "org.conscrypt", module = "conscrypt-android")
+}
+
 androidComponents {
     onVariants { variant ->
         variant.outputs.forEach { output ->
