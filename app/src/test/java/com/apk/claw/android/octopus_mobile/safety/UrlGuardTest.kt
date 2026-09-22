@@ -154,7 +154,10 @@ class UrlGuardTest {
         assertFalse(aws.allow)
         assertEquals("blocked_link_local: 169.254.169.254", aws.reason)
 
-        val gcp = UrlGuard.checkConfiguredEndpoint("http://metadata.google.internal/computeMetadata/v1/", resolveDns = false)
+        val gcp = UrlGuard.checkConfiguredEndpoint(
+            "http://metadata.google.internal/computeMetadata/v1/",
+            resolveDns = false,
+        )
         assertFalse(gcp.allow)
         assertTrue(gcp.reason.startsWith("blocked_metadata_host"))
 

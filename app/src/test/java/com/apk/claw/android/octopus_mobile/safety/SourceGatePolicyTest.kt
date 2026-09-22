@@ -32,7 +32,9 @@ class SourceGatePolicyTest {
 
     @Test
     fun `full power does not gate untrusted medium risk tools`() {
-        assertNull(SourceGatePolicy.actionFor(fullPower, untrustedSource = true, riskLevel = ToolRiskPolicy.RISK_MEDIUM))
+        assertNull(
+            SourceGatePolicy.actionFor(fullPower, untrustedSource = true, riskLevel = ToolRiskPolicy.RISK_MEDIUM),
+        )
     }
 
     @Test
@@ -59,7 +61,9 @@ class SourceGatePolicyTest {
     @Test
     fun `approval mode ignores trusted calls`() {
         assertNull(SourceGatePolicy.actionFor(approval, untrustedSource = false, riskLevel = ToolRiskPolicy.RISK_HIGH))
-        assertNull(SourceGatePolicy.actionFor(approval, untrustedSource = false, riskLevel = ToolRiskPolicy.RISK_MEDIUM))
+        assertNull(
+            SourceGatePolicy.actionFor(approval, untrustedSource = false, riskLevel = ToolRiskPolicy.RISK_MEDIUM),
+        )
     }
 
     @Test
