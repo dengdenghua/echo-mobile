@@ -581,7 +581,19 @@ cd octopus-mobile
 ./gradlew assembleRelease
 ```
 
-产物：`OctopusMobile_v0.0.7_<abi>_<timestamp>.apk`
+产物：`OctopusMobile_v<versionName>_vc<versionCode>_<abi>.apk`（文件名不含时间戳，可复现对账）
+
+验证签名（注意 apksigner 的 minSdk 感知行为）：
+
+```bash
+BT="$ANDROID_HOME/build-tools/36.0.0"
+"$BT/apksigner" verify --verbose --print-certs <apk>            # v3 -> true
+"$BT/apksigner" verify --verbose --min-sdk-version 24 <apk>     # v2 -> true
+```
+
+> ⚠️ 产物内同时存在 v2（`0x7109871a`）与 v3（`0xf05368c0`）两个签名块，但 apksigner 默认按 APK 自身
+> `minSdk=28` 判定，会把 v2 报成 `false`。这是它的 minSdk 感知行为（该范围内 v3 已完全覆盖，v2 视为冗余），
+> **不是签名缺失**；要观察 v2 块本身须显式加 `--min-sdk-version 24`。`release.yml` 对两者分别断言。
 
 ### 7.3 安装与配置
 
