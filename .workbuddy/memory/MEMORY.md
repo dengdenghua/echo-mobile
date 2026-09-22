@@ -25,9 +25,16 @@ AI 驱动的 Android 全自动化操控应用。LLM ReAct 智能体 + 无障碍�
 - 审计日志 HMAC 防篡改
 
 ## 工程门禁现状(已校正 PROJECT_ANALYSIS.md)
+- 四道门禁 2026-09-22 复测全绿: `:app:assembleDebug + :app:lintDebug + :app:detekt + :app:testDebugUnitTest`
+  (lint 0 error / detekt 0 新增 / 单测 1351 tests 0 failed)
 - detekt 已接入(棘轮 baseline 策略, detekt-baseline.xml, detekt.yml), 报告"无静态门禁"结论已过时
+  - 2026-09-22 重建过 baseline: 此前自 2b739ed 起未更新, 一年新增代码里 1135 处违规被当作"新增" → 门禁常红。
+    重建后 2934 条存量登记为已接受, 恢复"只对新增失败"语义。
 - JaCoCo 已接入(jacocoTestReport 任务, debug 开启 enableUnitTestCoverage)
-- lint 棘轮 baseline(lint-baseline.xml)
+- lint 棘轮 baseline(lint-baseline.xml), 2026-09-22 清零了 48 个 error
+  - 注意: lint-baseline.xml 自 e0d1935 创建后未再更新, 已漂移 74 条(陈旧条目); 666 条 warning 未纳入棘轮
+- 单测可移植性: UnitTestRuntimeClasspath 需排除 conscrypt-android 并 force guava 33.3.1-jre,
+  否则 Windows 开发机上数百个 Robolectric 用例因原生库/posix 权限属性假失败(CI 的 Linux 不受影响)
 - GeckoView 已移除(-180MB), mpv 已移除(-25MB), 浏览器改系统 WebView
 - HTTP 已统一为 OctoHttp.shared, 无 GlobalScope
 - 签名密钥优先 env(CI 注入)其次 local.properties
