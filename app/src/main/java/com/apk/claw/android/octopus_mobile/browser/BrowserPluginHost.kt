@@ -275,6 +275,7 @@ object BrowserPluginHost {
 
     private fun buildBridgeScript(grants: Set<String>): String {
         val sb = StringBuilder()
+        sb.append("  if (window.top !== window) return;\n")
         val safeGrants = grants.toMutableSet()
         if (safeGrants.isEmpty()) {
             safeGrants.addAll(setOf("GM_addStyle", "GM_setValue", "GM_getValue",
@@ -409,6 +410,41 @@ object BrowserPluginHost {
         if (current.isEmpty()) return emptyList()
         return current.filter { it.runAt == runAt && it.matches(url, host) }.map { it.js }
     }
+
+    /** 该 URL 是否命中至少一条用户脚本；命中即代表桥脚本会随用户脚本一起注入。 */
+    fun hasInjectedScriptForUrl(url: String?): Boolean {
+        val value = url?.takeIf { it.isNotBlank() }
+        val host = value?.let { hostOf(it) }
+        return value != null && host != null && scripts.any { it.matches(value, host) }
+    }
+
+    /**
+     * 所有 frame 的 document-start 门禁。
+     *
+     * addJavascriptInterface 会把裸接口注入到所有 frame，跨域 iframe 也能直接拿到 window.octopus_gm。
+     * 这里做 best-effort 删除/屏蔽；Java 侧仍会对顶层文档做 origin 授权校验，本脚本只负责收窄
+     * iframe 面。彻底方案是迁移到 WebViewCompat.addWebMessageListener（可按 origin 绑定），记入后续项。
+     */
+    fun bridgeFrameGuardScript(): String =
+        BRIDGE_FRAME_GUARD_JS.replace("__BRIDGE_NAME__", GmApiBridge.JS_BRIDGE_NAME)
+
+    private const val BRIDGE_FRAME_GUARD_JS = """
+(function () {
+  'use strict';
+  try {
+    if (window.top === window) return;
+    var name = '__BRIDGE_NAME__';
+    try { delete window[name]; } catch (e) {}
+    try {
+      Object.defineProperty(window, name, {
+        get: function () { return undefined; },
+        set: function () {},
+        configurable: false
+      });
+    } catch (e) {}
+  } catch (e) {}
+})();
+"""
 
     fun allBlockRules(): List<Regex> {
         val scriptRules = scripts.flatMap { it.blockRules }

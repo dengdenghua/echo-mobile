@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -12,6 +13,7 @@ import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import com.apk.claw.android.R
 import com.apk.claw.android.base.BaseActivity
+import com.apk.claw.android.octopus_mobile.safety.WebViewUrlPolicy
 import com.apk.claw.android.widget.CommonToolbar
 
 /**
@@ -29,6 +31,7 @@ class WebActivity : BaseActivity() {
     private lateinit var progressBar: ProgressBar
 
     companion object {
+        private const val TAG = "WebActivity"
         private const val EXTRA_URL = "extra_url"
         private const val EXTRA_HTML = "extra_html"
         private const val EXTRA_TITLE = "extra_title"
@@ -105,6 +108,12 @@ class WebActivity : BaseActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView(url: String) {
+        val verdict = WebViewUrlPolicy.navigation(url, allowBlank = false)
+        if (!verdict.allow) {
+            Log.w(TAG, "blocked WebActivity navigation: ${verdict.reason}")
+            finish()
+            return
+        }
         webView = findViewById(R.id.webView)
         webView.apply {
             settings.apply {
@@ -116,6 +125,11 @@ class WebActivity : BaseActivity() {
 
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                    val verdict = WebViewUrlPolicy.navigation(url, allowBlank = false)
+                    if (!verdict.allow) {
+                        Log.w(TAG, "blocked redirect: ${verdict.reason}")
+                        return true
+                    }
                     url?.let { view?.loadUrl(it) }
                     return true
                 }
@@ -166,6 +180,11 @@ class WebActivity : BaseActivity() {
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                     // 预览内的链接跳转交给系统浏览器,避免在预览页里乱跳
+                    val verdict = WebViewUrlPolicy.navigation(url, allowBlank = false)
+                    if (!verdict.allow) {
+                        Log.w(TAG, "blocked preview link: ${verdict.reason}")
+                        return true
+                    }
                     url?.let {
                         try {
                             val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it))

@@ -1,6 +1,9 @@
 package com.apk.claw.android.tool.mcp
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
+import com.apk.claw.android.octopus_mobile.safety.McpToolDescriptorPolicy
+import com.apk.claw.android.octopus_mobile.safety.ToolRiskPolicy
 import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolParameter
@@ -23,6 +26,13 @@ import java.util.concurrent.ConcurrentHashMap
  *  - Agent 在工具列表中看到的是带前缀的全名,描述里标注来源 server
  *
  * 配置持久化:由调用方(KVUtils)存储 server 列表,启动时 [restoreServers] 恢复。
+ *
+ * 安全(外部 server 不可信,见 [McpToolDescriptorPolicy]):
+ *  - 工具名 / inputSchema 逐条准入,不过门槛的工具**不注册**(fail-closed)
+ *  - 注册名跨 server 冲突时拒绝后来的注册者,不静默覆盖别人的工具
+ *  - 注销按 [toolMapping] 的归属 server 精确比对,不用前缀匹配(前缀会误伤 mcp_a_ / mcp_a_b_)
+ *  - 风险等级不接受 server 自报,统一走 [ToolRiskPolicy](`mcp_` 前缀 → HIGH)
+ *  - 描述经隐私扫描 + 注入话术中和 + 来源围栏后才交给 LLM
  */
 object McpManager {
 
@@ -78,11 +88,14 @@ object McpManager {
         return result.fold(
             onSuccess = { tools ->
                 clients[serverId] = client
-                // 动态注册工具到 ToolRegistry
-                registerServerTools(serverId, client, tools)
-                onServerStatusChange?.invoke(serverId, true, tools.size)
-                Log.i(TAG, "[$serverId] Connected with ${tools.size} tools")
-                Result.success(tools.size)
+                // 动态注册工具到 ToolRegistry(未过准入的工具被跳过,故按"实际注册数"上报)
+                val registered = registerServerTools(serverId, client, tools)
+                onServerStatusChange?.invoke(serverId, true, registered.size)
+                Log.i(
+                    TAG,
+                    "[$serverId] Connected with ${tools.size} tools (registered ${registered.size})",
+                )
+                Result.success(registered.size)
             },
             onFailure = { e ->
                 client.disconnect()
@@ -108,33 +121,86 @@ object McpManager {
     // ── 工具动态注册 ────────────────────────────────────────────────────
 
     /**
-     * 把 MCP server 的工具注册到 ToolRegistry。
-     * 工具名格式:`mcp_<serverId>_<toolName>`,描述标注来源。
+     * 把 MCP server 的工具注册到 ToolRegistry(工具名 `mcp_<serverId>_<toolName>`)。
+     *
+     * 准入一律 fail-closed,逐条判定后再注册;被判定的工具**直接跳过**,不注册半个工具:
+     *  1. 工具名非法(空/超长/字符集外)→ 跳过(见 [McpToolDescriptorPolicy.validateToolName])
+     *  2. inputSchema 非法(超大/过深/循环或外部 `$ref`/保留字段)→ 跳过
+     *  3. 注册名已被**别的 server** 占用 → 拒绝后来的注册者,不静默覆盖
+     *
+     * 第 3 条针对的是分隔符歧义:server "a" 的 `b_c` 与 server "a_b" 的 `c` 会拼出同一个
+     * `mcp_a_b_c`。若放任覆盖,后来者就能顶替前者的工具实现(且前者仍未断开)。
+     *
+     * 风险等级不由 MCP server 自报,统一走 [ToolRiskPolicy](`mcp_` 前缀 → HIGH)。
+     *
+     * @return 实际注册成功的工具全名集合
      */
-    private fun registerServerTools(
+    internal fun registerServerTools(
         serverId: String,
         client: McpClient,
         tools: List<McpClient.McpToolInfo>,
-    ) {
+    ): Set<String> {
+        val registered = linkedSetOf<String>()
         for (tool in tools) {
+            val nameReject = McpToolDescriptorPolicy.validateToolName(tool.name)
+            if (nameReject != null) {
+                Log.w(TAG, "[$serverId] 拒绝 MCP 工具名 '${tool.name}':$nameReject")
+                continue
+            }
+            val schemaReject = McpToolDescriptorPolicy.validateSchema(tool.inputSchema)
+            if (schemaReject != null) {
+                Log.w(TAG, "[$serverId] 拒绝 MCP 工具 '${tool.name}' 的 inputSchema:$schemaReject")
+                continue
+            }
             val fullToolName = "$TOOL_PREFIX${serverId}_${tool.name}"
+            val owner = toolMapping[fullToolName]
+            if (owner != null && owner.first != serverId) {
+                Log.w(TAG, "拒绝 MCP 工具名冲突 '$fullToolName':已被 server '${owner.first}' 占用")
+                continue
+            }
             try {
-                val bridge = McpToolBridge(serverId, tool.name, client)
-                ToolRegistry.registerPluginTool(bridge)
+                ToolRegistry.registerPluginTool(McpToolBridge(serverId, tool.name, client))
                 toolMapping[fullToolName] = serverId to tool.name
+                registered += fullToolName
             } catch (e: Exception) {
                 Log.w(TAG, "[$serverId] Failed to register tool ${tool.name}: ${e.message}")
             }
         }
+        return registered
     }
 
-    /** 注销 server 的所有工具。 */
-    private fun unregisterServerTools(serverId: String) {
-        val prefix = "$TOOL_PREFIX${serverId}_"
-        toolMapping.keys.filter { it.startsWith(prefix) }.forEach { toolName ->
+    /**
+     * 注销 server 的所有工具 —— 按 [toolMapping] 里记录的**归属 server** 精确比对,
+     * **不做前缀匹配**。
+     *
+     * 前缀匹配会误伤:`mcp_a_` 是 `mcp_a_b_c` 的前缀,注销 server "a" 时会连带删掉
+     * server "a_b" 的工具。归属比对则只删真正属于本 server 的条目。
+     */
+    internal fun unregisterServerTools(serverId: String) {
+        toolMapping.entries.filter { it.value.first == serverId }.map { it.key }.forEach { toolName ->
             ToolRegistry.unregister(toolName)
             toolMapping.remove(toolName)
         }
+    }
+
+    // ── 测试钩子 ────────────────────────────────────────────────────────
+
+    /** 测试用:当前由 MCP 注册到 ToolRegistry 的工具全名(传 serverId 只看该 server 的)。 */
+    @VisibleForTesting
+    internal fun registeredToolNames(serverId: String? = null): Set<String> {
+        return toolMapping.entries
+            .filter { serverId == null || it.value.first == serverId }
+            .map { it.key }
+            .toSet()
+    }
+
+    /** 测试用:清空单例状态(断开全部 client + 注销全部工具 + 清空映射),避免用例间串味。 */
+    @VisibleForTesting
+    internal fun resetForTest() {
+        clients.keys.toList().forEach { disconnectServer(it) }
+        toolMapping.keys.toList().forEach { ToolRegistry.unregister(it) }
+        toolMapping.clear()
+        clients.clear()
     }
 }
 
@@ -189,11 +255,34 @@ class McpToolBridge(
         }
     }
 
-    override fun getDescriptionEN() = "MCP tool '$mcpToolName' from server '$serverId'. " +
-        client.discoveredTools[mcpToolName]?.description?.let { "Description: $it" }
-        ?: "No description available."
+    /**
+     * server 返回的原始描述经 [McpToolDescriptorPolicy] 净化后的结果。
+     *
+     * 用 `by lazy` 缓存:净化是纯函数、描述在工具生命周期内不变;且断连时
+     * [McpClient.disconnect] 会清空 discoveredTools,缓存可保证描述不会中途"变空"。
+     */
+    private val descriptionVerdict by lazy {
+        McpToolDescriptorPolicy.sanitizeDescription(
+            client.discoveredTools[mcpToolName]?.description ?: "",
+        )
+    }
 
-    override fun getDescriptionCN() = "MCP 工具 '$mcpToolName'(来自 server '$serverId')。" +
-        client.discoveredTools[mcpToolName]?.description?.let { " 说明: $it" }
-        ?: " 无描述。"
+    /** 外部 MCP 工具的风险等级统一取策略值(`mcp_` 前缀 → HIGH),不接受 server 自报。 */
+    private val riskLevel: String get() = ToolRiskPolicy.riskOf(getName())
+
+    override fun getDescriptionEN() = McpToolDescriptorPolicy.composeDescription(
+        serverId = serverId,
+        toolName = mcpToolName,
+        risk = riskLevel,
+        verdict = descriptionVerdict,
+        english = true,
+    )
+
+    override fun getDescriptionCN() = McpToolDescriptorPolicy.composeDescription(
+        serverId = serverId,
+        toolName = mcpToolName,
+        risk = riskLevel,
+        verdict = descriptionVerdict,
+        english = false,
+    )
 }

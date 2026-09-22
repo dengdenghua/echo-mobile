@@ -1,5 +1,7 @@
 # detekt 覆盖配置(合并到 buildUponDefaultConfig 的默认规则之上,只写差异项)。
 naming:
+  PackageNaming:
+    active: false
   FunctionNaming:
     # Jetpack Compose @Composable 函数按官方惯例用 PascalCase(如 MyScreen()),
     # 与普通函数命名规则冲突。豁免,避免每写一个 Composable 就被静态门禁误拦。

@@ -481,9 +481,21 @@ class OctopusBridge(
         val wv = webViewRef?.get() ?: return
         val activity = activityRef?.get() ?: return
         val baseDir = findPluginDir(activity, manifest) ?: return
-        val target = File(baseDir, page).takeIf { it.exists() && it.isFile } ?: return
+        val target = resolveInsidePlugin(baseDir, page) ?: return
         mainHandler.post { wv.loadUrl(target.toURI().toString()) }
     }
+
+    /** 只允许跳转到插件沙箱目录内的文件，阻断 ../ 路径逃逸到应用私有数据。 */
+    private fun resolveInsidePlugin(baseDir: File, page: String): File? = runCatching {
+        val baseCanon = baseDir.canonicalPath
+        val file = File(baseDir, page)
+        if (!file.isFile) return@runCatching null
+        val canon = file.canonicalPath
+        if (canon != baseCanon && !canon.startsWith(baseCanon + File.separator)) {
+            return@runCatching null
+        }
+        file
+    }.getOrNull()
 
     @JavascriptInterface
     fun navigateBack(): Boolean {

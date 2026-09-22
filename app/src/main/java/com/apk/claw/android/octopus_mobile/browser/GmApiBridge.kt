@@ -15,6 +15,7 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.core.app.NotificationCompat
 import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.octopus_mobile.safety.WebViewUrlPolicy
 import com.apk.claw.android.utils.OctoHttp
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -46,7 +47,13 @@ class GmApiBridge(private val context: Context) {
     }
     private val menuCommands = ConcurrentHashMap<String, MenuCommand>()
     private var webView: java.lang.ref.WeakReference<android.webkit.WebView>? = null
+    @Volatile
     private var currentUrl: String = ""
+
+    /** 桥脚本实际注入过的文档 URL；null 表示当前文档未授权（fail-closed）。 */
+    @Volatile
+    private var injectedUrl: String? = null
+
     /** @connect 白名单(host)。为空时仅禁止访问内网/本机地址。 */
     private var connectWhitelist: Set<String> = emptySet()
 
@@ -60,6 +67,7 @@ class GmApiBridge(private val context: Context) {
     fun attach(webView: android.webkit.WebView, url: String) {
         this.webView = java.lang.ref.WeakReference(webView)
         this.currentUrl = url
+        this.injectedUrl = null
         try {
             webView.addJavascriptInterface(this, INTERFACE_NAME)
         } catch (e: Exception) {
@@ -70,11 +78,39 @@ class GmApiBridge(private val context: Context) {
     fun detach() {
         webView = null
         menuCommands.clear()
+        injectedUrl = null
         workerPool.shutdown()
     }
 
     fun updateUrl(url: String) {
         currentUrl = url
+        val authorized = injectedUrl ?: return
+        if (WebViewUrlPolicy.originOf(url) != WebViewUrlPolicy.originOf(authorized)) {
+            injectedUrl = null
+        }
+    }
+
+    /**
+     * 引擎确认「已在本 document 注入用户脚本」后调用。
+     *
+     * 这是 jsBridge 的唯一授权入口：没有调用过本方法的文档，
+     * 所有 @JavascriptInterface 方法一律拒绝，避免任意站点直接访问裸接口。
+     */
+    fun authorizeDocument(url: String) {
+        injectedUrl = url
+    }
+
+    /** 新 document 开始时撤销上一页授权（fail-closed）。 */
+    fun clearDocumentAuthorization() {
+        injectedUrl = null
+    }
+
+    private fun bridgeAccessAllowed(): Boolean =
+        WebViewUrlPolicy.bridgeCallAllowed(currentUrl, injectedUrl)
+
+    private fun denyBridgeCall(method: String) {
+        val origin = WebViewUrlPolicy.originOf(currentUrl) ?: currentUrl
+        Log.w(TAG, "denied $method from $origin")
     }
 
     /** 设置脚本 manifest 中声明的 @connect host 白名单。 */
@@ -85,6 +121,7 @@ class GmApiBridge(private val context: Context) {
     fun buildBridgeScript(grantedApis: Set<String>): String {
         val sb = StringBuilder()
         sb.append("(function(){\n")
+        sb.append("  if (window.top !== window) return;\n")
         sb.append("  if (window.__octopus_gm_ready__) return;\n")
         sb.append("  window.__octopus_gm_ready__ = true;\n")
         sb.append("  var bridge = window.$INTERFACE_NAME;\n")
@@ -295,6 +332,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun setValue(key: String, valueJson: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("setValue")
+            return
+        }
         try {
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit().putString("val_$currentUrl:$key", valueJson).apply()
@@ -303,6 +344,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun getValue(key: String): String? {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("getValue")
+            return null
+        }
         return try {
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getString("val_$currentUrl:$key", null)
@@ -311,6 +356,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun deleteValue(key: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("deleteValue")
+            return
+        }
         try {
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit().remove("val_$currentUrl:$key").apply()
@@ -319,6 +368,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun listValues(): String {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("listValues")
+            return "[]"
+        }
         return try {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val prefix = "val_$currentUrl:"
@@ -329,6 +382,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun setClipboard(text: String, mimeType: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("setClipboard")
+            return
+        }
         mainHandler.post {
             try {
                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -380,6 +437,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun xmlhttpRequest(callbackId: String, cfgJson: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("xmlhttpRequest")
+            return
+        }
         workerPool.execute {
             try {
                 val cfg = JSONObject(cfgJson)
@@ -449,11 +510,19 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun abortXhr(callbackId: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("abortXhr")
+            return
+        }
         // Best-effort: OkHttp cancels via tag/Call; simplified here.
     }
 
     @JavascriptInterface
     fun notification(callbackId: String, optsJson: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("notification")
+            return
+        }
         mainHandler.post {
             try {
                 val opts = JSONObject(optsJson)
@@ -480,6 +549,14 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun openInTab(url: String, active: Boolean) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("openInTab")
+            return
+        }
+        if (!WebViewUrlPolicy.navigation(url, allowBlank = false).allow) {
+            denyBridgeCall("openInTab:bad_url")
+            return
+        }
         mainHandler.post {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
@@ -491,16 +568,28 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun registerMenuCommand(id: String, name: String, accessKey: String?) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("registerMenuCommand")
+            return
+        }
         menuCommands[id] = MenuCommand(id, name, accessKey, id)
     }
 
     @JavascriptInterface
     fun unregisterMenuCommand(id: String) {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("unregisterMenuCommand")
+            return
+        }
         menuCommands.remove(id)
     }
 
     @JavascriptInterface
     fun getResourceText(name: String): String {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("getResourceText")
+            return ""
+        }
         return try {
             val file = getResourceFile(name)
             if (file?.isFile == true) file.readText(Charsets.UTF_8) else ""
@@ -509,6 +598,10 @@ class GmApiBridge(private val context: Context) {
 
     @JavascriptInterface
     fun getResourceUrl(name: String): String {
+        if (!bridgeAccessAllowed()) {
+            denyBridgeCall("getResourceUrl")
+            return ""
+        }
         return try {
             val file = getResourceFile(name)
             if (file?.isFile == true) {
@@ -554,7 +647,8 @@ class GmApiBridge(private val context: Context) {
             val wv = webView?.get()
             if (wv != null) {
                 val safeArg = JSONObject.quote(jsonArg)
-                val js = """if(window['$cbId']){window['$cbId']('$event', $safeArg);}"""
+                val safeCbId = JSONObject.quote(cbId)
+                val js = "if(window[$safeCbId]){window[$safeCbId]('$event', $safeArg);}"
                 wv.evaluateJavascript(js, null)
             }
         }

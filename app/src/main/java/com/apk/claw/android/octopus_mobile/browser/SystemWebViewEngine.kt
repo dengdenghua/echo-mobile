@@ -16,6 +16,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.apk.claw.android.octopus_mobile.safety.DownloadFilePolicy
+import com.apk.claw.android.octopus_mobile.safety.WebViewUrlPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -111,10 +113,8 @@ class SystemWebViewEngine : BrowserEngine {
         val docStartSupported = WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
         val stealthJs = BrowserPluginHost.documentStartScript()
         if (docStartSupported) {
-            if (stealthJs != null) {
-                runCatching { WebViewCompat.addDocumentStartJavaScript(webView, stealthJs, setOf("*")) }
-                    .onFailure { Log.w("SystemWebViewEngine", "addDocumentStartJavaScript failed: ${it.message}") }
-            }
+            registerDocumentStartScript(webView, BrowserPluginHost.bridgeFrameGuardScript())
+            stealthJs?.let { registerDocumentStartScript(webView, it) }
         }
 
         gmBridge.attach(webView, "")
@@ -123,15 +123,20 @@ class SystemWebViewEngine : BrowserEngine {
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                 currentUrlValue = url
                 gmBridge.updateUrl(url)
+                gmBridge.clearDocumentAuthorization()
                 // 取消上一页的 idle 定时任务
                 idleRunnable?.let { Handler(Looper.getMainLooper()).removeCallbacks(it) }
                 // doc-start 不支持时的 stealth 兜底注入(尽早,但可能晚于部分 head 脚本)
                 if (!docStartSupported) {
+                    view.evaluateJavascript(BrowserPluginHost.bridgeFrameGuardScript(), null)
                     BrowserPluginHost.documentStartScript()?.let { js -> view.evaluateJavascript(js, null) }
                 }
                 // @run-at document-start userscripts:onPageStarted 注入(早于 onPageFinished,
                 // 但不如 addDocumentStartJavaScript 早;在支持 DOCUMENT_START_SCRIPT 时也做一次以
                 // 覆盖URL匹配逻辑——addDocumentStartJavaScript 是全局注册的,这里按URL过滤)
+                if (BrowserPluginHost.hasInjectedScriptForUrl(url)) {
+                    gmBridge.authorizeDocument(url)
+                }
                 BrowserPluginHost.scriptsForUrl(url, Userscript.RunAt.DOCUMENT_START).forEach { js ->
                     view.evaluateJavascript(js, null)
                 }
@@ -140,6 +145,9 @@ class SystemWebViewEngine : BrowserEngine {
             override fun onPageFinished(view: WebView, url: String) {
                 currentUrlValue = url
                 gmBridge.updateUrl(url)
+                if (BrowserPluginHost.hasInjectedScriptForUrl(url)) {
+                    gmBridge.authorizeDocument(url)
+                }
                 // @run-at document-end:DOM 就绪后立即注入
                 BrowserPluginHost.scriptsForUrl(url, Userscript.RunAt.DOCUMENT_END).forEach { js ->
                     view.evaluateJavascript(js, null)
@@ -158,14 +166,30 @@ class SystemWebViewEngine : BrowserEngine {
             override fun shouldOverrideUrlLoading(
                 view: WebView,
                 request: android.webkit.WebResourceRequest
-            ): Boolean = false
+            ): Boolean {
+                val target = request.url?.toString()
+                val verdict = if (request.isForMainFrame) {
+                    WebViewUrlPolicy.navigation(target, allowBlank = false)
+                } else {
+                    WebViewUrlPolicy.subresource(target)
+                }
+                if (!verdict.allow) {
+                    Log.w("SystemWebViewEngine", "blocked navigation: ${verdict.reason} $target")
+                    return true
+                }
+                return false
+            }
             override fun shouldInterceptRequest(
                 view: WebView,
                 request: android.webkit.WebResourceRequest
             ): android.webkit.WebResourceResponse? {
-                return if (BrowserPluginHost.shouldBlock(request.url?.toString())) {
-                    android.webkit.WebResourceResponse("text/plain", "utf-8", ByteArrayInputStream(ByteArray(0)))
-                } else null
+                val target = request.url?.toString()
+                val verdict = WebViewUrlPolicy.subresource(target)
+                if (!verdict.allow) {
+                    Log.w("SystemWebViewEngine", "blocked subresource: ${verdict.reason} $target")
+                    return emptyResponse()
+                }
+                return if (BrowserPluginHost.shouldBlock(target)) emptyResponse() else null
             }
             override fun onReceivedError(
                 view: WebView,
@@ -196,13 +220,20 @@ class SystemWebViewEngine : BrowserEngine {
         // 下载监听:WebView 自身不处理下载,把 url/mime/size 透出给 UI 层走系统 DownloadManager。
         // 此前 DownloadStart 事件已声明但 setDownloadListener 从未调用 —— 此处补齐接通。
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
-            val filename = android.webkit.URLUtil.guessFileName(
-                url, contentDisposition, mimetype
+            val verdict = DownloadFilePolicy.decide(
+                url = url,
+                mimeType = mimetype,
+                suggestedFilename = null,
+                contentDisposition = contentDisposition,
             )
+            if (!verdict.allow) {
+                Log.w("SystemWebViewEngine", "blocked download: ${verdict.reason} $url")
+                return@setDownloadListener
+            }
             _events.tryEmit(
                 EngineEvent.DownloadStart(
                     url = url,
-                    suggestedFilename = filename,
+                    suggestedFilename = verdict.fileName,
                     mimeType = mimetype ?: "",
                     contentLength = contentLength,
                     userAgent = userAgent ?: "",
@@ -215,6 +246,17 @@ class SystemWebViewEngine : BrowserEngine {
     }
 
     override fun navigate(url: String) {
+        val verdict = WebViewUrlPolicy.navigation(url, allowBlank = true)
+        if (!verdict.allow) {
+            Log.w("SystemWebViewEngine", "blocked navigate: ${verdict.reason} $url")
+            _events.tryEmit(
+                EngineEvent.Error(
+                    errorCode = BLOCKED_NAVIGATION_ERROR,
+                    description = "blocked_navigation:${verdict.reason}",
+                )
+            )
+            return
+        }
         // 先记录导航意图（即使视图未就绪，currentUrl() 也反映最近一次 navigate）
         currentUrlValue = url
         val wv = activeWebView ?: return
@@ -321,6 +363,14 @@ class SystemWebViewEngine : BrowserEngine {
         )
     }
 
+    private fun registerDocumentStartScript(webView: WebView, script: String) {
+        runCatching { WebViewCompat.addDocumentStartJavaScript(webView, script, setOf("*")) }
+            .onFailure { Log.w("SystemWebViewEngine", "addDocumentStartJavaScript failed: ${it.message}") }
+    }
+
+    private fun emptyResponse(): android.webkit.WebResourceResponse =
+        android.webkit.WebResourceResponse("text/plain", "utf-8", ByteArrayInputStream(ByteArray(0)))
+
     @SuppressLint("NewApi")
     private fun setAcceptThirdPartyCookies(webView: WebView, accept: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -355,6 +405,8 @@ class SystemWebViewEngine : BrowserEngine {
     }
 
     companion object {
+        private const val BLOCKED_NAVIGATION_ERROR = -1001
+
         private const val DESKTOP_CHROME_UA =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"

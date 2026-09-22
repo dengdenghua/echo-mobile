@@ -4,9 +4,10 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.webkit.URLUtil
+import android.util.Log
 import android.widget.Toast
 import com.apk.claw.android.R
+import com.apk.claw.android.octopus_mobile.safety.DownloadFilePolicy
 
 /**
  * 把 WebView 触发的下载交给系统 DownloadManager。
@@ -19,6 +20,8 @@ import com.apk.claw.android.R
  * 需要鉴权的下载由站点自身在 WebView 会话内完成,此处只接最终直链)。
  */
 object DownloadHelper {
+
+    private const val TAG = "DownloadHelper"
 
     /**
      * 入队一条下载请求。
@@ -38,11 +41,18 @@ object DownloadHelper {
         contentDisposition: String? = null,
         userAgent: String? = null,
     ): Boolean {
-        if (url.isBlank() || !url.startsWith("http")) return false
+        val verdict = DownloadFilePolicy.decide(
+            url = url,
+            mimeType = mimeType,
+            suggestedFilename = suggestedFilename,
+            contentDisposition = contentDisposition,
+        )
+        if (!verdict.allow) return false
 
-        val displayName = suggestedFilename?.takeIf { it.isNotBlank() }
-            ?: URLUtil.guessFileName(url, contentDisposition, mimeType)
-        val finalName = displayName.ifBlank { "download_${System.currentTimeMillis()}" }
+        val finalName = verdict.fileName.ifBlank { "download_${System.currentTimeMillis()}" }
+        if (verdict.executable) {
+            Log.w(TAG, "executable download accepted: $finalName")
+        }
 
         @Suppress("DEPRECATION")
         val request = DownloadManager.Request(Uri.parse(url)).apply {

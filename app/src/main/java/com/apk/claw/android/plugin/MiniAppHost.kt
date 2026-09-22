@@ -18,6 +18,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
+import com.apk.claw.android.octopus_mobile.safety.WebViewUrlPolicy
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.lang.ref.WeakReference
@@ -37,6 +38,7 @@ object MiniAppHost {
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     fun createWebView(activity: Activity, manifest: PluginManifest): WebView? {
         val pageUrl = resolvePageUrl(activity, manifest) ?: return null
+        val localPrefixes = allowedLocalPrefixes(activity, manifest)
         val wv = WebView(activity)
 
         wv.settings.apply {
@@ -85,7 +87,13 @@ object MiniAppHost {
             }
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val u = request.url?.toString() ?: return true
-                if (u.startsWith("file://")) return false
+                if (u.startsWith("file:")) {
+                    val verdict = WebViewUrlPolicy.fileNavigation(u, localPrefixes)
+                    if (!verdict.allow) {
+                        Log.w(TAG, "blocked local navigation: ${verdict.reason} $u")
+                    }
+                    return !verdict.allow
+                }
                 if (u.startsWith("octopus://")) {
                     bridge.handleScheme(u)
                     return true
@@ -101,7 +109,9 @@ object MiniAppHost {
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
                 val u = request.url?.toString().orEmpty()
                 return when {
-                    u.startsWith("file://") -> null
+                    u.startsWith("file:") ->
+                        if (WebViewUrlPolicy.fileNavigation(u, localPrefixes).allow) null
+                        else WebResourceResponse("text/plain", "utf-8", ByteArrayInputStream(ByteArray(0)))
                     isAllowedRemoteResource(request, manifest) -> null
                     else -> WebResourceResponse("text/plain", "utf-8", ByteArrayInputStream(ByteArray(0)))
                 }
@@ -235,6 +245,22 @@ object MiniAppHost {
         })();
         """.trimIndent()
         view.evaluateJavascript(js, null)
+    }
+
+    private fun allowedLocalPrefixes(context: Context, manifest: PluginManifest): List<String> {
+        val candidates = linkedSetOf(manifest.id, manifest.id.substringAfterLast('/'))
+        val prefixes = linkedSetOf<String>()
+        for (baseDir in listOf("plugins", "generated_apps")) {
+            for (slug in candidates) {
+                val dir = File(context.filesDir, "$baseDir/$slug")
+                if (!dir.isDirectory) continue
+                prefixes += Uri.fromFile(dir).toString().trimEnd('/') + "/"
+                prefixes += dir.toURI().toString().trimEnd('/') + "/"
+            }
+        }
+        val safeId = manifest.id.trim('/').replace("..", "_")
+        prefixes += "file:///android_asset/plugins/$safeId/"
+        return prefixes.toList()
     }
 
     fun resolvePageUrl(context: Context, manifest: PluginManifest): String? {
