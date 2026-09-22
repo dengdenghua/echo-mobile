@@ -1395,4 +1395,20 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="language_name_ko">한국어</string>
     <string name="language_name_es">Español</string>
     <string name="language_name_pt">Português</string>
+
+    <!-- 权限模式 / MCP / Runtime 桥接 / Diff 视图 / 详情栏(补齐 es/ja/ko/pt) -->
+    <string name="permission_mode_menu_title">권한 모드</string>
+    <string name="permission_mode_dialog_title">권한 모드 선택</string>
+    <string name="mcp_server_menu_title">MCP 서버</string>
+    <string name="mcp_server_dialog_title">MCP 서버 설정</string>
+    <string name="tentacle_config_menu_title">런타임 브리지</string>
+    <string name="tentacle_config_dialog_title">런타임 브리지 설정</string>
+    <string name="github_token_menu_title">GitHub 토큰</string>
+    <string name="github_token_dialog_title">GitHub 토큰(git_push / github_create_pr용)</string>
+    <string name="diff_view_menu_title">Diff 뷰</string>
+    <string name="diff_view_dialog_title">Diff 뷰(파일 쓰기 전 차이 표시)</string>
+    <string name="settings_collapse_parallel_tools_title">병렬 도구 접기</string>
+    <string name="settings_collapse_parallel_tools_subtitle">병렬 도구 호출을 카드 하나로 집계</string>
+    <string name="settings_detail_drawer_title">상세 패널</string>
+    <string name="settings_detail_drawer_subtitle">오른쪽 패널에서 상세 열기</string>
 </resources>

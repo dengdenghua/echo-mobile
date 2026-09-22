@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * 兜底策略(按优先级):
  *  1. **首选**:`input tap <x> <y> -d <displayId>`(API 31+ 标准,通过 RootShellService)
- *  2. **次选**:`InputManager.injectInputEvent` reflection(MotionEvent.setDisplayId + 三参 injectInputEvent)
+ *  2. **次选**:`InputManager.injectInputEvent` reflection(三参版本,自带 displayId)
  *     - 需 INJECT_EVENTS 权限或 system uid,普通 App / shell uid 通常失败
  *     - 但某些定制 ROM(如root + Magisk + LSPosed)下可能成功,值得一试
  *  3. **兜底**:`sendevent /dev/input/eventN` 直接写 evdev(需找到虚拟屏对应的 evdev 节点,实现复杂)
@@ -115,11 +115,11 @@ class VirtualDisplayService(
             val imageReader = ImageReader.newInstance(width, height, android.graphics.PixelFormat.RGBA_8888, 2)
             val surface = imageReader.surface
 
-            // FLAG_PUBLIC(1<<0) 允许其他进程看到此虚拟屏
-            // FLAG_OWN_CONTENT(1<<2) 不镜像主屏,显示自己的内容
-            // FLAG_AUTO_MIRROR(1<<4) 自动镜像(与 OWN_CONTENT 互斥,这里用 OWN_CONTENT)
+            // FLAG_PUBLIC:允许其他进程看到此虚拟屏
+            // FLAG_OWN_CONTENT_ONLY:不镜像主屏,只显示自己的内容(与 FLAG_AUTO_MIRROR 互斥)
             // 注:Android 12+ 对 FLAG_AUTO_MIRROR 限制更严,生产应据 API 级别动态选择
-            val flags = 0x1 or 0x4  // FLAG_PUBLIC | FLAG_OWN_CONTENT
+            val flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC or
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
 
             @Suppress("DEPRECATION")
             val virtualDisplay = displayManager.createVirtualDisplay(
@@ -255,15 +255,18 @@ class VirtualDisplayService(
     @Volatile private var inputManagerInstance: Any? = null
     @Volatile private var inputManagerMethod: Method? = null
     @Volatile private var reflectionTried = false
-    @Volatile private var setDisplayIdMethod: Method? = null
 
     /**
      * 策略 2:用 InputManager.injectInputEvent reflection 向指定 display 注入触控。
      *
      * 调用 Android 隐藏 API:
      *  1. `InputManager.getInstance()`(hidden static)拿单例
-     *  2. `MotionEvent.setDisplayId(int)`(API 31+ public,API < 31 hidden)
-     *  3. `InputManager.injectInputEvent(InputEvent, int displayId, int mode)`(hidden 三参版)
+     *  2. `InputManager.injectInputEvent(InputEvent, int displayId, int mode)`(hidden 三参版)
+
+     * 关于 displayId:不反射设置 `MotionEvent.setDisplayId`。该方法在公开 SDK 中并不存在
+     * (java -classpath android.jar javap MotionEvent 可验证,API 36 亦无),属于非 SDK 接口;
+     * 在 targetSdk 36 下反射调用会被 hidden API 拦截(黑名单成员连 getDeclaredMethod 都抛
+     * NoSuchMethodException)。三参 injectInputEvent 已经单独携带 displayId,事件自身无需再标。
      *
      * 权限要求:
      *  - INJECT_EVENTS 权限(system 签名),普通 App 没有
@@ -375,12 +378,8 @@ class VirtualDisplayService(
         }
         val im = inputManagerInstance ?: return false
         val inject = inputManagerMethod ?: return false
-        val setDisplayId = setDisplayIdMethod
+        // displayId 由三参 injectInputEvent 携带,事件自身不需要(也无法)标记。
         return try {
-            // 设置 displayId
-            if (setDisplayId != null) {
-                setDisplayId.invoke(event, displayId)
-            }
             // INJECT_INPUT_EVENT_MODE_ASYNC = 0
             inject.invoke(im, event, displayId, 0) as? Boolean ?: false
         } catch (e: Exception) {
@@ -412,19 +411,9 @@ class VirtualDisplayService(
                 null
             }
 
-            // MotionEvent.setDisplayId(int) — API 31+ public,API < 31 hidden
-            setDisplayIdMethod = try {
-                MotionEvent::class.java.getMethod("setDisplayId", Int::class.javaPrimitiveType)
-            } catch (_: NoSuchMethodException) {
-                try {
-                    MotionEvent::class.java.getDeclaredMethod("setDisplayId", Int::class.javaPrimitiveType)
-                        .also { it.isAccessible = true }
-                } catch (_: NoSuchMethodException) { null }
-            }
-
             if (inputManagerInstance == null || inputManagerMethod == null) {
                 Log.d(TAG, "InputManager reflection unavailable (im=${inputManagerInstance != null}, " +
-                    "inject=${inputManagerMethod != null}, setDisplayId=${setDisplayIdMethod != null})")
+                    "inject=${inputManagerMethod != null})")
             }
         } catch (e: Throwable) {
             Log.d(TAG, "InputManager reflection prepare failed: ${e.javaClass.simpleName}: ${e.message}")

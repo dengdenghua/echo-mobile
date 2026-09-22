@@ -47,9 +47,14 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * TV 遥控器按键兜底:
-     * - DPAD_CENTER/ENTER → 模拟点击当前焦点元素(确保 Compose 可点击元素能被遥控器"确认")
-     * - BACK → 触发返回(在 TV 上物理返回键走 dispatchKeyEvent 而非系统返回手势)
+     * TV 遥控器按键兜底:DPAD_CENTER/ENTER → 模拟点击当前焦点元素
+     * (确保 Compose 可点击元素能被遥控器"确认")。
+     *
+     * 这里刻意**不**拦截 KEYCODE_BACK:Manifest 已开
+     * android:enableOnBackInvokedCallback="true" 且 targetSdk 36,返回事件统一由
+     * OnBackPressedDispatcher 处理(AndroidX 在低版本上也会把物理返回键汇入 dispatcher)。
+     * 在 dispatchKeyEvent 里再拦一次属于重复拦截,且对 Android 13+ 的返回手势无效
+     * (lint GestureBackNavigation 报的就是这个)。
      *
      * 手机上走默认分发,不影响触摸交互。
      */
@@ -67,13 +72,7 @@ open class BaseActivity : AppCompatActivity() {
                         }
                     }
                 }
-                KeyEvent.KEYCODE_BACK -> {
-                    if (event.action == KeyEvent.ACTION_UP) {
-                        @Suppress("DEPRECATION")
-                        onBackPressed()
-                        return true
-                    }
-                }
+
             }
         }
         return super.dispatchKeyEvent(event)

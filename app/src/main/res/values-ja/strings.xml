@@ -1386,4 +1386,20 @@
     <string name="wakeword_notification_title">ウェイクワードを監視中</string>
     <string name="wakeword_privacy_body">ウェイクワードを有効にすると、アプリはバックグラウンドでマイク音声を継続的に監視し、カスタムウェイクワードを検出します。\n\n・音声はローカルで処理され、アップロードされません\n・ウェイクワードを検出すると、アプリが自動的にアシスタント UI を起動します\n・通知バーまたは設定からいつでもオフにできます\n・オフにするとマイクのキャプチャは即座に停止します\n\n上記の内容をご理解のうえ、続行に同意してください。</string>
     <string name="wakeword_privacy_title">常駐マイクに関するお知らせ</string>
+
+    <!-- 权限模式 / MCP / Runtime 桥接 / Diff 视图 / 详情栏(补齐 es/ja/ko/pt) -->
+    <string name="permission_mode_menu_title">権限モード</string>
+    <string name="permission_mode_dialog_title">権限モードを選択</string>
+    <string name="mcp_server_menu_title">MCP サーバー</string>
+    <string name="mcp_server_dialog_title">MCP サーバー設定</string>
+    <string name="tentacle_config_menu_title">ランタイムブリッジ</string>
+    <string name="tentacle_config_dialog_title">ランタイムブリッジ設定</string>
+    <string name="github_token_menu_title">GitHub トークン</string>
+    <string name="github_token_dialog_title">GitHub トークン(git_push / github_create_pr 用)</string>
+    <string name="diff_view_menu_title">差分ビュー</string>
+    <string name="diff_view_dialog_title">差分ビュー(ファイル書き込み前に差分を表示)</string>
+    <string name="settings_collapse_parallel_tools_title">並列ツールを折りたたむ</string>
+    <string name="settings_collapse_parallel_tools_subtitle">並列ツール呼び出しを 1 枚のカードに集約</string>
+    <string name="settings_detail_drawer_title">詳細パネル</string>
+    <string name="settings_detail_drawer_subtitle">詳細を右パネルで開く</string>
 </resources>

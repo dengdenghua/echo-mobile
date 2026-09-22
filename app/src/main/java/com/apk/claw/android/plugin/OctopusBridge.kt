@@ -293,7 +293,9 @@ class OctopusBridge(
                 activity.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (pattern.size == 1 && pattern[0] <= 50) {
+                // createPredefined 是 API 29+;API 26-28 退回 createOneShot,
+                // 否则在 Android 8/9 上会抛 NoSuchMethodError。
+                if (pattern.size == 1 && pattern[0] <= 50 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                 } else if (pattern.size == 1) {
                     vibrator.vibrate(VibrationEffect.createOneShot(pattern[0], VibrationEffect.DEFAULT_AMPLITUDE))

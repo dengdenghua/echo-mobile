@@ -35,12 +35,14 @@ object HardwareDetector {
     fun getCpuCores(): Int = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
 
     /**
-     * 获取 SoC 名称(Android 11+,API 30+ 提供 [Build.SOC_MANUFACTURER] / [Build.SOC_MODEL])。
-     *
+     * 获取 SoC 名称([Build.SOC_MANUFACTURER] / [Build.SOC_MODEL] 为 API 31+ 字段)。
+
+     * 注意:这两个字段是 API 31(Android 12)加入的,不是 API 30。用 R(30) 做门槛会在
+     * Android 11 上直接抛 NoSuchFieldError,因此必须用 S。
      * 低版本设备返回 "Unknown"。
      */
     fun getSoCName(): String {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return "Unknown"
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return "Unknown"
         val mfr = Build.SOC_MANUFACTURER.takeIf { it.isNotBlank() } ?: "Unknown"
         val model = Build.SOC_MODEL.takeIf { it.isNotBlank() } ?: ""
         return if (model.isBlank()) mfr else "$mfr $model"

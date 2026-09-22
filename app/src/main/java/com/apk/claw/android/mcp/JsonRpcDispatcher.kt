@@ -4,6 +4,7 @@ import com.apk.claw.android.octopus_mobile.safety.ToolRiskPolicy
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit
  *  - [ping]                        心跳,返回空结果
  *  - 其他方法                       返回 -32601 METHOD_NOT_FOUND
  *
- * 审批超时:[CompletableFuture.orTimeout] 包装 [McpApprovalGate.requestApproval],
+ * 审批超时:见 [awaitApproval] —— 以 `get(timeout)` 包装 [McpApprovalGate.requestApproval],
  * 60 秒未决定则视为拒绝(防止 UI 卡死导致 MCP 客户端永远挂起)。
  *
  * @param provider 工具后端适配器
@@ -133,14 +134,7 @@ class JsonRpcDispatcher(
 
         // 高危工具 → 审批闸门（判定统一走 ToolRiskPolicy，含运行时 mcp_* 动态工具）
         if (ToolRiskPolicy.riskOf(name) == ToolRiskPolicy.RISK_HIGH) {
-            val approval = try {
-                CompletableFuture
-                    .supplyAsync { approvalGate.requestApproval(name, argMap) }
-                    .orTimeout(APPROVAL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                    .get()
-            } catch (e: Exception) {
-                ApprovalResult(false, "approval timeout or error: ${e.message}")
-            }
+            val approval = awaitApproval(name, argMap)
             if (!approval.approved) {
                 val content = JsonObject().apply {
                     add("content", JsonArray().apply {
@@ -182,6 +176,26 @@ class JsonRpcDispatcher(
             addProperty("isError", !toolResult.success)
         }
         return JsonRpcResponse(id = request.id, result = content)
+    }
+
+    /**
+     * 等待审批闸门返回，最长 [APPROVAL_TIMEOUT_SECONDS] 秒。
+     *
+     * 刻意不用 CompletableFuture.orTimeout：那是 Java 9+ API，在 Android 上要求
+     * API 31，而本项目 minSdk 为 28，低版本会抛 NoSuchMethodError。改用 get(timeout)
+     * 显式限时，语义等价且全版本可用。
+     */
+    private fun awaitApproval(name: String, args: Map<String, Any>): ApprovalResult {
+        val future = CompletableFuture.supplyAsync { approvalGate.requestApproval(name, args) }
+        return try {
+            future.get(APPROVAL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        } catch (e: TimeoutException) {
+            future.cancel(true)
+            ApprovalResult(false, "approval timeout after ${APPROVAL_TIMEOUT_SECONDS}s")
+        } catch (e: Exception) {
+            future.cancel(true)
+            ApprovalResult(false, "approval error: ${e.message}")
+        }
     }
 
     // ── 辅助 ────────────────────────────────────────────────

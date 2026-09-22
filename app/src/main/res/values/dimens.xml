@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      手机默认尺寸基线。
+
+      values-sw600dp(平板/折叠屏)/values-tv(TV)里放的是放大后的覆盖值,这里必须给出
+      默认声明:否则在「不匹配任何限定符」的配置下查询这些资源会抛
+      Resources.NotFoundException(lint MissingDefaultResource 报的就是这个)。
+      缩放梯度保持 phone <= sw600dp <= tv。
+    -->
+    <dimen name="text_size_caption">12sp</dimen>
+    <dimen name="text_size_body">14sp</dimen>
+    <dimen name="text_size_title">16sp</dimen>
+    <dimen name="text_size_headline">20sp</dimen>
+    <dimen name="text_size_display">24sp</dimen>
+    <dimen name="spacing_sm">4dp</dimen>
+    <dimen name="spacing_md">8dp</dimen>
+    <dimen name="spacing_lg">12dp</dimen>
+    <dimen name="spacing_xl">16dp</dimen>
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="button_height">44dp</dimen>
+    <dimen name="icon_size_medium">24dp</dimen>
+</resources>

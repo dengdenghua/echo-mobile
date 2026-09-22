@@ -9,6 +9,7 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -27,8 +28,30 @@ class MiniAppActivity : AppCompatActivity() {
     private var appId: String? = null
     private var progressBar: ProgressBar? = null
 
+    /**
+     * 返回键优先回退 WebView 历史,历史走完再交给系统关闭 Activity。
+     *
+     * 必须用 OnBackPressedDispatcher:Manifest 已声明
+     * android:enableOnBackInvokedCallback="true" 且 targetSdk 为 36,Android 13+ 起系统
+     * 不再调用 onBackPressed(),原先的 override 是一段永不执行的死代码 ——
+     * 表现是返回手势直接关掉 mini-app,而不是先退回 WebView 上一页。
+     */
+    private val backCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            val wv = webView
+            if (wv != null && wv.canGoBack()) {
+                wv.goBack()
+                return
+            }
+            // 关掉自己,让系统默认行为(结束 Activity)接手
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this, backCallback)
         val id = intent.getStringExtra(EXTRA_PLUGIN_ID)
         val manifest = id?.let { MiniAppRegistry.get(it) }
         if (manifest == null || manifest.page.isBlank()) { finish(); return }
@@ -113,16 +136,6 @@ class MiniAppActivity : AppCompatActivity() {
         MiniAppHost.handleActivityResult(requestCode, resultCode, data)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val wv = webView
-        if (wv != null && wv.canGoBack()) {
-            wv.goBack()
-            return
-        }
-        @Suppress("DEPRECATION")
-        super.onBackPressed()
-    }
 
     override fun onDestroy() {
         super.onDestroy()
