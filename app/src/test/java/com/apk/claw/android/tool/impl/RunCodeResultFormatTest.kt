@@ -29,8 +29,8 @@ class RunCodeResultFormatTest {
         // 约束:不修改 run_code 工具名/参数/风险等级
         assertEquals("run_code", tool.getName())
         val params = tool.getParameters()
-        assertTrue("code param required", params.any { it.name == "code" && it.required })
-        assertTrue("timeout_ms param optional", params.any { it.name == "timeout_ms" && !it.required })
+        assertTrue("code param required", params.any { it.name == "code" && it.isRequired })
+        assertTrue("timeout_ms param optional", params.any { it.name == "timeout_ms" && !it.isRequired })
     }
 
     @Test

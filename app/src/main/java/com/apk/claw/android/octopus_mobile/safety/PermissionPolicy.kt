@@ -12,6 +12,7 @@ package com.apk.claw.android.octopus_mobile.safety
  * - [auditLogEnabled]：审计日志
  * - [circuitBreakerEnabled]：断路器（防死循环烧钱）
  * - [pathSandboxEnabled]：/sdcard 路径沙箱（防越界访问系统/私有目录）
+ * - [untrustedHighRiskHardGate]：不可信来源 × 高危工具的最小硬闸门（满血模式也必须保留）
  */
 data class PermissionPolicy(
     val mode: PermissionMode,
@@ -25,6 +26,18 @@ data class PermissionPolicy(
 
     // —— 来源闸门 ——
     val trustAllSources: Boolean,
+    /**
+     * 不可信来源 × 高危工具的「最小硬闸门」—— 满血模式（[trustAllSources]=true）也必须保留。
+     *
+     * 满血模式原本整体跳过来源闸门，使母体 WS / LAN HTTP / 主动规则能在无人工确认的情况下驱动
+     * 任意高危工具（shell / 文件 / 账号操作）。开启本闸门后，这类调用在满血模式下仍被强制降级为
+     * [RiskAction.CONFIRM]：由 [com.apk.claw.android.tool.ToolRegistry.highRiskConfirmer] 或
+     * 用户显式开启的 [com.apk.claw.android.utils.KVUtils.isRemoteHighRiskAllowed] 放行，否则回落到
+     * 本地审批窗（无人值守 → 超时拒绝，fail-closed）。
+     *
+     * 群控机逃生舱：设置页显式打开「允许远程来源执行高危工具」后自动放行，不影响无人值守批量任务。
+     */
+    val untrustedHighRiskHardGate: Boolean = true,
 
     // —— 护栏阈值 ——
     val maxConsecutiveFailures: Int,

@@ -15,11 +15,19 @@ import org.junit.Test
  */
 class UiNodeTest {
 
+    /** Local JVM tests cannot invoke android.graphics.Rect(int,...); mutate the stub fields directly. */
+    private fun testRect(left: Int, top: Int, right: Int, bottom: Int): Rect = Rect().apply {
+        this.left = left
+        this.top = top
+        this.right = right
+        this.bottom = bottom
+    }
+
     private fun makeNode(
         text: String = "",
         desc: String = "",
         viewId: String = "",
-        bounds: Rect = Rect(0, 0, 100, 100),
+        bounds: Rect = testRect(0, 0, 100, 100),
         clickable: Boolean = false,
         scrollable: Boolean = false,
         children: List<UiNode> = emptyList(),
@@ -68,8 +76,8 @@ class UiNodeTest {
 
     @Test
     fun `stableId is deterministic for same input`() {
-        val n1 = makeNode(text = "登录", viewId = "id1", bounds = Rect(0, 0, 100, 200))
-        val n2 = makeNode(text = "登录", viewId = "id1", bounds = Rect(0, 0, 100, 200))
+        val n1 = makeNode(text = "登录", viewId = "id1", bounds = testRect(0, 0, 100, 200))
+        val n2 = makeNode(text = "登录", viewId = "id1", bounds = testRect(0, 0, 100, 200))
         assertEquals(n1.stableId, n2.stableId)
     }
 
@@ -131,8 +139,8 @@ class UiNodeTest {
 
     @Test
     fun `findAt returns smallest node containing point`() {
-        val outer = makeNode(bounds = Rect(0, 0, 500, 500))
-        val inner = makeNode(bounds = Rect(100, 100, 200, 200), text = "inner")
+        val outer = makeNode(bounds = testRect(0, 0, 500, 500))
+        val inner = makeNode(bounds = testRect(100, 100, 200, 200), text = "inner")
         val tree = UiTree(
             outer.copy(children = listOf(inner)),
             500, 500, "com.test", 0L, "a11y"
@@ -145,7 +153,7 @@ class UiNodeTest {
     @Test
     fun `findAt returns null for point outside any node`() {
         val tree = UiTree(
-            makeNode(bounds = Rect(0, 0, 100, 100)),
+            makeNode(bounds = testRect(0, 0, 100, 100)),
             500, 500, "com.test", 0L, "a11y"
         )
         assertNull(tree.findAt(400, 400))
@@ -153,7 +161,7 @@ class UiNodeTest {
 
     @Test
     fun `center returns midpoint of bounds`() {
-        val node = makeNode(bounds = Rect(0, 0, 100, 200))
+        val node = makeNode(bounds = testRect(0, 0, 100, 200))
         val (cx, cy) = node.center()
         assertEquals(50, cx)
         assertEquals(100, cy)

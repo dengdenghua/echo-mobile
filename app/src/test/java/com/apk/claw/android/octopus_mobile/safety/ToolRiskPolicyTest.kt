@@ -33,6 +33,21 @@ class ToolRiskPolicyTest {
         assertEquals(ToolRiskPolicy.RISK_LOW, ToolRiskPolicy.riskOf(""))
     }
 
+    @Test
+    fun `runtime mcp tools default to high`() {
+        // 外部 MCP server 的能力未知（见 McpManager：mcp_<serverId>_<tool>）。
+        // 不能按「未分类 → LOW」放行，否则会绕过来源闸门与审计。
+        for (t in listOf(
+            "mcp_github_create_issue",
+            "mcp_filesystem_write",
+            "mcp_slack_send_message",
+            "mcp_",
+        )) {
+            assertEquals("$t should be high", ToolRiskPolicy.RISK_HIGH, ToolRiskPolicy.riskOf(t))
+            assertTrue("$t should be audited", ToolRiskPolicy.shouldAudit(t))
+        }
+    }
+
     // ── shouldAudit ──────────────────────────────────────
     @Test
     fun `shouldAudit true for high and medium, false for low`() {

@@ -1,6 +1,7 @@
 package com.apk.claw.android.mcp
 
 import android.content.Context
+import com.apk.claw.android.server.LocalControlAuth
 import com.apk.claw.android.utils.XLog
 
 /**
@@ -56,7 +57,15 @@ object McpServerBootstrap {
             stopInternal()
         }
 
+        val authToken = try {
+            LocalControlAuth.getOrCreateToken()
+        } catch (e: Exception) {
+            XLog.e(TAG, "Failed to initialize MCP auth token: ${e.message}", e)
+            return
+        }
+
         val s = McpServer(port = port)
+        s.setAuthorizationValidator(LocalControlAuth::isAuthorized)
         pendingProvider?.let { s.setProvider(it) }
         pendingGate?.let { s.setApprovalGate(it) }
 
@@ -64,7 +73,7 @@ object McpServerBootstrap {
             s.start(SOCKET_READ_TIMEOUT, false)
             server = s
             currentPort = port
-            XLog.i(TAG, "MCP server started on port $port (path=${McpServer.MCP_PATH})")
+            XLog.i(TAG, "MCP server started on port $port (path=${McpServer.MCP_PATH}, bearerTokenLength=${authToken.length})")
         } catch (e: Exception) {
             XLog.e(TAG, "Failed to start MCP server on port $port: ${e.message}", e)
             server = null
@@ -102,6 +111,9 @@ object McpServerBootstrap {
         pendingGate = gate
         server?.setApprovalGate(gate)
     }
+
+    /** 9527/9528 共用 Bearer token，供设置页展示/复制。 */
+    fun authToken(): String = LocalControlAuth.getOrCreateToken()
 
     /** server 是否正在运行。 */
     fun isRunning(): Boolean = server != null

@@ -118,7 +118,7 @@ object ScriptSandbox {
         "/system", "/sdcard", "/storage", "/storage/emulated", "/storage/emulated/0",
     )
 
-    /** 返回经规范化 + 危险根拦截的工作空间前缀(带尾分隔符),不合法则 null。 */
+    /** 返回经规范化 + 危险根拦截的工作空间前缀(带平台尾分隔符),不合法则 null。 */
     @Suppress("ReturnCount")
     private fun sanitizedWorkspacePrefix(): String? {
         // 优先读会话级工作空间(类似 Codex --cd 选定项目目录),为 null 时回退全局默认。
@@ -128,20 +128,31 @@ object ScriptSandbox {
         if (ws.isBlank()) return null
         val canon = try { File(ws).canonicalPath } catch (_: Exception) { return null }
         if (canon in FORBIDDEN_WORKSPACE_ROOTS) return null
-        return if (canon.endsWith("/")) canon else "$canon/"
+        return normalizedPrefix(canon)
+    }
+
+    /** canonical path + 平台分隔符；Linux/Android 用 "/"，Windows 用 "\\"。 */
+    private fun normalizedPrefix(path: String): String? = try {
+        val canon = File(path).canonicalPath
+        when {
+            canon.endsWith(File.separator) -> canon
+            else -> canon + File.separator
+        }
+    } catch (_: Exception) {
+        null
     }
 
     private fun safePrefixes(): List<String> {
         val ws = sanitizedWorkspacePrefix()
-        return if (ws != null) BASE_SAFE_PREFIXES + ws else BASE_SAFE_PREFIXES
+        val bases = BASE_SAFE_PREFIXES.mapNotNull(::normalizedPrefix)
+        return if (ws != null) (bases + ws).distinct() else bases
     }
 
     fun isSafePath(path: String): Boolean {
         val normalized = try { File(path).canonicalPath } catch (_: Exception) { return false }
         return safePrefixes().any { prefix ->
-            // 前缀恒带尾分隔符 → startsWith 具备路径边界,避免 /a/Download 命中 /a/Download_evil
-            val p = if (prefix.endsWith("/")) prefix else "$prefix/"
-            normalized == p.trimEnd('/') || normalized.startsWith(p)
+            // 前缀恒带平台尾分隔符 → startsWith 具备路径边界,避免 /a/Download 命中 /a/Download_evil
+            normalized == prefix.removeSuffix(File.separator) || normalized.startsWith(prefix)
         }
     }
 

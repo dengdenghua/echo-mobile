@@ -35,6 +35,9 @@ import com.apk.claw.android.ui.desktop.personaPrompt
 import com.apk.claw.android.utils.KVUtils
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Launch
+import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -2969,7 +2972,7 @@ private fun artifactIcon(kind: ChatMessage.ArtifactKind): androidx.compose.ui.gr
     ChatMessage.ArtifactKind.IMAGE -> Icons.Filled.CameraAlt
     ChatMessage.ArtifactKind.FILE -> Icons.Filled.Storage
     ChatMessage.ArtifactKind.DIFF -> Icons.Filled.Build
-    ChatMessage.ArtifactKind.PLAN -> Icons.AutoMirrored.Filled.ListLong  // 计划列表
+    ChatMessage.ArtifactKind.PLAN -> Icons.AutoMirrored.Filled.ListAlt  // 计划列表
     ChatMessage.ArtifactKind.CODE_SNIPPET -> Icons.Filled.Code           // 代码片段
     ChatMessage.ArtifactKind.TEXT -> Icons.AutoMirrored.Filled.Notes     // 文本
 }

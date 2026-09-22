@@ -3,11 +3,10 @@ package com.apk.claw.android.server
 import android.content.Context
 import com.apk.claw.android.BuildConfig
 import com.apk.claw.android.server.routes.*
-import com.apk.claw.android.utils.KVUtils
+
 import com.apk.claw.android.utils.XLog
 import com.google.gson.Gson
 import fi.iki.elonen.NanoHTTPD
-import java.security.SecureRandom
 
 /**
  * 局域网 HTTP 配置服务器
@@ -24,16 +23,8 @@ class ConfigServer(
         const val PORT = 9527
         private const val MIME_HTML = "text/html"
         private const val MIME_JSON = "application/json"
-        private const val AUTH_TOKEN_KEY = "config_server_auth_token"
-        private const val AUTH_TOKEN_BYTES = 24
-        private val SECURE_RANDOM = SecureRandom()
-
-        /** 生成 24 字节随机 token（base64url，~32 字符） */
-        fun generateAuthToken(): String {
-            val bytes = ByteArray(AUTH_TOKEN_BYTES)
-            SECURE_RANDOM.nextBytes(bytes)
-            return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
-        }
+        /** 生成 24 字节随机 token（base64url，共 32 字符）。 */
+        fun generateAuthToken(): String = LocalControlAuth.generateToken()
     }
 
     private val gson = Gson()
@@ -51,10 +42,7 @@ class ConfigServer(
     )
 
     /** 当前生效的鉴权 token（首次启动时持久化到 KVUtils） */
-    val authToken: String by lazy {
-        KVUtils.getString(AUTH_TOKEN_KEY).takeIf { it.isNotEmpty() }
-            ?: ConfigServer.generateAuthToken().also { KVUtils.putString(AUTH_TOKEN_KEY, it) }
-    }
+    val authToken: String get() = LocalControlAuth.getOrCreateToken()
 
     /**
      * 校验请求的 token。
@@ -62,20 +50,8 @@ class ConfigServer(
      * 查询参数 ?token=<token> 已禁用，防止 token 泄漏到浏览器历史 / 代理日志 / Referer。
      * 防止同 WiFi 邻居未授权访问配网页面。
      */
-    private fun validateAuth(session: IHTTPSession): Boolean {
-        val provided = session.headers["authorization"]
-            ?.removePrefix("Bearer ")?.trim()
-            ?: return false
-        // 恒定时间比较，避免 token 时序泄露
-        return constantTimeEquals(provided, authToken)
-    }
-
-    private fun constantTimeEquals(a: String, b: String): Boolean {
-        return java.security.MessageDigest.isEqual(
-            a.toByteArray(Charsets.UTF_8),
-            b.toByteArray(Charsets.UTF_8),
-        )
-    }
+    private fun validateAuth(session: IHTTPSession): Boolean =
+        LocalControlAuth.isAuthorized(session.headers["authorization"])
 
     private fun unauthorizedResponse(): Response = routeContext.corsResponse(
         newFixedLengthResponse(

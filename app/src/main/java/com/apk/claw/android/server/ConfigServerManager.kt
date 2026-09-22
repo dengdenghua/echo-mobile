@@ -92,24 +92,24 @@ object ConfigServerManager {
      */
     fun getAuthToken(): String? = server?.authToken
 
+    /** 获取 9527/9528 共用 token；不存在时生成并持久化。 */
+    fun getOrCreateAuthToken(): String = LocalControlAuth.getOrCreateToken()
+
     /**
-     * 重新生成 token（旧的立即失效）。用户主动"重置密钥"时调用。
+     * 重新生成 token（旧的立即失效，9527/9528 同步生效）。用户主动“重置密钥”时调用。
      */
     fun rotateAuthToken(): String {
-        val newToken = ConfigServer.generateAuthToken()
-        KVUtils.putString("config_server_auth_token", newToken)
+        val newToken = LocalControlAuth.rotateToken()
         XLog.i(TAG, "Auth token rotated")
         return newToken
     }
 
     /**
-     * 获取带 token 的局域网访问 URL，如 http://192.168.1.100:9527/?token=xxx
-     * UI 用于展示 QR 码 / 复制链接。
+     * 获取局域网访问地址。token 不复用于 query，必须通过 Authorization Bearer 传入。
      */
     fun getAccessUrl(): String? {
         val addr = getAddress() ?: return null
-        val token = getAuthToken() ?: return null
-        return "http://$addr/?token=$token"
+        return "http://$addr/"
     }
 
     /**

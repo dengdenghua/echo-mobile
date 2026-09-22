@@ -49,30 +49,43 @@ object GitCommandRunner {
             .redirectErrorStream(false)
             .start()
 
-        // stdout / stderr 必须并发读,否则子进程写满 pipe 缓冲区(默认 ~64KB)后会阻塞死锁。
+        // stdout / stderr 必须并发读，否则子进程写满 pipe 缓冲区后会阻塞死锁；
+        // 同时也不能在 waitFor 之前同步 readText，否则“进程不退出且不关流”时
+        // 超时逻辑永远没有机会执行。
+        val stdoutFuture = CompletableFuture.supplyAsync {
+            process.inputStream.bufferedReader().use { it.readText() }
+        }
         val stderrFuture = CompletableFuture.supplyAsync {
             process.errorStream.bufferedReader().use { it.readText() }
         }
-        val stdout = process.inputStream.bufferedReader().use { it.readText() }
 
         val finished = process.waitFor(timeoutSec, TimeUnit.SECONDS)
-        val stderr = try { stderrFuture.get() } catch (_: Exception) { "" }
-
         if (!finished) {
             process.destroyForcibly()
+            // 给输出线程一个短暂的收尾窗口；进程已被强杀，正常情况下会立即结束。
+            process.waitFor(5, TimeUnit.SECONDS)
             return GitCommandResult(
                 exitCode = -1,
-                stdout = stdout,
-                stderr = stderr,
+                stdout = readStream(stdoutFuture),
+                stderr = readStream(stderrFuture),
                 success = false,
             )
         }
+
         val exit = process.exitValue()
         return GitCommandResult(
             exitCode = exit,
-            stdout = stdout,
-            stderr = stderr,
+            stdout = readStream(stdoutFuture),
+            stderr = readStream(stderrFuture),
             success = exit == 0,
         )
+    }
+
+    /** 读取异步流；进程已被终止时最多等待 5 秒，避免读线程永久拖住调用方。 */
+    private fun readStream(future: CompletableFuture<String>): String = try {
+        future.get(5, TimeUnit.SECONDS)
+    } catch (_: Exception) {
+        future.cancel(true)
+        ""
     }
 }

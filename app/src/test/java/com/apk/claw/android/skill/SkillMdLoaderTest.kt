@@ -23,7 +23,7 @@ class SkillMdLoaderTest {
     // ── 合法全字段解析 ────────────────────────────────────────
 
     @Test
-    fun `parse valid SKILL.md with all fields`() {
+    fun `parse valid SKILL_md with all fields`() {
         val content = """
             ---
             name: android.tap
@@ -346,7 +346,7 @@ class SkillMdLoaderTest {
     // ── 真实 SKILL.md 样本 ───────────────────────────────────
 
     @Test
-    fun `parse handles real-world SKILL.md format from mobile skills`() {
+    fun `parse handles real-world SKILL_md format from mobile skills`() {
         // 精确复制 tap/SKILL.md 的 frontmatter 结构
         val content = """
             ---

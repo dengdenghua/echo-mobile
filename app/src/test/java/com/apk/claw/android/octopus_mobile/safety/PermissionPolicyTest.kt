@@ -9,7 +9,8 @@ import org.junit.Test
  * 锁定关键安全语义,防止误改预设把主力机变成"高危自动放行":
  *  - APPROVAL(默认/主力机):高危=CONFIRM、不信任所有来源、路径沙箱开、宪法法官开。
  *  - FULL_POWER(闲置/群控机):高危=ALLOW、信任所有来源、旁路法官。路径沙箱仍不可关。
- *  - 两模式都不可关:PrivacyScanner / AuditLog / CircuitBreaker / PathSandbox。
+ *  - 两模式都不可关:PrivacyScanner / AuditLog / CircuitBreaker / PathSandbox，
+ *    以及「不可信来源 × 高危工具」的最小硬闸门(untrustedHighRiskHardGate，见 SourceGatePolicyTest)。
  */
 class PermissionPolicyTest {
 
@@ -45,6 +46,7 @@ class PermissionPolicyTest {
             assertTrue("${p.mode}: auditLog 不可关", p.auditLogEnabled)
             assertTrue("${p.mode}: circuitBreaker 不可关", p.circuitBreakerEnabled)
             assertTrue("${p.mode}: pathSandbox 不可关", p.pathSandboxEnabled)
+            assertTrue("${p.mode}: 不可信来源高危硬闸门不可关", p.untrustedHighRiskHardGate)
         }
     }
 

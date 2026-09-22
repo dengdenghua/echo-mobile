@@ -1,5 +1,6 @@
 package com.apk.claw.android.mcp
 
+import com.apk.claw.android.octopus_mobile.safety.ToolRiskPolicy
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import java.util.concurrent.CompletableFuture
@@ -35,15 +36,16 @@ class JsonRpcDispatcher(
 ) {
 
     companion object {
-        /** 高危工具白名单:这些工具被调用前必须经过 ApprovalGate 审批。 */
-        val HIGH_RISK_TOOLS: Set<String> = setOf(
-            "send_sms",            // 发短信(消耗话费 / 诈骗风险)
-            "install_app",         // 安装应用(任意 APK 可执行)
-            "file_delete",         // 删除文件(不可逆)
-            "system_setting",      // 改系统设置(可能锁死设备)
-            "payment",             // 支付(直接财务风险)
-            "account_logout",      // 账号登出(中断会话)
-        )
+        /**
+         * 高危工具白名单 —— 已统一到 [ToolRiskPolicy]（唯一权威来源）。
+         *
+         * 历史上这里与 [SystemApprovalGate] / [ToolRiskPolicy] 各维护一份名单，三处漂移
+         * 会让同一工具在不同闸门判定不一致。现在只做别名转发，禁止在此另起名单。
+         *
+         * 注意：运行时动态注册的 `mcp_*` 工具不在集合里（前缀规则），但同样按 HIGH 处理，
+         * 判定一律走 [ToolRiskPolicy.riskOf]。
+         */
+        val HIGH_RISK_TOOLS: Set<String> get() = ToolRiskPolicy.HIGH_RISK_TOOLS
 
         /** 审批超时时间(秒)。超过则视为拒绝。 */
         const val APPROVAL_TIMEOUT_SECONDS = 60L
@@ -129,8 +131,8 @@ class JsonRpcDispatcher(
         val args = params.getAsJsonObject("arguments") ?: JsonObject()
         val argMap = jsonObjectToMap(args)
 
-        // 高危工具 → 审批闸门
-        if (name in HIGH_RISK_TOOLS) {
+        // 高危工具 → 审批闸门（判定统一走 ToolRiskPolicy，含运行时 mcp_* 动态工具）
+        if (ToolRiskPolicy.riskOf(name) == ToolRiskPolicy.RISK_HIGH) {
             val approval = try {
                 CompletableFuture
                     .supplyAsync { approvalGate.requestApproval(name, argMap) }

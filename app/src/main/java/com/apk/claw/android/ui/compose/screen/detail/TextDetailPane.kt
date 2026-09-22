@@ -32,11 +32,9 @@ import com.apk.claw.android.ui.compose.theme.OctopusType
  * @param body  纯文本正文(可能含 URL)
  */
 class TextDetailPane(
-    private val title: String,
+    override val title: String,
     private val body: String,
 ) : DetailPane {
-
-    override val title: String = this.title
 
     @Composable
     override fun Render() {
@@ -55,7 +53,7 @@ class TextDetailPane(
                     fontSize = OctopusType.caption,
                     color = OctopusColors.TextSecondary,
                     fontFamily = FontFamily.Monospace,
-                    lineHeight = OctopusType.body.value * 1.4f,
+                    lineHeight = OctopusType.body * 1.4f,
                 ),
                 onClick = { offset ->
                     annotated.getStringAnnotations(URL_TAG, offset, offset)

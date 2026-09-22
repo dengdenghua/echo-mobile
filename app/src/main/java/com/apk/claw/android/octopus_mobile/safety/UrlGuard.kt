@@ -133,6 +133,44 @@ object UrlGuard {
     }
 
     /**
+     * 校验「用户显式配置的外部端点」（如 MCP SSE server URL）。
+     *
+     * 与 [check] 的差异：**允许** loopback / 私网 / `.local`（本机与局域网场景需要），但**始终**阻止
+     * 云元数据端点与 link-local 地址（169.254.0.0/16、fe80::/10）—— 这两类是 SSRF 里价值最高、
+     * 且不存在合法 MCP server 用法的目标。
+     */
+    fun checkConfiguredEndpoint(url: String, resolveDns: Boolean = true): URLVerdict {
+        val base = check(url, allowPrivate = true, resolveDns = false)
+        if (!base.allow) return base
+
+        val host = try { URI(url).host } catch (e: Exception) { null }
+        if (host.isNullOrBlank()) return URLVerdict(false, url, "missing_host")
+        val hostLc = host.lowercase().trimEnd('.')
+        if (hostLc in METADATA_HOSTS) {
+            return URLVerdict(false, url, "blocked_metadata_host: $hostLc")
+        }
+
+        val ip = parseIp(host)
+        if (ip != null) {
+            return if (isLinkLocalLiteral(ip)) {
+                URLVerdict(false, url, "blocked_link_local: $ip", ip)
+            } else {
+                URLVerdict(true, url, resolvedIp = ip)
+            }
+        }
+
+        if (!resolveDns) return URLVerdict(true, url)
+
+        val resolved = resolveHost(host)
+            ?: return URLVerdict(false, url, "dns_resolution_failed")
+        return if (isLinkLocalLiteral(resolved)) {
+            URLVerdict(false, url, "dns_resolves_to_link_local: $host → $resolved", resolved)
+        } else {
+            URLVerdict(true, url, resolvedIp = resolved)
+        }
+    }
+
+    /**
      * 已解析地址是否属于应阻断的目标(loopback/link-local/site-local/any-local/multicast +
      * 169.254/16 + IPv4-mapped/compat 内嵌 IPv4 + fc00::/7)。供 [SsrfSafeDns] 在**连接期**
      * 对 OkHttp 实际使用的解析结果逐个校验,消除 check-then-connect 的 DNS rebinding 窗口。
@@ -140,6 +178,32 @@ object UrlGuard {
     fun isDisallowedAddress(addr: InetAddress): Boolean = isPrivateAddress(addr)
 
     // ── 内部 ──────────────────────────────────────────
+
+    /** 云元数据服务主机名：任何场景都不允许作为出站目标。 */
+    private val METADATA_HOSTS = setOf(
+        "metadata.google.internal",
+        "metadata.azure.internal",
+        "instance-data",
+        "instance-data.ec2.internal",
+        "metadata",
+    )
+
+    /** 该 IP 字面量是否属于 link-local（169.254.0.0/16 / fe80::/10，含 IPv4-mapped 变体）。 */
+    private fun isLinkLocalLiteral(ip: String): Boolean {
+        val addr = try {
+            InetAddress.getByName(ip.trim('[', ']'))
+        } catch (e: Exception) {
+            return true  // 解析失败 → 保守拒绝(fail-closed)
+        }
+        if (addr.isLinkLocalAddress) return true
+        val bytes = addr.address
+        if (bytes.size == 16) {
+            val v4 = extractEmbeddedIpv4(bytes) ?: return false
+            val inner = try { InetAddress.getByAddress(v4) } catch (e: Exception) { null } ?: return true
+            return inner.isLinkLocalAddress
+        }
+        return false
+    }
 
     private fun parseIp(host: String): String? {
         val stripped = host.trim('[', ']')

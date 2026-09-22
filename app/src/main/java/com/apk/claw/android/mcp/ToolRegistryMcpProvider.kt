@@ -31,7 +31,11 @@ class ToolRegistryMcpProvider(
         val tool = registry.getTool(name)
             ?: return McpToolResult(false, "", "tool not found: $name")
         return try {
-            val result: ToolResult = registry.executeTool(name, args)
+            // 9528 是外部网络入口：MCP 调用一律标记为「不可信来源」，
+            // 高危工具因此走来源闸门/审批（与 9527 的 MCP 路由行为保持一致）。
+            val result: ToolResult = registry.withUntrustedSource {
+                registry.executeTool(name, args)
+            }
             if (result.isSuccess) {
                 McpToolResult(true, result.data ?: "", null)
             } else {

@@ -1,6 +1,7 @@
 package com.apk.claw.android.tool.mcp
 
 import android.util.Log
+import com.apk.claw.android.octopus_mobile.safety.UrlGuard
 import com.apk.claw.android.tool.BaseTool
 import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolParameter
@@ -45,8 +46,8 @@ import java.util.concurrent.atomic.AtomicLong
  *  - MCP server 是外部进程,其工具能力由 server 定义,Octopus 无法预审 → 登记为 HIGH 风险
  *  - 不可信来源走来源闸门弹审批 + 全程审计
  *  - MCP server 返回的结果过 SecretRedactor 脱敏
- *  - stdio 模式:子进程在 App UID 下运行,受 Android 沙箱约束
- *  - SSE 模式:URL 过 UrlGuard(由调用方 McpClientTool 完成)
+ *  - stdio 模式:启动命令过 [McpStdioGuard] 白名单(裸命令名 + 参数/环境变量过滤),子进程在 App UID 下运行,受 Android 沙箱约束
+ *  - SSE 模式:URL 过 [UrlGuard.checkConfiguredEndpoint](禁云元数据/link-local,允许 loopback/LAN)
  *  - 工具调用超时 60s,防止恶意 server 挂起
  *
  * 协议参考: https://spec.modelcontextprotocol.io/specification/
@@ -248,6 +249,10 @@ class McpClient(
 
     @Suppress("TooGenericExceptionCaught")
     private fun connectStdio(transport: Transport.Stdio) {
+        // 纵深防御:配置层已校验,这里再校验一次,确保任何调用路径(含未来的远程下发)都过白名单。
+        McpStdioGuard.validate(transport.command, transport.env)?.let { reason ->
+            throw IllegalArgumentException("MCP stdio 命令被安全策略拒绝:$reason")
+        }
         val pb = ProcessBuilder(transport.command)
         transport.env.forEach { (k, v) -> pb.environment()[k] = v }
         pb.redirectErrorStream(false)
@@ -276,6 +281,10 @@ class McpClient(
 
     @Suppress("TooGenericExceptionCaught")
     private fun connectSse(transport: Transport.Sse) {
+        val verdict = UrlGuard.checkConfiguredEndpoint(transport.url)
+        if (!verdict.allow) {
+            throw IllegalArgumentException("SSE URL 被安全策略拒绝(${verdict.reason}):${transport.url}")
+        }
         val client = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(0, TimeUnit.SECONDS)  // SSE 长连接

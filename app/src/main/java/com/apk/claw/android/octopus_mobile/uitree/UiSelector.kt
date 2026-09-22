@@ -51,7 +51,7 @@ data class UiSelector(
     }
 
     /** AND 组合（默认所有字段叠加即 AND） */
-    fun and(other: UiSelector): UiSelector = copy(
+    infix fun and(other: UiSelector): UiSelector = copy(
         textEquals = other.textEquals ?: textEquals,
         textContains = other.textContains ?: textContains,
         descEquals = other.descEquals ?: descEquals,

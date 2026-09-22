@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap
  *  - HTTP 模式足以覆盖 Claude Desktop / Cursor / OpenClaw 等主流 MCP 客户端的远程连接场景。
  *
  * 安全:
- *  - MCP server 暂不强制 token 鉴权(由 [McpServerBootstrap] 在集成时按需追加,
- *    例如复用 ConfigServer 的 Bearer token 机制)。
+ *  - 默认拒绝所有请求；[McpServerBootstrap] 启动时注入 9527/9528 共用的 Bearer token 校验。
+ *  - 只接受 Authorization Header，不接受 query token，避免凭据进入 URL/代理日志。
  *  - 高危工具由 [JsonRpcDispatcher] 走 ApprovalGate 审批。
  */
 class McpServer(
@@ -55,6 +55,10 @@ class McpServer(
     @Volatile
     private var approvalGate: McpApprovalGate = AutoDenyApprovalGate()
 
+    /** 默认拒绝；Bootstrap 必须注入 Bearer Header 校验器后 server 才可访问。 */
+    @Volatile
+    private var authorizationValidator: (String?) -> Boolean = { false }
+
     /** 会话表:sessionId → McpSession。session 在首次请求时惰性创建。 */
     private val sessions = ConcurrentHashMap<String, McpSession>()
 
@@ -70,12 +74,28 @@ class McpServer(
         this.approvalGate = gate
     }
 
+    /** 注入 Bearer Header 校验器；未注入时 fail-closed。 */
+    fun setAuthorizationValidator(validator: (String?) -> Boolean) {
+        this.authorizationValidator = validator
+    }
+
     // ── NanoHTTPD 入口 ──────────────────────────────────────
 
     override fun serve(session: IHTTPSession): Response {
         // CORS 预检
         if (session.method == Method.OPTIONS) {
             return corsResponse(newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, ""))
+        }
+
+        // Bearer 鉴权失败时不得进入 initialize / tools/list / tools/call。
+        if (!authorizationValidator(session.headers["authorization"])) {
+            val denied = newFixedLengthResponse(
+                Response.Status.UNAUTHORIZED,
+                MIME_JSON,
+                """{"jsonrpc":"2.0","id":null,"error":{"code":-32001,"message":"Unauthorized"}}""",
+            )
+            denied.addHeader("WWW-Authenticate", "Bearer realm=\"octopus-mcp\"")
+            return corsResponse(denied)
         }
 
         val uri = session.uri

@@ -14,6 +14,7 @@ import com.apk.claw.android.octopus_mobile.safety.ToolRiskPolicy
 import com.apk.claw.android.octopus_mobile.safety.CircuitBreaker
 import com.apk.claw.android.octopus_mobile.safety.PermissionModeManager
 import com.apk.claw.android.octopus_mobile.safety.PermissionPolicy
+import com.apk.claw.android.octopus_mobile.safety.SourceGatePolicy
 import com.apk.claw.android.octopus_mobile.safety.ApprovalFlow
 import com.apk.claw.android.octopus_mobile.safety.IrreversibleActions
 import com.apk.claw.android.octopus_mobile.safety.UndoWindow
@@ -478,18 +479,19 @@ object ToolRegistry {
 
         // ── 高危/中危工具来源闸门 + 审批流程 ──
         // APPROVAL 模式：不可信来源调高危工具 → 弹窗审批；中危工具按 mediumRiskAction 处理
-        // FULL_POWER 模式：trustAllSources=true，跳过来源闸门，高危工具自动放行
+        // FULL_POWER 模式：trustAllSources=true 跳过常规来源闸门，但「不可信来源 × 高危工具」仍受
+        //   不可关闭的最小硬闸门约束（见 [SourceGatePolicy]）：常态降级为 CONFIRM（无人在场 →
+        //   超时拒绝，fail-closed），仅用户显式打开 KVUtils.isRemoteHighRiskAllowed() 才放行无人值守群控机。
         // 注:中危工具(tap/swipe/input_text/clipboard/browser_navigate 等)从不可信来源驱动时
         // 也能造成实质危害(读剪贴板凭据/输密码/跳钓鱼站),故同样走闸门,仅 action 默认更宽松。
         val riskLevel = ToolRiskPolicy.riskOf(name)
         val isHighRisk = riskLevel == ToolRiskPolicy.RISK_HIGH
-        val isMediumRisk = riskLevel == ToolRiskPolicy.RISK_MEDIUM
-        val needsSourceGate = !policy.trustAllSources && isUntrustedSource() && (isHighRisk || isMediumRisk)
+        // 闸门决策抽在 SourceGatePolicy(纯函数,单独单测):满血模式下「不可信来源 × 高危工具」
+        // 仍被强制降级为 CONFIRM,不会因为 trustAllSources=true 而静默放行。
+        val sourceGateAction = SourceGatePolicy.actionFor(policy, isUntrustedSource(), riskLevel)
 
-        if (needsSourceGate) {
-            // HIGH 走 highRiskAction,MEDIUM 走 mediumRiskAction(默认 ALLOW,用户可收紧为 CONFIRM)
-            val action = if (isHighRisk) policy.highRiskAction else policy.mediumRiskAction
-            when (action) {
+        if (sourceGateAction != null) {
+            when (sourceGateAction) {
                 PermissionPolicy.RiskAction.BLOCK -> {
                     eventBus?.publish(EventBus.ToolBlockedEvent(name, "risk_blocked", "policy"))
                     return audited(

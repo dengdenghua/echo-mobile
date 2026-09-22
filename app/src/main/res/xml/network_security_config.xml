@@ -13,9 +13,46 @@
         </trust-anchors>
     </base-config>
 
-    <!-- 已知后端强制 HTTPS（能锁的就锁：账号/计费/中转始终走 TLS）。 -->
+    <!--
+      已知公网后端强制 HTTPS（能锁的就锁：账号/计费/模型 API/消息通道始终走 TLS）。
+      这些域名的所有调用点都已经是 https://（代码里没有 http:// 调用点），
+      因此这里的 cleartext=false 只是把"将来不小心写成 http"变成显式失败，而非静默降级。
+      LAN/loopback/母体链路不受影响（它们走上面的 base-config）。
+    -->
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">api.octoapk.com</domain>
+        <!-- Octopus 自有后端（账号/计费/中转/社区） -->
+        <domain includeSubdomains="true">octoapk.com</domain>
+
+        <!-- 模型 / LLM 服务商 -->
+        <domain includeSubdomains="true">deepseek.com</domain>
+        <domain includeSubdomains="true">aliyuncs.com</domain>
+        <domain includeSubdomains="true">aliyun.com</domain>
+        <domain includeSubdomains="true">modelscope.cn</domain>
+        <domain includeSubdomains="true">moonshot.cn</domain>
+        <domain includeSubdomains="true">siliconflow.cn</domain>
+        <domain includeSubdomains="true">novita.ai</domain>
+        <domain includeSubdomains="true">openai.com</domain>
+        <domain includeSubdomains="true">openrouter.ai</domain>
+        <domain includeSubdomains="true">baidubce.com</domain>
+        <domain includeSubdomains="true">x.ai</domain>
+        <domain includeSubdomains="true">nvidia.com</domain>
+        <domain includeSubdomains="true">perplexity.ai</domain>
+        <domain includeSubdomains="true">lmstudio.ai</domain>
+        <domain includeSubdomains="true">ollama.com</domain>
+
+        <!-- 消息 / 平台通道 -->
+        <domain includeSubdomains="true">dingtalk.com</domain>
+        <domain includeSubdomains="true">telegram.org</domain>
+        <domain includeSubdomains="true">sgroup.qq.com</domain>
+        <domain includeSubdomains="true">qq.com</domain>
+
+        <!-- 工具链 / 素材 -->
+        <domain includeSubdomains="true">github.com</domain>
+        <domain includeSubdomains="true">githubusercontent.com</domain>
+        <domain includeSubdomains="true">rikka.app</domain>
+        <domain includeSubdomains="true">openverse.org</domain>
+        <domain includeSubdomains="true">unavatar.io</domain>
+
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>

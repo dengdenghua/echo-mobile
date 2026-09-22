@@ -514,8 +514,10 @@ object KVUtils {
     fun setRemoteHighRiskAllowed(enabled: Boolean) = putBoolean(KEY_REMOTE_HIGH_RISK, enabled)
 
     // ── 高级自动化模式(满血) ──
-    // 专用自动化设备总开关：解除「高危工具来源闸门 + 主动规则高危限制 + 文件工具 /sdcard 沙箱」，
-    // 让母体/LAN/主动规则可无确认执行全部高危工具、访问完整文件系统(仍受 shell UID 与注入校验约束)。
+    // 专用自动化设备总开关：解除「主动规则高危限制 + 文件工具 /sdcard 沙箱」并放宽常规来源闸门，
+    // 让母体/LAN/主动规则可无确认执行高危工具、访问完整文件系统(仍受 shell UID 与注入校验约束)。
+    // 例外(不可解除)：不可信来源 × 高危工具仍受 PermissionPolicy.untrustedHighRiskHardGate 约束，
+    // 想要无人值守放行需另行显式打开 KEY_REMOTE_HIGH_RISK_ALLOWED(见上)。
     // 默认 false。仅用于你完全掌控的闲置/专用自动化设备。不影响"防外部攻击"类加固(发送者 ACL、密钥脱敏等)。
     private const val KEY_ADVANCED_AUTOMATION = "KEY_ADVANCED_AUTOMATION_MODE"
     fun isAdvancedAutomationMode(): Boolean = getBoolean(KEY_ADVANCED_AUTOMATION, false)

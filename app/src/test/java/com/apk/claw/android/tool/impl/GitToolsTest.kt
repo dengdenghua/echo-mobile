@@ -3,6 +3,7 @@ package com.apk.claw.android.tool.impl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -20,6 +21,22 @@ import java.io.File
  *  - [GitCloneTool] / [GitCommitTool] 参数 schema 完整(必填/可选/类型正确)
  */
 class GitToolsTest {
+
+    private val isWindows: Boolean =
+        System.getProperty("os.name")?.startsWith("Windows", ignoreCase = true) == true
+
+    private fun runCommand(command: List<String>, timeoutSec: Long) =
+        GitCommandRunner.runCommand(File("."), *command.toTypedArray(), timeoutSec = timeoutSec)
+
+    /** A process that blocks without relying on a POSIX-only executable. */
+    private fun blockingCommand(): List<String> =
+        if (isWindows) listOf("cmd.exe", "/d", "/c", "pause")
+        else listOf("sh", "-c", "read _")
+
+    /** A process that exits non-zero on both Windows and POSIX shells. */
+    private fun failingCommand(): List<String> =
+        if (isWindows) listOf("cmd.exe", "/d", "/c", "exit", "1")
+        else listOf("false")
 
     // ── GitCommandRunner ────────────────────────────────────────
 
@@ -40,25 +57,16 @@ class GitToolsTest {
 
     @Test
     fun `GitCommandRunner returns failure on timeout`() {
-        // `sleep 10` 不会在 1 秒内结束,触发超时分支。
-        // CI 容器若没有 sleep 命令会以非零退出码失败,这两种情况 success 都应为 false。
-        val result = GitCommandRunner.runCommand(
-            File("."),
-            "sleep", "10",
-            timeoutSec = 1,
-        )
+        // 跨平台命令会阻塞超过 1 秒，确保触发超时分支。
+        val result = runCommand(blockingCommand(), timeoutSec = 1)
         assertFalse("timeout should produce success=false", result.success)
         assertEquals("exitCode should be -1 on timeout", -1, result.exitCode)
     }
 
     @Test
     fun `GitCommandRunner captures non-zero exit code`() {
-        // `false` 命令总是返回退出码 1(POSIX)。
-        val result = GitCommandRunner.runCommand(
-            File("."),
-            "false",
-            timeoutSec = 5,
-        )
+        // 跨平台 shell 命令返回退出码 1。
+        val result = runCommand(failingCommand(), timeoutSec = 5)
         assertFalse("false command should fail", result.success)
         assertEquals("exitCode should be 1", 1, result.exitCode)
     }
@@ -141,11 +149,13 @@ class GitToolsTest {
     fun `GitCloneTool rejects missing url or path`() {
         val tool = GitCloneTool()
         // 缺 url
-        val r1 = tool.execute(mapOf("path" to "/tmp/foo"))
-        assertFalse("missing url should fail", r1.isSuccess)
+        assertThrows(IllegalArgumentException::class.java) {
+            tool.execute(mapOf("path" to "/tmp/foo"))
+        }
         // 缺 path
-        val r2 = tool.execute(mapOf("url" to "https://github.com/foo/bar.git"))
-        assertFalse("missing path should fail", r2.isSuccess)
+        assertThrows(IllegalArgumentException::class.java) {
+            tool.execute(mapOf("url" to "https://github.com/foo/bar.git"))
+        }
         // 空 url
         val r3 = tool.execute(mapOf("url" to "  ", "path" to "/tmp/foo"))
         assertFalse("blank url should fail", r3.isSuccess)
@@ -188,11 +198,13 @@ class GitToolsTest {
     fun `GitCommitTool rejects missing path or message`() {
         val tool = GitCommitTool()
         // 缺 message
-        val r1 = tool.execute(mapOf("path" to "/tmp/foo"))
-        assertFalse("missing message should fail", r1.isSuccess)
+        assertThrows(IllegalArgumentException::class.java) {
+            tool.execute(mapOf("path" to "/tmp/foo"))
+        }
         // 缺 path
-        val r2 = tool.execute(mapOf("message" to "init"))
-        assertFalse("missing path should fail", r2.isSuccess)
+        assertThrows(IllegalArgumentException::class.java) {
+            tool.execute(mapOf("message" to "init"))
+        }
         // 空 message
         val r3 = tool.execute(mapOf("path" to "/tmp/foo", "message" to "   "))
         assertFalse("blank message should fail", r3.isSuccess)

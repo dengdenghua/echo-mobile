@@ -343,6 +343,8 @@ private fun McpServerEditDialog(
                 if (!isEdit && McpServerConfigStore.get(id) != null) {
                     error = "ID 已存在"; return@TextButton
                 }
+                // 安全自检:STDIO 命令白名单 / SSE URL 守卫(McpStdioGuard, UrlGuard)
+                cfg.validate()?.let { msg -> error = msg; return@TextButton }
                 onSave(cfg)
             }) { Text("保存") }
         },

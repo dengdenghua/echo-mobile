@@ -2,6 +2,7 @@ package com.apk.claw.android.mcp
 
 import android.os.Handler
 import android.os.Looper
+import com.apk.claw.android.octopus_mobile.safety.ToolRiskPolicy
 import com.apk.claw.android.utils.XLog
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -23,8 +24,8 @@ class SystemApprovalGate(
 ) : McpApprovalGate {
 
     override fun requestApproval(toolName: String, args: Map<String, Any>): ApprovalResult {
-        // 高危工具清单(与 JsonRpcDispatcher.HIGH_RISK_TOOLS 对齐)
-        val isHighRisk = toolName in HIGH_RISK_TOOLS
+        // 高危判定统一以 ToolRiskPolicy 为准（含运行时 mcp_* 动态工具），避免多处名单漂移。
+        val isHighRisk = ToolRiskPolicy.riskOf(toolName) == ToolRiskPolicy.RISK_HIGH
         if (!isHighRisk) {
             return ApprovalResult(true, "low/medium risk auto approved")
         }
@@ -62,12 +63,10 @@ class SystemApprovalGate(
     companion object {
         private const val TAG = "SystemApprovalGate"
 
-        /** 高危工具清单(由 MCP 服务端强制审批)。 */
-        val HIGH_RISK_TOOLS = setOf(
-            "send_sms", "install_app", "file_delete", "system_setting",
-            "payment", "account_logout",
-            "git_push",  // force push 可覆盖历史
-            "github_create_pr"
-        )
+        /**
+         * 高危工具清单 —— 别名转发到 [ToolRiskPolicy]（唯一权威来源），禁止在此另起名单。
+         * 运行时 `mcp_*` 动态工具同样为 HIGH，但由前缀规则决定，不在本集合内。
+         */
+        val HIGH_RISK_TOOLS: Set<String> get() = ToolRiskPolicy.HIGH_RISK_TOOLS
     }
 }

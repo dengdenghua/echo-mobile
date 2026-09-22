@@ -191,9 +191,18 @@ object ToolRiskPolicy {
         "pin_code", "pincode"
     )
 
-    fun riskOf(toolName: String): String = when (toolName) {
-        in HIGH_RISK_TOOLS -> RISK_HIGH
-        in MEDIUM_RISK_TOOLS -> RISK_MEDIUM
+    /**
+     * 运行时动态注册的 MCP 工具前缀（见 [com.apk.claw.android.tool.mcp.McpManager]）：
+     * `mcp_<serverId>_<toolName>`。外部 MCP server 的能力对 App 是未知的，
+     * 不能按「未分类 → LOW」静默放行。
+     */
+    const val MCP_DYNAMIC_TOOL_PREFIX = "mcp_"
+
+    fun riskOf(toolName: String): String = when {
+        toolName in HIGH_RISK_TOOLS -> RISK_HIGH
+        // 外部 MCP server 工具能力未知 → 默认 HIGH，强制走审计 + 不可信来源闸门 + 审批。
+        toolName.startsWith(MCP_DYNAMIC_TOOL_PREFIX) -> RISK_HIGH
+        toolName in MEDIUM_RISK_TOOLS -> RISK_MEDIUM
         else -> RISK_LOW
     }
 

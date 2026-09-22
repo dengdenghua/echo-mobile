@@ -40,6 +40,31 @@ data class McpServerConfig(
         TransportType.STDIO -> McpClient.Transport.Stdio(command, env)
         TransportType.SSE -> McpClient.Transport.Sse(url, headers)
     }
+
+    /**
+     * 配置自检（纯 JVM，不做 DNS，可在主线程调用）。
+     *
+     * STDIO 走 [McpStdioGuard] 命令/环境变量白名单；SSE 走
+     * [com.apk.claw.android.octopus_mobile.safety.UrlGuard.checkConfiguredEndpoint]（禁云元数据与
+     * link-local，允许 loopback/LAN）。连接期 [McpClient] 会再跑一次带 DNS 解析的完整校验。
+     *
+     * @return null=通过；非 null=错误信息（可直接展示给用户）
+     */
+    fun validate(): String? {
+        if (!McpServerConfigStore.isValidId(id)) return "serverId 仅允许 [a-zA-Z0-9_-]"
+        if (name.isBlank()) return "显示名不能为空"
+        return when (transportType) {
+            TransportType.STDIO -> McpStdioGuard.validate(command, env)
+            TransportType.SSE -> validateSseUrl(url)
+        }
+    }
+
+    private fun validateSseUrl(raw: String): String? {
+        if (raw.isBlank()) return "SSE 模式必须填写 URL"
+        val verdict = com.apk.claw.android.octopus_mobile.safety.UrlGuard
+            .checkConfiguredEndpoint(raw, resolveDns = false)
+        return if (verdict.allow) null else "SSE URL 不安全(${verdict.reason}):$raw"
+    }
 }
 
 /**
@@ -77,6 +102,7 @@ object McpServerConfigStore {
 
     /** 添加:同 id 覆盖。返回 null 表示成功,非 null 表示错误信息。 */
     fun add(cfg: McpServerConfig): String? {
+        cfg.validate()?.let { return it }
         if (!isValidId(cfg.id)) return "serverId 仅允许 [a-zA-Z0-9_-]"
         val list = all().toMutableList()
         // 同 id 覆盖:先断开旧连接
@@ -90,10 +116,13 @@ object McpServerConfigStore {
         return null
     }
 
-    /** 更新:按 id 找到并替换。 */
-    fun update(cfg: McpServerConfig) {
+    /** 更新:按 id 找到并替换。返回 null=成功,非 null=错误信息。 */
+    fun update(cfg: McpServerConfig): String? {
+        if (!isValidId(cfg.id)) return "serverId 仅允许 [a-zA-Z0-9_-]"
+        cfg.validate()?.let { return it }
         val list = all().map { if (it.id == cfg.id) cfg else it }
         save(list)
+        return null
     }
 
     /** 删除:同时断开运行时连接。 */
@@ -108,6 +137,11 @@ object McpServerConfigStore {
      */
     fun restoreAll() {
         all().filter { it.autoConnect }.forEach { cfg ->
+            // 旧配置可能来自被篡改的 KV 存储:不合规的直接跳过,不启动子进程/不外连
+            cfg.validate()?.let { reason ->
+                Log.w(TAG, "Skip invalid MCP server [${cfg.id}]: $reason")
+                return@forEach
+            }
             runCatching {
                 McpManager.connectServer(cfg.id, cfg.toTransport())
             }.onFailure { e ->

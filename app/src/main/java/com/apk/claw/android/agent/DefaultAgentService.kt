@@ -97,7 +97,7 @@ class DefaultAgentService : AgentService {
 
         /** refine-chat-interaction Task 6:产生 TEXT Artifact 的 Git 工具集合。 */
         private val GIT_TEXT_ARTIFACT_TOOLS = setOf("git_commit", "git_push", "github_create_pr")
-    }   /**
+        /**
          * 从 LLM 的 AiMessage 文本里提取 plan JSON(步骤数组)。
          *
          * PLAN 模式下 LLM 应在调 exit_plan_mode 前,于同一条 AiMessage 文本里输出 JSONArray,

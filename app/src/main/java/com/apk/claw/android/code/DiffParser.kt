@@ -24,7 +24,7 @@ object DiffParser {
 
     /** Hunk header 正则:`@@ -oldStart[,oldCount] +newStart[,newCount] @@ [可选上下文]` */
     private val HUNK_RE = Regex(
-        """^@@\s+-(\d+)(?:,(\d+))?\s+\+(\d+)(?:,(\d+))?\s+@@.*$""",
+        """^@@\s+-(\d+)(?:,([^,\s]+))?\s+\+(\d+)(?:,([^,\s]+))?\s+@@.*$""",
     )
 
     /**

@@ -56,7 +56,9 @@ class DiffParserTest {
         assertEquals(1, h.newStart)
         assertEquals(3, h.newCount)
         assertEquals("@@ -1,3 +1,3 @@", h.header)
-        assertEquals(3, h.lines.size)
+        // unified diff 的行数是 oldCount/newCount 的校验收集（context 同时计入两侧），
+        // 不是“变更行数量”；这里 3 个旧行 + 3 个新行由 4 条 body 行表达。
+        assertEquals(4, h.lines.size)
 
         // context, removed, added
         assertEquals(CONTEXT, h.lines[0].type)
@@ -73,6 +75,11 @@ class DiffParserTest {
         assertNull(h.lines[2].oldLineNumber)
         assertEquals(2, h.lines[2].newLineNumber)
         assertEquals("new2", h.lines[2].content)
+
+        assertEquals(CONTEXT, h.lines[3].type)
+        assertEquals(3, h.lines[3].oldLineNumber)
+        assertEquals(3, h.lines[3].newLineNumber)
+        assertEquals("line3", h.lines[3].content)
     }
 
     @Test
@@ -116,11 +123,11 @@ class DiffParserTest {
 
         val h1 = files[0].hunks[0]
         assertEquals(1, h1.oldStart)
-        assertEquals("B", h1.lines[1].content)
+        assertEquals("B", h1.lines.last().content)
 
         val h2 = files[0].hunks[1]
         assertEquals(10, h2.oldStart)
-        assertEquals("Y", h2.lines[1].content)
+        assertEquals("Y", h2.lines.last().content)
     }
 
     // ── 多文件 diff ────────────────────────────────────────────
