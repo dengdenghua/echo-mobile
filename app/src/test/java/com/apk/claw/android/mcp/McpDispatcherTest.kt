@@ -71,6 +71,20 @@ class McpDispatcherTest {
         }
     }
 
+    /** 声明自带策略的 provider:用于验证 JsonRpcDispatcher 会跳过外层审批闸门。 */
+    private class SelfPolicingProvider : McpToolRegistryProvider {
+        var lastCall: Pair<String, Map<String, Any>>? = null
+
+        override val enforcesOwnPolicy: Boolean get() = true
+
+        override fun listTools(): List<McpToolInfo> = emptyList()
+
+        override fun executeTool(name: String, args: Map<String, Any>): McpToolResult {
+            lastCall = name to args
+            return McpToolResult(true, "self-policed: ", null)
+        }
+    }
+
     /** 自动允许的审批闸门(测试用,真实场景禁止使用)。 */
     private class AutoApproveGate : McpApprovalGate {
         override fun requestApproval(toolName: String, args: Map<String, Any>): ApprovalResult =
@@ -212,6 +226,34 @@ class McpDispatcherTest {
         assertFalse(result.get("isError").asBoolean)
         val text = result.getAsJsonArray("content")[0].asJsonObject.get("text").asString
         assertEquals("sms sent to 10086", text)
+    }
+
+    /**
+     * 回归测试:provider 自带策略时必须跳过外层闸门。
+     *
+     * 背景 —— 生产 provider([ToolRegistryMcpProvider])声明 enforcesOwnPolicy=true,由
+     * ToolRegistry 自己完成来源闸门 + PermissionPolicy + ApprovalFlow 审批 + 审计。
+     * 此前 JsonRpcDispatcher 无条件叠加外层 SystemApprovalGate,而该闸门在 ClawApplication
+     * 里是无参构造(callback=null)→ 9528 上所有 HIGH 工具都被静默自动拒绝,永远执行不了。
+     * 这里用 AutoDenyGate 模拟「外层闸门没有开门的路」,断言工具仍须被执行。
+     */
+    @Test
+    fun `policy owning provider bypasses outer approval gate`() {
+        val provider = SelfPolicingProvider()
+        val d = newDispatcher(provider = provider, gate = AutoDenyGate())
+        val params = JsonObject().apply {
+            addProperty("name", "send_sms")
+            add("arguments", JsonObject().apply {
+                addProperty("to", "10086")
+                addProperty("body", "hello")
+            })
+        }
+        val resp = d.dispatch(req("tools/call", params = params))
+
+        // 外层闸门拒绝无效 —— provider 自己的策略才是权威
+        assertEquals("send_sms", provider.lastCall?.first)
+        val result = resp.result!!
+        assertFalse(result.get("isError").asBoolean)
     }
 
     @Test

@@ -21,6 +21,12 @@ class ToolRegistryMcpProvider(
     private val registry: ToolRegistry = ToolRegistry
 ) : McpToolRegistryProvider {
 
+    /**
+     * ToolRegistry 自带完整闸门链(来源闸门 + PermissionPolicy + ApprovalFlow 审批 + 审计),
+     * 因此不需要 [JsonRpcDispatcher] 再叠一道外层审批闸门。
+     */
+    override val enforcesOwnPolicy: Boolean get() = true
+
     /** 枚举 ToolRegistry 全部工具,转为 MCP 协议的 McpToolInfo。 */
     override fun listTools(): List<McpToolInfo> {
         return registry.getAllTools().map { tool -> tool.toMcpInfo() }

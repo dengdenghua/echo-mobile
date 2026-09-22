@@ -133,7 +133,12 @@ class JsonRpcDispatcher(
         val argMap = jsonObjectToMap(args)
 
         // 高危工具 → 审批闸门（判定统一走 ToolRiskPolicy，含运行时 mcp_* 动态工具）
-        if (ToolRiskPolicy.riskOf(name) == ToolRiskPolicy.RISK_HIGH) {
+        //
+        // provider 声明自带策略时跳过：ToolRegistryMcpProvider 会在 executeTool 内部走完
+        // 来源闸门 + PermissionPolicy + ApprovalFlow 审批 + 审计。外层再拦一次会让同一次
+        // 调用审批两次，且在外层闸门未绑定 UI 时直接 fail-closed，使该入口的高危工具
+        // 永远无法执行（= 能力被静默摘除，而不是被审批约束）。
+        if (!provider.enforcesOwnPolicy && ToolRiskPolicy.riskOf(name) == ToolRiskPolicy.RISK_HIGH) {
             val approval = awaitApproval(name, argMap)
             if (!approval.approved) {
                 val content = JsonObject().apply {

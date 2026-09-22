@@ -28,6 +28,19 @@ interface McpToolRegistryProvider {
      * @return 执行结果(success=true 时 output 为输出文本;false 时 error 描述错误)
      */
     fun executeTool(name: String, args: Map<String, Any>): McpToolResult
+
+    /**
+     * 该 provider 的 executeTool 内部是否已经完成「风险判定 + 审批」。
+     *
+     * 默认 alse,此时 [JsonRpcDispatcher] 会在调用前叠加自己的 [McpApprovalGate]
+     * 外层闸门(对不设防的第三方 provider 是必要的兜底)。
+     *
+     * 置为 	rue 表示 provider 自己就是策略权威 —— 例如 [ToolRegistryMcpProvider]
+     * 会走 ToolRegistry 的完整闸门链(含不可信来源 × 高危硬闸门 + ApprovalFlow 审批 +
+     * 审计)。此时若外层再加一道闸门,同一次调用会被要求审批两次;更糟的是外层闸门
+     * 若没有绑定 UI 就会直接 fail-closed,使得该入口的高危工具**永远无法执行**。
+     */
+    val enforcesOwnPolicy: Boolean get() = false
 }
 
 data class McpToolInfo(
