@@ -71,3 +71,8 @@ app/src/main/assets/proot/alpine-minirootfs.tar.gz
 app/src/main/assets/proot/alpine-minirootfs.tar.gz.sha256
 app/src/main/assets/proot/ubuntu-base-*.tar.gz
 app/src/main/assets/proot/ubuntu-base-*.tar.gz.sha256
+
+# ─────────────── 第三方 APK 静态分析产物 (muse-analysis, ~1.1GB, 不入库) ───────────────
+muse-analysis/
+*.apk_*
+
