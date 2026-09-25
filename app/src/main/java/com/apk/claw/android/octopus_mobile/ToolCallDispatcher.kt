@@ -84,7 +84,12 @@ class ToolCallDispatcher(
             try {
                 if (result.isSuccess) {
                     // 截断超大返回（避免 WebSocket 帧超限）
-                    val data = truncateResultData(result.data)
+                    val data = if (shortName == "mirror_frame") {
+                        require((result.data?.length ?: 0) <= MAX_MIRROR_CHARS) {
+                            "Mirror frame exceeds transport limit"
+                        }
+                        result.data
+                    } else truncateResultData(result.data)
                     client.sendToolResult(
                         callId = call.id,
                         success = true,
@@ -157,6 +162,7 @@ class ToolCallDispatcher(
         data?.let { if (it.length > MAX_RESULT_CHARS) it.substring(0, MAX_RESULT_CHARS) + TRUNCATED_SUFFIX else it }
 
     companion object {
+        private const val MAX_MIRROR_CHARS = 500_000
         internal const val MAX_RESULT_CHARS = 32_000
         internal const val TRUNCATED_SUFFIX = "...(truncated)"
     }

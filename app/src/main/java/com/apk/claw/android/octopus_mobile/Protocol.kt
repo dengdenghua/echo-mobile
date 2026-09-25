@@ -130,6 +130,7 @@ object EnvelopeFactory {
             put("client_type", "android_tentacle")
             put("client_version", "0.1.0")
             put("tentacle_id", tentacleId)
+            put("platform", "android")
             put("device_meta", deviceMeta)
             put("capabilities", capabilities)
             put("auth_token", authToken ?: "")

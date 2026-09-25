@@ -129,6 +129,17 @@
             android:name=".ui.settings.RuntimeConfigActivity"
             android:exported="false" />
         <activity
+            android:name=".transfer.TransferActivity"
+            android:exported="true"
+            android:label="Echo 文件收发">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ui.device.DeviceListActivity"
             android:exported="false" />
         <activity

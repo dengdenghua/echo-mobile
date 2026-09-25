@@ -524,6 +524,12 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         context.startActivity(Intent(context, RuntimeConfigActivity::class.java))
                     }
                     SettingsDivider()
+                    ClickableSettingsRow(Icons.Filled.Hub, "Echo 文件收发", "加入手机文件，接收电脑文件") {
+                        context.startActivity(
+                            Intent(context, com.apk.claw.android.transfer.TransferActivity::class.java),
+                        )
+                    }
+                    SettingsDivider()
                     ClickableSettingsRow(Icons.Filled.GraphicEq, stringResource(R.string.settings_remote_lan_title), "") {
                         context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.PcRemoteActivity::class.java))
                     }

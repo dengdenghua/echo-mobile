@@ -148,6 +148,7 @@ object ToolRegistry {
         deviceType = type
         tools.clear()
         registerCommonTools()
+        registerMirrorTools()
         when (type) {
             DeviceType.TV -> registerTvTools()
             DeviceType.MOBILE -> registerMobileTools()
@@ -172,6 +173,12 @@ object ToolRegistry {
         tools.keys.removeIf { it.startsWith("browser_") }
     }
 
+    private fun registerMirrorTools() {
+        register(MirrorFrameTool())
+        register(MirrorControlTool())
+        register(ExchangeFilesTool())
+    }
+
     private fun registerCommonTools() {
         register(GetScreenInfoTool())
         register(LookAtScreenTool())
@@ -188,6 +195,7 @@ object ToolRegistry {
         register(ClipboardTool())
         register(SendFileTool())
         register(FinishTool())
+        register(com.apk.claw.android.tool.impl.DeviceCallTool())
         // exit_plan_mode:PLAN 模式下 LLM 输出方案后调用此工具,经用户确认后切换到 DEFAULT 模式
         register(com.apk.claw.android.tool.impl.ExitPlanModeTool())
 
@@ -459,11 +467,13 @@ object ToolRegistry {
 
         // ── 权限策略（统一读取 PermissionModeManager）──
         val policy = PermissionModeManager.getCurrentPolicy()
+        val activeBreaker = com.apk.claw.android.octopus_mobile.safety.InteractiveToolLimits
+            .forTool(name, circuitBreaker)
 
         // ── 断路器熔断检查（全工具维度，防止持续失败拖垮系统）──
         // 不可关闭项：circuitBreakerEnabled 始终为 true，即使 FULL_POWER 也不关
         if (policy.circuitBreakerEnabled) {
-            val breaker = circuitBreaker
+            val breaker = activeBreaker
             if (breaker != null) {
                 try {
                     breaker.check()
@@ -599,7 +609,7 @@ object ToolRegistry {
         val result = try {
             tool.executeWithWaitAfter(params, cancellationToken)
         } catch (e: Exception) {
-            circuitBreaker?.record(success = false)
+            activeBreaker?.record(success = false)
             // requireString/requireInt 缺参/类型错都抛 IllegalArgumentException → 归类 INVALID_PARAM,
             // Agent 据此知道该改参数而非原样重试;其余按内部异常。
             val code = if (e is IllegalArgumentException) ToolErr.INVALID_PARAM else ToolErr.INTERNAL
@@ -621,7 +631,7 @@ object ToolRegistry {
         }
 
         // ── 断路器记录结果 ──
-        circuitBreaker?.record(success = finalResult.isSuccess)
+        activeBreaker?.record(success = finalResult.isSuccess)
 
         // ── 自进化打分（无论是否 WARN 都记录）──
         turnScorer?.record(name, success = finalResult.isSuccess, reason = finalResult.data ?: finalResult.error ?: "")

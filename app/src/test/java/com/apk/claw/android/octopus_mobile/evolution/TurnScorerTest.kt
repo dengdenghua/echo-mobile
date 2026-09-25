@@ -10,6 +10,15 @@ import java.io.File
  * TurnScorer 测试 —— 打分 / 适应度 / 趋势.
  */
 class TurnScorerTest {
+    @Test fun `large screen payloads stay out of scoring logs`() {
+        val scorer = TurnScorer(tempDir)
+        scorer.record("mirror_frame", true, reason = "image".repeat(100_000))
+        scorer.record("other_tool", false, reason = "failure".repeat(100_000))
+        val scores = scorer.readRecentScores(10)
+        assertEquals("Frame delivered", scores[0].reason)
+        assertEquals(512, scores[1].reason.length)
+        assertTrue(File(tempDir, "turn_scores.jsonl").length() < 4096)
+    }
 
     // 每个测试独立临时目录。不能用毫秒时间戳命名：同一毫秒内多个测试
     // 会共享目录，scores 文件跨测试累积导致计数断言失败。

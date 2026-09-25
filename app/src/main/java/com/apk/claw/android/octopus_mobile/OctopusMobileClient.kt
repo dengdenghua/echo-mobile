@@ -14,6 +14,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import com.apk.claw.android.utils.KVUtils
 
+private const val PEER_TOOL_TIMEOUT_MS = 30_000
+private const val PEER_REPLY_TIMEOUT_MS = 35_000L
+
 /**
  * Octopus Mobile 客户端 —— Octopus Mobile 与 octopus-agent Runtime 之间的 WebSocket 通道.
  *
@@ -36,15 +39,18 @@ import com.apk.claw.android.utils.KVUtils
  *  - 集成：docs/adr/008-octopus-mobile.md
  */
 open class OctopusMobileClient(
-    private val runtimeUrl: String,
+    private var runtimeUrl: String,
     private val tentacleId: String,
-    private val authToken: String? = null
+    private var authToken: String? = null,
+    private val capabilitiesProvider: () -> List<String> = { emptyList() },
 ) {
     private val tag = "OctopusMobile"
 
     private val gson = Gson()
+    private val pendingPeerCalls = ConcurrentHashMap<String, CompletableDeferred<JsonObject>>()
+    private val connectionGeneration = AtomicInteger(0)
 
-    private val httpClient: OkHttpClient = run {
+    private fun createHttpClient(): OkHttpClient {
         val builder = OctoHttp.shared.newBuilder()
             .pingInterval(30, TimeUnit.SECONDS)
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -54,7 +60,7 @@ open class OctopusMobileClient(
         val certPin = KVUtils.getRuntimeCertPin()
         if (certPin.isNotBlank()) {
             val host = try {
-                java.net.URL(runtimeUrl).host
+                java.net.URI(runtimeUrl).host
             } catch (e: Exception) { null }
             if (host != null) {
                 builder.certificatePinner(
@@ -65,7 +71,7 @@ open class OctopusMobileClient(
                 XLog.i(tag, "certificate pinning enabled for $host")
             }
         }
-        builder.build()
+        return builder.build()
     }
 
     private var webSocket: WebSocket? = null
@@ -120,6 +126,7 @@ open class OctopusMobileClient(
 
     /** 启动客户端 —— 建立 WebSocket 连接 + 发送 hello + 状态流转. */
     open fun connect() {
+        val generation = connectionGeneration.incrementAndGet()
         val transport = MobileRuntimeSecurity.assess(
             runtimeUrl,
             allowInsecureRuntime = KVUtils.isInsecureOctopusRuntimeAllowed(),
@@ -145,6 +152,7 @@ open class OctopusMobileClient(
 
         val listener = object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
+                if (generation != connectionGeneration.get()) { webSocket.cancel(); return }
                 XLog.i(tag, "websocket opened")
                 this@OctopusMobileClient.webSocket = webSocket
                 setState(ConnectionState.CONNECTED)
@@ -157,9 +165,14 @@ open class OctopusMobileClient(
                         "brand" to android.os.Build.BRAND,
                         "model" to android.os.Build.MODEL,
                         "android_version" to android.os.Build.VERSION.RELEASE,
-                        "sdk" to android.os.Build.VERSION.SDK_INT
+                        "sdk" to android.os.Build.VERSION.SDK_INT,
+                        "device_kind" to if (
+                            android.os.Build.FINGERPRINT.startsWith("generic") ||
+                            android.os.Build.HARDWARE in setOf("goldfish", "ranchu") ||
+                            android.os.Build.MODEL.contains("sdk_gphone", ignoreCase = true)
+                        ) "emulator" else "unknown",
                     ),
-                    capabilities = emptyList(),
+                    capabilities = capabilitiesProvider(),
                     authToken = authToken,
                     nonce = nonce
                 )
@@ -170,25 +183,29 @@ open class OctopusMobileClient(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
+                if (generation != connectionGeneration.get()) return
                 XLog.d(tag, "received: $text")
                 handleIncomingMessage(text)
             }
 
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                if (generation != connectionGeneration.get()) return
                 // 二进制帧：母体 push_pc_frame 推来的 PC 屏幕帧（远程桌面）
                 if (state == ConnectionState.HELLO_SENT) {
                     XLog.w(tag, "binary frame ignored before hello acknowledgement")
                     return
                 }
-                onPcFrame?.invoke(bytes.toByteArray())
+                if (pcScreenSubscribed) onPcFrame?.invoke(bytes.toByteArray())
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                if (generation != connectionGeneration.get()) { webSocket.cancel(); return }
                 XLog.i(tag, "websocket closing code=$code reason=$reason")
                 webSocket.close(code, reason)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                if (generation != connectionGeneration.get()) return
                 XLog.i(tag, "websocket closed code=$code reason=$reason")
                 this@OctopusMobileClient.webSocket = null
                 // code 1000 = 正常关闭（用户主动 disconnect），不重连
@@ -203,6 +220,7 @@ open class OctopusMobileClient(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                if (generation != connectionGeneration.get()) return
                 XLog.w(tag, "websocket failure: ${t.message}")
                 this@OctopusMobileClient.webSocket = null
                 setState(ConnectionState.DISCONNECTED)
@@ -212,7 +230,7 @@ open class OctopusMobileClient(
             }
         }
 
-        httpClient.newWebSocket(request, listener)
+        createHttpClient().newWebSocket(request, listener)
     }
 
     /** 连接诊断（重连历史/失败原因/离线时长），供 UI/控制台观测断线状态。 */
@@ -257,6 +275,8 @@ open class OctopusMobileClient(
      * 此时 executeRemoteTask 因状态非 ONLINE 不会再注册新任务,无竞态。
      */
     private fun failPendingTasks(reason: String) {
+        pendingPeerCalls.values.forEach { it.completeExceptionally(IllegalStateException(reason)) }
+        pendingPeerCalls.clear()
         if (pendingTasks.isEmpty()) return
         val deferreds = pendingTasks.values.toList()
         pendingTasks.clear()
@@ -271,6 +291,7 @@ open class OctopusMobileClient(
     internal fun handleIncomingMessage(text: String) {
         try {
             val root = JsonParser.parseString(text).asJsonObject
+            if (handlePeerReply(root)) return
             if (handleHelloAck(root)) {
                 // Continue to listener fan-out below, but no further protocol dispatch needed.
             } else if (handleHelloError(root)) {
@@ -278,6 +299,8 @@ open class OctopusMobileClient(
             }
             // 母体（Python json.dumps）发的是 "method": "..."，Gson 自动处理空白
             val method = root.get("method")?.asString
+            // Runtime sends JSON-RPC params; older relays used flat fields.
+            val payload = root.get("params")?.takeIf { it.isJsonObject }?.asJsonObject ?: root
 
             when (method) {
                 "device/hello_ack", "device/registered" -> {
@@ -285,16 +308,22 @@ open class OctopusMobileClient(
                 }
                 // 任务结果（母体返回的任务执行结果）
                 "task/result" -> {
-                    val taskId = root.get("task_id")?.asString ?: return
-                    val response = root.get("response")?.asString ?: ""
-                    val steps = root.get("steps")?.asInt ?: 0
+                    if (state != ConnectionState.ONLINE) return
+                    val taskId = payload.get("task_id")?.asString ?: return
+                    val response = payload.get("response")?.asString ?: ""
+                    val steps = payload.get("steps")?.asInt ?: 0
                     val deferred = pendingTasks.remove(taskId)
-                    deferred?.complete(RemoteTaskResult.Success(steps, response, TokenUsage(0, 0, 0)))
+                    val success = payload.get("success")?.asBoolean ?: true
+                    deferred?.complete(
+                        if (success) RemoteTaskResult.Success(steps, response, TokenUsage(0, 0, 0))
+                        else RemoteTaskResult.Failure(response.ifBlank { "Remote task failed" }),
+                    )
                 }
                 // 任务错误
                 "task/error" -> {
-                    val taskId = root.get("task_id")?.asString ?: return
-                    val error = root.get("error")?.asString ?: "Unknown error"
+                    if (state != ConnectionState.ONLINE) return
+                    val taskId = payload.get("task_id")?.asString ?: return
+                    val error = payload.get("error")?.asString ?: "Unknown error"
                     val deferred = pendingTasks.remove(taskId)
                     deferred?.complete(RemoteTaskResult.Failure(error))
                 }
@@ -307,9 +336,14 @@ open class OctopusMobileClient(
                         XLog.w(tag, "tool/execute rejected before handshake ack (state=$state)")
                         return
                     }
-                    val callId = root.get("id")?.asString ?: return
-                    val tool = root.get("tool")?.asString ?: return
-                    val argsElement = root.get("args")
+                    val target = payload.get("tentacle_id")?.asString
+                    if (target != null && target != tentacleId) {
+                        XLog.w(tag, "tool/execute rejected: device target mismatch")
+                        return
+                    }
+                    val callId = payload.get("id")?.asString ?: root.get("id")?.asString ?: return
+                    val tool = payload.get("tool")?.asString ?: return
+                    val argsElement = payload.get("args")
                     val args = parseArgs(argsElement)
                     val call = ToolCall(id = callId, name = tool, args = args)
                     onToolExecute?.invoke(call)
@@ -474,6 +508,24 @@ open class OctopusMobileClient(
         }
     }
 
+    /** Explicitly granted device-to-device calls use the same authenticated hub. */
+    suspend fun executePeerTool(targetDeviceId: String, tool: String, args: Map<String, Any?>): JsonObject {
+        val ws = webSocket ?: error("Not connected to runtime")
+        check(state == ConnectionState.ONLINE) { "Device handshake is not complete" }
+        val id = "peer-${java.util.UUID.randomUUID()}"
+        val result = CompletableDeferred<JsonObject>()
+        pendingPeerCalls[id] = result
+        return try {
+            check(ws.send(Envelope.Request(method = "device/call", id = id, params = mapOf(
+                "target_device_id" to targetDeviceId, "tool" to tool,
+                "args" to args, "timeout_ms" to PEER_TOOL_TIMEOUT_MS,
+            )).toJson())) { "Device connection is closed" }
+            withTimeout(PEER_REPLY_TIMEOUT_MS) { result.await() }
+        } finally {
+            pendingPeerCalls.remove(id)
+        }
+    }
+
     /**
      * 发送工具执行结果给母体.
      *
@@ -519,7 +571,10 @@ open class OctopusMobileClient(
     /** 订阅母体 PC 屏幕流（远程桌面：母体随后通过 push_pc_frame 推 JPEG 帧）。 */
     fun subscribePcScreen() {
         pcScreenSubscribed = true
-        send(Envelope.Request(method = "pc_screen/subscribe", params = mapOf("tentacle_id" to tentacleId)))
+        send(Envelope.Request(
+            method = "pc_screen/subscribe",
+            params = mapOf("tentacle_id" to tentacleId, "formats" to listOf("h264", "jpeg")),
+        ))
     }
 
     /** 取消订阅母体 PC 屏幕流。 */
@@ -551,20 +606,50 @@ open class OctopusMobileClient(
             XLog.w(tag, "send skipped: not connected")
             return
         }
-        ws.send(envelope.toJson())
+        val boundEnvelope = if (envelope is Envelope.Request &&
+            envelope.params["tentacle_id"] == "") {
+            envelope.copy(params = envelope.params + ("tentacle_id" to tentacleId))
+        } else envelope
+        ws.send(boundEnvelope.toJson())
     }
 
     /**
      * 主动断开连接.
      */
     fun disconnect() {
+        connectionGeneration.incrementAndGet()
         reconnectJob?.cancel()
         reconnectAttempts.set(0)
-        scope.cancel()
         webSocket?.close(1000, "client disconnect")
         webSocket = null
         setState(ConnectionState.OFFLINE)
+        failPendingTasks("Device disconnected")
         diagnostics.onDisconnected(null, System.currentTimeMillis())
+    }
+
+    /** Apply saved pairing settings to the existing component graph. */
+    fun configure(url: String, token: String?) {
+        if (runtimeUrl == url && authToken == token) return
+        disconnect()
+        runtimeUrl = url
+        authToken = token
+    }
+
+    private fun handlePeerReply(root: JsonObject): Boolean {
+        val isReply = root.has("result") || root.has("error")
+        if (state != ConnectionState.ONLINE || !isReply) return false
+        val pending = root.get("id")?.asString?.let { pendingPeerCalls.remove(it) }
+        if (pending != null) {
+            val result = root.get("result")
+            when {
+                root.has("error") -> pending.completeExceptionally(
+                    IllegalStateException(root.get("error").toString()),
+                )
+                result?.isJsonObject == true -> pending.complete(result.asJsonObject)
+                else -> pending.completeExceptionally(IllegalStateException("Invalid peer result"))
+            }
+        }
+        return pending != null
     }
 
     /**
@@ -591,7 +676,10 @@ open class OctopusMobileClient(
                 // 否则远程桌面在一次网络抖动后掉线，便永远等不到新帧（母体侧订阅已随旧连接失效）。
                 if (pcScreenSubscribed) {
                     XLog.i(tag, "reconnected ONLINE, restoring pc_screen subscription")
-                    send(Envelope.Request(method = "pc_screen/subscribe", params = mapOf("tentacle_id" to tentacleId)))
+                    send(Envelope.Request(
+            method = "pc_screen/subscribe",
+            params = mapOf("tentacle_id" to tentacleId, "formats" to listOf("h264", "jpeg")),
+        ))
                 }
             }
         }

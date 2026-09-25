@@ -127,6 +127,118 @@ class OctopusMobileClientHandshakeTest {
         assertEquals(ConnectionState.DISCONNECTED, client.currentState())
     }
 
+    @Test
+    fun `runtime nested tool params are dispatched and wrong device is rejected`() {
+        val dispatched = CountDownLatch(1)
+        val online = CountDownLatch(1)
+        enqueueRuntimeSocket { webSocket, text ->
+            val hello = JSONObject(text)
+            webSocket.send(JSONObject().put("id", hello.getString("id"))
+                .put("result", JSONObject().put("registered", true)).toString())
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        client.onToolExecute = {
+            assertEquals("android.get_screen_info", it.name)
+            assertEquals("call-1", it.id)
+            dispatched.countDown()
+        }
+        client.handleIncomingMessage("""{"jsonrpc":"2.0","method":"tool/execute","id":"call-1",
+            "params":{"id":"call-1","tentacle_id":"test-device","tool":"android.get_screen_info","args":{}}}""")
+        assertTrue(dispatched.await(2, TimeUnit.SECONDS))
+        client.onToolExecute = { throw AssertionError("dispatched to wrong device") }
+        client.handleIncomingMessage("""{"method":"tool/execute","id":"wrong",
+            "params":{"tentacle_id":"another-device","tool":"android.tap","args":{}}}""")
+    }
+
+    @Test
+    fun `heartbeat binds identity and peer calls receive real result`() = kotlinx.coroutines.runBlocking {
+        val online = CountDownLatch(1)
+        val heartbeat = CountDownLatch(1)
+        enqueueRuntimeSocket { webSocket, text ->
+            val message = JSONObject(text)
+            when (message.getString("method")) {
+                "device/hello" -> webSocket.send(JSONObject().put("id", message.getString("id"))
+                    .put("result", JSONObject().put("registered", true)).toString())
+                "device/heartbeat" -> {
+                    assertEquals("test-device", message.getJSONObject("params").getString("tentacle_id"))
+                    heartbeat.countDown()
+                }
+                "device/call" -> {
+                    assertEquals("vm-1", message.getJSONObject("params").getString("target_device_id"))
+                    webSocket.send(JSONObject().put("id", message.getString("id"))
+                        .put("result", JSONObject().put("success", true).put("data", "from-vm")).toString())
+                }
+            }
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        client.send(EnvelopeFactory.heartbeat("", null, 80, false, null))
+        assertTrue(heartbeat.await(2, TimeUnit.SECONDS))
+        val result = client.executePeerTool("vm-1", "device.info", emptyMap())
+        assertEquals("from-vm", result.get("data").asString)
+    }
+
+    @Test
+    fun `nested failed task result is not reported as success`() = kotlinx.coroutines.runBlocking {
+        val online = CountDownLatch(1)
+        enqueueRuntimeSocket { webSocket, text ->
+            val message = JSONObject(text)
+            if (message.getString("method") == "device/hello") {
+                webSocket.send(JSONObject().put("id", message.getString("id"))
+                    .put("result", JSONObject().put("registered", true)).toString())
+            } else if (message.getString("method") == "task/execute") {
+                webSocket.send(JSONObject().put("method", "task/result")
+                    .put("params", JSONObject().put("task_id", message.getString("id"))
+                        .put("success", false).put("response", "device unavailable")).toString())
+            }
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        val result = client.executeRemoteTask("test", IntentClassifier.classify("test"))
+        assertEquals(RemoteTaskResult.Failure("device unavailable"), result)
+    }
+
+    @Test
+    fun `reconfigured client reconnects with new endpoint token and capabilities`() {
+        val online = CountDownLatch(1)
+        val reconnected = CountDownLatch(1)
+        enqueueRuntimeSocket { webSocket, text ->
+            val hello = JSONObject(text)
+            webSocket.send(JSONObject().put("id", hello.getString("id"))
+                .put("result", JSONObject().put("registered", true)).toString())
+        }
+        val url = server.url("/first").toString().replace("http://", "ws://")
+        val client = OctopusMobileClient(url, "test-device", "old-token") {
+            listOf("android.get_screen_info")
+        }.also { clients.add(it) }
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        assertEquals("/first", server.takeRequest(2, TimeUnit.SECONDS)?.path)
+
+        enqueueRuntimeSocket { webSocket, text ->
+            val hello = JSONObject(text)
+            val params = hello.getJSONObject("params")
+            assertEquals("new-token", params.getString("auth_token"))
+            assertEquals("android", params.getString("platform"))
+            assertEquals("android.get_screen_info", params.getJSONArray("capabilities").getString(0))
+            webSocket.send(JSONObject().put("id", hello.getString("id"))
+                .put("result", JSONObject().put("registered", true)).toString())
+        }
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) reconnected.countDown() }
+        client.configure(server.url("/second").toString().replace("http://", "ws://"), "new-token")
+        client.connect()
+        assertTrue(reconnected.await(2, TimeUnit.SECONDS))
+        assertEquals("/second", server.takeRequest(2, TimeUnit.SECONDS)?.path)
+    }
+
     private fun newClient(): OctopusMobileClient =
         OctopusMobileClient(server.url("/ws").toString().replace("http://", "ws://"), "test-device")
             .also { clients.add(it) }

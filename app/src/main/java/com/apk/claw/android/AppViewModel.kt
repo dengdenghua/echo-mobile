@@ -172,13 +172,21 @@ class AppViewModel : ViewModel() {
     fun initOctopusMobile() {
         try {
             val runtimeUrl = KVUtils.getOctopusRpcUrl().ifEmpty { "ws://10.0.2.2:8765" }
-            val tentacleId = "${android.os.Build.BRAND}_${android.os.Build.MODEL}"
-                .replace(" ", "_").lowercase()
+            // The same model can occur on many physical phones or emulator instances.
+            val tentacleId = com.apk.claw.android.tentacle.DeviceRegistration(
+                ClawApplication.instance,
+            ).deviceId
 
             val client = OctopusMobileClient(
                 runtimeUrl = runtimeUrl,
                 tentacleId = tentacleId,
-                authToken = KVUtils.getOctopusAuthToken()
+                authToken = KVUtils.getOctopusAuthToken(),
+                capabilitiesProvider = {
+                    ToolRegistry.getAllTools()
+                        .filter { ToolRegistry.isToolEnabled(it.getName()) }
+                        .map { "android.${it.getName()}" }
+                        .sorted()
+                },
             )
             octopusClient = client
 
@@ -286,6 +294,7 @@ class AppViewModel : ViewModel() {
             XLog.w(TAG, "connectRuntime: client not initialized")
             return
         }
+        client.configure(KVUtils.getOctopusRpcUrl(), KVUtils.getOctopusAuthToken())
         connectionManager?.connect()
             ?: XLog.w(TAG, "connectRuntime: connectionManager not initialized")
     }

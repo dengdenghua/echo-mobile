@@ -25,6 +25,7 @@ abstract class BaseTool {
          */
         @JvmField
         val NON_IDEMPOTENT_TOOLS: MutableSet<String> = hashSetOf(
+            "mirror_control", "exchange_files",
             "tap", "long_press", "swipe", "input_text",
             "dpad_center", "dpad_up", "dpad_down", "dpad_left", "dpad_right",
             "press_menu", "press_power", "volume_up", "volume_down",

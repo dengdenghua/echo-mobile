@@ -254,7 +254,7 @@ class RuntimeConfigActivity : BaseActivity() {
      */
     private fun maybeApplyConnectString() {
         val raw = etRuntimeUrl.text.toString().trim()
-        if (!raw.startsWith("octopus://join")) return
+        if (!raw.startsWith("octopus://join") && !raw.startsWith("echo://join")) return
         try {
             val uri = android.net.Uri.parse(raw)
             val ws = uri.getQueryParameter("ws")

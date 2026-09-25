@@ -15,6 +15,7 @@ object ToolRiskPolicy {
     const val RISK_HIGH = "high"
 
     val HIGH_RISK_TOOLS: Set<String> = setOf(
+        "device_call",
         // VPN 隧道:劫持全局网络流量,把所有流量导向用户/插件提供的 SOCKS5 代理。
         // 高危 → 不可信来源走来源闸门,防远端静默把流量引到攻击者代理做中间人。
         // (stop_vpn/vpn_status 无副作用本可低危,但同族一起 HIGH 更简单一致,不留缺口。)
@@ -83,6 +84,7 @@ object ToolRiskPolicy {
     )
 
     val MEDIUM_RISK_TOOLS: Set<String> = setOf(
+        "mirror_control", "exchange_files",
         "tap",
         "long_press",
         "swipe",
@@ -151,6 +153,7 @@ object ToolRiskPolicy {
      * 任何会改变设备/应用/外部状态的工具都不应放在这里——见 MEDIUM/HIGH。
      */
     val KNOWN_LOW_RISK_TOOLS: Set<String> = setOf(
+        "mirror_frame",
         // 只读 / 观察类
         "get_screen_info", "look_at_screen", "find_node_info", "get_installed_apps",
         "get_window_info", "take_screenshot", "browser_get_dom", "browser_screenshot",

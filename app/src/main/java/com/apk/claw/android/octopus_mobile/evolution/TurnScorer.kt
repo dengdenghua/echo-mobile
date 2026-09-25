@@ -62,10 +62,11 @@ open class TurnScorer(
     open fun record(toolName: String, success: Boolean, rounds: Int = 1, reason: String = "") {
         val score = if (success) 1.0 else 0.0
         val entry = TurnScore(
-            ts = DATE_FMT.format(Date()),
+            ts = synchronized(DATE_FMT) { DATE_FMT.format(Date()) },
             toolName = toolName,
             score = score,
-            reason = reason,
+            reason = if (toolName == "mirror_frame" && success) "Frame delivered"
+                else reason.take(BoundedScoreLog.MAX_REASON_CHARS),
             rounds = rounds,
         )
         appendScore(entry)
@@ -76,10 +77,10 @@ open class TurnScorer(
      */
     fun recordPartial(toolName: String, rounds: Int = 1, reason: String = "partial") {
         val entry = TurnScore(
-            ts = DATE_FMT.format(Date()),
+            ts = synchronized(DATE_FMT) { DATE_FMT.format(Date()) },
             toolName = toolName,
             score = 0.5,
-            reason = reason,
+            reason = reason.take(BoundedScoreLog.MAX_REASON_CHARS),
             rounds = rounds,
         )
         appendScore(entry)
@@ -90,11 +91,11 @@ open class TurnScorer(
     /**
      * 读取最近 N 条打分记录.
      */
+    @Synchronized
     fun readRecentScores(limit: Int = windowSize): List<TurnScore> {
         if (!scoresFile.exists()) return emptyList()
 
-        val lines = scoresFile.readLines()
-        val recent = lines.takeLast(limit)
+        val recent = scoresFile.reader().use { BoundedScoreLog.read(it, limit) }
 
         return recent.mapNotNull { line ->
             try {
@@ -210,6 +211,7 @@ open class TurnScorer(
 
     // ── 内部 ──────────────────────────────────────────
 
+    @Synchronized
     private fun appendScore(entry: TurnScore) {
         try {
             dataDir.mkdirs()
@@ -232,10 +234,9 @@ open class TurnScorer(
     private fun trimScores(maxLines: Int) {
         try {
             if (!scoresFile.exists()) return
-            val lines = scoresFile.readLines()
-            if (lines.size > maxLines) {
-                val trimmed = lines.takeLast(maxLines)
-                scoresFile.writeText(trimmed.joinToString("\n") + "\n")
+            val trimmed = scoresFile.reader().use { BoundedScoreLog.read(it, maxLines) }
+            scoresFile.bufferedWriter().use { output ->
+                trimmed.forEach { output.appendLine(it) }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to trim scores", e)

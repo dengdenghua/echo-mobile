@@ -59,7 +59,7 @@ class DeviceDiscoveryManager(
 
     /** 本机 deviceId */
     private val localDeviceId: String by lazy {
-        "${android.os.Build.BRAND}_${android.os.Build.MODEL}".replace(" ", "_").lowercase()
+        com.apk.claw.android.tentacle.DeviceRegistration(context).deviceId
     }
 
     @Volatile
