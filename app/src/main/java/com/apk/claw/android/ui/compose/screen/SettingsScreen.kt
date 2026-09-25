@@ -530,6 +530,12 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         )
                     }
                     SettingsDivider()
+                    ClickableSettingsRow(Icons.Filled.Hub, "跨端任务", "查看进度、确认执行计划、继续已暂停任务") {
+                        context.startActivity(
+                            Intent(context, com.apk.claw.android.ui.featurescreens.DeviceTasksActivity::class.java),
+                        )
+                    }
+                    SettingsDivider()
                     ClickableSettingsRow(Icons.Filled.GraphicEq, stringResource(R.string.settings_remote_lan_title), "") {
                         context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.PcRemoteActivity::class.java))
                     }

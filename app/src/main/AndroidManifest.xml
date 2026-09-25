@@ -223,6 +223,7 @@
         <activity android:name=".ui.featurescreens.BrowserSettingsActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.PcRemoteActivity" android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity android:name=".ui.featurescreens.DeviceTasksActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.PcRemoteWebrtcActivity" android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden" />
 

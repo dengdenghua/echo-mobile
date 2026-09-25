@@ -509,6 +509,24 @@ open class OctopusMobileClient(
     }
 
     /** Explicitly granted device-to-device calls use the same authenticated hub. */
+    suspend fun taskWorkspace(command: String, args: Map<String, Any?> = emptyMap()): JsonObject {
+        require(command in setOf("list", "devices", "submit", "get", "approve", "pause", "resume", "cancel", "remove"))
+        val ws = webSocket ?: error("请先连接设备中心")
+        check(state == ConnectionState.ONLINE) { "设备中心尚未连接" }
+        val id = "workspace-${java.util.UUID.randomUUID()}"
+        val result = CompletableDeferred<JsonObject>()
+        pendingPeerCalls[id] = result
+        return try {
+            check(ws.send(Envelope.Request(method = "task/workspace/$command", id = id, params = args).toJson())) {
+                "连接已断开"
+            }
+            withTimeout(PEER_REPLY_TIMEOUT_MS) { result.await() }
+        } finally {
+            pendingPeerCalls.remove(id)
+        }
+    }
+
+    /** Explicitly granted device-to-device calls use the same authenticated hub. */
     suspend fun executePeerTool(targetDeviceId: String, tool: String, args: Map<String, Any?>): JsonObject {
         val ws = webSocket ?: error("Not connected to runtime")
         check(state == ConnectionState.ONLINE) { "Device handshake is not complete" }
@@ -643,7 +661,10 @@ open class OctopusMobileClient(
             val result = root.get("result")
             when {
                 root.has("error") -> pending.completeExceptionally(
-                    IllegalStateException(root.get("error").toString()),
+                    IllegalStateException(
+                        root.get("error")?.takeIf { it.isJsonObject }?.asJsonObject
+                            ?.get("message")?.asString ?: "设备中心拒绝了此操作",
+                    ),
                 )
                 result?.isJsonObject == true -> pending.complete(result.asJsonObject)
                 else -> pending.completeExceptionally(IllegalStateException("Invalid peer result"))

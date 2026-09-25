@@ -154,6 +154,32 @@ class OctopusMobileClientHandshakeTest {
     }
 
     @Test
+    fun `task workspace uses paired socket and reads durable server records`() {
+        val online = CountDownLatch(1)
+        val closed = enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            val result = if (request.getString("method") == "device/hello") {
+                JSONObject().put("registered", true)
+            } else {
+                assertEquals("task/workspace/list", request.getString("method"))
+                JSONObject().put("tasks", org.json.JSONArray().put(
+                    JSONObject().put("id", "same-task").put("status", "succeeded"),
+                ))
+            }
+            socket.send(JSONObject().put("jsonrpc", "2.0").put("id", request.getString("id"))
+                .put("result", result).toString())
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        val response = kotlinx.coroutines.runBlocking { client.taskWorkspace("list") }
+        assertEquals("same-task", response.getAsJsonArray("tasks")[0].asJsonObject.get("id").asString)
+        client.disconnect()
+        assertTrue(closed.await(2, TimeUnit.SECONDS))
+    }
+
+    @Test
     fun `heartbeat binds identity and peer calls receive real result`() = kotlinx.coroutines.runBlocking {
         val online = CountDownLatch(1)
         val heartbeat = CountDownLatch(1)
