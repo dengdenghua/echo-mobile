@@ -1,5 +1,7 @@
 package com.apk.claw.android.agent
 
+import com.apk.claw.android.octopus_mobile.GoalVerifier
+import java.lang.reflect.Proxy
 import dev.langchain4j.agent.tool.ToolExecutionRequest
 import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.ChatMessage
@@ -18,6 +20,44 @@ import java.util.LinkedList
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class DefaultAgentServiceTest {
+
+    @Test
+    fun `completion emits structured verdict before answer and only verified goals permit caching`() {
+        val stateClass = DefaultAgentService::class.java.declaredClasses.first { it.simpleName == "AgentLoopState" }
+        val constructor = stateClass.getDeclaredConstructor(
+            MutableList::class.java, Int::class.javaPrimitiveType, String::class.java,
+        ).apply { isAccessible = true }
+        val verdictField = stateClass.getDeclaredField("goalVerdict").apply { isAccessible = true }
+        val successField = stateClass.getDeclaredField("taskSucceeded").apply { isAccessible = true }
+        val complete = DefaultAgentService::class.java.getDeclaredMethod(
+            "completeWithVerification", stateClass, AgentCallback::class.java, String::class.java,
+        ).apply { isAccessible = true }
+        GoalVerifier.Status.entries.forEach { status ->
+            val events = mutableListOf<String>()
+            val verdict = GoalVerifier.Verdict(status, "证据")
+            val callback = Proxy.newProxyInstance(
+                AgentCallback::class.java.classLoader, arrayOf(AgentCallback::class.java),
+            ) {
+                _, method, args ->
+                when (method.name) {
+                    "onGoalVerification" -> {
+                        assertEquals(verdict, args[1])
+                        events.add("verification")
+                    }
+                    "onComplete" -> {
+                        assertEquals(verdict.present("模型反馈"), args[1])
+                        events.add("completion")
+                    }
+                }
+                null
+            } as AgentCallback
+            val state = constructor.newInstance(mutableListOf<ChatMessage>(), 2, "保存文件")
+            verdictField.set(state, verdict)
+            complete.invoke(DefaultAgentService(), state, callback, "模型反馈")
+            assertEquals(listOf("verification", "completion"), events)
+            assertEquals(status == GoalVerifier.Status.ACHIEVED, successField.getBoolean(state))
+        }
+    }
 
     // ==================== 反射辅助方法 ====================
 

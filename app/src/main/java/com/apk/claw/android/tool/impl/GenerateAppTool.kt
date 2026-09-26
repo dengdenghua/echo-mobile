@@ -333,10 +333,11 @@ class GenerateAppTool : BaseTool() {
             if (errors.isEmpty()) break
         }
 
-        var visualNote = ""
+        var visualNote = "，视觉结果待核验"
+        var visualPassed = false
         if (com.apk.claw.android.octopus_mobile.VisionAnalyzer.isConfigured()) {
             var visualRounds = 0
-            while (visualRounds < MAX_VISUAL_REPAIR) {
+            while (visualRounds <= MAX_VISUAL_REPAIR) {
                 currentCancellationToken()?.checkCancelled()
                 com.apk.claw.android.agent.AgentProgressBus.set("视觉验收中(第${visualRounds + 1}轮)…")
                 val shot = runCatching { HtmlLinter.lint(ClawApplication.instance, html, capture = true).screenshot }.getOrNull()
@@ -347,9 +348,14 @@ class GenerateAppTool : BaseTool() {
                     }
                 }.getOrNull()
                 runCatching { shot.recycle() }
-                if (verdict == null || verdict.achieved) break
+                if (verdict == null || !verdict.needsRepair) {
+                    visualPassed = verdict?.achieved == true
+                    visualNote = if (visualPassed) "，视觉核验通过" else "，视觉结果待核验"
+                    break
+                }
+                visualNote = "，视觉核验未通过：${verdict.reason.take(80)}"
+                if (visualRounds >= MAX_VISUAL_REPAIR) break
                 visualRounds++
-                if (visualRounds > MAX_VISUAL_REPAIR) break
                 ExperienceLedger.recordError("VISUAL_VERIFY_FAIL: ${verdict.reason.take(80)}", html.take(500))
                 currentCancellationToken()?.checkCancelled()
                 com.apk.claw.android.agent.AgentProgressBus.set("视觉修复中(第${visualRounds}轮)…")
@@ -360,7 +366,7 @@ class GenerateAppTool : BaseTool() {
                 val fe = runCatching { HtmlLinter.lint(ClawApplication.instance, fixedHtml).errors }.getOrDefault(emptyList())
                 if (fe.size <= errors.size) {
                     ExperienceLedger.recordRepair("VISUAL_VERIFY_FAIL")
-                    html = fixedHtml; errors = fe; visualNote = "，并按视觉检查修正了功能实现"
+                    html = fixedHtml; errors = fe; visualNote = "，修复后视觉结果待核验"
                 } else {
                     break
                 }
@@ -390,7 +396,6 @@ class GenerateAppTool : BaseTool() {
 
         val payload = "$PREVIEW_HEIGHT\n$html"
         val durationMs = System.currentTimeMillis() - startTime
-        val visualPassed = visualNote.isBlank() || "修正" in visualNote
         if (errors.isEmpty()) {
             TurnScorer.recordSuccess(durationMs, repairRounds, visualPassed)
         } else {

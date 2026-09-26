@@ -1,5 +1,6 @@
 package com.apk.claw.android.floating
 
+import com.apk.claw.android.octopus_mobile.GoalVerifier
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Handler
@@ -129,6 +130,19 @@ object LiveControlOverlay {
         main.post {
             if (!showing) return@post
             applyStep((if (success) "✓ " else "✗ ") + text, running = false, tint = if (success) cSuccess else cDanger)
+            main.postDelayed({ dismissView() }, 1600)
+        }
+    }
+
+    fun finishVerification(verdict: GoalVerifier.Verdict) {
+        if (verdict.status != GoalVerifier.Status.UNVERIFIED) {
+            finish(verdict.achieved, verdict.label)
+            return
+        }
+        taskActive = false
+        main.post {
+            if (!showing) return@post
+            applyStep(verdict.label, running = false, tint = cText)
             main.postDelayed({ dismissView() }, 1600)
         }
     }

@@ -30,13 +30,15 @@ private val cDanger = Color(0xFFFF453B)
 
 private fun outcomeLabel(o: String) = when (o) {
     "success" -> ClawApplication.instance.getString(R.string.channel_msg_tool_success)
+    "unverified", "completed" -> "结果待核验"
+    "not_achieved" -> "目标尚未完成"
     "cancelled" -> ClawApplication.instance.getString(R.string.activity_outcome_cancelled)
     else -> ClawApplication.instance.getString(R.string.channel_msg_tool_failure)
 }
 
 private fun outcomeColor(o: String) = when (o) {
     "success" -> FSuccess
-    "cancelled" -> FMuted
+    "cancelled", "unverified", "completed" -> FMuted
     else -> cDanger
 }
 

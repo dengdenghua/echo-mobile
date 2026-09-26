@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -48,12 +50,17 @@ private const val POLL_INTERVAL_MS = 3000L
 private const val MAX_TASK_LENGTH = 4096
 private fun JsonObject.string(name: String): String = get(name)?.takeUnless { it.isJsonNull }?.asString.orEmpty()
 private val taskLabels = mapOf(
-    "planning" to "正在生成计划", "awaiting_approval" to "等待确认", "running" to "正在执行",
-    "paused" to "已暂停", "interrupted" to "已中断", "succeeded" to "已完成", "failed" to "执行失败",
+    "planning" to "正在生成计划", "awaiting_handoff" to "等待阶段交接", "awaiting_approval" to "等待确认", "running" to "正在执行",
+    "paused" to "已暂停", "interrupted" to "已中断", "succeeded" to "步骤已执行", "failed" to "执行失败",
     "cancelled" to "已取消", "emergency_stopped" to "已停止",
 )
 
+private data class StageDraft(val deviceId: String = "", val task: String = "")
+private const val MAX_STAGES = 8
+private const val MAX_STAGE_TASK_LENGTH = 1024
+
 private class TaskWorkspaceState {
+    var stages by mutableStateOf<List<StageDraft>>(emptyList())
     var tasks by mutableStateOf<List<JsonObject>>(emptyList())
     var devices by mutableStateOf<List<JsonObject>>(emptyList())
     var target by mutableStateOf("")
@@ -94,6 +101,7 @@ private class TaskWorkspaceState {
             error = ""
             if (command == "submit") {
                 text = ""
+                stages = emptyList()
                 submissionId = UUID.randomUUID().toString()
             }
             refresh()
@@ -143,7 +151,15 @@ private fun DeviceTasksScreen(onBack: () -> Unit) {
 
 @Composable
 private fun TaskSubmission(state: TaskWorkspaceState, submit: (Map<String, Any?>) -> Unit) {
-    state.devices.forEach { device ->
+    Row {
+        Checkbox(checked = state.stages.isNotEmpty(), enabled = !state.busy, onCheckedChange = {
+            state.stages = if (it) listOf(StageDraft(state.target), StageDraft()) else emptyList()
+            state.submissionId = UUID.randomUUID().toString()
+        })
+        Text("多设备接续")
+    }
+    if (state.stages.isNotEmpty()) StageSubmission(state)
+    else state.devices.forEach { device ->
         TextButton(enabled = !state.busy && device.get("online").asBoolean, onClick = {
             state.target = device.string("id")
             state.submissionId = UUID.randomUUID().toString()
@@ -162,9 +178,13 @@ private fun TaskSubmission(state: TaskWorkspaceState, submit: (Map<String, Any?>
         },
         label = { Text("任务内容") }, modifier = Modifier.fillMaxWidth(),
     )
-    val online = state.devices.any { it.string("id") == state.target && it.get("online").asBoolean }
-    Button(enabled = !state.busy && state.text.isNotBlank() && online, onClick = {
-        submit(mapOf("id" to state.submissionId, "device_id" to state.target, "task" to state.text))
+    val firstTarget = state.stages.firstOrNull()?.deviceId ?: state.target
+    val online = state.devices.any { it.string("id") == firstTarget && it.get("online").asBoolean }
+    val complete = state.stages.all { it.deviceId.isNotBlank() && it.task.isNotBlank() }
+    Button(enabled = !state.busy && state.text.isNotBlank() && online && complete, onClick = {
+        val target = if (state.stages.isEmpty()) mapOf("device_id" to state.target)
+        else mapOf("stages" to state.stages.map { mapOf("device_id" to it.deviceId, "task" to it.task) })
+        submit(mapOf("id" to state.submissionId, "task" to state.text) + target)
     }) { Text("生成执行计划") }
 }
 
@@ -178,6 +198,8 @@ private fun DeviceTaskCard(task: JsonObject, busy: Boolean, perform: (String, Ma
             val progress = "${task.get("current_step").asInt} / ${task.getAsJsonArray("steps").size()}"
             Text("${taskLabels[state] ?: state} · 已确认 $progress 步")
             if (task.string("error").isNotBlank()) Text(task.string("error"), color = MaterialTheme.colorScheme.error)
+            StageProgress(task)
+            TaskOutcomeReview(task, busy, perform)
             TaskPlanAndResults(task)
             TaskActions(task, busy, perform)
         }
@@ -210,6 +232,11 @@ private fun TaskActions(task: JsonObject, busy: Boolean, perform: (String, Map<S
     val args = mapOf("id" to task.string("id"), "revision" to task.string("revision"))
     val ended = state in setOf("succeeded", "failed", "cancelled", "emergency_stopped")
     if (uncertain != null && !executing) Text("第 ${uncertain + 1} 步结果不明。请到目标设备核对；未完成可取消后重新规划。")
+    if (state == "awaiting_handoff") {
+        val reviewed = task.get("result_review")?.takeIf { it.isJsonObject }?.asJsonObject
+        Button(enabled = !busy && !executing && reviewed?.string("outcome") == "achieved",
+            onClick = { perform("advance", args) }) { Text("交给下一台设备规划") }
+    }
     TaskContinue(task, busy, perform)
     if (state == "running") TextButton(enabled = !busy, onClick = { perform("pause", args) }) { Text("暂停后续步骤") }
     if (!ended) TextButton(enabled = !busy, onClick = { perform("cancel", args) }) { Text("取消任务") }
@@ -232,5 +259,82 @@ private fun TaskContinue(task: JsonObject, busy: Boolean, perform: (String, Map<
             val resolution = if (uncertain != null) mapOf("resolution" to "completed") else emptyMap()
             perform(if (state == "awaiting_approval") "approve" else "resume", args + resolution)
         }) { Text(label) }
+    }
+}
+
+@Composable
+private fun TaskOutcomeReview(task: JsonObject, busy: Boolean, perform: (String, Map<String, Any?>) -> Unit) {
+    if (task.string("status") !in setOf("succeeded", "awaiting_handoff")) return
+    val review = task.get("result_review")?.takeIf { it.isJsonObject }?.asJsonObject
+    val outcome = review?.string("outcome").orEmpty()
+    Text(when (outcome) {
+        "achieved" -> "已由用户确认完成"
+        "not_achieved" -> "用户核对：目标尚未完成"
+        else -> "结果待确认：步骤已执行，请到目标设备检查实际结果。"
+    })
+    if (review != null) Text("核对人：${review.string("reviewed_by")}")
+    Text("核对只更新结果记录，不会再次执行操作。")
+    listOf("achieved" to "我已核对，确认完成", "not_achieved" to "我已核对，尚未完成").forEach { (value, label) ->
+        TextButton(enabled = !busy && !task.get("busy").asBoolean && outcome != value, onClick = {
+            perform("review_result", mapOf(
+                "id" to task.string("id"), "revision" to task.string("revision"), "outcome" to value,
+            ))
+        }) { Text(label) }
+    }
+}
+
+
+@Composable
+private fun StageSubmission(state: TaskWorkspaceState) {
+    fun update(index: Int, stage: StageDraft) {
+        state.stages = state.stages.mapIndexed { i, old -> if (index == i) stage else old }
+        state.submissionId = UUID.randomUUID().toString()
+    }
+    Text("按顺序填写每台设备的目标。核对当前阶段后，再为下一阶段生成计划。")
+    state.stages.forEachIndexed { index, stage ->
+        Text("第 ${index + 1} 阶段")
+        state.devices.forEach { device ->
+            TextButton(enabled = !state.busy, onClick = { update(index, stage.copy(deviceId = device.string("id"))) }) {
+                val selected = if (stage.deviceId == device.string("id")) "✓ " else ""
+                val offline = if (device.get("online").asBoolean) "" else "（离线）"
+                Text("$selected${device.string("id")}$offline")
+            }
+        }
+        OutlinedTextField(value = stage.task, enabled = !state.busy, modifier = Modifier.fillMaxWidth(),
+            label = { Text("第 ${index + 1} 阶段任务") }, onValueChange = {
+                if (it.length <= MAX_STAGE_TASK_LENGTH) update(index, stage.copy(task = it))
+            })
+        if (state.stages.size > 2) TextButton(enabled = !state.busy, onClick = {
+            state.stages = state.stages.filterIndexed { i, _ -> i != index }
+            state.submissionId = UUID.randomUUID().toString()
+        }) { Text("移除此阶段") }
+    }
+    TextButton(enabled = !state.busy && state.stages.size < MAX_STAGES, onClick = {
+        state.stages = state.stages + StageDraft()
+        state.submissionId = UUID.randomUUID().toString()
+    }) { Text("添加阶段") }
+}
+
+@Composable
+private fun StageProgress(task: JsonObject) {
+    val stages = task.getAsJsonArray("stages") ?: return
+    val current = task.get("stage_index").asInt
+    Text("阶段 ${current + 1} / ${stages.size()} · 当前阶段：${stages[current].asJsonObject.string("task")}")
+    stages.forEachIndexed { index, value ->
+        val stage = value.asJsonObject
+        val label = if (index < current) "已核对" else if (index == current) "当前阶段" else "等待接续"
+        Text("${index + 1}. ${stage.string("device_id")} · ${stage.string("task")} · $label")
+    }
+    var expanded by remember(task.string("id")) { mutableStateOf(false) }
+    val history = task.getAsJsonArray("stage_history") ?: return
+    if (history.size() > 0) TextButton(onClick = { expanded = !expanded }) {
+        Text(if (expanded) "收起前序结果" else "前序阶段结果")
+    }
+    if (expanded) history.forEach { value ->
+        val stage = value.asJsonObject
+        Text("${stage.string("device_id")} · ${stage.string("task")}")
+        stage.getAsJsonArray("results").forEach { result ->
+            Text(result.asJsonObject.string("error").ifBlank { result.asJsonObject.string("summary") })
+        }
     }
 }

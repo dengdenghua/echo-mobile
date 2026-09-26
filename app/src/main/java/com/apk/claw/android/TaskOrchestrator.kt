@@ -2,6 +2,7 @@ package com.apk.claw.android
 
 import android.os.Handler
 import android.os.Looper
+import com.apk.claw.android.octopus_mobile.GoalVerifier
 import com.apk.claw.android.agent.AgentCallback
 import com.apk.claw.android.agent.AgentConfig
 import com.apk.claw.android.agent.AgentService
@@ -536,6 +537,12 @@ class TaskOrchestrator(
                 }
             }
 
+            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+
+            override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
+                goalVerdict = verdict
+            }
+
             override fun onComplete(round: Int, finalAnswer: String, totalTokens: Int) {
                 if (!isCurrentCallbackTask()) {
                     XLog.i(TAG, "Ignoring stale onComplete for task=$taskId")
@@ -546,10 +553,12 @@ class TaskOrchestrator(
                 // 标记当前任务完成
                 synchronized(scheduleLock) {
                     currentTask?.status = TaskQueue.TaskStatus.COMPLETED
+                    currentTask?.goalVerification = goalVerdict
                 }
                 val (ch, _) = releaseTask()
                 ChannelManager.flushMessages(channel)
-                FloatingCircleManager.setSuccessState()
+                com.apk.claw.android.floating.LiveControlOverlay.finishVerification(goalVerdict)
+                if (!goalVerdict.achieved) ChannelManager.sendMessage(channel, finalAnswer, messageID)
                 // 从任务结果中提取用户偏好并更新记忆
                 memoryStore?.let { store ->
                     store.extractFromTask(task)
@@ -571,7 +580,9 @@ class TaskOrchestrator(
                 // 自进化度量:任务完成为检查点,持久化计数并打印一行效果报告(命中率/告警率/注入次数)。
                 EvolutionMetrics.persist()
                 XLog.i(TAG, "EvolutionMetrics: ${EvolutionMetrics.report()}")
-                triggerPostTaskReflect(success = true)
+                if (goalVerdict.status != GoalVerifier.Status.UNVERIFIED) {
+                    triggerPostTaskReflect(success = goalVerdict.achieved)
+                }
                 // 任务完成后，如果有下一个任务，通过 Handler 延迟调度，避免回调递归
                 scheduleHandler.post { executeCurrentTask() }
             }

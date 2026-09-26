@@ -5,12 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * GoalVerifier.parse 单测 —— 看屏判定的核心，决定是否触发 verdict-repair。
- *
- * 关键不变量：**只有明确否定才判未达成；含糊/空一律 fail-open 判达成**，
- * 这样接进主循环永不弱于现状（绝不拦正常完成）。
- */
+/** Unknown evidence must never become a verified success or trigger a repair. */
 class GoalVerifierTest {
 
     @Test
@@ -47,16 +42,15 @@ class GoalVerifierTest {
     }
 
     @Test
-    fun `ambiguous answer fails open to achieved`() {
-        // 识别不出肯定/否定 → 不拦
-        assertTrue(GoalVerifier.parse("不确定，可能需要再看看").achieved)
-        assertTrue(GoalVerifier.parse("这张截图看起来像是设置页").achieved)
+    fun `ambiguous answer stays unverified`() {
+        assertEquals(GoalVerifier.Status.UNVERIFIED, GoalVerifier.parse("不确定，可能需要再看看").status)
+        assertEquals(GoalVerifier.Status.UNVERIFIED, GoalVerifier.parse("这张截图看起来像是设置页").status)
     }
 
     @Test
-    fun `blank answer fails open to achieved`() {
-        assertTrue(GoalVerifier.parse("").achieved)
-        assertTrue(GoalVerifier.parse("   \n  ").achieved)
+    fun `blank answer stays unverified`() {
+        assertEquals(GoalVerifier.Status.UNVERIFIED, GoalVerifier.parse("").status)
+        assertEquals(GoalVerifier.Status.UNVERIFIED, GoalVerifier.parse("   \n  ").status)
     }
 
     @Test
@@ -73,5 +67,23 @@ class GoalVerifierTest {
         val v = GoalVerifier.parse("未完成")
         assertFalse(v.achieved)
         assertEquals("未完成", v.reason)
+    }
+
+    @Test
+    fun `mixed or misleading verdict prefixes remain unverified`() {
+        listOf("YES / NO", "YES but not completed", "Yesterday", "Nobody", "是否已完成", "未完成但显示已完成", "UNKNOWN").forEach {
+            val verdict = GoalVerifier.parse(it)
+            assertEquals(it, GoalVerifier.Status.UNVERIFIED, verdict.status)
+            assertFalse(verdict.needsRepair)
+        }
+    }
+
+    @Test
+    fun `missing screenshot cannot verify completion`() = kotlinx.coroutines.runBlocking {
+        val verdict = GoalVerifier.verify("保存文件", null)
+        assertEquals(GoalVerifier.Status.UNVERIFIED, verdict.status)
+        assertFalse(verdict.achieved)
+        assertFalse(verdict.needsRepair)
+        assertTrue(verdict.present("模型声称完成").startsWith("结果待核验"))
     }
 }

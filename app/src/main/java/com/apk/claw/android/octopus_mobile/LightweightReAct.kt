@@ -3,6 +3,7 @@
 package com.apk.claw.android.octopus_mobile
 
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -26,7 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger
 class LightweightReAct(
     private val llmClient: LightweightLlmClient,
     private val toolExecutor: suspend (ToolCall) -> ToolExecutionResult,
-    private val config: ReActConfig = ReActConfig()
+    private val config: ReActConfig = ReActConfig(),
+    private val verifyGoal: suspend (String, android.graphics.Bitmap?) -> GoalVerifier.Verdict = GoalVerifier::verify
 ) {
     private val tag = "LightweightReAct"
 
@@ -68,8 +70,8 @@ class LightweightReAct(
         val activeSkills = SemanticSkillRanker
             .rank(task, skills.map { "${it.id} ${it.description}" }, topK = skills.size)
             ?.map { skills[it] } ?: skills
-        // VLM 目标自校验的修复预算:仅当调用方提供了截图能力时启用一轮修复。
-        var verifyRepairsLeft = if (captureScreen != null) 1 else 0
+        // Only explicit negative evidence consumes the single repair attempt.
+        var verifyRepairsLeft = 1
 
         val totalUsage = AccumulatedUsage()
         val recentActions = ArrayDeque<String>(config.stuckWindowSize)  // 死循环检测
@@ -103,26 +105,23 @@ class LightweightReAct(
                     toolCalls = response.toolCalls
                 )
 
-                // 没有工具调用 → LLM 认为完成。先做 VLM 目标自校验再收尾:
-                // 看屏确认目标真达成,没达成就带原因再来一轮(修复)。
-                // fail-open:无截图/VLM未配置/含糊 → 直接放行,绝不卡正常完成。
+                // Recheck after repairs, even when the repair budget is exhausted.
                 if (!response.hasToolCalls) {
-                    if (verifyRepairsLeft > 0) {
-                        val verdict = GoalVerifier.verify(task, captureScreen?.invoke())
-                        if (!verdict.achieved) {
-                            verifyRepairsLeft--
-                            Log.i(tag, "goal not met at step $step: ${verdict.reason}")
-                            history += ChatMessage.System(
-                                content = "目标尚未达成:${verdict.reason}。请继续操作直到完成。"
-                            )
-                            continue
-                        }
+                    val verdict = verifyCompletion(task, captureScreen)
+                    if (verdict.needsRepair && verifyRepairsLeft > 0) {
+                        verifyRepairsLeft--
+                        Log.i(tag, "goal not met at step $step: ${verdict.reason}")
+                        history += ChatMessage.System(
+                            content = "目标尚未达成:${verdict.reason}。请继续操作直到完成。"
+                        )
+                        continue
                     }
-                    onStep?.invoke(ReActStep.Done(step))
+                    onStep?.invoke(ReActStep.Done(step, verdict))
                     return TaskResult.Done(
-                        summary = response.content ?: "(no summary)",
+                        summary = verdict.present(response.content ?: "(no summary)"),
                         totalSteps = step,
-                        totalUsage = totalUsage.snapshot()
+                        totalUsage = totalUsage.snapshot(),
+                        verification = verdict,
                     )
                 }
 
@@ -191,6 +190,8 @@ class LightweightReAct(
                 },
                 totalUsage = totalUsage.snapshot()
             )
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             Log.e(tag, "ReAct run failed", e)
             return TaskResult.MaxStepsReached(
@@ -199,6 +200,17 @@ class LightweightReAct(
                 totalUsage = totalUsage.snapshot()
             )
         }
+    }
+
+    private suspend fun verifyCompletion(
+        task: String,
+        captureScreen: (suspend () -> android.graphics.Bitmap?)?,
+    ): GoalVerifier.Verdict = try {
+        verifyGoal(task, captureScreen?.invoke())
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        GoalVerifier.unverified("未能获取核验结果，请检查目标设备")
     }
 
     /**
@@ -278,7 +290,10 @@ sealed class ReActStep {
     data class Thought(override val step: Int, val content: String?, val usage: TokenUsage?) : ReActStep()
     data class ToolCallStart(override val step: Int, val call: ToolCall) : ReActStep()
     data class ToolCallDone(override val step: Int, val call: ToolCall, val result: ToolExecutionResult) : ReActStep()
-    data class Done(override val step: Int) : ReActStep()
+    data class Done(
+        override val step: Int,
+        val verification: GoalVerifier.Verdict = GoalVerifier.unverified("尚未核验"),
+    ) : ReActStep()
     data class Stuck(override val step: Int, val action: String) : ReActStep()
 }
 

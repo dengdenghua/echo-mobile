@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
+import com.apk.claw.android.octopus_mobile.GoalVerifier
 import com.apk.claw.android.agent.AgentCallback
 import com.apk.claw.android.agent.AgentConfig
 import com.apk.claw.android.agent.DefaultAgentService
@@ -103,12 +104,18 @@ object ChatAgentBridge {
                 main.post { onTool(toolId, toolName, parameters, summary.take(48)) }
             }
 
+            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+
+            override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
+                goalVerdict = verdict
+            }
+
             override fun onComplete(round: Int, finalAnswer: String, totalTokens: Int) {
                 batcher.flushNow()
                 main.post {
                     onDone(finalAnswer)
                     LiveControlOverlay.hide()
-                    finalize("completed", finalAnswer.take(120))
+                    finalize(goalVerdict.outcome, finalAnswer.take(120))
                     busy.set(false)
                 }
             }
@@ -394,9 +401,15 @@ object ChatAgentBridge {
                 }
             }
 
+            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+
+            override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
+                goalVerdict = verdict
+            }
+
             override fun onComplete(round: Int, finalAnswer: String, totalTokens: Int) {
                 batcher.flushNow()
-                if (recordKey != null) recorder?.commit(recordKey, prompt)
+                if (recordKey != null && goalVerdict.achieved) recorder?.commit(recordKey, prompt)
                 // 记忆写侧(仿 TaskOrchestrator 任务后钩子;对话页绕过编排器,得自己做):
                 // ① 收割主模型标注的 MEMO 行(高质量提取,展示前剥离);
                 // ② 正则保底只扫用户原始指令,不喂组装后的 taskPrompt(背景区是历史消息,别重复提取)。
@@ -405,8 +418,8 @@ object ChatAgentBridge {
                     memoryStore.extractFromTask(prompt)
                     memoryStore.pruneExpiredContexts()
                 }
-                LiveControlOverlay.finish(true, ClawApplication.instance.getString(R.string.floating_circle_success_state))
-                finalize("success", cleaned)
+                LiveControlOverlay.finishVerification(goalVerdict)
+                finalize(goalVerdict.outcome, cleaned)
                 busy.set(false)
                 restorePersona()
                 main.post { onDone(cleaned) }

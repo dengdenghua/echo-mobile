@@ -22,7 +22,7 @@ object ActivityLog {
         val task: String,
         val target: String,     // 本机 / 设备名
         val steps: Int,
-        val outcome: String,    // "success" | "cancelled" | "error"
+        val outcome: String,    // success | unverified | not_achieved | cancelled | error
         val detail: String,
     )
 

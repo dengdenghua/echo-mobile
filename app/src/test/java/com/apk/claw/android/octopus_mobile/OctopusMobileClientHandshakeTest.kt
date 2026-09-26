@@ -180,6 +180,34 @@ class OctopusMobileClientHandshakeTest {
     }
 
     @Test
+    fun `result review carries task revision through paired socket`() = kotlinx.coroutines.runBlocking {
+        val online = CountDownLatch(1)
+        enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            val result = if (request.getString("method") == "device/hello") {
+                JSONObject().put("registered", true)
+            } else {
+                assertEquals("task/workspace/review_result", request.getString("method"))
+                val args = request.getJSONObject("params")
+                assertEquals("same-task", args.getString("id"))
+                assertEquals("result-revision", args.getString("revision"))
+                assertEquals("not_achieved", args.getString("outcome"))
+                JSONObject().put("id", "same-task").put("result_review",
+                    JSONObject().put("outcome", "not_achieved").put("reviewed_by", "device:test-device"))
+            }
+            socket.send(JSONObject().put("id", request.getString("id")).put("result", result).toString())
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        val result = client.taskWorkspace("review_result", mapOf(
+            "id" to "same-task", "revision" to "result-revision", "outcome" to "not_achieved",
+        ))
+        assertEquals("not_achieved", result.getAsJsonObject("result_review").get("outcome").asString)
+    }
+
+    @Test
     fun `heartbeat binds identity and peer calls receive real result`() = kotlinx.coroutines.runBlocking {
         val online = CountDownLatch(1)
         val heartbeat = CountDownLatch(1)
@@ -263,6 +291,40 @@ class OctopusMobileClientHandshakeTest {
         client.connect()
         assertTrue(reconnected.await(2, TimeUnit.SECONDS))
         assertEquals("/second", server.takeRequest(2, TimeUnit.SECONDS)?.path)
+    }
+
+    @Test
+    fun `workflow submits ordered stages and advances a revision`() = kotlinx.coroutines.runBlocking {
+        val online = CountDownLatch(1)
+        enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            val result = when (request.getString("method")) {
+                "device/hello" -> JSONObject().put("registered", true)
+                "task/workspace/submit" -> {
+                    val stages = request.getJSONObject("params").getJSONArray("stages")
+                    assertEquals("pc", stages.getJSONObject(0).getString("device_id"))
+                    assertEquals("手机接续", stages.getJSONObject(1).getString("task"))
+                    JSONObject().put("id", "parent").put("stage_index", 0)
+                }
+                "task/workspace/advance" -> {
+                    assertEquals("checked-stage", request.getJSONObject("params").getString("revision"))
+                    JSONObject().put("id", "parent").put("stage_index", 1).put("status", "planning")
+                }
+                else -> error("Unexpected workflow method")
+            }
+            socket.send(JSONObject().put("id", request.getString("id")).put("result", result).toString())
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        val submitted = client.taskWorkspace("submit", mapOf("id" to "parent", "task" to "协作", "stages" to listOf(
+            mapOf("device_id" to "pc", "task" to "电脑处理"), mapOf("device_id" to "test-device", "task" to "手机接续"),
+        )))
+        assertEquals(0, submitted.get("stage_index").asInt)
+        val next = client.taskWorkspace("advance", mapOf("id" to "parent", "revision" to "checked-stage"))
+        assertEquals(1, next.get("stage_index").asInt)
+        assertEquals("planning", next.get("status").asString)
     }
 
     private fun newClient(): OctopusMobileClient =

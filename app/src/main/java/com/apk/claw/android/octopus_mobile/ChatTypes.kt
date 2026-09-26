@@ -94,11 +94,12 @@ sealed class ToolExecutionResult {
 
 /** 任务执行结果（ReAct 循环结束）*/
 sealed class TaskResult {
-    /** 任务完成 */
+    /** 执行循环结束；目标是否达成由 verification 单独记录。 */
     data class Done(
         val summary: String,
         val totalSteps: Int,
-        val totalUsage: TokenUsage
+        val totalUsage: TokenUsage,
+        val verification: GoalVerifier.Verdict = GoalVerifier.unverified("尚未核验"),
     ) : TaskResult()
 
     /** 达到最大步数未完成 */

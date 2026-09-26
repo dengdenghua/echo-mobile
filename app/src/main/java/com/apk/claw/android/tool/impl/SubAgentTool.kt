@@ -1,5 +1,6 @@
 package com.apk.claw.android.tool.impl
 
+import com.apk.claw.android.octopus_mobile.GoalVerifier
 import com.apk.claw.android.agent.AgentCallback
 import com.apk.claw.android.agent.AgentServiceFactory
 import com.apk.claw.android.tool.BaseTool
@@ -129,12 +130,23 @@ class SubAgentTool : BaseTool() {
                 XLog.d(TAG, "[sub-agent] tool result: ${if (result.isSuccess) "ok" else "fail"}")
             }
 
+            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+
+            override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
+                goalVerdict = verdict
+            }
+
             override fun onComplete(round: Int, finalAnswer: String, totalTokens: Int) {
                 XLog.i(
                     TAG,
                     "[sub-agent] completed: ${finalAnswer.take(LOG_CONTENT_PREVIEW_CHARS)}... (tokens=$totalTokens)"
                 )
-                resultRef.set(true to finalAnswer)
+                val evidence = org.json.JSONObject()
+                    .put("execution_completed", true)
+                    .put("goal_status", goalVerdict.status.name)
+                    .put("goal_reason", goalVerdict.reason)
+                    .put("response", finalAnswer)
+                resultRef.set(true to evidence.toString())
                 latch.countDown()
             }
 

@@ -1,6 +1,7 @@
 package com.apk.claw.android.agent
 
 import android.util.Log
+import com.apk.claw.android.octopus_mobile.GoalVerifier
 import com.apk.claw.android.channel.Channel
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.PriorityBlockingQueue
@@ -24,6 +25,7 @@ class TaskQueue {
         val isBackground: Boolean = false,  // 后台任务不阻塞队列
         val createdAt: Long = System.currentTimeMillis(),
         var status: TaskStatus = TaskStatus.QUEUED,
+        var goalVerification: GoalVerifier.Verdict = GoalVerifier.unverified("尚未核验"),
         /** 任务来源是否受信任。false（默认）= 不可信来源（聊天渠道/LAN 控制台），高危工具走来源闸门拦截；
          *  true = 受信任来源（内部系统触发），不施加来源闸门。安全默认 false。 */
         val trusted: Boolean = false,
@@ -46,7 +48,7 @@ class TaskQueue {
         QUEUED,       // 排队中
         RUNNING,      // 执行中
         PAUSED,       // 被暂停（被高优先级任务抢占）
-        COMPLETED,    // 已完成
+        COMPLETED,    // 执行已结束，目标核验见 goalVerification
         FAILED,       // 失败
         CANCELLED     // 被取消
     }

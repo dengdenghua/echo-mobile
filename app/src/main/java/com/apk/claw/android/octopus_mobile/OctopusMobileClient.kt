@@ -510,7 +510,10 @@ open class OctopusMobileClient(
 
     /** Explicitly granted device-to-device calls use the same authenticated hub. */
     suspend fun taskWorkspace(command: String, args: Map<String, Any?> = emptyMap()): JsonObject {
-        require(command in setOf("list", "devices", "submit", "get", "approve", "pause", "resume", "cancel", "remove"))
+        require(command in setOf(
+            "list", "devices", "submit", "get", "approve", "pause", "resume", "cancel", "remove",
+            "review_result", "advance",
+        ))
         val ws = webSocket ?: error("请先连接设备中心")
         check(state == ConnectionState.ONLINE) { "设备中心尚未连接" }
         val id = "workspace-${java.util.UUID.randomUUID()}"

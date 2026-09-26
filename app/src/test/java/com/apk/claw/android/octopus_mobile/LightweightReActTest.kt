@@ -223,10 +223,57 @@ class LightweightReActTest {
 
     // ── 测试工具 ─────────────────────────────────────────────
 
+
+    @Test
+    fun `unknown verification stops without repair and remains visible`() = runBlocking {
+        enqueueResponse(textResponse("已经完成"))
+        val (react, exec) = newReact(verifyGoal = { _, _ -> GoalVerifier.unverified("没有截图") })
+        val result = react.run("保存文件", emptyList()) as TaskResult.Done
+        assertEquals(GoalVerifier.Status.UNVERIFIED, result.verification.status)
+        assertTrue(result.summary.startsWith("结果待核验"))
+        assertTrue(exec.calls.isEmpty())
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
+    fun `repair exhaustion still verifies and does not report success`() = runBlocking {
+        repeat(2) { enqueueResponse(textResponse("完成")) }
+        var checks = 0
+        val (react, _) = newReact(verifyGoal = { _, _ -> checks++; GoalVerifier.parse("NO\n文件不存在") })
+        val result = react.run("保存文件", emptyList()) as TaskResult.Done
+        assertEquals(2, checks)
+        assertEquals(GoalVerifier.Status.NOT_ACHIEVED, result.verification.status)
+        assertTrue(result.summary.startsWith("目标尚未完成"))
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun `successful repair needs fresh positive evidence`() = runBlocking {
+        repeat(2) { enqueueResponse(textResponse("完成")) }
+        var checks = 0
+        val (react, _) = newReact(verifyGoal = { _, _ -> GoalVerifier.parse(if (checks++ == 0) "NO" else "YES") })
+        val result = react.run("保存文件", emptyList()) as TaskResult.Done
+        assertEquals(2, checks)
+        assertTrue(result.verification.achieved)
+    }
+
+    @Test
+    fun `cancelling verification is not converted to a completed result`() = runBlocking {
+        enqueueResponse(textResponse("完成"))
+        val (react, _) = newReact(verifyGoal = { _, _ -> throw kotlinx.coroutines.CancellationException("cancel") })
+        try {
+            react.run("保存文件", emptyList())
+            org.junit.Assert.fail("Cancellation must propagate")
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            assertEquals("cancel", cancelled.message)
+        }
+    }
+
     private data class Bundle(val react: LightweightReAct, val exec: MockToolExecutor)
 
     private fun newReact(
         config: ReActConfig = ReActConfig(),
+        verifyGoal: suspend (String, android.graphics.Bitmap?) -> GoalVerifier.Verdict = GoalVerifier::verify,
         toolExecutor: (suspend (ToolCall) -> ToolExecutionResult)? = null
     ): Bundle {
         val baseUrl = server.url("/v1/").toString().trimEnd('/')
@@ -253,7 +300,8 @@ class LightweightReActTest {
         val react = LightweightReAct(
             llmClient = client,
             toolExecutor = executor,
-            config = config
+            config = config,
+            verifyGoal = verifyGoal,
         )
         return Bundle(react, exec)
     }

@@ -965,8 +965,16 @@ class DefaultAgentService : AgentService {
         var lastScreenshotHash = 0
         /** 剩余目标修复轮数（VLM 判未达成时消耗）。 */
         var goalRepairsLeft = MAX_GOAL_REPAIRS
-        /** 任务是否成功完成:仅 LLM 正常 finish 或目标校验通过时置 true,finishLoop 据此决定是否 commit 动作录制。 */
+        var goalVerdict = GoalVerifier.unverified("尚未核验")
+        /** 任务是否成功完成:仅目标校验明确通过时置 true,finishLoop 据此决定是否 commit 动作录制。 */
         var taskSucceeded = false
+    }
+
+    private fun AgentLoopState.completeWithVerification(callback: AgentCallback, summary: String) {
+        if (cancelToken.isCancelled()) return
+        taskSucceeded = goalVerdict.achieved
+        callback.onGoalVerification(iterations, goalVerdict)
+        callback.onComplete(iterations, goalVerdict.present(summary), totalTokens)
     }
 
     private enum class IterationOutcome { CONTINUE, TERMINATE }
@@ -1350,8 +1358,10 @@ class DefaultAgentService : AgentService {
                     messages.add(UserMessage.from(repair))
                     return ToolHandleResult.CONTINUE
                 }
-                taskSucceeded = true
-                callback.onComplete(iterations, result.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)
+                completeWithVerification(
+                    callback,
+                    result.data ?: ClawApplication.instance.getString(R.string.agent_task_completed),
+                )
                 return ToolHandleResult.TERMINATE
             }
 
@@ -1415,8 +1425,10 @@ class DefaultAgentService : AgentService {
                 messages.add(UserMessage.from(repair))
                 return ToolHandleResult.CONTINUE
             }
-            taskSucceeded = true
-            callback.onComplete(iterations, rawResult.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)
+            completeWithVerification(
+                callback,
+                rawResult.data ?: ClawApplication.instance.getString(R.string.agent_task_completed),
+            )
             return ToolHandleResult.TERMINATE
         }
 
@@ -1465,14 +1477,16 @@ class DefaultAgentService : AgentService {
 
         if (!llmResponse.hasToolExecutionRequests()) {
             // 目标自校验：LLM 不再调工具即判 Done 是 ReAct 的盲点——可能点错/被弹窗挡住。
-            // 完成前用 VLM 看屏确认；未达成则注入修复提示并继续循环（fail-open，永不弱于现状）。
+            // 完成前用 VLM 看屏确认；未达成则注入修复提示并继续循环（无法核验时保留待核验状态）。
             val repair = shouldRepairForGoal(callback)
             if (repair != null) {
                 messages.add(UserMessage.from(repair))
                 return false
             }
-            taskSucceeded = true
-            callback.onComplete(iterations, llmResponse.text ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)
+            completeWithVerification(
+                callback,
+                llmResponse.text ?: ClawApplication.instance.getString(R.string.agent_task_completed),
+            )
             return true
         }
         return false
@@ -1595,8 +1609,10 @@ class DefaultAgentService : AgentService {
                 messages.add(UserMessage.from(repair))
                 return ToolHandleResult.CONTINUE
             }
-            taskSucceeded = true
-            callback.onComplete(iterations, result.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)
+            completeWithVerification(
+                callback,
+                result.data ?: ClawApplication.instance.getString(R.string.agent_task_completed),
+            )
             return ToolHandleResult.TERMINATE
         }
 
@@ -1778,22 +1794,18 @@ class DefaultAgentService : AgentService {
         return false
     }
 
-    /**
-     * 目标自校验（verdict-repair）：LLM 宣称完成后，用 VLM 看当前屏幕判断目标是否真达成。
-     *
-     * 返回非 null 的修复提示串 = 未达成且仍有修复机会（调用方应注入该提示并继续循环）；
-     * 返回 null = 达成 / 无法校验 / 修复轮数耗尽（调用方应正常结束）。
-     *
-     * 全程 fail-open：未开启视觉、未配置 VLM、截图失败、校验异常一律返回 null，绝不拦正常完成——
-     * 这样接进去永不弱于现状，价值只在 VLM 明确判"未达成"时兑现。外层 maxIterations 仍兜底防失控。
-     */
+    /** Retry only on explicit failure; keep unknown results visible without replaying actions. */
     private fun AgentLoopState.shouldRepairForGoal(callback: AgentCallback): String? {
-        if (goalRepairsLeft <= 0) return null
+        goalVerdict = GoalVerifier.unverified("未开启视觉核验或缺少模型配置")
         if (!config.enableVision || goal.isBlank() || !VisionAnalyzer.isConfigured()) return null
 
         val bitmap = runCatching {
             ClawAccessibilityService.getInstance()?.takeScreenshot(5000)
-        }.getOrNull() ?: return null
+        }.getOrNull()
+        if (bitmap == null) {
+            goalVerdict = GoalVerifier.unverified("未能获取截图，请检查目标设备")
+            return null
+        }
 
         AgentMetrics.goalVerify()
         val verdict = try {
@@ -1802,19 +1814,20 @@ class DefaultAgentService : AgentService {
             // 硬超时 35s(略高于 VLM HTTP 的 30s callTimeout)仍作兜底。
             verifyGoalWithCancellation(goal, bitmap)
         } catch (e: Exception) {
-            XLog.w(TAG, "goal verify failed, fail-open: ${e.message}")
+            XLog.w(TAG, "goal verification unavailable: ${e.message}")
             null
         } finally {
             if (!bitmap.isRecycled) bitmap.recycle()
         }
 
-        if (verdict == null || verdict.achieved) return null
+        goalVerdict = verdict ?: GoalVerifier.unverified("目标校验超时或中断，请检查实际结果")
+        if (!goalVerdict.needsRepair || goalRepairsLeft <= 0) return null
 
         goalRepairsLeft--
         AgentMetrics.goalRepair()
-        XLog.i(TAG, "Goal not achieved (repairs left=$goalRepairsLeft): ${verdict.reason}")
-        callback.onContent(iterations, "[目标校验] 目标尚未达成：${verdict.reason}")
-        return "[目标校验] 经看屏确认，目标尚未达成：${verdict.reason}。" +
+        XLog.i(TAG, "Goal not achieved (repairs left=$goalRepairsLeft): ${goalVerdict.reason}")
+        callback.onContent(iterations, "[目标校验] 目标尚未达成：${goalVerdict.reason}")
+        return "[目标校验] 经看屏确认，目标尚未达成：${goalVerdict.reason}。" +
             "请继续操作直到真正完成；若确实无法完成，再调用 finish 说明原因。"
     }
 
@@ -1822,7 +1835,7 @@ class DefaultAgentService : AgentService {
      * 在独立线程跑 VLM 目标校验,当前(executor)线程 poll 等待结果,每 200ms 检查一次
      * [cancelToken]。这样 Agent 取消时能及时跳出等待,不被 VLM 网络 RT 阻塞。
      *
-     * 超时或取消时返回 null(fail-open,不拦正常完成)。bitmap 由调用方 recycle。
+     * 超时或取消时返回 null，由调用方记录为待核验。bitmap 由调用方 recycle。
      */
     @Suppress("ReturnCount", "TooGenericExceptionCaught", "MagicNumber")
     private fun verifyGoalWithCancellation(goal: String, bitmap: android.graphics.Bitmap): GoalVerifier.Verdict? {

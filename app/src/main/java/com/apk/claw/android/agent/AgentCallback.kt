@@ -1,5 +1,6 @@
 package com.apk.claw.android.agent
 
+import com.apk.claw.android.octopus_mobile.GoalVerifier
 import com.apk.claw.android.tool.ToolResult
 
 interface AgentCallback {
@@ -11,6 +12,8 @@ interface AgentCallback {
     fun onContent(round: Int, content: String)
     fun onToolCall(round: Int, toolId: String, toolName: String, parameters: String)
     fun onToolResult(round: Int, toolId: String, toolName: String, parameters: String, result: ToolResult)
+    /** Execution completion and goal achievement are distinct. Emitted before onComplete. */
+    fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {}
     fun onComplete(round: Int, finalAnswer: String, totalTokens: Int)
     fun onError(round: Int, error: Exception, totalTokens: Int)
     fun onSystemDialogBlocked(round: Int, totalTokens: Int)
