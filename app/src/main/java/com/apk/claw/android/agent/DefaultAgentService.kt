@@ -882,7 +882,7 @@ class DefaultAgentService : AgentService {
         }
 
     /**
-     * ContextCompressor 二次压缩：对保护区外的 UserMessage 文本做截断.
+     * ContextCompressor 二次压缩：对保护区外的 AiMessage 文本和非首条 UserMessage 文本做截断.
      * 这是对现有 tool result 压缩的补充层。
      */
     private fun applyContextCompressorTruncation(
@@ -907,6 +907,19 @@ class DefaultAgentService : AgentService {
                     AiMessage.from(truncated, aiMsg.toolExecutionRequests())
                 } else {
                     AiMessage.from(truncated)
+                }
+            }
+        }
+
+        // 对保护区外的非首条 UserMessage 文本做有界截断（保护用户初始指令与保护区消息）
+        val cutoffIndex = aiIndices.getOrNull(totalRounds - keepRecent) ?: messages.size
+        val firstUserMsgIdx = messages.indexOfFirst { it is UserMessage }
+        for (i in 0 until cutoffIndex) {
+            val msg = messages[i]
+            if (i != firstUserMsgIdx && msg is UserMessage) {
+                val userText = msg.singleText()
+                if (userText.length > truncLimit * 2) {
+                    messages[i] = UserMessage.from(userText.take(truncLimit * 2) + "...[compressed]")
                 }
             }
         }

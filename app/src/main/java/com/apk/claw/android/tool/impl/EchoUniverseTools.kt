@@ -9,9 +9,12 @@ import com.apk.claw.android.tool.ToolResult
 import com.apk.claw.android.utils.KVUtils
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.apk.claw.android.agent.CancellationToken
+import com.apk.claw.android.tool.ToolErr
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -154,66 +157,72 @@ class EchoUniverseTools {
             ),
         )
 
-        override fun execute(params: Map<String, Any>): ToolResult = runBlocking {
-            val what = optionalString(params, "what", "feed")
-            val limit = optionalInt(params, "limit", 10)
-            val userId = Net.currentUserId()
-            try {
-                val result = when (what) {
-                    "events" -> {
-                        val events = Net.get("/api/journal/events?limit=$limit", Array<JournalEventDto>::class.java)
-                        buildString {
-                            appendLine("== ECHO 编年史（最近 ${events.size} 条）==")
-                            events.forEachIndexed { i, e ->
-                                appendLine("${i + 1}. [${e.createdAt}] ${e.title}")
-                                if (e.summary.isNotBlank()) appendLine("   ${e.summary.take(200)}")
+        override fun execute(params: Map<String, Any>): ToolResult {
+            currentCancellationToken()?.checkCancelled()
+            return runBlocking(Dispatchers.IO) {
+                withTimeoutOrNull(ECHO_TIMEOUT_MS) {
+                    val what = optionalString(params, "what", "feed")
+                    val limit = optionalInt(params, "limit", 10)
+                    val userId = Net.currentUserId()
+                    try {
+                        val result = when (what) {
+                            "events" -> {
+                                val url = "/api/journal/events?limit=$limit"
+                                val events = Net.get(url, Array<JournalEventDto>::class.java)
+                                buildString {
+                                    appendLine("== ECHO 编年史（最近 ${events.size} 条）==")
+                                    events.forEachIndexed { i, e ->
+                                        appendLine("${i + 1}. [${e.createdAt}] ${e.title}")
+                                        if (e.summary.isNotBlank()) appendLine("   ${e.summary.take(200)}")
+                                    }
+                                }
+                            }
+                            "characters" -> {
+                                val chars = Net.get("/api/canon/characters", Array<CharacterDto>::class.java)
+                                buildString {
+                                    appendLine("== 可绑定角色（${chars.size}）==")
+                                    chars.forEach { c ->
+                                        appendLine("- ${c.id} | ${c.name}" + (c.codename?.let { " ($it)" } ?: ""))
+                                    }
+                                }
+                            }
+                            "npcs" -> {
+                                @Suppress("UNCHECKED_CAST")
+                                val npcs = Net.get("/api/npcs?limit=$limit", List::class.java) as List<Map<String, Any>>
+                                buildString {
+                                    appendLine("== NPC 列表（${npcs.size}）==")
+                                    npcs.forEach { n ->
+                                        appendLine("- ${n["id"] ?: n["name"]} | ${n["name"]}" +
+                                            (n["type"]?.let { " [$it]" } ?: ""))
+                                    }
+                                }
+                            }
+                            else -> {
+                                val feed = Net.get("/api/universe/feed/$userId", FeedDto::class.java)
+                                buildString {
+                                    appendLine("== ECHO 世界状态 · Day ${feed.day} ==")
+                                    appendLine("角色：${feed.characterName}" +
+                                        (feed.codename.takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""))
+                                    appendLine("当前焦点：${feed.currentFocus.ifBlank { "无" }}")
+                                    if (feed.goals.isNotEmpty()) {
+                                        appendLine("近期目标：")
+                                        feed.goals.take(3).forEach { appendLine("  - $it") }
+                                    }
+                                    feed.latestDiary?.takeIf { it.isNotBlank() }?.let {
+                                        appendLine("最近日记：${it.take(300)}")
+                                    }
+                                    if (feed.memory.isNotEmpty()) {
+                                        appendLine("记忆碎片：")
+                                        feed.memory.take(3).forEach { appendLine("  - ${it.take(120)}") }
+                                    }
+                                }
                             }
                         }
+                        ToolResult.success(result)
+                    } catch (e: Exception) {
+                        ToolResult.error("感知 ECHO 世界失败：${e.message}", ToolErr.UPSTREAM)
                     }
-                    "characters" -> {
-                        val chars = Net.get("/api/canon/characters", Array<CharacterDto>::class.java)
-                        buildString {
-                            appendLine("== 可绑定角色（${chars.size}）==")
-                            chars.forEach { c ->
-                                appendLine("- ${c.id} | ${c.name}" + (c.codename?.let { " ($it)" } ?: ""))
-                            }
-                        }
-                    }
-                    "npcs" -> {
-                        @Suppress("UNCHECKED_CAST")
-                        val npcs = Net.get("/api/npcs?limit=$limit", List::class.java) as List<Map<String, Any>>
-                        buildString {
-                            appendLine("== NPC 列表（${npcs.size}）==")
-                            npcs.forEach { n ->
-                                appendLine("- ${n["id"] ?: n["name"]} | ${n["name"]}" +
-                                    (n["type"]?.let { " [$it]" } ?: ""))
-                            }
-                        }
-                    }
-                    else -> {
-                        val feed = Net.get("/api/universe/feed/$userId", FeedDto::class.java)
-                        buildString {
-                            appendLine("== ECHO 世界状态 · Day ${feed.day} ==")
-                            appendLine("角色：${feed.characterName}" +
-                                (feed.codename.takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""))
-                            appendLine("当前焦点：${feed.currentFocus.ifBlank { "无" }}")
-                            if (feed.goals.isNotEmpty()) {
-                                appendLine("近期目标：")
-                                feed.goals.take(3).forEach { appendLine("  - $it") }
-                            }
-                            feed.latestDiary?.takeIf { it.isNotBlank() }?.let {
-                                appendLine("最近日记：${it.take(300)}")
-                            }
-                            if (feed.memory.isNotEmpty()) {
-                                appendLine("记忆碎片：")
-                                feed.memory.take(3).forEach { appendLine("  - ${it.take(120)}") }
-                            }
-                        }
-                    }
-                }
-                ToolResult.success(result)
-            } catch (e: Exception) {
-                ToolResult.error("感知 ECHO 世界失败：${e.message}")
+                } ?: ToolResult.error("感知 ECHO 世界请求超时(15s)", ToolErr.TIMEOUT)
             }
         }
     }
@@ -255,44 +264,49 @@ class EchoUniverseTools {
             ),
         )
 
-        override fun execute(params: Map<String, Any>): ToolResult = runBlocking {
-            val title = optionalString(params, "title", "")
-                .takeIf { it.isNotBlank() } ?: return@runBlocking ToolResult.error("'title' 不能为空")
-            val summary = optionalString(params, "summary", "")
-                .takeIf { it.isNotBlank() } ?: return@runBlocking ToolResult.error("'summary' 不能为空")
-            val scope = optionalString(params, "scope", "personal")
-            val realmId = optionalString(params, "realm_id", "").takeIf { it.isNotBlank() }
-            val userId = Net.currentUserId()
-            try {
-                val req = RealmEventRequest(
-                    title = title,
-                    summary = summary,
-                    scope = scope,
-                    realmId = realmId,
-                    submitter = "octopus-agent:$userId",
-                    content = summary,
-                )
-                val resp = Net.post(
-                    "/api/realm-events",
-                    Net.gson.toJson(req),
-                    RealmEventResponse::class.java,
-                )
-                ToolResult.success(
-                    buildString {
-                        appendLine("✅ 行动已提交到 ECHO 世界")
-                        appendLine("标题：${resp.title}")
-                        appendLine("范围：$scope" + (realmId?.let { " · 领域 $it" } ?: ""))
-                        appendLine("时间：${resp.createdAt}")
-                        appendLine("类型：${resp.eventType}")
-                        if (scope == "canon") {
-                            appendLine("⚠️ 正史事件需审核，结果稍后在 echo_observe events 中查看")
-                        } else {
-                            appendLine("个人事件已生效，可用 echo_observe feed 查看后续影响")
-                        }
-                    },
-                )
-            } catch (e: Exception) {
-                ToolResult.error("影响 ECHO 世界失败：${e.message}")
+        override fun execute(params: Map<String, Any>): ToolResult {
+            currentCancellationToken()?.checkCancelled()
+            return runBlocking(Dispatchers.IO) {
+                withTimeoutOrNull(ECHO_TIMEOUT_MS) {
+                    val title = optionalString(params, "title", "").takeIf { it.isNotBlank() }
+                        ?: return@withTimeoutOrNull ToolResult.error("'title' 不能为空", ToolErr.INVALID_PARAM)
+                    val summary = optionalString(params, "summary", "").takeIf { it.isNotBlank() }
+                        ?: return@withTimeoutOrNull ToolResult.error("'summary' 不能为空", ToolErr.INVALID_PARAM)
+                    val scope = optionalString(params, "scope", "personal")
+                    val realmId = optionalString(params, "realm_id", "").takeIf { it.isNotBlank() }
+                    val userId = Net.currentUserId()
+                    try {
+                        val req = RealmEventRequest(
+                            title = title,
+                            summary = summary,
+                            scope = scope,
+                            realmId = realmId,
+                            submitter = "octopus-agent:$userId",
+                            content = summary,
+                        )
+                        val resp = Net.post(
+                            "/api/realm-events",
+                            Net.gson.toJson(req),
+                            RealmEventResponse::class.java,
+                        )
+                        ToolResult.success(
+                            buildString {
+                                appendLine("✅ 行动已提交到 ECHO 世界")
+                                appendLine("标题：${resp.title}")
+                                appendLine("范围：$scope" + (realmId?.let { " · 领域 $it" } ?: ""))
+                                appendLine("时间：${resp.createdAt}")
+                                appendLine("类型：${resp.eventType}")
+                                if (scope == "canon") {
+                                    appendLine("⚠️ 正史事件需审核，结果稍后在 echo_observe events 中查看")
+                                } else {
+                                    appendLine("个人事件已生效，可用 echo_observe feed 查看后续影响")
+                                }
+                            },
+                        )
+                    } catch (e: Exception) {
+                        ToolResult.error("影响 ECHO 世界失败：${e.message}", ToolErr.UPSTREAM)
+                    }
+                } ?: ToolResult.error("影响 ECHO 世界请求超时(15s)", ToolErr.TIMEOUT)
             }
         }
     }
@@ -318,35 +332,44 @@ class EchoUniverseTools {
             ),
         )
 
-        override fun execute(params: Map<String, Any>): ToolResult = runBlocking {
-            val characterId = optionalString(params, "character_id", "")
-                .takeIf { it.isNotBlank() } ?: return@runBlocking ToolResult.error("'character_id' 不能为空")
-            val userId = Net.currentUserId()
-            try {
-                val body = Net.gson.toJson(
-                    mapOf(
-                        "user_id" to userId,
-                        "character_id" to characterId,
-                        "source" to "octopus-agent",
-                    ),
-                )
-                val binding = Net.post("/api/bindings", body, BindingDto::class.java)
-                ToolResult.success(
-                    buildString {
-                        appendLine("✅ 角色绑定成功")
-                        appendLine("角色：${binding.characterName}")
-                        appendLine("Agent ID：${binding.agentId}")
-                        appendLine("状态：${binding.status}")
-                        appendLine("现在可以用 echo_observe feed 读取该角色的世界状态")
-                    },
-                )
-            } catch (e: Exception) {
-                ToolResult.error("绑定角色失败：${e.message}")
+        override fun execute(params: Map<String, Any>): ToolResult {
+            currentCancellationToken()?.checkCancelled()
+            return runBlocking(Dispatchers.IO) {
+                withTimeoutOrNull(ECHO_TIMEOUT_MS) {
+                    val characterId = optionalString(params, "character_id", "").takeIf { it.isNotBlank() }
+                        ?: return@withTimeoutOrNull ToolResult.error(
+                            "'character_id' 不能为空",
+                            ToolErr.INVALID_PARAM,
+                        )
+                    val userId = Net.currentUserId()
+                    try {
+                        val body = Net.gson.toJson(
+                            mapOf(
+                                "user_id" to userId,
+                                "character_id" to characterId,
+                                "source" to "octopus-agent",
+                            ),
+                        )
+                        val binding = Net.post("/api/bindings", body, BindingDto::class.java)
+                        ToolResult.success(
+                            buildString {
+                                appendLine("✅ 角色绑定成功")
+                                appendLine("角色：${binding.characterName}")
+                                appendLine("Agent ID：${binding.agentId}")
+                                appendLine("状态：${binding.status}")
+                                appendLine("现在可以用 echo_observe feed 读取该角色的世界状态")
+                            },
+                        )
+                    } catch (e: Exception) {
+                        ToolResult.error("绑定角色失败：${e.message}", ToolErr.UPSTREAM)
+                    }
+                } ?: ToolResult.error("绑定角色请求超时(15s)", ToolErr.TIMEOUT)
             }
         }
     }
 
     companion object {
+        private const val ECHO_TIMEOUT_MS = 15_000L
         private const val ECHO_LOCAL_USER_KEY = "ECHO_UNIVERSE_LOCAL_USER_ID"
 
         /** 一次性注册所有 Echo 工具 */

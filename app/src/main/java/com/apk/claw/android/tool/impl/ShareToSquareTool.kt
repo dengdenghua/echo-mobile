@@ -1,11 +1,15 @@
 package com.apk.claw.android.tool.impl
 
+import com.apk.claw.android.agent.CancellationToken
 import com.apk.claw.android.plugin.MiniAppRegistry
 import com.apk.claw.android.plugin.SquarePublisher
 import com.apk.claw.android.tool.BaseTool
+import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolParameter
 import com.apk.claw.android.tool.ToolResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * 「分享到广场」工具 —— 把一个本地小程序(通常是刚用 generate_app 生成的)投稿到广场,后台审核后展示。
@@ -32,11 +36,27 @@ class ShareToSquareTool : BaseTool() {
         ToolParameter("app_id", "string", "The mini-app id to publish to the Square.", true),
     )
 
+    companion object {
+        private const val TIMEOUT_MS = 20_000L
+    }
+
     override fun execute(params: Map<String, Any>): ToolResult {
+        currentCancellationToken()?.checkCancelled()
         val id = requireString(params, "app_id").trim()
         val manifest = MiniAppRegistry.get(id)
-            ?: return ToolResult.error("找不到 id 为「$id」的小程序;先用 generate_app 生成,或确认 id 是否正确。")
-        val outcome = runBlocking { SquarePublisher.publish(manifest) }
-        return if (outcome.ok) ToolResult.success(outcome.message) else ToolResult.error(outcome.message)
+            ?: return ToolResult.error(
+                "找不到 id 为「$id」的小程序;先用 generate_app 生成,或确认 id 是否正确。",
+                ToolErr.NOT_FOUND,
+            )
+        val outcome = runBlocking(Dispatchers.IO) {
+            withTimeoutOrNull(TIMEOUT_MS) {
+                SquarePublisher.publish(manifest)
+            }
+        }
+        return when {
+            outcome == null -> ToolResult.error("发布到广场网络超时(20s)", ToolErr.TIMEOUT)
+            outcome.ok -> ToolResult.success(outcome.message)
+            else -> ToolResult.error(outcome.message, ToolErr.UPSTREAM)
+        }
     }
 }

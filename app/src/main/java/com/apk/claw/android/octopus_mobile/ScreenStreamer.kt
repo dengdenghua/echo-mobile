@@ -67,6 +67,7 @@ class ScreenStreamer(
         running = false
         sendJob?.cancel()
         sendJob = null
+        unregisterListener(this)
         // 取消整个协程作用域,释放 SupervisorJob + IO 线程;否则 stop 后 scope 仍存活,
         // flushNow 等仍可调度新协程到已"停止"的 streamer 上。
         scope.cancel()

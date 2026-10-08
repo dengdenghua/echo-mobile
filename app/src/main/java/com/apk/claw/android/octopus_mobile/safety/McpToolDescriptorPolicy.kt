@@ -149,22 +149,6 @@ object McpToolDescriptorPolicy {
         return null
     }
 
-    @Suppress("ReturnCount")
-    private fun hasCycle(start: String, successors: Map<String, List<String>>): Boolean {
-        val path = HashSet<String>()
-        var current: String? = start
-        // 步数上限 = 节点数,超过即必然重复走点 → 有环
-        var steps = 0
-        val maxSteps = successors.size + 1
-        while (current != null && steps <= maxSteps) {
-            if (!path.add(current)) return true
-            val next = successors[current] ?: return false
-            current = next.firstOrNull()
-            steps++
-        }
-        return false
-    }
-
     private fun collectRefs(element: JsonElement, out: MutableSet<String>) {
         val stack = ArrayDeque<JsonElement>()
         stack.addLast(element)
@@ -339,4 +323,21 @@ object McpToolDescriptorPolicy {
                 UNTRUSTED_DESC_NOTICE_CN + " " + fence(body)
         }
     }
+}
+
+/** Schema reference graph traversal is independent of descriptor policy state. */
+@Suppress("ReturnCount")
+private fun hasCycle(start: String, successors: Map<String, List<String>>): Boolean {
+    val path = HashSet<String>()
+    var current: String? = start
+    // 步数上限 = 节点数,超过即必然重复走点 → 有环
+    var steps = 0
+    val maxSteps = successors.size + 1
+    while (current != null && steps <= maxSteps) {
+        if (!path.add(current)) return true
+        val next = successors[current] ?: return false
+        current = next.firstOrNull()
+        steps++
+    }
+    return false
 }

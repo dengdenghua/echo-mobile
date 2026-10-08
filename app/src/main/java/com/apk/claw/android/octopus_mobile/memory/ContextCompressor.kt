@@ -69,7 +69,7 @@ class ContextCompressor(
         val olderMsgs = mutableListOf<ChatMessage>()
 
         for (m in messages) {
-            if (m.role == "system" && config.preserveSystem) {
+            if (m.role == "system" && config.preserveSystem && !m.content.startsWith("[Context Summary]")) {
                 systemMsgs.add(m)
             } else {
                 olderMsgs.add(m)

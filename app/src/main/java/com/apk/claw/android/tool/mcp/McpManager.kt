@@ -142,20 +142,10 @@ object McpManager {
     ): Set<String> {
         val registered = linkedSetOf<String>()
         for (tool in tools) {
-            val nameReject = McpToolDescriptorPolicy.validateToolName(tool.name)
-            if (nameReject != null) {
-                Log.w(TAG, "[$serverId] 拒绝 MCP 工具名 '${tool.name}':$nameReject")
-                continue
-            }
-            val schemaReject = McpToolDescriptorPolicy.validateSchema(tool.inputSchema)
-            if (schemaReject != null) {
-                Log.w(TAG, "[$serverId] 拒绝 MCP 工具 '${tool.name}' 的 inputSchema:$schemaReject")
-                continue
-            }
             val fullToolName = "$TOOL_PREFIX${serverId}_${tool.name}"
-            val owner = toolMapping[fullToolName]
-            if (owner != null && owner.first != serverId) {
-                Log.w(TAG, "拒绝 MCP 工具名冲突 '$fullToolName':已被 server '${owner.first}' 占用")
+            val rejection = toolRegistrationRejection(serverId, tool, fullToolName)
+            if (rejection != null) {
+                Log.w(TAG, rejection)
                 continue
             }
             try {
@@ -167,6 +157,25 @@ object McpManager {
             }
         }
         return registered
+    }
+
+    private fun toolRegistrationRejection(
+        serverId: String,
+        tool: McpClient.McpToolInfo,
+        fullToolName: String,
+    ): String? {
+        val nameReject = McpToolDescriptorPolicy.validateToolName(tool.name)
+        val schemaReject = if (nameReject == null) {
+            McpToolDescriptorPolicy.validateSchema(tool.inputSchema)
+        } else null
+        val owner = toolMapping[fullToolName]
+        return when {
+            nameReject != null -> "[$serverId] 拒绝 MCP 工具名 '${tool.name}':$nameReject"
+            schemaReject != null -> "[$serverId] 拒绝 MCP 工具 '${tool.name}' 的 inputSchema:$schemaReject"
+            owner != null && owner.first != serverId ->
+                "拒绝 MCP 工具名冲突 '$fullToolName':已被 server '${owner.first}' 占用"
+            else -> null
+        }
     }
 
     /**
