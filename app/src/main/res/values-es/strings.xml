@@ -1401,8 +1401,6 @@ Shizuku es una herramienta local segura y de código abierto.</string>
     <string name="permission_mode_dialog_title">Seleccionar modo de permisos</string>
     <string name="mcp_server_menu_title">Servidor MCP</string>
     <string name="mcp_server_dialog_title">Configuración del servidor MCP</string>
-    <string name="tentacle_config_menu_title">Puente de Runtime</string>
-    <string name="tentacle_config_dialog_title">Configuración del puente de Runtime</string>
     <string name="github_token_menu_title">Token de GitHub</string>
     <string name="github_token_dialog_title">Token de GitHub (para git_push / github_create_pr)</string>
     <string name="diff_view_menu_title">Vista de diferencias</string>

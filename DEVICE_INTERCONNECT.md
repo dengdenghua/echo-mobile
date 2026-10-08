@@ -1,12 +1,12 @@
 # Echo Mobile 统一设备接入
 
-手机、Android 模拟器、电脑和虚拟机可以通过一个 Echo OS 或 Echo AI 中枢，按设备 ID 双向调用已授权工具。本轮实现协议和客户端接线，不代表已部署云服务或完成真机/外网验收。
+手机、Android 模拟器、电脑和虚拟机可以接入一个 Echo OS 或 Echo AI 中枢；按设备 ID 双向调用已授权工具（设备间互调）仅 Echo OS 中枢支持，见下文第 5 步。本轮实现协议和客户端接线，不代表已部署云服务或完成真机/外网验收。
 
 1. 在 Echo OS 设备连接页面为当前手机创建独立配对邀请。
 2. Runtime 设置支持 `echo://join?...` 和旧 `octopus://join?...`。保存地址和令牌后连接会使用新配置；只有收到注册确认才显示在线。
 3. 同型号手机/模拟器使用各自持久设备 ID，不再以品牌和型号充当身份。克隆设备时不要复制配对数据。
 4. 电脑在 AI/OS 仓库运行 `python -m runtime.tentacle.device_client`，虚拟机必须在虚拟机内部运行。使用 `--device-id vm-1 --kind vm` 等选项；令牌由 `ECHO_DEVICE_TOKEN` 提供。
-5. 在中枢配置 `ECHO_DEVICE_PEER_GRANTS`，按源 ID、目标 ID、精确工具名分别授权，重启生效。
+5. 在中枢配置 `ECHO_DEVICE_PEER_GRANTS`，按源 ID、目标 ID、精确工具名分别授权，重启生效。设备间互调只在 Echo OS 中枢（每台设备独立令牌）上可用；Echo AI 中枢使用共享令牌、从不启用按设备鉴权，设备间调用会被拒绝（`-32098`），除非显式设置不安全开关 `ECHO_ALLOW_INSECURE_SHARED_TOKEN_PEER_CALLS=1`（共享令牌下无法区分调用方，不建议在生产使用）。
 6. 手机的 `device_call` 工具使用 `device_id`、`tool`、`arguments_json` 参数。仍受手机本地高风险工具策略约束；远端拒绝和断线会返回失败。
 
 示例：目标 `vm-1` 启动时声明 `--workspace C:\EchoShare` 后，授权手机使用 `workspace.write_text`，调用参数为 `{"path":"from-phone.txt","text":"hello"}`。文件在虚拟机限定目录实际创建，已有文件不覆盖。

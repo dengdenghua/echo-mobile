@@ -94,6 +94,39 @@ class MobileRuntimeSecurityTest {
     }
 
     @Test
+    fun `cleartext auth host classifier accepts only local and private hosts`() {
+        val allowed = listOf(
+            "localhost", "127.0.0.1", "::1", "[::1]", "10.0.2.2",
+            "10.1.2.3", "172.16.0.1", "192.168.1.20", "169.254.10.20",
+            "fe80::1", "[fe80::abcd]", "nas.local", "Printer.LOCAL",
+        )
+        for (host in allowed) {
+            assertTrue("$host should allow cleartext auth", MobileRuntimeSecurity.isCleartextAuthHost(host))
+        }
+        val rejected = listOf(
+            "", "203.0.113.42", "8.8.8.8", "172.32.0.1", "169.255.0.1",
+            "example.com", "local", ".local", "evil.local.example.com",
+            "2001:db8::1", "fec0::1",
+        )
+        for (host in rejected) {
+            assertFalse("$host must not allow cleartext auth", MobileRuntimeSecurity.isCleartextAuthHost(host))
+        }
+    }
+
+    @Test
+    fun `bearer token is refused over public ws but allowed over wss and lan ws`() {
+        assertTrue(MobileRuntimeSecurity.allowsBearerToken("wss://runtime.example/ws"))
+        assertTrue(MobileRuntimeSecurity.allowsBearerToken("ws://192.168.1.2:8765"))
+        assertTrue(MobileRuntimeSecurity.allowsBearerToken("ws://10.0.2.2:8765"))
+        assertTrue(MobileRuntimeSecurity.allowsBearerToken("ws://hub.local:8765"))
+        assertTrue(MobileRuntimeSecurity.allowsBearerToken("ws://[fe80::1]:8765"))
+        assertFalse(MobileRuntimeSecurity.allowsBearerToken("ws://runtime.example/ws"))
+        assertFalse(MobileRuntimeSecurity.allowsBearerToken("ws://203.0.113.42:8765"))
+        assertFalse(MobileRuntimeSecurity.allowsBearerToken("http://192.168.1.2:8765"))
+        assertFalse(MobileRuntimeSecurity.allowsBearerToken("not a url"))
+    }
+
+    @Test
     fun `assess reason mentions production guidance for public ws`() {
         val decision = MobileRuntimeSecurity.assess("ws://203.0.113.42:8765")
         assertEquals(false, decision.allowed)

@@ -1,6 +1,7 @@
 package com.apk.claw.android.octopus_mobile
 
 import com.apk.claw.android.utils.KVUtils
+import kotlinx.coroutines.async
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
@@ -325,6 +326,68 @@ class OctopusMobileClientHandshakeTest {
         val next = client.taskWorkspace("advance", mapOf("id" to "parent", "revision" to "checked-stage"))
         assertEquals(1, next.get("stage_index").asInt)
         assertEquals("planning", next.get("status").asString)
+    }
+
+    @Test
+    fun `replacing an online connection fails pending calls and closes old socket`() = kotlinx.coroutines.runBlocking {
+        val online = CountDownLatch(1)
+        val received = CountDownLatch(1)
+        val oldClosed = enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            if (request.getString("method") == "device/hello") {
+                socket.send(JSONObject().put("id", request.getString("id"))
+                    .put("result", JSONObject().put("registered", true)).toString())
+            } else if (request.getString("method") == "task/workspace/list") {
+                received.countDown()
+            }
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        val pending = async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+            runCatching { client.taskWorkspace("list") }
+        }
+        assertTrue(received.await(2, TimeUnit.SECONDS))
+        val replacementOnline = CountDownLatch(1)
+        enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            assertEquals("device/hello", request.getString("method"))
+            socket.send(JSONObject().put("id", request.getString("id"))
+                .put("result", JSONObject().put("registered", true)).toString())
+        }
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) replacementOnline.countDown() }
+        client.connect()
+        val failure = kotlinx.coroutines.withTimeout(2_000) { pending.await() }.exceptionOrNull()
+        assertTrue(failure is IllegalStateException)
+        assertTrue(oldClosed.await(2, TimeUnit.SECONDS))
+        assertTrue(replacementOnline.await(2, TimeUnit.SECONDS))
+    }
+
+    @Test
+    fun `connection loss fails pending workspace call without replay`() = kotlinx.coroutines.runBlocking {
+        val online = CountDownLatch(1)
+        val requests = java.util.concurrent.atomic.AtomicInteger()
+        enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            if (request.getString("method") == "device/hello") {
+                socket.send(JSONObject().put("id", request.getString("id"))
+                    .put("result", JSONObject().put("registered", true)).toString())
+            } else if (request.getString("method") == "task/workspace/submit") {
+                requests.incrementAndGet()
+                socket.close(1001, "test connection loss")
+            }
+        }
+        val client = newClient()
+        client.onStateChanged = { if (it == ConnectionState.ONLINE) online.countDown() }
+        client.connect()
+        assertTrue(online.await(2, TimeUnit.SECONDS))
+        val failure = kotlinx.coroutines.withTimeout(2_000) {
+            runCatching { client.taskWorkspace("submit", mapOf("id" to "stable-task", "task" to "test")) }
+        }.exceptionOrNull()
+        assertTrue(failure is IllegalStateException)
+        assertEquals(1, requests.get())
+        client.disconnect()
     }
 
     private fun newClient(): OctopusMobileClient =

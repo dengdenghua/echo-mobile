@@ -635,8 +635,6 @@
     <ID>MagicNumber:DeviceListActivity.kt$DeviceListActivity$16</ID>
     <ID>MagicNumber:DeviceListActivity.kt$DeviceListActivity$40</ID>
     <ID>MagicNumber:DeviceListActivity.kt$DeviceListActivity$8</ID>
-    <ID>MagicNumber:DeviceRegistration.kt$DeviceRegistration$32</ID>
-    <ID>MagicNumber:DeviceRegistration.kt$DeviceRegistration$8</ID>
     <ID>MagicNumber:DeviceRegistry.kt$DeviceRegistry$500</ID>
     <ID>MagicNumber:DeviceRouteHandler.kt$DeviceRouteHandler$300L</ID>
     <ID>MagicNumber:DeviceRouteHandler.kt$DeviceRouteHandler$600L</ID>
@@ -1056,7 +1054,6 @@
     <ID>MagicNumber:ScreenHandler.kt$ScreenHandler$65</ID>
     <ID>MagicNumber:ScreenHandler.kt$ScreenHandler$720</ID>
     <ID>MagicNumber:ScreenHandler.kt$ScreenHandler$900</ID>
-    <ID>MagicNumber:ScreenRelay.kt$ScreenRelay$1024</ID>
     <ID>MagicNumber:ScreenStreamer.kt$ScreenStreamer$16</ID>
     <ID>MagicNumber:ScriptSandbox.kt$ScriptSandbox$10_000L</ID>
     <ID>MagicNumber:ScriptSandbox.kt$ScriptSandbox$1_000L</ID>
@@ -1150,7 +1147,6 @@
     <ID>MagicNumber:TelegramMarkdownUtils.kt$TelegramMarkdownUtils$7</ID>
     <ID>MagicNumber:TelegramMarkdownUtils.kt$TelegramMarkdownUtils$8</ID>
     <ID>MagicNumber:TelegramMarkdownUtils.kt$TelegramMarkdownUtils$9</ID>
-    <ID>MagicNumber:TentacleManager.kt$TentacleManager$8</ID>
     <ID>MagicNumber:ToolCallDispatcher.kt$ToolCallDispatcher$32603</ID>
     <ID>MagicNumber:ToolCallGuardrail.kt$ToolCallGuardrailController$200</ID>
     <ID>MagicNumber:ToolCallGuardrail.kt$ToolCallSignature.Companion$8</ID>
@@ -1786,7 +1782,6 @@
     <ID>MaxLineLength:TaskOrchestrator.kt$TaskOrchestrator.&lt;no name provided&gt;$ChannelManager.sendMessage(channel, ClawApplication.instance.getString(R.string.channel_msg_task_error, error.message), messageID)</ID>
     <ID>MaxLineLength:TaskOrchestrator.kt$TaskOrchestrator.&lt;no name provided&gt;$override</ID>
     <ID>MaxLineLength:TaskOrchestrator.kt$TaskOrchestrator.&lt;no name provided&gt;$val status = if (result.isSuccess) app.getString(R.string.channel_msg_tool_success) else app.getString(R.string.channel_msg_tool_failure)</ID>
-    <ID>MaxLineLength:TentacleHandshakeTest.kt$TentacleHandshakeTest$assertTrue("backoff should be capped near 30s, got $big", big &lt;= OctopusMobileClient.MAX_BACKOFF_MS + OctopusMobileClient.INITIAL_BACKOFF_MS)</ID>
     <ID>MaxLineLength:ToolRegistry.kt$ToolRegistry$ToolResult.error("${if (isHighRisk) "高危" else "中危"}工具「$name」被安全策略拦截（当前为审批模式）。", ToolErr.BLOCKED)</ID>
     <ID>MaxLineLength:ToolRegistry.kt$ToolRegistry$ToolResult.error("${if (isHighRisk) "高危" else "中危"}工具「$name」被用户拒绝或审批超时。", ToolErr.PERMISSION)</ID>
     <ID>MaxLineLength:ToolRegistry.kt$ToolRegistry$ToolResult.error("${result.error} [⚠️ ${failCheck.message}]", result.errorCode ?: ToolErr.INTERNAL, result.errorLine)</ID>
@@ -1872,7 +1867,6 @@
     <ID>MaxLineLength:WorkspaceListTool.kt$WorkspaceListTool$sb.append("- ${m.id} ${m.name} [${m.type}] ${m.host}:${m.port}${m.rootPath} status=${m.lastStatus}\n")</ID>
     <ID>MaxLineLength:WorkspacePushTool.kt$WorkspacePushTool$ToolResult.error("Conflict: ${r.message} (remote mtime=${r.remoteMtime}). Pull first or set force=true.")</ID>
     <ID>MayBeConst:GmApiBridge.kt$GmApiBridge.Companion$val JS_BRIDGE_NAME = INTERFACE_NAME</ID>
-    <ID>MayBeConst:TentacleManager.kt$TentacleManager$private val tag = "TentacleManager"</ID>
     <ID>NestedBlockDepth:BaseActivity.kt$BaseActivity$override fun dispatchKeyEvent(event: KeyEvent): Boolean</ID>
     <ID>NestedBlockDepth:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ChatScreen()</ID>
     <ID>NestedBlockDepth:ChatScreen.kt$private fun turnRows(turn: List&lt;ChatMessage&gt;): List&lt;ChatRow&gt;</ID>
@@ -2153,7 +2147,6 @@
     <ID>ReturnCount:TaskCheckpoint.kt$TaskCheckpoint$fun load(): CheckpointData?</ID>
     <ID>ReturnCount:TaskOrchestrator.kt$TaskOrchestrator$private fun triggerPostTaskReflect(success: Boolean)</ID>
     <ID>ReturnCount:TaskQueue.kt$TaskQueue$fun shouldPreempt(newTask: QueuedTask, currentTask: QueuedTask?): Boolean</ID>
-    <ID>ReturnCount:TentacleManager.kt$TentacleManager$fun start(runtimeUrl: String, authToken: String)</ID>
     <ID>ReturnCount:ToolCallGuardrail.kt$ToolCallGuardrailController$fun observe( toolName: String, args: Map&lt;String, Any&gt;? = null, result: String? = null, failed: Boolean = false, ): GuardrailDecision</ID>
     <ID>ReturnCount:ToolCallGuardrail.kt$ToolCallGuardrailController$fun precheck(toolName: String, args: Map&lt;String, Any&gt;? = null): GuardrailDecision</ID>
     <ID>ReturnCount:ToolCallGuardrail.kt$ToolCallGuardrailController$private fun handleFailure( sig: ToolCallSignature, toolName: String, result: String? ): GuardrailDecision</ID>
@@ -2216,7 +2209,6 @@
     <ID>SwallowedException:DefaultAgentService.kt$DefaultAgentService$e: Exception</ID>
     <ID>SwallowedException:DefaultAgentService.kt$DefaultAgentService$e: java.util.concurrent.TimeoutException</ID>
     <ID>SwallowedException:DefaultAgentService.kt$DefaultAgentService.Companion$e: Exception</ID>
-    <ID>SwallowedException:DeviceRegistration.kt$DeviceRegistration$e: Exception</ID>
     <ID>SwallowedException:FastReplay.kt$FastReplay$e: Exception</ID>
     <ID>SwallowedException:FeiShuChannelHandler.kt$FeiShuChannelHandler.&lt;no name provided&gt;$e: Exception</ID>
     <ID>SwallowedException:GmApiBridge.kt$GmApiBridge$e: Exception</ID>
@@ -2242,7 +2234,6 @@
     <ID>SwallowedException:RemoteWorkspaceManager.kt$RemoteWorkspaceManager$e: Exception</ID>
     <ID>SwallowedException:RouteContext.kt$RouteContext$e: Exception</ID>
     <ID>SwallowedException:RoutineStore.kt$RoutineStore$e: Exception</ID>
-    <ID>SwallowedException:ScreenRelay.kt$DefaultScreenSource$e: Exception</ID>
     <ID>SwallowedException:ScreenStreamer.kt$ScreenStreamer$e: Exception</ID>
     <ID>SwallowedException:ScreenStreamer.kt$ScreenStreamer.Companion$e: Exception</ID>
     <ID>SwallowedException:ScriptSandbox.kt$ScriptSandbox$e: java.util.concurrent.TimeoutException</ID>
@@ -2310,7 +2301,6 @@
     <ID>TooGenericExceptionCaught:DefaultAgentService.kt$DefaultAgentService$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DefaultAgentService.kt$DefaultAgentService.Companion$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DeviceDiscoveryManager.kt$DeviceDiscoveryManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:DeviceRegistration.kt$DeviceRegistration$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DeviceRegistry.kt$DeviceRegistry$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DeviceRemoteControl.kt$DeviceRemoteControl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DingTalkChannelHandler.kt$DingTalkChannelHandler$e: Exception</ID>
@@ -2390,8 +2380,6 @@
     <ID>TooGenericExceptionCaught:SafetyGate.kt$LlmConstitutionJudge$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ScreenCaptureManager.kt$ScreenCaptureManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ScreenCastService.kt$ScreenCastService$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:ScreenRelay.kt$DefaultScreenSource$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:ScreenRelay.kt$ScreenRelay$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ScreenStreamer.kt$ScreenStreamer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ScreenStreamer.kt$ScreenStreamer.Companion$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ScriptSandbox.kt$ScriptSandbox$e: Exception</ID>
@@ -2416,7 +2404,6 @@
     <ID>TooGenericExceptionCaught:TaskOrchestrator.kt$TaskOrchestrator$e: Exception</ID>
     <ID>TooGenericExceptionCaught:TaskOrchestrator.kt$TaskOrchestrator.&lt;no name provided&gt;$e: Exception</ID>
     <ID>TooGenericExceptionCaught:TelegramChannelHandler.kt$TelegramChannelHandler$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:TentacleManager.kt$TentacleManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ToolCallDispatcher.kt$ToolCallDispatcher$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ToolRegistry.kt$ToolRegistry$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ToolRegistryMcpProvider.kt$ToolRegistryMcpProvider$e: Exception</ID>

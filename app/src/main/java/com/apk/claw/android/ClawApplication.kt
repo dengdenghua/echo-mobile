@@ -42,6 +42,15 @@ open class ClawApplication : BaseApp() {
 
     companion object {
         private const val TAG = "ClawApplication"
+
+        /** 已移除的旧版 Tentacle 客户端遗留的 KV 键(启动时清理)。 */
+        private const val LEGACY_TENTACLE_ENABLED_KEY = "DEFAULT_TENTACLE_ENABLED"
+        private val LEGACY_TENTACLE_KEYS = listOf(
+            LEGACY_TENTACLE_ENABLED_KEY,
+            "DEFAULT_TENTACLE_RUNTIME_URL",
+            "DEFAULT_TENTACLE_AUTH_TOKEN",
+        )
+
         lateinit var instance: ClawApplication
             private set
         lateinit var appViewModelInstance: AppViewModel
@@ -156,24 +165,16 @@ open class ClawApplication : BaseApp() {
             XLog.i(TAG, "ApprovalGate installed (mode=${com.apk.claw.android.agent.AgentConfig.currentPermissionMode()})")
         }.onFailure { XLog.e(TAG, "ApprovalGate install failed", it) }
 
-        // 3. Tentacle WS 通路:连母本 Runtime,接收 tool/execute 帧。
-        // LOCAL_ONLY 模式(无 URL)完全 no-op,确保 INV-T4(无母本时现有功能不受影响)。
+        // 3. 旧版 Tentacle WS 客户端(tentacle.OctopusMobileClient)已停用:它发送不带 JSON-RPC
+        // method 的 {type:"device/hello"} 帧,现有 hub 一律拒绝。设备互联统一走
+        // octopus_mobile.OctopusMobileClient(设置 → Octopus Runtime / 设备列表 / echo://join 配对)。
+        // 旧客户端代码与设置入口均已移除;这里清掉残留的旧配置(含加密存储的 bearer token)。
         runCatching {
-            val tentacleConfig = com.apk.claw.android.tentacle.TentacleConfig.load()
-            if (tentacleConfig.enabled && tentacleConfig.runtimeUrl.isNotBlank()) {
-                com.apk.claw.android.tentacle.TentacleManager.init(this)
-                com.apk.claw.android.tentacle.TentacleManager.setToolCallHandler { toolName, params ->
-                    // 母本下发的工具调用必经 ToolRegistry 全套闸门 + ApprovalGate(不可信来源)
-                    ToolRegistry.getInstance().withUntrustedSource {
-                        ToolRegistry.getInstance().executeTool(toolName, params)
-                    }
-                }
-                com.apk.claw.android.tentacle.TentacleManager.start(tentacleConfig.runtimeUrl, tentacleConfig.authToken)
-                XLog.i(TAG, "Tentacle started: ${tentacleConfig.runtimeUrl}")
-            } else {
-                XLog.i(TAG, "Tentacle skipped (LOCAL_ONLY mode) — INV-T4")
+            if (KVUtils.getBoolean(LEGACY_TENTACLE_ENABLED_KEY, false)) {
+                XLog.w(TAG, "Legacy Tentacle client was removed; use the Octopus Mobile hub connection instead")
             }
-        }.onFailure { XLog.e(TAG, "Tentacle start failed", it) }
+            LEGACY_TENTACLE_KEYS.forEach { KVUtils.remove(it) }
+        }.onFailure { XLog.w(TAG, "Legacy Tentacle config cleanup failed: ${it.message}") }
 
         // 4. MCP 服务端:把 Android 工具暴露给外部 MCP 客户端(Claude Desktop / Cursor / 母本 Runtime)
         // 默认关闭,需用户在 Settings 中开启。

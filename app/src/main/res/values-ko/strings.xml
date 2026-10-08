@@ -1401,8 +1401,6 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="permission_mode_dialog_title">권한 모드 선택</string>
     <string name="mcp_server_menu_title">MCP 서버</string>
     <string name="mcp_server_dialog_title">MCP 서버 설정</string>
-    <string name="tentacle_config_menu_title">런타임 브리지</string>
-    <string name="tentacle_config_dialog_title">런타임 브리지 설정</string>
     <string name="github_token_menu_title">GitHub 토큰</string>
     <string name="github_token_dialog_title">GitHub 토큰(git_push / github_create_pr용)</string>
     <string name="diff_view_menu_title">Diff 뷰</string>

@@ -58,15 +58,46 @@ object MobileRuntimeSecurity {
         return decision.allowed && !decision.localDevelopment
     }
 
+    /**
+     * Whether a bearer token may be sent to [runtimeUrl]. Always true for wss://;
+     * for cleartext ws:// only loopback, the emulator host 10.0.2.2, RFC 1918,
+     * link-local and mDNS `.local` hosts qualify.
+     */
+    fun allowsBearerToken(runtimeUrl: String): Boolean {
+        val uri = runCatching { URI(runtimeUrl.trim()) }.getOrNull() ?: return false
+        return when (uri.scheme?.lowercase()) {
+            "wss" -> true
+            "ws" -> isCleartextAuthHost(uri.host ?: "")
+            else -> false
+        }
+    }
+
+    /** Host classifier for cleartext credentials: loopback / emulator / private LAN only. */
+    fun isCleartextAuthHost(rawHost: String): Boolean {
+        val host = rawHost.trim().lowercase().removeSurrounding("[", "]")
+        if (host.isEmpty()) return false
+        return isLocalCleartextHost(host) || isPrivateNetworkHost(host)
+    }
+
     private fun isLocalCleartextHost(host: String): Boolean =
         host in LOCAL_CLEAR_TEXT_HOSTS
 
     /**
-     * 判断是否为 RFC 1918 私有网络地址（LAN）。
-     * 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+     * 判断是否为私有网络地址（LAN）。
+     * RFC 1918: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16；
+     * 链路本地: 169.254.0.0/16、fe80::/10；mDNS: *.local
      */
+    private fun isPrivateNetworkHost(rawHost: String): Boolean {
+        val host = rawHost.removeSurrounding("[", "]")
+        return when {
+            host.endsWith(".local") && host.length > ".local".length -> true
+            host.contains(':') -> isIpv6LinkLocal(host)
+            else -> isPrivateIpv4(host)
+        }
+    }
+
     @Suppress("ReturnCount", "MagicNumber")
-    private fun isPrivateNetworkHost(host: String): Boolean {
+    private fun isPrivateIpv4(host: String): Boolean {
         val parts = host.split(".")
         if (parts.size != 4) return false
         val octets = runCatching { parts.map { it.toInt() } }.getOrNull() ?: return false
@@ -75,7 +106,16 @@ object MobileRuntimeSecurity {
             octets[0] == 10 -> true                          // 10.0.0.0/8
             octets[0] == 172 && octets[1] in 16..31 -> true  // 172.16.0.0/12
             octets[0] == 192 && octets[1] == 168 -> true     // 192.168.0.0/16
+            octets[0] == 169 && octets[1] == 254 -> true     // 169.254.0.0/16 link-local
             else -> false
         }
+    }
+
+    /** fe80::/10 —— 首个 hextet 落在 fe80..febf。 */
+    @Suppress("MagicNumber")
+    private fun isIpv6LinkLocal(host: String): Boolean {
+        val first = host.substringBefore('%').substringBefore(':')
+        val value = first.toIntOrNull(16) ?: return false
+        return first.length == 4 && value in 0xfe80..0xfebf
     }
 }

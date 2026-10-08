@@ -23,7 +23,6 @@ import com.apk.claw.android.account.AccountConfig
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.agent.AgentConfig
 import com.apk.claw.android.agent.PermissionMode
-import com.apk.claw.android.tentacle.TentacleConfig
 import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.account.LoginActivity
 import com.apk.claw.android.utils.KVUtils
@@ -256,18 +255,6 @@ class SettingsActivity : BaseActivity() {
         mcpServerItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
         mcpServerItem.setTrailingText(getCurrentMcpServerDisplayText())
         menuItems["MCP_SERVER"] = mcpServerItem
-
-        // 母本 Runtime 桥接(Tentacle WS 通路)
-        // 配置 wss URL + token + 总开关, 重启 App 后 TentacleManager.start 生效
-        val tentacleConfigItem = modelGroup.addMenuItem(
-            leadingIcon = R.drawable.ic_runtime,
-            title = getString(R.string.tentacle_config_menu_title),
-            onClick = { showTentacleConfigDialog() },
-            showDivider = false
-        )
-        tentacleConfigItem.setLeadingIconColor(getColor(R.color.colorTextPrimary))
-        tentacleConfigItem.setTrailingText(getCurrentTentacleDisplayText())
-        menuItems["TENTACLE_CONFIG"] = tentacleConfigItem
 
         // GitHub Token(给 Git 工具集: git_push / github_create_pr)
         // 加密存储, 由 KVUtils.SECURE_KEYS 处理
@@ -609,66 +596,6 @@ class SettingsActivity : BaseActivity() {
             "ON · :${KVUtils.getMcpServerPort()}"
         } else {
             "OFF"
-        }
-    }
-
-    /**
-     * 母本 Runtime 桥接(Tentacle WS 通路)配置弹窗。
-     * 3 个输入:URL / Token / 总开关。
-     * 保存调用 TentacleConfig.save,重启 App 后 TentacleManager.start 生效。
-     */
-    private fun showTentacleConfigDialog() {
-        val current = TentacleConfig.load()
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 24, 48, 24)
-        }
-        val urlEdit = EditText(this).apply {
-            inputType = InputType.TYPE_TEXT_VARIATION_URI
-            hint = "Runtime WebSocket URL (wss://...)"
-            setText(current.runtimeUrl)
-        }
-        val tokenEdit = EditText(this).apply {
-            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
-            hint = "Auth Token"
-            setText(current.authToken)
-        }
-        val switch = SwitchCompat(this).apply {
-            text = "Enable Runtime Bridge"
-            isChecked = current.enabled
-        }
-        container.addView(switch)
-        container.addView(urlEdit)
-        container.addView(tokenEdit)
-
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle(R.string.tentacle_config_dialog_title)
-            .setView(container)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                TentacleConfig.save(
-                    TentacleConfig(
-                        runtimeUrl = urlEdit.text.toString().trim(),
-                        authToken = tokenEdit.text.toString().trim(),
-                        enabled = switch.isChecked,
-                    )
-                )
-                menuItems["TENTACLE_CONFIG"]?.setTrailingText(getCurrentTentacleDisplayText())
-                Toast.makeText(
-                    this,
-                    "Saved. Restart app to apply (TentacleManager.start on next launch).",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    /** Tentacle 配置菜单项副标题: 已连接 / 未配置 */
-    private fun getCurrentTentacleDisplayText(): String {
-        return if (KVUtils.getBoolean("DEFAULT_TENTACLE_ENABLED", false)) {
-            "已连接"
-        } else {
-            "未配置"
         }
     }
 

@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.apk.claw.android.utils.KVUtils
 
 private const val PEER_TOOL_TIMEOUT_MS = 30_000
-private const val PEER_REPLY_TIMEOUT_MS = 35_000L
 
 /**
  * Octopus Mobile 客户端 —— Octopus Mobile 与 octopus-agent Runtime 之间的 WebSocket 通道.
@@ -47,8 +46,10 @@ open class OctopusMobileClient(
     private val tag = "OctopusMobile"
 
     private val gson = Gson()
-    private val pendingPeerCalls = ConcurrentHashMap<String, CompletableDeferred<JsonObject>>()
     private val connectionGeneration = AtomicInteger(0)
+    private val pairedRpc = PairedDeviceRpc {
+        PairedConnectionSnapshot(webSocket, connectionGeneration.get(), state == ConnectionState.ONLINE)
+    }
 
     private fun createHttpClient(): OkHttpClient {
         val builder = OctoHttp.shared.newBuilder()
@@ -127,6 +128,16 @@ open class OctopusMobileClient(
     /** 启动客户端 —— 建立 WebSocket 连接 + 发送 hello + 状态流转. */
     open fun connect() {
         val generation = connectionGeneration.incrementAndGet()
+        // An explicit replacement is also a connection boundary. Old callbacks
+        // are fenced by generation, so retire their socket and pending calls
+        // here rather than waiting for callbacks that will now be ignored.
+        reconnectJob?.cancel()
+        webSocket?.cancel()
+        webSocket = null
+        setState(ConnectionState.CONNECTING)
+        failPendingTasks("Device connection replaced")
+        pendingHelloId = null
+        pendingHelloNonce = null
         val transport = MobileRuntimeSecurity.assess(
             runtimeUrl,
             allowInsecureRuntime = KVUtils.isInsecureOctopusRuntimeAllowed(),
@@ -137,8 +148,12 @@ open class OctopusMobileClient(
             setState(ConnectionState.DISCONNECTED)
             return
         }
-        if (runtimeUrl.startsWith("ws://") && !transport.localDevelopment) {
-            XLog.w(tag, "⚠️ connecting to runtime over plaintext ws:// — auth token is exposed to network MITM. Use wss:// in production.")
+        if (!authToken.isNullOrBlank() && !MobileRuntimeSecurity.allowsBearerToken(runtimeUrl)) {
+            val reason = "refusing to send auth token over cleartext ws:// to a non-local host; use wss://"
+            XLog.e(tag, "blocked runtime connection to $runtimeUrl: $reason")
+            diagnostics.onDisconnected("blocked: $reason", System.currentTimeMillis())
+            setState(ConnectionState.DISCONNECTED)
+            return
         }
         XLog.i(tag, "connecting to $runtimeUrl as $tentacleId")
 
@@ -275,8 +290,9 @@ open class OctopusMobileClient(
      * 此时 executeRemoteTask 因状态非 ONLINE 不会再注册新任务,无竞态。
      */
     private fun failPendingTasks(reason: String) {
-        pendingPeerCalls.values.forEach { it.completeExceptionally(IllegalStateException(reason)) }
-        pendingPeerCalls.clear()
+        pairedRpc.failAll(reason)
+        pendingLeases.values.forEach { it.complete(LeaseResult(false, reason)) }
+        pendingLeases.clear()
         if (pendingTasks.isEmpty()) return
         val deferreds = pendingTasks.values.toList()
         pendingTasks.clear()
@@ -514,38 +530,15 @@ open class OctopusMobileClient(
             "list", "devices", "submit", "get", "approve", "pause", "resume", "cancel", "remove",
             "review_result", "advance",
         ))
-        val ws = webSocket ?: error("请先连接设备中心")
-        check(state == ConnectionState.ONLINE) { "设备中心尚未连接" }
-        val id = "workspace-${java.util.UUID.randomUUID()}"
-        val result = CompletableDeferred<JsonObject>()
-        pendingPeerCalls[id] = result
-        return try {
-            check(ws.send(Envelope.Request(method = "task/workspace/$command", id = id, params = args).toJson())) {
-                "连接已断开"
-            }
-            withTimeout(PEER_REPLY_TIMEOUT_MS) { result.await() }
-        } finally {
-            pendingPeerCalls.remove(id)
-        }
+        return pairedRpc.request("task/workspace/$command", args, "workspace")
     }
 
     /** Explicitly granted device-to-device calls use the same authenticated hub. */
-    suspend fun executePeerTool(targetDeviceId: String, tool: String, args: Map<String, Any?>): JsonObject {
-        val ws = webSocket ?: error("Not connected to runtime")
-        check(state == ConnectionState.ONLINE) { "Device handshake is not complete" }
-        val id = "peer-${java.util.UUID.randomUUID()}"
-        val result = CompletableDeferred<JsonObject>()
-        pendingPeerCalls[id] = result
-        return try {
-            check(ws.send(Envelope.Request(method = "device/call", id = id, params = mapOf(
-                "target_device_id" to targetDeviceId, "tool" to tool,
-                "args" to args, "timeout_ms" to PEER_TOOL_TIMEOUT_MS,
-            )).toJson())) { "Device connection is closed" }
-            withTimeout(PEER_REPLY_TIMEOUT_MS) { result.await() }
-        } finally {
-            pendingPeerCalls.remove(id)
-        }
-    }
+    suspend fun executePeerTool(targetDeviceId: String, tool: String, args: Map<String, Any?>): JsonObject =
+        pairedRpc.request("device/call", mapOf(
+            "target_device_id" to targetDeviceId, "tool" to tool,
+            "args" to args, "timeout_ms" to PEER_TOOL_TIMEOUT_MS,
+        ), "peer")
 
     /**
      * 发送工具执行结果给母体.
@@ -656,25 +649,7 @@ open class OctopusMobileClient(
         authToken = token
     }
 
-    private fun handlePeerReply(root: JsonObject): Boolean {
-        val isReply = root.has("result") || root.has("error")
-        if (state != ConnectionState.ONLINE || !isReply) return false
-        val pending = root.get("id")?.asString?.let { pendingPeerCalls.remove(it) }
-        if (pending != null) {
-            val result = root.get("result")
-            when {
-                root.has("error") -> pending.completeExceptionally(
-                    IllegalStateException(
-                        root.get("error")?.takeIf { it.isJsonObject }?.asJsonObject
-                            ?.get("message")?.asString ?: "设备中心拒绝了此操作",
-                    ),
-                )
-                result?.isJsonObject == true -> pending.complete(result.asJsonObject)
-                else -> pending.completeExceptionally(IllegalStateException("Invalid peer result"))
-            }
-        }
-        return pending != null
-    }
+    private fun handlePeerReply(root: JsonObject): Boolean = pairedRpc.handleReply(root)
 
     /**
      * 强制重连：主动断开当前连接并立即重连（用于心跳检测到母体僵死时）。

@@ -1392,8 +1392,6 @@
     <string name="permission_mode_dialog_title">権限モードを選択</string>
     <string name="mcp_server_menu_title">MCP サーバー</string>
     <string name="mcp_server_dialog_title">MCP サーバー設定</string>
-    <string name="tentacle_config_menu_title">ランタイムブリッジ</string>
-    <string name="tentacle_config_dialog_title">ランタイムブリッジ設定</string>
     <string name="github_token_menu_title">GitHub トークン</string>
     <string name="github_token_dialog_title">GitHub トークン(git_push / github_create_pr 用)</string>
     <string name="diff_view_menu_title">差分ビュー</string>
