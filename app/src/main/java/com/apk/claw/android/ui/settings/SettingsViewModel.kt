@@ -180,6 +180,7 @@ class SettingsViewModel : ViewModel() {
         return if (ConfigServerManager.isRunning()) {
             ConfigServerManager.stop()
             KVUtils.setConfigServerEnabled(false)
+            com.apk.claw.android.mcp.McpServerBootstrap.onNetworkSettingChanged()
             val text = getLanConfigTrailingText()
             updateTrailingText(MenuAction.LAN_CONFIG.name, text)
             text
@@ -187,6 +188,7 @@ class SettingsViewModel : ViewModel() {
             val started = ConfigServerManager.start(context)
             if (started) {
                 KVUtils.setConfigServerEnabled(true)
+                com.apk.claw.android.mcp.McpServerBootstrap.onNetworkSettingChanged()
                 val text = getLanConfigTrailingText()
                 updateTrailingText(MenuAction.LAN_CONFIG.name, text)
                 text

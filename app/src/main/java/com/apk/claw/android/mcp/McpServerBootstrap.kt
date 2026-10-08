@@ -36,6 +36,12 @@ object McpServerBootstrap {
     private var currentPort: Int = McpServer.DEFAULT_PORT
 
     @Volatile
+    private var currentBindHost: String? = null
+
+    private var appContext: Context? = null
+    private val watcher = McpNetworkWatcher { refreshBindNow() }
+
+    @Volatile
     private var pendingProvider: McpToolRegistryProvider? = null
 
     @Volatile
@@ -49,6 +55,8 @@ object McpServerBootstrap {
      */
     @Synchronized
     fun start(context: Context, port: Int = McpServer.DEFAULT_PORT) {
+        appContext = context.applicationContext
+        watcher.register(context.applicationContext)
         val existing = server
         if (existing != null) {
             if (currentPort == port) {
@@ -80,6 +88,7 @@ object McpServerBootstrap {
             s.start(SOCKET_READ_TIMEOUT, false)
             server = s
             currentPort = port
+            currentBindHost = bindHost
             XLog.i(
                 TAG,
                 "MCP server started on $bindHost:$port (path=${McpServer.MCP_PATH}, tokenLen=${authToken.length})",
@@ -93,7 +102,33 @@ object McpServerBootstrap {
     /** 停止 MCP server。幂等。 */
     @Synchronized
     fun stop() {
+        watcher.unregister()
         stopInternal()
+    }
+
+    /**
+     * 控制服务器/局域网开关变化时调用；与 WiFi 变化共用去抖，避免连续事件造成重绑抖动。
+     */
+    fun onNetworkSettingChanged() {
+        if (server != null) watcher.schedule()
+    }
+
+    @Synchronized
+    private fun refreshBindNow() {
+        val ctx = appContext
+        if (ctx != null && server != null) {
+            val desired = McpBindPolicy.resolve(
+                lanModeEnabled = KVUtils.isConfigServerEnabled(),
+                wifiIp = ConfigServerManager.currentWifiIp(ctx),
+            )
+            if (McpBindPolicy.shouldRebind(currentBindHost, desired)) {
+                XLog.i(TAG, "MCP bind changed $currentBindHost -> $desired, restarting listener")
+                // start() 重新计算绑定地址，并沿用同一 LocalControlAuth 鉴权闸门；先停再起。
+                val port = currentPort
+                stopInternal()
+                start(ctx, port)
+            }
+        }
     }
 
     private fun stopInternal() {
@@ -106,6 +141,7 @@ object McpServerBootstrap {
             }
         }
         server = null
+        currentBindHost = null
     }
 
     /** 注入工具后端。即使 server 还没启动也会缓存,等 [start] 时生效。 */

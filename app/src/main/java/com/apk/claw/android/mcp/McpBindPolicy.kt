@@ -11,4 +11,14 @@ object McpBindPolicy {
 
     fun resolve(lanModeEnabled: Boolean, wifiIp: String?): String =
         if (lanModeEnabled && !wifiIp.isNullOrBlank() && wifiIp != "0.0.0.0") wifiIp else LOOPBACK
+
+    /**
+     * 是否需要重绑：服务在跑且当前绑定地址与期望地址不同才重绑；
+     * 未运行（currentBind == null）时不由本函数负责（由 start 处理）。
+     */
+    fun shouldRebind(currentBind: String?, desiredBind: String): Boolean =
+        currentBind != null && currentBind != desiredBind
+
+    /** 网络抖动合并窗口：窗口内的多次事件只在最后一次事件后评估一次。 */
+    const val REBIND_DEBOUNCE_MS = 1500L
 }

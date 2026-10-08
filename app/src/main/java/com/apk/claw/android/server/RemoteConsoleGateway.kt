@@ -296,6 +296,7 @@ object RemoteConsoleGateway {
 
     private fun ensureLanConsole(): Triple<String, String, String>? {
         KVUtils.setConfigServerEnabled(true)
+        com.apk.claw.android.mcp.McpServerBootstrap.onNetworkSettingChanged()
         if (!ConfigServerManager.start(ClawApplication.instance)) return null
         val address = ConfigServerManager.getAddress() ?: return null
         val token = ConfigServerManager.getAuthToken() ?: return null

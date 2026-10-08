@@ -35,6 +35,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   `privileged=false`. Root shell dump paths are restricted and arguments quoted.
 
 ### Known limitations
+- **Legacy stream auth**: `/api/screen/stream` still accepts a bearer header
+  without a ticket. Native clients (MjpegImageView, RemoteControlActivity,
+  ChatScreen) send the header and rely on it; only browser `<img>` needs the
+  one-time ticket. The token never appears in the URL and failures still count
+  toward the lockout.
 - **Legacy videos**: videos submitted before the `video_tasks` table existed have
   no ownership record and now 404 on poll. They cannot be backfilled (no
   video-to-user data was ever stored), so no admin/CLI backfill exists; users must

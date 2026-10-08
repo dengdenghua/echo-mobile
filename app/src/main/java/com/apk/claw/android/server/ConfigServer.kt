@@ -193,6 +193,9 @@ private fun decideAccess(
     if (isGet && session.uri == LocalControlAccessGate.STREAM_PATH && !ticket.isNullOrEmpty()) {
         return gate.decideTicket(ticket, source, now)
     }
+    // 有意保留：/api/screen/stream 在没有 ticket 时仍接受 Authorization: Bearer 头，
+    // 因为原生客户端（MjpegImageView、RemoteControlActivity、ChatScreen）能带头且依赖该用法；
+    // 仅浏览器 <img> 需要一次性 ticket。头部 token 不出现在 URL 中，且仍走同一失败锁定闸门。
     return gate.decide(
         uri = session.uri,
         isGet = isGet,
