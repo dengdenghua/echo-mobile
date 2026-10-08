@@ -28,6 +28,7 @@ class ConfigServer(
     }
 
     private val gson = Gson()
+    private val accessGate = LocalControlAccessGate()
     private val routeContext = RouteContext(context, gson)
     private val handlers: List<RouteHandler> = listOf(
         ScreenHandler(),
@@ -45,12 +46,12 @@ class ConfigServer(
     val authToken: String get() = LocalControlAuth.getOrCreateToken()
 
     /**
-     * 校验请求的 token。
+     * 校验请求的 token（经 [accessGate] 统一决策，含失败锁定）。
      * 仅接受 HTTP 头: Authorization: Bearer <token>
      * 查询参数 ?token=<token> 已禁用，防止 token 泄漏到浏览器历史 / 代理日志 / Referer。
      * 防止同 WiFi 邻居未授权访问配网页面。
      */
-    private fun validateAuth(session: IHTTPSession): Boolean =
+    internal fun validateAuth(session: IHTTPSession): Boolean =
         LocalControlAuth.isAuthorized(session.headers["authorization"])
 
     private fun unauthorizedResponse(): Response = routeContext.corsResponse(
@@ -79,12 +80,29 @@ class ConfigServer(
         val uri = session.uri
         val method = session.method
 
-        // 鉴权：放行 H5 页面、console 页面；debug.html 也需鉴权(即使 DEBUG 构建也不应无鉴权暴露)
-        val isPublic = uri == "/" || uri == "/index.html" ||
-            uri == "/console" || uri == "/console.html"
-        if (!isPublic && !validateAuth(session)) {
-            routeContext.recordRemoteAccess(session, "auth_denied", false, "uri=$uri", System.currentTimeMillis())
-            return unauthorizedResponse()
+        // 鉴权：仅放行静态空壳页面/资源白名单（不含任何 token/配置/状态）；其余一律要求 Bearer token。
+        // debug.html 也需鉴权(即使 DEBUG 构建也不应无鉴权暴露)。错误 token 过多的来源 IP 会被临时锁定。
+        val source = routeContext.sourceOf(session)
+        val decision = accessGate.decide(
+            uri = uri,
+            isGet = method == Method.GET,
+            authorizationHeader = session.headers["authorization"],
+            clientKey = source,
+            nowMs = System.currentTimeMillis(),
+        )
+        when (decision) {
+            LocalControlAccessGate.Decision.LOCKED_OUT -> {
+                XLog.w(TAG, "Auth locked out for $source uri=$uri")
+                val now = System.currentTimeMillis()
+                routeContext.recordRemoteAccess(session, "auth_locked_out", false, "uri=$uri", now)
+                return lockedOutResponse()
+            }
+            LocalControlAccessGate.Decision.UNAUTHORIZED -> {
+                routeContext.recordRemoteAccess(session, "auth_denied", false, "uri=$uri", System.currentTimeMillis())
+                return unauthorizedResponse()
+            }
+            LocalControlAccessGate.Decision.ALLOW_PUBLIC,
+            LocalControlAccessGate.Decision.ALLOW_AUTHENTICATED -> Unit
         }
 
         return try {
@@ -97,6 +115,8 @@ class ConfigServer(
             when {
                 (uri == "/" || uri == "/index.html") && method == Method.GET -> serveHtml()
                 (uri == "/console" || uri == "/console.html") && method == Method.GET -> serveConsoleHtml()
+                method == Method.GET && uri in LocalControlAccessGate.PUBLIC_STATIC_ASSETS ->
+                    serveStaticAsset(LocalControlAccessGate.PUBLIC_STATIC_ASSETS.getValue(uri))
                 uri == "/debug.html" && method == Method.GET && BuildConfig.DEBUG -> serveDebugHtml()
                 else -> routeContext.corsResponse(
                     newFixedLengthResponse(
@@ -119,16 +139,39 @@ class ConfigServer(
 
     // ==================== HTML 页面 ====================
 
-    private fun serveHtml(): Response {
-        val inputStream = context.assets.open("web/index.html")
-        val html = inputStream.bufferedReader().use { it.readText() }
-        return routeContext.corsResponse(newFixedLengthResponse(Response.Status.OK, MIME_HTML, html))
+    private fun lockedOutResponse(): Response = routeContext.corsResponse(
+        newFixedLengthResponse(
+            Response.Status.TOO_MANY_REQUESTS, MIME_JSON,
+            """{"code":429,"message":"鉴权失败次数过多，请稍后再试"}"""
+        )
+    )
+
+    /** 公开静态内容统一加上不缓存、不外泄 Referer、禁止被嵌入的头。 */
+    private fun publicStatic(mime: String, body: String): Response =
+        routeContext.corsResponse(newFixedLengthResponse(Response.Status.OK, mime, body)).apply {
+            addHeader("Cache-Control", "no-store")
+            addHeader("Referrer-Policy", "no-referrer")
+            addHeader("X-Content-Type-Options", "nosniff")
+            addHeader("X-Frame-Options", "DENY")
+        }
+
+    private fun serveStaticAsset(asset: Pair<String, String>): Response {
+        val body = context.assets.open(asset.first).bufferedReader().use { it.readText() }
+        return publicStatic(asset.second, body)
     }
 
-    /** 网页遥控台:实时屏幕(MJPEG)+ 点击/滑动/键盘 -> /api/control/input。页面公开,API 仍要 token。 */
+    private fun serveHtml(): Response {
+        val html = context.assets.open("web/index.html").bufferedReader().use { it.readText() }
+        return publicStatic(MIME_HTML, html)
+    }
+
+    /**
+     * 网页遥控台:实时屏幕(MJPEG)+ 点击/滑动/键盘 -> /api/control/input。
+     * 页面是不含任何密钥/状态的静态空壳(token 来自 URL fragment，不会发送到服务器)，所有 API 仍要 token。
+     */
     private fun serveConsoleHtml(): Response {
         val html = context.assets.open("web/console.html").bufferedReader().use { it.readText() }
-        return routeContext.corsResponse(newFixedLengthResponse(Response.Status.OK, MIME_HTML, html))
+        return publicStatic(MIME_HTML, html)
     }
 
     /** Debug 页面（仅 DEBUG 构建） */

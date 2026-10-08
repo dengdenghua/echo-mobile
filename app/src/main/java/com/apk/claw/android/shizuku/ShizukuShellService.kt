@@ -168,7 +168,8 @@ object ShizukuShellService {
      * 执行路径：
      *  1. 优先使用 Shizuku.newProcess() → 在 shizuku_server 进程（shell UID 2000）中执行，
      *     拥有 INJECT_EVENTS / READ_FRAME_BUFFER / 跨用户访问等完整 shell 权限
-     *  2. 回退到 Runtime.exec() → 在 app 进程以 app UID 执行，权限受限
+     *  2. newProcess 不可用时显式降级（见 [UnprivilegedShellFallback]）：需要 shell 权限的命令直接返回错误；
+     *     文件类命令以 app UID 执行，结果 privileged=false 且 stderr 注明
      *
      * @param command shell 命令（必须以白名单前缀开头，否则返回 blocked 结果）
      * @return ShellResult 包含 exitCode 和 stdout/stderr，Shizuku 不可用时返回 null
@@ -216,19 +217,37 @@ object ShizukuShellService {
     }
 
     private fun execRaw(command: String): ShellResult? = try {
-        val process = createProcess(arrayOf("sh", "-c", command))
-        readProcessOutput(process, command)
+        val cmd = arrayOf("sh", "-c", command)
+        val process = createShizukuProcess(cmd)
+        if (process != null) {
+            readProcessOutput(process, command)
+        } else {
+            execWithoutShizuku(cmd, command)
+        }
     } catch (e: Exception) {
         Log.e(TAG, "exec failed: $command", e)
         null
     }
 
     /**
-     * 创建子进程执行命令。
-     * 优先使用 Shizuku.newProcess()（shell UID），失败时回退到 Runtime.exec()（app UID）。
+     * Shizuku 进程不可用时的显式降级：需要 shell 权限的命令直接拒绝；
+     * 其余命令以 app UID 执行，结果标记为 privileged=false 并在 stderr 中注明。
+     */
+    private fun execWithoutShizuku(cmd: Array<String>, command: String): ShellResult {
+        if (UnprivilegedShellFallback.requiresElevation(command)) {
+            Log.e(TAG, "Shizuku process unavailable, refusing privileged command: $command")
+            return UnprivilegedShellFallback.refused()
+        }
+        Log.w(TAG, "Shizuku process unavailable, running WITHOUT shell privileges (app UID): $command")
+        val process = Runtime.getRuntime().exec(cmd)
+        return UnprivilegedShellFallback.markUnprivileged(readProcessOutput(process, command))
+    }
+
+    /**
+     * 通过 Shizuku.newProcess()（shell UID）创建子进程；不可用时返回 null（不再静默回退到 app UID）。
      * newProcess() 在 Shizuku API 13 中被标记为 hidden，但仍可通过反射调用。
      */
-    private fun createProcess(cmd: Array<String>): Process {
+    private fun createShizukuProcess(cmd: Array<String>): Process? {
         return try {
             val method = rikka.shizuku.Shizuku::class.java.getDeclaredMethod(
                 "newProcess", Array<String>::class.java, Array<String>::class.java, String::class.java
@@ -243,8 +262,8 @@ object ShizukuShellService {
                 method.isAccessible = true
                 method.invoke(null, cmd, null, null, null) as Process
             } catch (e2: Exception) {
-                Log.w(TAG, "Shizuku.newProcess unavailable, falling back to Runtime.exec: ${e2.message}")
-                Runtime.getRuntime().exec(cmd)
+                Log.w(TAG, "Shizuku.newProcess unavailable (${e.message}; ${e2.message})")
+                null
             }
         }
     }
@@ -394,7 +413,11 @@ object ShizukuShellService {
         }
 
         return try {
-            val process = createProcess(arrayOf("sh", "-c", command))
+            // 二进制命令（screencap）只有 shell 权限下才有意义：Shizuku 进程不可用时直接失败，不降级到 app UID
+            val process = createShizukuProcess(arrayOf("sh", "-c", command)) ?: run {
+                Log.e(TAG, "Shizuku process unavailable, refusing privileged binary command: $command")
+                return null
+            }
             val stdout = java.util.concurrent.ArrayBlockingQueue<ByteArray?>(1)
 
             val readerThread = Thread {
@@ -1055,11 +1078,13 @@ object ShizukuShellService {
 
     /**
      * Shell 命令执行结果。
+     * [privileged]=false 表示 Shizuku 进程不可用，命令以 app UID 执行（或因需要权限被拒绝），见 [UnprivilegedShellFallback]。
      */
     data class ShellResult(
         val exitCode: Int,
         val stdout: String,
-        val stderr: String
+        val stderr: String,
+        val privileged: Boolean = true,
     ) {
         val isSuccess: Boolean get() = exitCode == 0
     }

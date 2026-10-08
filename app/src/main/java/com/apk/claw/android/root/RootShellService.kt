@@ -6,6 +6,12 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
 
+private val WHITESPACE_REGEX = Regex("""\s+""")
+
+/** 按空白切分命令为参数列表（命令已通过元字符黑名单，不含引号/转义）。 */
+private fun tokenize(command: String): List<String> =
+    command.trim().split(WHITESPACE_REGEX).filter { it.isNotEmpty() }
+
 /**
  * Root Shell 服务 —— 通过 `su` 执行 root 权限命令。
  *
@@ -112,10 +118,12 @@ object RootShellService {
     @Suppress("ReturnCount", "TooGenericExceptionCaught")
     fun exec(command: String): ExecResult? {
         if (!isAvailable()) return null
-        if (!isCommandAllowed(command)) return null
+        // su -c 会把整条字符串交给 sh 解析：校验后按参数逐个单引号转义再拼接，
+        // 杜绝通配符/展开/引号拼接等 shell 解释（元字符黑名单之外的第二道防线）。
+        val quoted = toQuotedSuCommand(command) ?: return null
 
         return try {
-            val proc = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
+            val proc = Runtime.getRuntime().exec(arrayOf("su", "-c", quoted))
             // 双线程读 stdout/stderr 防止管道阻塞（uiautomator dump 可能输出较大 XML）
             val stdoutBuf = StringBuilder()
             val stderrBuf = StringBuilder()
@@ -180,8 +188,48 @@ object RootShellService {
             Log.w(TAG, "Command contains metacharacters: $command")
             return false
         }
+        if (!arePathArgumentsAllowed(tokenize(normalized))) {
+            Log.w(TAG, "Command has disallowed path arguments: $command")
+            return false
+        }
         return true
     }
+
+    /**
+     * 路径参数约束（root 下任意路径读写 = 完全失陷）：
+     * - cat/rm/uiautomator dump 必须且只能带一个 /sdcard/octopus_ui_dump_ 临时文件路径
+     *   （防 `cat /sdcard/octopus_ui_dump_x /data/...`、`rm -f /sdcard/octopus_ui_dump_x /system/...`）；
+     * - 其余命令中出现的任何绝对路径必须位于 /sdcard 下；
+     * - 一律禁止 `..` 路径穿越。
+     */
+    private fun arePathArgumentsAllowed(tokens: List<String>): Boolean {
+        val dumpFileArgs = when {
+            tokens.take(2) == listOf("rm", "-f") -> tokens.drop(2)
+            tokens.firstOrNull() == "cat" -> tokens.drop(1)
+            tokens.take(2) == listOf("uiautomator", "dump") -> tokens.drop(2)
+            else -> null
+        }
+        return when {
+            tokens.any { it.contains("..") } -> false
+            dumpFileArgs != null -> dumpFileArgs.size == 1 && UI_DUMP_PATH_REGEX.matches(dumpFileArgs[0])
+            else -> tokens.filter { it.startsWith("/") }.all { SDCARD_PATH_REGEX.matches(it) }
+        }
+    }
+
+    /**
+     * 校验命令并转换为逐参数单引号转义后的字符串（供 `su -c` 使用）；不允许时返回 null。
+     */
+    internal fun toQuotedSuCommand(command: String): String? {
+        if (!isCommandAllowed(command)) return null
+        // 仅含安全字符的参数原样保留，否则单引号包裹（内部单引号转义为 '\''）
+        return tokenize(command).joinToString(" ") { arg ->
+            if (SAFE_UNQUOTED_ARG_REGEX.matches(arg)) arg else "'" + arg.replace("'", "'\\''") + "'"
+        }
+    }
+
+    private val SAFE_UNQUOTED_ARG_REGEX = Regex("""^[A-Za-z0-9_./:=,+@%-]+$""")
+    private val SDCARD_PATH_REGEX = Regex("""^/sdcard/[A-Za-z0-9_.\-/]+$""")
+    private val UI_DUMP_PATH_REGEX = Regex("""^/sdcard/octopus_ui_dump_[A-Za-z0-9_.\-]+$""")
 
     private fun isSafeFilenameChar(c: Char): Boolean =
         c.isLetterOrDigit() || c == '_' || c == '-' || c == '.'

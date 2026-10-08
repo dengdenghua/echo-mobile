@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.app.NotificationCompat
 import com.apk.claw.android.R
 import com.apk.claw.android.shizuku.ShizukuShellService
+import com.apk.claw.android.shizuku.UnprivilegedShellFallback
 import com.apk.claw.android.ui.home.HomeActivity
 import com.apk.claw.android.utils.XLog
 import java.util.concurrent.CountDownLatch
@@ -618,12 +619,26 @@ class ClawAccessibilityService : AccessibilityService() {
             XLog.d(TAG, "Shizuku keyEvent $keyCode: $result")
             return result
         }
-        // Fallback: App UID exec（手机上不可靠，但 TV 盒子可用）
+        // 显式降级：Shizuku 不可用 → 以 App UID 执行 `input keyevent`（无 shell 权限；手机上通常被拒，TV 盒子可用）。
+        // 不再只看退出码：app UID 下 `input` 常以 0 退出但打印 SecurityException，这种情况按失败处理。
+        XLog.w(TAG, "Shizuku unavailable, injecting key $keyCode WITHOUT shell privileges (app UID)")
         return try {
-            val process = Runtime.getRuntime().exec(
-                arrayOf("input", "keyevent", keyCode.toString())
-            )
-            process.waitFor() == 0
+            val process = ProcessBuilder("input", "keyevent", keyCode.toString())
+                .redirectErrorStream(true)
+                .start()
+            if (!process.waitFor(KEY_EVENT_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                process.destroyForcibly()
+                XLog.e(TAG, "Unprivileged key event $keyCode timed out")
+                false
+            } else {
+                val output = process.inputStream.bufferedReader().use { it.readText() }
+                val exit = process.exitValue()
+                val ok = UnprivilegedShellFallback.appUidCommandSucceeded(exit, output)
+                if (!ok) {
+                    XLog.e(TAG, "Unprivileged key event $keyCode failed (exit=$exit): ${output.take(200)}")
+                }
+                ok
+            }
         } catch (e: Exception) {
             XLog.e(TAG, "Failed to send key event: $keyCode", e)
             false
@@ -655,6 +670,7 @@ class ClawAccessibilityService : AccessibilityService() {
         private const val A11Y_NOTIFICATION_ID = 1002
         private const val RESTART_DELAY_MS = 1000L
         private const val RESTART_REQUEST_CODE = 2
+        private const val KEY_EVENT_TIMEOUT_MS = 5_000L
 
         @Volatile
         private var instance: ClawAccessibilityService? = null

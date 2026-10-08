@@ -194,9 +194,35 @@ class ConfigServerTest {
         assertEquals(NanoHTTPD.Response.Status.OK, response.status)
     }
 
-    private fun invokeValidateAuth(server: ConfigServer, session: NanoHTTPD.IHTTPSession): Boolean {
-        val method = ConfigServer::class.java.getDeclaredMethod("validateAuth", NanoHTTPD.IHTTPSession::class.java)
-        method.isAccessible = true
-        return method.invoke(server, session) as Boolean
+    @Test
+    fun `serve locks out client after repeated wrong tokens even for correct token`() {
+        fun request(token: String): NanoHTTPD.Response {
+            val session = mock(NanoHTTPD.IHTTPSession::class.java)
+            `when`(session.method).thenReturn(NanoHTTPD.Method.GET)
+            `when`(session.uri).thenReturn("/api/auth/check")
+            `when`(session.remoteIpAddress).thenReturn("192.168.1.66")
+            `when`(session.headers).thenReturn(mapOf("authorization" to "Bearer $token"))
+            `when`(session.parms).thenReturn(emptyMap())
+            return server.serve(session)
+        }
+        repeat(AuthFailureLimiter.DEFAULT_MAX_FAILURES - 1) {
+            assertEquals(NanoHTTPD.Response.Status.UNAUTHORIZED, request("wrong-$it").status)
+        }
+        assertEquals(NanoHTTPD.Response.Status.TOO_MANY_REQUESTS, request("wrong-last").status)
+        assertEquals(NanoHTTPD.Response.Status.TOO_MANY_REQUESTS, request(server.authToken).status)
     }
+
+    @Test
+    fun `serve does not treat POST to console as public`() {
+        val session = mock(NanoHTTPD.IHTTPSession::class.java)
+        `when`(session.method).thenReturn(NanoHTTPD.Method.POST)
+        `when`(session.uri).thenReturn("/console")
+        `when`(session.headers).thenReturn(emptyMap())
+        `when`(session.parms).thenReturn(emptyMap())
+
+        assertEquals(NanoHTTPD.Response.Status.UNAUTHORIZED, server.serve(session).status)
+    }
+
+    private fun invokeValidateAuth(server: ConfigServer, session: NanoHTTPD.IHTTPSession): Boolean =
+        server.validateAuth(session)
 }

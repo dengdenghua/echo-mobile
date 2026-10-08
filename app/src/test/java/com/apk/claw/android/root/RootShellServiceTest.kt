@@ -1,6 +1,8 @@
 package com.apk.claw.android.root
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -70,6 +72,40 @@ class RootShellServiceTest {
         // setprop 非 persist 前缀拒绝(防止修改运行时系统属性如 ro.*)
         assertFalse(isAllowed("setprop ro.product.model Fake"))
         assertFalse(isAllowed("setprop sys.shutdown.timeout 0"))
+    }
+
+    @Test
+    fun `ui dump 临时文件命令只能带一个 dump 路径`() {
+        assertTrue(isAllowed("uiautomator dump /sdcard/octopus_ui_dump_123.xml"))
+        assertTrue(isAllowed("cat /sdcard/octopus_ui_dump_123.xml"))
+        assertTrue(isAllowed("rm -f /sdcard/octopus_ui_dump_123.xml"))
+        // 追加额外路径参数 → 以 root 读/删任意文件
+        assertFalse(isAllowed("cat /sdcard/octopus_ui_dump_1.xml /data/system/packages.xml"))
+        assertFalse(isAllowed("rm -f /sdcard/octopus_ui_dump_1.xml /system/build.prop"))
+        assertFalse(isAllowed("uiautomator dump /data/system/packages.xml"))
+        assertFalse(isAllowed("uiautomator dump"))
+        // 路径穿越
+        assertFalse(isAllowed("cat /sdcard/octopus_ui_dump_../../data/system/packages.xml"))
+    }
+
+    @Test
+    fun `其他命令中的绝对路径必须在 sdcard 下`() {
+        assertTrue(isAllowed("screencap -p /sdcard/shot.png"))
+        assertFalse(isAllowed("screencap -p /data/system/shot.png"))
+        assertFalse(isAllowed("screencap -p /sdcard/../data/shot.png"))
+    }
+
+    @Test
+    fun `su 命令逐参数转义`() {
+        assertEquals("input tap 10 20", RootShellService.toQuotedSuCommand("input tap 10 20"))
+        assertEquals("am start -n com.a/.Main", RootShellService.toQuotedSuCommand("  am start   -n com.a/.Main "))
+        // 通配符 / 单引号 / 花括号不得被 shell 解释
+        assertEquals("settings put global k '?'", RootShellService.toQuotedSuCommand("settings put global k ?"))
+        assertNull(RootShellService.toQuotedSuCommand("settings put global k *"))
+        assertEquals("settings put global k 'a'\\''b'", RootShellService.toQuotedSuCommand("settings put global k a'b"))
+        assertEquals("settings put global k '{a,b}'", RootShellService.toQuotedSuCommand("settings put global k {a,b}"))
+        assertNull(RootShellService.toQuotedSuCommand("reboot"))
+        assertNull(RootShellService.toQuotedSuCommand("input tap 1 2; reboot"))
     }
 
     @Test
