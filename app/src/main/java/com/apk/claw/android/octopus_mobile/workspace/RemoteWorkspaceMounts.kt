@@ -11,7 +11,7 @@ import com.google.gson.reflect.TypeToken
  * 与 [com.apk.claw.android.media.WebDavMounts] 的区别：
  *  - 本类面向 Agent 编程工作空间（edit_file / run_code / workspace_* 工具）
  *  - WebDavMounts 面向媒体播放（mpv 播放 URL）
- *  - 本类凭据强制走 [KVUtils.SECURE_KEYS] 加密；WebDavMounts 凭据明文存 MMKV
+ *  - 本类凭据强制走 [KVUtils.SECURE_KEYS] 加密；WebDavMounts 密码同样按 mountId 加密存储
  *  - 本类支持 local/sftp/webdav 三种协议；WebDavMounts 仅 webdav
  *
  * 凭据存储：密码/私钥通过 [KVUtils] 加密存储（按 mountId 分键），不与 Mount 数据混存，

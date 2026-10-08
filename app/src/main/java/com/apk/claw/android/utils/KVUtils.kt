@@ -1,11 +1,15 @@
 package com.apk.claw.android.utils
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.apk.claw.android.agent.LlmProvider
 import com.tencent.mmkv.MMKV
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * MMKV 键值存储工具类
@@ -54,7 +58,59 @@ object KVUtils {
     const val KEY_OCTOPUS_AUTO_CONNECT = "DEFAULT_OCTOPUS_AUTO_CONNECT"
 
     private lateinit var mmkv: MMKV
-    private lateinit var securePrefs: EncryptedSharedPreferences
+    private var securePrefs: EncryptedSharedPreferences? = null
+    private var storageContext: Context? = null
+    private val storageWarningShown = AtomicBoolean(false)
+    private const val SECURE_CLEARED_PREFIX = "secure_credential_cleared_"
+    private const val SECURE_ALL_CLEARED = "secure_credentials_all_cleared"
+    private val credentialStore = SecureCredentialStore(
+        encrypted = {
+            securePrefs?.let { prefs ->
+                object : SecureCredentialStore.EncryptedBackend {
+                    override fun read(key: String): String? = prefs.getString(key, null)
+                    override fun write(key: String, value: String?): Boolean = prefs.edit().apply {
+                        if (value == null) remove(key) else putString(key, value)
+                    }.commit()
+                    override fun clear(): Boolean = prefs.edit().clear().commit()
+                }
+            }
+        },
+        legacy = object : SecureCredentialStore.LegacyBackend {
+            override fun read(key: String): String? =
+                if (::mmkv.isInitialized) mmkv.decodeString(key, null) else null
+            override fun remove(key: String) {
+                if (::mmkv.isInitialized) mmkv.removeValueForKey(key)
+            }
+            override fun isCleared(key: String): Boolean {
+                if (!::mmkv.isInitialized) return false
+                val marker = SECURE_CLEARED_PREFIX + key
+                return if (mmkv.containsKey(marker)) mmkv.decodeBool(marker, false)
+                else mmkv.decodeBool(SECURE_ALL_CLEARED, false)
+            }
+            override fun markCleared(key: String, cleared: Boolean): Boolean =
+                ::mmkv.isInitialized && mmkv.encode(SECURE_CLEARED_PREFIX + key, cleared)
+            override fun markAllCleared(): Boolean =
+                ::mmkv.isInitialized && mmkv.encode(SECURE_ALL_CLEARED, true)
+        },
+        onFailure = { notifyCredentialStorageFailure() },
+    )
+
+    private fun notifyCredentialStorageFailure() {
+        XLog.e("KVUtils", "凭据未能写入加密存储；新值仅在本次运行有效，旧数据已保留")
+        val context = storageContext ?: return
+        if (!storageWarningShown.compareAndSet(false, true)) return
+        runCatching {
+            Handler(Looper.getMainLooper()).post {
+                runCatching {
+                    Toast.makeText(
+                        context,
+                        "凭据加密存储不可用：新凭据仅本次运行有效，重启后需重新设置。旧数据已保留。",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
+        }
+    }
     private val disabledToolsFallback = mutableSetOf<String>()
     @Volatile
     private var disabledToolsCache: Set<String>? = null
@@ -80,6 +136,8 @@ object KVUtils {
         KEY_OCTOPUS_AUTH_TOKEN,
         KEY_LLM_API_KEY,
         KEY_VISION_API_KEY,
+        // ApiKeyPool persists raw primary/fallback credentials inside this JSON array.
+        "llm_api_key_pool_v1",
         // 服务端账号 JWT(AccountStore.K_TOKEN)—— bearer 级秘密,泄漏可冒充用户
         "ACCOUNT_TOKEN",
         // 远程控制台设备 token(RemoteConsoleGateway.KEY_DEVICE_TOKEN)—— bearer 级秘密
@@ -95,7 +153,7 @@ object KVUtils {
         "cd2_password",
         // GitHub Personal Access Token(GithubCreatePrTool)—— bearer 级秘密,泄漏可写仓库
         "KEY_GITHUB_TOKEN",
-        // Tentacle 母本 Runtime 认证 token(TentacleConfig.KEY_TENTACLE_AUTH_TOKEN)—— bearer 级秘密
+        // 旧版 Tentacle 认证 token(客户端已移除,ClawApplication 启动时清理)—— 保留在此以便从加密存储删除
         "DEFAULT_TENTACLE_AUTH_TOKEN",
     )
 
@@ -107,6 +165,10 @@ object KVUtils {
         "remote_workspace_ssh_private_key_",
         // LLM per-provider API Key —— KEY_LLM_API_KEY_OPENAI / KEY_LLM_API_KEY_DEEPSEEK 等
         "KEY_LLM_API_KEY_",
+        // 媒体 WebDAV 挂载密码(WebDavMounts)—— 按 mountId 分键
+        "webdav_mount_password_",
+        // 局域网设备 ConfigServer 鉴权 token(DeviceRegistry)—— 按 deviceId 分键
+        "octopus_device_lan_token_",
     )
 
     /** 判断 key 是否应走加密存储（精确匹配或前缀匹配）。 */
@@ -117,11 +179,12 @@ object KVUtils {
      * 在 Application.onCreate 中调用初始化
      */
     fun init(context: Context) {
+        storageContext = context.applicationContext
         MMKV.initialize(context)
         mmkv = MMKV.defaultMMKV()
         // EncryptedSharedPreferences/Keystore 在部分设备（keystore 损坏/被清空/恢复备份）会抛异常或 Error。
-        // 失败时不初始化 securePrefs —— 敏感 key 自动退回 MMKV（见 get/putSecureString），
-        // 避免在 Application.onCreate 里未捕获导致"一启动就崩"。
+        // 失败时继续运行，但新凭据只驻留内存，绝不降级为明文持久化。
+        securePrefs = null
         try {
             val masterKey = MasterKey.Builder(context)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -134,7 +197,8 @@ object KVUtils {
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             ) as EncryptedSharedPreferences
         } catch (e: Throwable) {
-            XLog.e("KVUtils", "EncryptedSharedPreferences 初始化失败，敏感数据退回 MMKV: ${e.message}")
+            XLog.e("KVUtils", "EncryptedSharedPreferences 初始化失败；新凭据仅在本次运行有效")
+            notifyCredentialStorageFailure()
         }
     }
 
@@ -160,50 +224,14 @@ object KVUtils {
         return mmkv.decodeString(key, defaultValue) ?: defaultValue
     }
 
-    /** 加密存储字符串（用于敏感凭据） */
-    private fun putSecureString(key: String, value: String?): Boolean {
-        if (!::securePrefs.isInitialized) {
-            // 加密存储不可用：退回 MMKV（mmkv 在 init 里先于 securePrefs 初始化，通常已就绪）。
-            if (::mmkv.isInitialized) return mmkv.encode(key, value)
-            if (value == null) stringFallback.remove(key) else stringFallback[key] = value
-            return true
-        }
-        return try {
-            securePrefs.edit().apply {
-                if (value == null) remove(key) else putString(key, value)
-            }.commit()
-        } catch (e: Exception) {
-            XLog.e("KVUtils", "加密写入失败，回退 MMKV: ${e.message}")
-            mmkv.encode(key, value)
-        }
-    }
+    /** false means the value is usable this session but was not durably saved. */
+    private fun putSecureString(key: String, value: String?): Boolean = credentialStore.write(key, value)
 
-    /** 加密读取字符串（用于敏感凭据） */
-    private fun getSecureString(key: String, defaultValue: String = ""): String {
-        if (!::securePrefs.isInitialized) {
-            // 加密存储不可用：退回 MMKV，避免读空丢凭据。
-            return if (::mmkv.isInitialized) mmkv.decodeString(key, defaultValue) ?: defaultValue
-            else stringFallback[key] ?: defaultValue
-        }
-        val secure = try {
-            securePrefs.getString(key, null)
-        } catch (e: Exception) {
-            XLog.e("KVUtils", "加密读取失败，回退 MMKV: ${e.message}")
-            null
-        }
-        if (!secure.isNullOrEmpty()) return secure
-        // securePrefs 里没有该值：老用户升级时凭据还在 MMKV —— 一次性迁移过来（迁完清掉旧值，
-        // 避免日后被显式清除的密钥被 MMKV 旧值"复活"）。这修复了"升级后被登出/丢配置"。
-        val legacy = if (::mmkv.isInitialized) mmkv.decodeString(key, "") ?: "" else ""
-        if (legacy.isNotEmpty()) {
-            runCatchingLog("KVUtils") {
-                securePrefs.edit().putString(key, legacy).commit()
-                if (::mmkv.isInitialized) mmkv.removeValueForKey(key)
-            }
-            return legacy
-        }
-        return defaultValue
-    }
+    private fun getSecureString(key: String, defaultValue: String = ""): String =
+        credentialStore.read(key) ?: defaultValue
+
+    /** UI/configuration callers can distinguish a saved credential from a session-only value. */
+    fun sensitiveStorageStatus(key: String): SecureCredentialStore.Status = credentialStore.status(key)
 
     // ==================== Int ====================
     fun putInt(key: String, value: Int): Boolean {
@@ -280,15 +308,14 @@ object KVUtils {
 
     // ==================== 常用操作 ====================
     fun contains(key: String): Boolean {
-        if (isSecureKey(key) && ::securePrefs.isInitialized) {
-            return securePrefs.contains(key)
-        }
+        if (isSecureKey(key)) return credentialStore.read(key) != null
         return mmkv.containsKey(key)
     }
 
     fun remove(key: String) {
-        if (isSecureKey(key) && ::securePrefs.isInitialized) {
-            runCatchingLog("KVUtils") { securePrefs.edit().remove(key).commit() }
+        if (isSecureKey(key)) {
+            credentialStore.write(key, null)
+            return
         }
         // 内存兜底也要清（MMKV 未初始化时 string/bool 走 fallback map）。生产环境 map 为空，无副作用。
         stringFallback.remove(key)
@@ -303,10 +330,9 @@ object KVUtils {
     }
 
     fun clear() {
-        if (::securePrefs.isInitialized) {
-            runCatchingLog("KVUtils") { securePrefs.edit().clear().commit() }
-        }
-        mmkv.clearAll()
+        if (::mmkv.isInitialized) mmkv.clearAll()
+        credentialStore.clear()
+        stringFallback.clear()
     }
 
     /**
@@ -318,6 +344,8 @@ object KVUtils {
      */
     @androidx.annotation.VisibleForTesting
     fun resetForTest() {
+        credentialStore.resetSession()
+        storageWarningShown.set(false)
         stringFallback.clear()
         boolFallback.clear()
         intFallback.clear()

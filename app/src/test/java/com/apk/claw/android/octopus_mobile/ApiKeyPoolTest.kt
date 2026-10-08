@@ -3,6 +3,7 @@
 package com.apk.claw.android.octopus_mobile
 
 import com.apk.claw.android.utils.KVUtils
+import com.apk.claw.android.utils.SecureCredentialStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -30,6 +31,20 @@ class ApiKeyPoolTest {
         assertFalse(ApiKeyPool.isEnabled())
         assertEquals(PRIMARY_KEY, ApiKeyPool.acquireKey())
         assertEquals(0, ApiKeyPool.size())
+    }
+
+    @Test
+    fun `raw key pool uses sensitive session-only storage when encryption is unavailable`() {
+        ApiKeyPool.addKey(FALLBACK_KEY_1)
+        assertEquals(
+            SecureCredentialStore.Status.SESSION_ONLY,
+            KVUtils.sensitiveStorageStatus("llm_api_key_pool_v1"),
+        )
+        // The existing caller remains usable even though durable persistence failed.
+        ApiKeyPool.resetForTest()
+        ApiKeyPool.init()
+        assertEquals(2, ApiKeyPool.size())
+        assertEquals(PRIMARY_KEY, ApiKeyPool.acquireKey())
     }
 
     @Test
