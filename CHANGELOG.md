@@ -18,13 +18,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   drops the live device and console WebSockets immediately, not just future requests.
 - **Video ownership**: video submissions are recorded per user (`video_tasks`);
   polling another user's video id returns 404 without touching the upstream.
-- **Encrypted credential storage** (mobile): stored credentials are encrypted at rest.
-- **Bearer-token cleartext guard**: the client refuses to send bearer tokens over
-  plain HTTP to non-local hosts.
+- **Encrypted credential storage** (mobile): WebDAV mount passwords and LAN device
+  tokens now live in the encrypted store, keyed per mount/device; legacy plaintext is
+  migrated on read and cleared only after the encrypted write succeeds. A credential-less
+  discovery beacon no longer wipes a verified LAN token for the same device and address.
+- **Bearer-token cleartext guard**: the remote client refuses to send its bearer token
+  over `ws://` unless the host is loopback, the emulator host, or a private/link-local/`.local`
+  address.
 - **Legacy tentacle client removed**: the old tentacle client code path is gone.
-- **LAN console lockout**: the LAN remote console locks out after repeated failed attempts.
-- **Shizuku fallback flagging**: actions that fell back from Shizuku to a weaker
-  path are now flagged as such in results.
+- **LAN console and MCP lockout**: 10 bad tokens in 60 s from one IP locks that IP out for
+  5 minutes (429) on the 9527 control server and the 9528 MCP server; MCP now binds the
+  WiFi IP only when LAN mode is on, otherwise loopback. The console screen stream uses
+  30-second single-use tickets instead of a token in the URL.
+- **Shizuku fallback flagging**: when Shizuku cannot start a process, privileged commands
+  now fail with a clear error; file commands still run as the app but are flagged
+  `privileged=false`. Root shell dump paths are restricted and arguments quoted.
 
 ### Known limitations
 - **Legacy videos**: videos submitted before the `video_tasks` table existed have
