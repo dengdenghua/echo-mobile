@@ -1,7 +1,9 @@
 package com.apk.claw.android.mcp
 
 import android.content.Context
+import com.apk.claw.android.server.ConfigServerManager
 import com.apk.claw.android.server.LocalControlAuth
+import com.apk.claw.android.utils.KVUtils
 import com.apk.claw.android.utils.XLog
 
 /**
@@ -64,7 +66,12 @@ object McpServerBootstrap {
             return
         }
 
-        val s = McpServer(port = port)
+        // 与 ConfigServer 一致：局域网模式（9527 已启用）才绑 WiFi 接口，否则仅回环。
+        val bindHost = McpBindPolicy.resolve(
+            lanModeEnabled = KVUtils.isConfigServerEnabled(),
+            wifiIp = ConfigServerManager.currentWifiIp(context),
+        )
+        val s = McpServer(port = port, hostname = bindHost)
         s.setAuthorizationValidator(LocalControlAuth::isAuthorized)
         pendingProvider?.let { s.setProvider(it) }
         pendingGate?.let { s.setApprovalGate(it) }
@@ -73,7 +80,10 @@ object McpServerBootstrap {
             s.start(SOCKET_READ_TIMEOUT, false)
             server = s
             currentPort = port
-            XLog.i(TAG, "MCP server started on port $port (path=${McpServer.MCP_PATH}, bearerTokenLength=${authToken.length})")
+            XLog.i(
+                TAG,
+                "MCP server started on $bindHost:$port (path=${McpServer.MCP_PATH}, tokenLen=${authToken.length})",
+            )
         } catch (e: Exception) {
             XLog.e(TAG, "Failed to start MCP server on port $port: ${e.message}", e)
             server = null

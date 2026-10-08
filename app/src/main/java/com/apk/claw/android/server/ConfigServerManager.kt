@@ -144,6 +144,12 @@ object ConfigServerManager {
     /**
      * 通过 WifiManager 获取 WiFi IP 地址（优先），回退到 NetworkInterface
      */
+    /** 控制面绑定所用的 WiFi IP（无 WiFi 连接时为 null），供 MCP Server 镜像同一绑定策略。 */
+    fun currentWifiIp(context: Context): String? {
+        val ctx = context.applicationContext
+        return if (isWifiConnected(ctx)) getWifiIpAddress(ctx) else null
+    }
+
     private fun getWifiIpAddress(context: Context): String? {
         try {
             val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager

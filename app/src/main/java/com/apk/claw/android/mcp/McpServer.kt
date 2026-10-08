@@ -1,5 +1,7 @@
 package com.apk.claw.android.mcp
 
+import com.apk.claw.android.server.AuthFailureLimiter
+import com.apk.claw.android.server.LocalControlAccessGate
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import fi.iki.elonen.NanoHTTPD
@@ -37,12 +39,15 @@ class McpServer(
     private val serverVersion: String = "0.1.0",
     port: Int = DEFAULT_PORT,
     hostname: String? = null,
+    limiter: AuthFailureLimiter = AuthFailureLimiter(),
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : NanoHTTPD(hostname, port) {
 
     companion object {
         private const val TAG = "McpServer"
         const val DEFAULT_PORT = 9528
         const val MCP_PATH = "/mcp"
+        private const val MS_PER_SECOND = 1000L
         private const val MIME_JSON = "application/json"
         private const val MIME_SSE = "text/event-stream"
     }
@@ -58,6 +63,9 @@ class McpServer(
     /** 默认拒绝；Bootstrap 必须注入 Bearer Header 校验器后 server 才可访问。 */
     @Volatile
     private var authorizationValidator: (String?) -> Boolean = { false }
+
+    /** 校验器经 [authorizationValidator] 间接取值，setAuthorizationValidator 后立即生效。 */
+    private val accessGate = LocalControlAccessGate(limiter) { authorizationValidator(it) }
 
     /** 会话表:sessionId → McpSession。session 在首次请求时惰性创建。 */
     private val sessions = ConcurrentHashMap<String, McpSession>()
@@ -88,7 +96,24 @@ class McpServer(
         }
 
         // Bearer 鉴权失败时不得进入 initialize / tools/list / tools/call。
-        if (!authorizationValidator(session.headers["authorization"])) {
+        // 与 9527 共用失败锁定：同一来源 IP 错误 token 过多 → 429（锁定期内正确 token 也拒绝）。
+        val decision = accessGate.decide(
+            uri = session.uri,
+            isGet = false, // /mcp 无公开路径
+            authorizationHeader = session.headers["authorization"],
+            clientKey = session.remoteIpAddress?.takeIf { it.isNotBlank() } ?: "unknown",
+            nowMs = clock(),
+        )
+        if (decision == LocalControlAccessGate.Decision.LOCKED_OUT) {
+            val locked = newFixedLengthResponse(
+                Response.Status.TOO_MANY_REQUESTS,
+                MIME_JSON,
+                """{"jsonrpc":"2.0","id":null,"error":{"code":-32002,"message":"Too many failed attempts"}}""",
+            )
+            locked.addHeader("Retry-After", (AuthFailureLimiter.DEFAULT_LOCKOUT_MS / MS_PER_SECOND).toString())
+            return corsResponse(locked)
+        }
+        if (decision != LocalControlAccessGate.Decision.ALLOW_AUTHENTICATED) {
             val denied = newFixedLengthResponse(
                 Response.Status.UNAUTHORIZED,
                 MIME_JSON,
