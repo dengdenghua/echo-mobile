@@ -3,6 +3,35 @@
 All notable changes to Octopus Mobile are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+- **Real logout / session revocation** (server): `users.token_version` column;
+  new JWTs carry a `tv` claim and `actor`/WebSocket auth (incl. the per-message
+  console re-check) reject a mismatch. `POST /auth/logout` bumps the version
+  (revokes every session of that user) and closes their live remote links.
+  Tokens issued before this change lack `tv`, count as version 0, and keep
+  working until the first logout or ban. Admin ban/unban also bumps the version.
+
+### Changed
+- **Revoke/ban closes live links**: revoking a device or banning a user now
+  drops the live device and console WebSockets immediately, not just future requests.
+- **Video ownership**: video submissions are recorded per user (`video_tasks`);
+  polling another user's video id returns 404 without touching the upstream.
+- **Encrypted credential storage** (mobile): stored credentials are encrypted at rest.
+- **Bearer-token cleartext guard**: the client refuses to send bearer tokens over
+  plain HTTP to non-local hosts.
+- **Legacy tentacle client removed**: the old tentacle client code path is gone.
+- **LAN console lockout**: the LAN remote console locks out after repeated failed attempts.
+- **Shizuku fallback flagging**: actions that fell back from Shizuku to a weaker
+  path are now flagged as such in results.
+
+### Known limitations
+- **Legacy videos**: videos submitted before the `video_tasks` table existed have
+  no ownership record and now 404 on poll. They cannot be backfilled (no
+  video-to-user data was ever stored), so no admin/CLI backfill exists; users must
+  resubmit the generation.
+
 ## [1.0.0] — 2026-07-05
 
 First stable release (`versionCode 9`). Builds on the 0.0.1 test build with a
