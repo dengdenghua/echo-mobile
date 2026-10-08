@@ -677,7 +677,8 @@ def init_db() -> None:
                      "daily_free_date TEXT DEFAULT ''",
                      "gift_credits INTEGER NOT NULL DEFAULT 0",  # 赠送积分(月清),与永久 credits 分桶
                      "gift_month TEXT DEFAULT ''",               # 赠送所属月份 YYYYMM;跨月即失效
-                     "sub_goods_id TEXT DEFAULT ''"):            # 当前订阅档(续费用)
+                     "sub_goods_id TEXT DEFAULT ''",             # 当前订阅档(续费用)
+                     "token_version INTEGER NOT NULL DEFAULT 0"):  # 会话代数:登出/封禁时 +1,旧 JWT 即时作废
             try:
                 c.execute(f"ALTER TABLE users ADD COLUMN {_col}")
             except sqlite3.OperationalError:
@@ -1033,6 +1034,28 @@ def rate_limit(key: str, limit: int, window_s: float) -> None:
                 _rl.pop(k, None)
 
 
+def _token_version_ok(claims: dict[str, Any], row: sqlite3.Row) -> bool:
+    """JWT 的 `tv` 声明必须等于用户当前 token_version。
+    改造前签发的令牌无 `tv`,按 0 处理:在用户首次登出/被封前继续有效。"""
+    try:
+        return int(claims.get("tv", 0)) == int(row["token_version"] or 0)
+    except (TypeError, ValueError):
+        return False
+
+
+def _claims_user_id(token: str) -> str:
+    """可选身份识别(广场浏览等)与控制台复核:令牌有效且版本未被撤销时返回 user_id,否则空串。"""
+    claims = jwt_decode(token, JWT_SECRET) if token else None
+    if not claims or not claims.get("sub"):
+        return ""
+    with closing(db()) as c:
+        row = c.execute("SELECT user_id, token_version FROM users WHERE user_id = ?",
+                        (claims["sub"],)).fetchone()
+    if row is None or not _token_version_ok(claims, row):
+        return ""
+    return row["user_id"]
+
+
 def actor(authorization: str = Header(default="")) -> sqlite3.Row:
     """Verify the bearer JWT and load the user row, or 401."""
     token = authorization[7:] if authorization.lower().startswith("bearer ") else ""
@@ -1045,6 +1068,8 @@ def actor(authorization: str = Header(default="")) -> sqlite3.Row:
         raise HTTPException(status_code=401, detail="unknown user")
     if row["banned"]:  # 封禁:令牌即刻作废,中转/账号接口全部拒绝
         raise HTTPException(status_code=403, detail="账号已被封禁")
+    if not _token_version_ok(claims, row):  # 已登出/被撤销的会话
+        raise HTTPException(status_code=401, detail="token revoked")
     return row
 
 
@@ -1055,9 +1080,15 @@ def user_from_bearer_token(token: str) -> sqlite3.Row | None:
         return None
     with closing(db()) as c:
         row = c.execute("SELECT * FROM users WHERE user_id = ?", (claims.get("sub"),)).fetchone()
-    if row is None or row["banned"]:
+    if row is None or row["banned"] or not _token_version_ok(claims, row):
         return None
     return row
+
+
+def _bump_token_version(user_id: str) -> None:
+    with closing(db()) as c:
+        c.execute("UPDATE users SET token_version = token_version + 1 WHERE user_id = ?", (user_id,))
+        c.commit()
 
 
 def _remote_secret_hash(secret: str) -> str:
@@ -1339,6 +1370,7 @@ def sms_login(body: dict[str, Any]) -> dict[str, Any]:
         if user is not None and user["banned"]:  # 封号用户不再签发新 token
             raise HTTPException(status_code=403, detail="账号已被封禁")
         is_new = user is None
+        tv = 0 if is_new else int(user["token_version"] or 0)
         if is_new:
             uid = "u_" + secrets.token_hex(8)
             c.execute(
@@ -1352,7 +1384,7 @@ def sms_login(body: dict[str, Any]) -> dict[str, Any]:
         c.execute("DELETE FROM sms_codes WHERE mobile = ?", (mobile,))
         c.commit()
     token = jwt_encode(
-        {"sub": uid, "mobile": mobile, "iat": int(time.time()),
+        {"sub": uid, "mobile": mobile, "tv": tv, "iat": int(time.time()),
          "exp": int(time.time()) + JWT_EXPIRE_SECONDS},
         JWT_SECRET,
     )
@@ -1420,6 +1452,7 @@ def email_login(body: dict[str, Any], request: Request) -> dict[str, Any]:
         if user is not None and user["banned"]:  # 封号用户不再签发新 token
             raise HTTPException(status_code=403, detail="账号已被封禁")
         is_new = user is None
+        tv = 0 if is_new else int(user["token_version"] or 0)
         nick = email.split("@")[0]
         if is_new:
             uid = "u_" + secrets.token_hex(8)
@@ -1435,12 +1468,21 @@ def email_login(body: dict[str, Any], request: Request) -> dict[str, Any]:
         c.execute("DELETE FROM email_codes WHERE email = ?", (email,))
         c.commit()
     token = jwt_encode(
-        {"sub": uid, "email": email, "iat": int(time.time()),
+        {"sub": uid, "email": email, "tv": tv, "iat": int(time.time()),
          "exp": int(time.time()) + JWT_EXPIRE_SECONDS},
         JWT_SECRET,
     )
     return {"token": token, "userId": uid, "mobile": "", "email": email,
             "isNewUser": is_new, "nickname": nick}
+
+
+@app.post("/auth/logout")
+async def auth_logout(u: sqlite3.Row = Depends(actor)) -> dict[str, Any]:
+    """真登出:token_version +1 使该用户所有已签发 JWT(含其他设备)立即失效,
+    并断开其在线的远控设备/控制台长连接。(JWT 无会话 id,故无单设备登出,即"全部登出"。)"""
+    _bump_token_version(u["user_id"])
+    await _remote_close_user(u["user_id"])
+    return {"ok": True}
 
 
 # ─────────────────────────── endpoints: account ───────────────────────────
@@ -1938,7 +1980,7 @@ async def remote_console_ws(ws: WebSocket, device_id: str = "", token: str = "")
             if not isinstance(msg, dict):
                 continue
             # 转发边界复核:令牌过期、账号封禁、设备撤销/易主后,已建立的控制台不得再下发指令。
-            if not jwt_decode(token, JWT_SECRET) or not _remote_link_authorized(device_id, user_id=u["user_id"]):
+            if _claims_user_id(token) != u["user_id"] or not _remote_link_authorized(device_id, user_id=u["user_id"]):
                 try:
                     await ws.close(code=4003, reason="console no longer authorized")
                 except Exception:
@@ -3266,9 +3308,7 @@ def square_post_detail(post_id: str, request: Request) -> dict[str, Any]:
     auth = request.headers.get("authorization") or ""
     if auth.lower().startswith("bearer "):
         try:
-            claims = jwt_decode(auth[7:], JWT_SECRET)
-            if claims and claims.get("sub"):
-                viewer = claims["sub"]
+            viewer = _claims_user_id(auth[7:])
         except Exception:
             viewer = ""
     with closing(db()) as c:
@@ -3525,9 +3565,7 @@ def square_user_profile(user_id: str, request: Request) -> dict[str, Any]:
     auth = request.headers.get("authorization") or ""
     if auth.lower().startswith("bearer "):
         try:
-            claims = jwt_decode(auth[7:], JWT_SECRET)
-            if claims and claims.get("sub"):
-                viewer = claims["sub"]
+            viewer = _claims_user_id(auth[7:])
         except Exception:
             viewer = ""
     target = _from_opaque_uid(user_id)
@@ -3618,9 +3656,7 @@ def square_feed(request: Request, limit: int = 20, offset: int = 0, q: str = "",
     auth = request.headers.get("authorization") or ""
     if auth.lower().startswith("bearer "):
         try:
-            claims = jwt_decode(auth[7:], JWT_SECRET)
-            if claims and claims.get("sub"):
-                viewer = claims["sub"]
+            viewer = _claims_user_id(auth[7:])
         except Exception:
             viewer = ""
     topic = (topic or "").strip()
@@ -4531,9 +4567,7 @@ def _viewer(request: Request) -> str:
     auth = request.headers.get("authorization") or ""
     if auth.lower().startswith("bearer "):
         try:
-            claims = jwt_decode(auth[7:], JWT_SECRET)
-            if claims and claims.get("sub"):
-                return claims["sub"]
+            return _claims_user_id(auth[7:])
         except Exception:
             return ""
     return ""
@@ -5501,6 +5535,8 @@ def _record_video_task(user_id: str, data: Any, ref_id: str) -> None:
 
 
 def _video_task_owned(user_id: str, video_id: str) -> bool:
+    # 已知限制:video_tasks 上线前提交的视频没有归属记录,轮询一律 404(宁可拒绝也不越权)。
+    # 无法回填(历史上没存过 video_id→user_id),故不提供回填端点/CLI;用户需重新提交。见 CHANGELOG。
     with closing(db()) as c:
         return c.execute(
             "SELECT 1 FROM video_tasks WHERE video_id = ? AND user_id = ?", (video_id, user_id)
@@ -5710,7 +5746,8 @@ async def admin_ban(uid: str, body: dict[str, Any], _: bool = Depends(admin_guar
     with closing(db()) as c:
         if _user(c, uid) is None:
             raise HTTPException(status_code=404, detail="用户不存在")
-        c.execute("UPDATE users SET banned = ? WHERE user_id = ?", (banned, uid))
+        c.execute("UPDATE users SET banned = ?, token_version = token_version + 1 WHERE user_id = ?",
+                  (banned, uid))  # 封/解封都换代:解封后旧令牌也不复活
         _admin_log(c, "ban", uid, f"banned={banned} reason={reason}")
         c.commit()
     if banned:  # 封号即时生效:断开该用户在线的远控设备/控制台长连接

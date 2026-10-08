@@ -3213,3 +3213,67 @@ class TestVoiceClone:
         tok, _ = _email_register(client)
         r = client.post("/voice/clone", json={"audio": "A" * 14_000_001}, headers={"Authorization": f"Bearer {tok}"})
         assert r.status_code == 413
+
+
+class TestLogoutRevocation:
+    @staticmethod
+    def _hdr(tok):
+        return {"Authorization": f"Bearer {tok}"}
+
+    def test_logout_invalidates_old_token_new_login_works(self, client):
+        tok, uid = _email_register(client, "logout1@example.com")
+        assert client.get("/account/profile", headers=self._hdr(tok)).status_code == 200
+        assert client.post("/auth/logout", headers=self._hdr(tok)).status_code == 200
+        assert client.get("/account/profile", headers=self._hdr(tok)).status_code == 401
+        assert client.post("/auth/logout", headers=self._hdr(tok)).status_code == 401
+        _insert_email_code("logout1@example.com")
+        r = client.post("/auth/email/login", json={"email": "logout1@example.com", "code": "123456"})
+        assert r.status_code == 200
+        assert client.get("/account/profile", headers=self._hdr(r.json()["token"])).status_code == 200
+
+    def test_pre_change_token_without_claim_still_works(self, client):
+        _, uid = _email_register(client, "logout2@example.com")
+        legacy = _make_token(uid)  # 无 tv 声明
+        assert client.get("/account/profile", headers=self._hdr(legacy)).status_code == 200
+        tok2 = _make_token(uid)
+        client.post("/auth/logout", headers=self._hdr(legacy))
+        assert client.get("/account/profile", headers=self._hdr(tok2)).status_code == 401
+
+    def test_ban_invalidates_token(self, client):
+        tok, uid = _email_register(client, "logout3@example.com")
+        r = client.post(f"/admin/api/users/{uid}/ban", json={"banned": True, "reason": "t"},
+                        headers={"X-Admin-Token": "test-token"})
+        assert r.status_code == 200
+        client.post(f"/admin/api/users/{uid}/ban", json={"banned": False, "reason": "t"},
+                    headers={"X-Admin-Token": "test-token"})
+        assert client.get("/account/profile", headers=self._hdr(tok)).status_code == 401  # 解封后旧令牌不复活
+
+    def test_logout_rejects_console_ws_handshake_and_closes_live(self, client):
+        tok, uid, headers, device_url, console_url = TestRemotePairing._pair_device(
+            client, "logout4@example.com", "dev_logout_ws")
+        with client.websocket_connect(device_url) as device:
+            assert device.receive_json()["type"] == "hello"
+            with client.websocket_connect(console_url) as console:
+                assert console.receive_json()["online"] is True
+                assert client.post("/auth/logout", headers=headers).status_code == 200
+                with pytest.raises(WebSocketDisconnect):
+                    device.receive_json()
+                with pytest.raises(WebSocketDisconnect):
+                    console.receive_json()
+        with client.websocket_connect(console_url) as console:  # 旧令牌握手被拒
+            with pytest.raises(WebSocketDisconnect):
+                console.receive_json()
+
+    def test_console_per_message_recheck_honors_version(self, client):
+        tok, uid, headers, device_url, console_url = TestRemotePairing._pair_device(
+            client, "logout5@example.com", "dev_logout_msg")
+        with client.websocket_connect(device_url) as device:
+            assert device.receive_json()["type"] == "hello"
+            with client.websocket_connect(console_url) as console:
+                assert console.receive_json()["online"] is True
+                with closing(db()) as c:  # 绕过端点直接换代
+                    c.execute("UPDATE users SET token_version = token_version + 1 WHERE user_id=?", (uid,))
+                    c.commit()
+                console.send_json({"type": "control", "action": "home", "id": "x"})
+                with pytest.raises(WebSocketDisconnect):
+                    console.receive_json()
