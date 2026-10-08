@@ -3,6 +3,7 @@ package com.apk.claw.android.server.routes
 import com.apk.claw.android.BuildConfig
 import com.apk.claw.android.server.RemoteControlIndicator
 import com.apk.claw.android.server.ScreenCaptureManager
+import com.apk.claw.android.server.StreamTicketStore
 import com.apk.claw.android.service.ClawAccessibilityService
 import com.google.gson.JsonObject
 import fi.iki.elonen.NanoHTTPD
@@ -12,7 +13,9 @@ import java.util.concurrent.Semaphore
 
 private const val MIME_JSON = "application/json"
 
-class ScreenHandler : RouteHandler {
+class ScreenHandler(
+    private val streamTickets: StreamTicketStore = StreamTicketStore(),
+) : RouteHandler {
 
     private val screenCaptureManager = ScreenCaptureManager()
     private val mjpegStreamLock = Semaphore(2) // 限制 2 路并发 MJPEG
@@ -24,19 +27,23 @@ class ScreenHandler : RouteHandler {
     }
 
     override fun canHandle(uri: String, method: NanoHTTPD.Method): Boolean {
-        if (method != NanoHTTPD.Method.GET) return false
-        return when (uri) {
-            "/api/screen/screenshot",
-            "/api/screen/stream",
-            "/api/screen/info",
-            "/api/screen/tree" -> true
-            "/api/debug/screen-full" -> BuildConfig.DEBUG
+        return when (method) {
+            NanoHTTPD.Method.POST -> uri == "/api/screen/stream-ticket"
+            NanoHTTPD.Method.GET -> when (uri) {
+                "/api/screen/screenshot",
+                "/api/screen/stream",
+                "/api/screen/info",
+                "/api/screen/tree" -> true
+                "/api/debug/screen-full" -> BuildConfig.DEBUG
+                else -> false
+            }
             else -> false
         }
     }
 
     override fun handle(session: NanoHTTPD.IHTTPSession, ctx: RouteContext): NanoHTTPD.Response {
         return when (session.uri) {
+            "/api/screen/stream-ticket" -> handleStreamTicket(ctx)
             "/api/screen/screenshot" -> handleScreenshot(session, ctx)
             "/api/screen/stream" -> handleScreenStream(session, ctx)
             "/api/screen/info" -> handleScreenInfo(ctx)
@@ -49,6 +56,23 @@ class ScreenHandler : RouteHandler {
                 )
             )
         }
+    }
+
+    /**
+     * POST /api/screen/stream-ticket（需 Bearer 头，由 ConfigServer 的访问闸门保证）。
+     * 返回 30s 内有效、只能使用一次的不透明票据，供 `/api/screen/stream?ticket=` 使用。
+     */
+    private fun handleStreamTicket(ctx: RouteContext): NanoHTTPD.Response {
+        val ticket = streamTickets.issue(System.currentTimeMillis())
+        val json = ctx.gson.toJson(
+            mapOf(
+                "code" to 0,
+                "data" to mapOf("ticket" to ticket, "expiresInMs" to StreamTicketStore.DEFAULT_TTL_MS),
+            )
+        )
+        val response = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, json)
+        response.addHeader("Cache-Control", "no-store")
+        return ctx.corsResponse(response)
     }
 
     /**

@@ -12,6 +12,7 @@ package com.apk.claw.android.server
  */
 class LocalControlAccessGate(
     private val limiter: AuthFailureLimiter = AuthFailureLimiter(),
+    private val consumeStreamTicket: (String) -> Boolean = { false },
     private val isTokenValid: (String?) -> Boolean = LocalControlAuth::isAuthorized,
 ) {
 
@@ -38,7 +39,17 @@ class LocalControlAccessGate(
         }
     }
 
+    /** 屏幕流：<img> 无法带头，可用一次性短期 ticket（绝不接受 URL 里的 Bearer token）。 */
+    fun decideTicket(ticket: String, clientKey: String, nowMs: Long): Decision = when {
+        limiter.isLockedOut(clientKey, nowMs) -> Decision.LOCKED_OUT
+        consumeStreamTicket(ticket) -> Decision.ALLOW_AUTHENTICATED
+        limiter.recordFailure(clientKey, nowMs) -> Decision.LOCKED_OUT
+        else -> Decision.UNAUTHORIZED
+    }
+
     companion object {
+        const val STREAM_PATH = "/api/screen/stream"
+
         /** 无需 token 的 HTML 页面（静态空壳，不嵌入任何 token / 配置 / 设备状态）。 */
         val PUBLIC_PAGES: Set<String> = setOf("/", "/index.html", "/console", "/console.html")
 

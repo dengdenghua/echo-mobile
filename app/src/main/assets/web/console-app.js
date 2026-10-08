@@ -36,10 +36,17 @@
     return p;
   }
 
-  // 为无法使用 header 的资源(如 <img> MJPEG 流)生成带 token 的 URL。
-  // token 仍在 URL 中,但仅用于 img.src,不进入浏览器历史。
-  function streamUrl(p) {
-    return p + (p.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(TOKEN);
+  // <img> MJPEG 流无法带 Authorization 头,且长期 token 不得进入 URL:
+  // 先用 Bearer 头换取 30s 一次性 ticket,再用 ?ticket= 打开流(ticket 用后即废)。
+  async function fetchStreamTicket() {
+    const res = await fetch(api('/api/screen/stream-ticket'), {
+      method: 'POST',
+      cache: 'no-store',
+      headers: authHeaders()
+    });
+    const j = await res.json();
+    if (!res.ok || !j || j.code !== 0 || !j.data || !j.data.ticket) throw new Error('ticket');
+    return j.data.ticket;
   }
 
   function authHeaders(extra) {
@@ -77,9 +84,18 @@
   let pingTimer = null;
   let streamWasActive = false;
 
+  let streamSeq = 0;                 // 丢弃过期的异步 ticket 结果
   function reloadStream() {
-    // 默认 900p / 65 JPEG / 20fps; 服务端 ScreenCaptureManager 节流 33ms 兜底上限 30fps
-    img.src = streamUrl('/api/screen/stream?maxWidth=900&fps=20&quality=65&_=' + Date.now());
+    if (!TOKEN) return;
+    const seq = ++streamSeq;
+    fetchStreamTicket().then(function (ticket) {
+      if (seq !== streamSeq) return;
+      // 默认 900p / 65 JPEG / 20fps; 服务端 ScreenCaptureManager 节流 33ms 兜底上限 30fps
+      img.src = '/api/screen/stream?maxWidth=900&fps=20&quality=65&ticket=' + encodeURIComponent(ticket) + '&_=' + Date.now();
+    }).catch(function () {
+      if (seq !== streamSeq) return;
+      img.dispatchEvent(new Event('error'));
+    });
   }
 
   img.addEventListener('load', function () {
@@ -393,6 +409,7 @@
     if (document.visibilityState === 'hidden') {
       if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
       streamWasActive = streamWasActive || !!img.src;
+      streamSeq++;
       img.src = '';
       if (streamRetryTimer) { clearTimeout(streamRetryTimer); streamRetryTimer = null; }
     } else {
@@ -405,6 +422,7 @@
     if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
     if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
     if (streamRetryTimer) { clearTimeout(streamRetryTimer); streamRetryTimer = null; }
+    streamSeq++;
     img.src = '';
   });
 

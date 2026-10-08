@@ -28,10 +28,13 @@ class ConfigServer(
     }
 
     private val gson = Gson()
-    private val accessGate = LocalControlAccessGate()
+    private val streamTickets = StreamTicketStore()
+    private val accessGate = LocalControlAccessGate(
+        consumeStreamTicket = { streamTickets.consume(it, System.currentTimeMillis()) },
+    )
     private val routeContext = RouteContext(context, gson)
     private val handlers: List<RouteHandler> = listOf(
-        ScreenHandler(),
+        ScreenHandler(streamTickets),
         ChannelRouteHandler(),
         CastRouteHandler(context),
         DeviceRouteHandler(),
@@ -71,6 +74,7 @@ class ConfigServer(
         }
     }
 
+
     private fun serveInternal(session: IHTTPSession): Response {
         // CORS 预检请求
         if (session.method == Method.OPTIONS) {
@@ -83,14 +87,7 @@ class ConfigServer(
         // 鉴权：仅放行静态空壳页面/资源白名单（不含任何 token/配置/状态）；其余一律要求 Bearer token。
         // debug.html 也需鉴权(即使 DEBUG 构建也不应无鉴权暴露)。错误 token 过多的来源 IP 会被临时锁定。
         val source = routeContext.sourceOf(session)
-        val decision = accessGate.decide(
-            uri = uri,
-            isGet = method == Method.GET,
-            authorizationHeader = session.headers["authorization"],
-            clientKey = source,
-            nowMs = System.currentTimeMillis(),
-        )
-        when (decision) {
+        when (decideAccess(accessGate, session, source)) {
             LocalControlAccessGate.Decision.LOCKED_OUT -> {
                 XLog.w(TAG, "Auth locked out for $source uri=$uri")
                 val now = System.currentTimeMillis()
@@ -181,4 +178,26 @@ class ConfigServer(
         return routeContext.corsResponse(newFixedLengthResponse(Response.Status.OK, MIME_HTML, html))
     }
 
+}
+
+/** 屏幕流可用一次性 ticket（?ticket=，不接受 URL 中的 Bearer token）；其余走 Bearer 头闸门。 */
+private fun decideAccess(
+    gate: LocalControlAccessGate,
+    session: NanoHTTPD.IHTTPSession,
+    source: String,
+): LocalControlAccessGate.Decision {
+    val now = System.currentTimeMillis()
+    val isGet = session.method == NanoHTTPD.Method.GET
+    @Suppress("DEPRECATION")
+    val ticket = session.parms["ticket"]
+    if (isGet && session.uri == LocalControlAccessGate.STREAM_PATH && !ticket.isNullOrEmpty()) {
+        return gate.decideTicket(ticket, source, now)
+    }
+    return gate.decide(
+        uri = session.uri,
+        isGet = isGet,
+        authorizationHeader = session.headers["authorization"],
+        clientKey = source,
+        nowMs = now,
+    )
 }
