@@ -27,6 +27,7 @@ from contextlib import closing
 # ── 在导入 app 前注入测试环境变量(避免污染真实 octo.db) ──
 _TMPDIR = tempfile.mkdtemp(prefix="octo_test_")
 os.environ["OCTO_DB"] = os.path.join(_TMPDIR, "test.db")
+os.environ["UPLOAD_DIR"] = os.path.join(_TMPDIR, "uploads")
 os.environ["ALLOW_MOCK_AUTH"] = "1"          # 测试中放开 mock 邮箱登录
 os.environ["ENABLE_COST_SNAPSHOTS"] = "0"     # 关后台成本快照定时任务(测试直接调 _take_cost_snapshot)
 os.environ["ADMIN_TOKEN"] = "test-token"      # 启用管理后台
@@ -76,7 +77,8 @@ def clean_state():
                   "registry_assets", "crash_reports",
                   "square_posts", "square_comments", "square_likes", "square_follows",
                   "square_favorites", "square_unlocks", "plugin_subscriptions", "config_kv",
-                  "cost_snapshots", "pricing_proposals", "voice_sessions", "voice_prefs"):
+                  "cost_snapshots", "pricing_proposals", "voice_sessions", "voice_prefs",
+                  "video_tasks"):
             c.execute(f"DELETE FROM {t}")
         c.commit()
     app_module._rl.clear()
@@ -1193,10 +1195,141 @@ class TestRemotePairing:
         assert r.status_code == 200
         assert r.json()["items"][0]["revoked"] is True
 
+    @staticmethod
+    def _pair_device(client, email, device_id):
+        token, uid = _email_register(client, email)
+        headers = {"Authorization": f"Bearer {token}"}
+        code = client.post("/remote/pair/start", json={}, headers=headers).json()["code"]
+        pair = client.post("/remote/pair/claim", json={"code": code, "deviceId": device_id},
+                           headers=headers).json()
+        device_url = f"/remote/device/ws?device_id={device_id}&device_token={pair['deviceToken']}"
+        console_url = f"/remote/console/ws?device_id={device_id}&token={token}"
+        return token, uid, headers, device_url, console_url
+
+    def test_revoke_closes_live_device_and_console(self, client):
+        """撤销后服务端主动断开设备与控制台;无视 revoked 通知的客户端也无法继续中转。"""
+        _, _, headers, device_url, console_url = self._pair_device(
+            client, "remote-live1@example.com", "dev_live_revoke")
+        with client.websocket_connect(device_url) as device:
+            assert device.receive_json()["type"] == "hello"
+            with client.websocket_connect(console_url) as console:
+                assert console.receive_json()["online"] is True
+                # 撤销前双向中转正常
+                console.send_json({"type": "control", "action": "home", "id": "before"})
+                assert device.receive_json()["id"] == "before"
+                device.send_json({"type": "result", "id": "before", "success": True})
+                assert console.receive_json()["id"] == "before"
+
+                assert client.post("/remote/devices/dev_live_revoke/revoke", headers=headers).status_code == 200
+                assert device.receive_json()["type"] == "revoked"
+                console.send_json({"type": "control", "action": "home", "id": "after-revoke"})
+                # 下一帧必须是关闭帧,而不是转发来的指令
+                with pytest.raises(WebSocketDisconnect):
+                    device.receive_json()
+                with pytest.raises(WebSocketDisconnect):
+                    console.receive_json()
+
+    def test_ban_via_db_stops_forwarding(self, client):
+        """直接改库封号(绕过 ban 端点):转发边界复核拦截,并断开设备与控制台。"""
+        _, uid, _, device_url, console_url = self._pair_device(
+            client, "remote-live2@example.com", "dev_live_ban_db")
+        with client.websocket_connect(device_url) as device:
+            assert device.receive_json()["type"] == "hello"
+            with client.websocket_connect(console_url) as console:
+                assert console.receive_json()["online"] is True
+                with closing(db()) as c:
+                    c.execute("UPDATE users SET banned=1 WHERE user_id=?", (uid,))
+                    c.commit()
+                console.send_json({"type": "control", "action": "back", "id": "after-ban"})
+                with pytest.raises(WebSocketDisconnect):
+                    device.receive_json()
+                with pytest.raises(WebSocketDisconnect):
+                    console.receive_json()
+
+    def test_ban_via_db_stops_device_to_console(self, client):
+        """直接改库封号后,设备侧上行消息也不再转发给控制台。"""
+        _, uid, _, device_url, console_url = self._pair_device(
+            client, "remote-live3@example.com", "dev_live_ban_up")
+        with client.websocket_connect(device_url) as device:
+            assert device.receive_json()["type"] == "hello"
+            with client.websocket_connect(console_url) as console:
+                assert console.receive_json()["online"] is True
+                with closing(db()) as c:
+                    c.execute("UPDATE users SET banned=1 WHERE user_id=?", (uid,))
+                    c.commit()
+                device.send_json({"type": "result", "id": "after-ban", "success": True})
+                with pytest.raises(WebSocketDisconnect):
+                    console.receive_json()
+                with pytest.raises(WebSocketDisconnect):
+                    device.receive_json()
+
+    def test_admin_ban_closes_live_sockets(self, client):
+        """管理员封号端点:即时断开该用户在线的设备与控制台。"""
+        _, uid, _, device_url, console_url = self._pair_device(
+            client, "remote-live4@example.com", "dev_live_ban_admin")
+        with client.websocket_connect(device_url) as device:
+            assert device.receive_json()["type"] == "hello"
+            with client.websocket_connect(console_url) as console:
+                assert console.receive_json()["online"] is True
+                r = client.post(f"/admin/api/users/{uid}/ban", json={"banned": True, "reason": "t"},
+                                headers={"X-Admin-Token": "test-token"})
+                assert r.status_code == 200
+                with pytest.raises(WebSocketDisconnect):
+                    device.receive_json()
+                with pytest.raises(WebSocketDisconnect):
+                    console.receive_json()
+
     def test_remote_console_page_public_shell(self, client):
         r = client.get("/remote/console")
         assert r.status_code == 200
         assert "Octopus 远程控制台" in r.text
+
+
+class TestVideoPollOwnership:
+    def test_poll_other_users_video_is_404_without_upstream(self, client, monkeypatch):
+        """B 轮询 A 提交的视频 id → 404 且不打上游;A 本人仍可 200。"""
+        import httpx
+        requests = []
+
+        class FixtureUpstream:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                pass
+
+            async def post(self, url, *, headers, json):
+                requests.append(("post", url))
+                return httpx.Response(200, json={"video_id": "vid-private-a"})
+
+            async def get(self, url, *, params, headers):
+                requests.append(("get", params["video_id"]))
+                return httpx.Response(200, json={"video_id": params["video_id"], "status": "completed"})
+
+        monkeypatch.setattr(httpx, "AsyncClient", FixtureUpstream)
+        monkeypatch.setattr(app_module, "_agnes_upstream", lambda: ("https://fixture.invalid/v1", "fixture-key"))
+        token_a, _ = _email_register(client, "video-a@example.com")
+        token_b, _ = _email_register(client, "video-b@example.com")
+        r = client.post("/v1/video/generations", json={"prompt": "p"},
+                        headers={"Authorization": f"Bearer {token_a}"})
+        assert r.status_code == 200, r.text
+        vid = r.json()["video_id"]
+
+        r = client.get(f"/v1/video/generations/{vid}", headers={"Authorization": f"Bearer {token_b}"})
+        assert r.status_code == 404
+        assert not any(kind == "get" for kind, _ in requests)
+        r = client.get("/v1/video/generations/never-submitted",
+                       headers={"Authorization": f"Bearer {token_b}"})
+        assert r.status_code == 404
+        assert not any(kind == "get" for kind, _ in requests)
+
+        r = client.get(f"/v1/video/generations/{vid}", headers={"Authorization": f"Bearer {token_a}"})
+        assert r.status_code == 200
+        assert r.json()["status"] == "completed"
+        assert requests[-1] == ("get", vid)
 
 
 # ═══════════════════════════════════════════════════════════════════════

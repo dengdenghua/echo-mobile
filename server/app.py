@@ -798,6 +798,13 @@ def init_db() -> None:
             "user_id TEXT PRIMARY KEY, voice TEXT DEFAULT '', persona TEXT DEFAULT '', "
             "cloned_voice TEXT DEFAULT '', updated_at INTEGER NOT NULL DEFAULT 0)"
         )
+        # 视频生成任务归属:提交时记 video_id → 提交者(+上游),轮询只放行本人的任务(防越权读他人视频)。
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS video_tasks("
+            "video_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, provider TEXT DEFAULT '', "
+            "ref_id TEXT DEFAULT '', created_at INTEGER NOT NULL)"
+        )
+        c.execute("CREATE INDEX IF NOT EXISTS idx_video_tasks_user ON video_tasks(user_id, created_at)")
         # 迁移:给已存在的 remote_devices 表补新列(幂等)
         for _col in (
             "push_token TEXT DEFAULT ''", "os_version TEXT DEFAULT ''",
@@ -965,6 +972,8 @@ def _fts_search_post_ids(c: sqlite3.Connection, q: str) -> list[str] | None:
 
 # 静态文件服务:暴露 uploads/ 目录到 /static/<file>(图片 URL 用此前缀)
 # 生产环境建议 nginx 直接 alias 此目录,跳过 Python 处理;本地直跑用此 mount。
+# StaticFiles validates this path at import time, before startup callbacks run.
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount(UPLOAD_URL_PREFIX, StaticFiles(directory=UPLOAD_DIR), name="static")
 
 
@@ -1091,6 +1100,21 @@ class RemoteRelayHub:
                 self._device_info.pop(device_id, None)
             consoles = list(self._consoles.get(device_id, set()))
         await self._broadcast(consoles, {"type": "device_status", "deviceId": device_id, "online": False})
+
+    async def close_device(self, device_id: str, code: int = 4003, reason: str = "revoked") -> None:
+        """撤销/封号:服务端主动断开该设备及其所有控制台连接并移出路由表(不依赖客户端自觉)。"""
+        async with self._lock:
+            targets: list[WebSocket] = []
+            dev = self._devices.pop(device_id, None)
+            if dev is not None:
+                targets.append(dev)
+            self._device_info.pop(device_id, None)
+            targets.extend(self._consoles.pop(device_id, set()))
+        for target in targets:
+            try:
+                await target.close(code=code, reason=reason)
+            except Exception:
+                pass
 
     async def update_device_info(self, device_id: str, info: dict[str, Any]) -> None:
         lan_base_url = str(info.get("lanBaseUrl") or "").strip()
@@ -1643,6 +1667,7 @@ async def remote_device_revoke(device_id: str, u: sqlite3.Row = Depends(actor)) 
     if cur.rowcount == 0:
         raise HTTPException(status_code=404, detail="设备不存在")
     await remote_hub.send_to_device(device_id, {"type": "revoked"})
+    await remote_hub.close_device(device_id, reason="revoked")  # 服务端强制断开,不靠客户端自觉
     return {"ok": True}
 
 
@@ -1811,6 +1836,32 @@ def _load_remote_device(device_id: str) -> sqlite3.Row | None:
         return c.execute("SELECT * FROM remote_devices WHERE device_id = ?", (device_id,)).fetchone()
 
 
+def _remote_link_authorized(device_id: str, user_id: str = "", token_hash: str = "") -> bool:
+    """转发边界的授权复核(每条消息一次查询):设备未撤销、令牌未被重新配对轮换、属主未封禁;
+    控制台侧另校验设备仍属于该用户。握手后的撤销/封号(含直接改库)由此兜底拦截。"""
+    with closing(db()) as c:
+        row = c.execute(
+            "SELECT d.user_id, d.revoked, d.token_hash, u.banned FROM remote_devices d "
+            "LEFT JOIN users u ON u.user_id = d.user_id WHERE d.device_id = ?",
+            (device_id,),
+        ).fetchone()
+    if row is None or row["revoked"] or row["banned"] is None or row["banned"]:
+        return False
+    if user_id and row["user_id"] != user_id:
+        return False
+    if token_hash and not hmac.compare_digest(row["token_hash"] or "", token_hash):
+        return False
+    return True
+
+
+async def _remote_close_user(user_id: str) -> None:
+    """封号等账号级失效:断开该用户名下所有在线设备及其控制台连接。"""
+    with closing(db()) as c:
+        rows = c.execute("SELECT device_id FROM remote_devices WHERE user_id = ?", (user_id,)).fetchall()
+    for r in rows:
+        await remote_hub.close_device(r["device_id"], reason="account disabled")
+
+
 @app.websocket("/remote/device/ws")
 async def remote_device_ws(ws: WebSocket, device_id: str = "", device_token: str = "") -> None:
     await ws.accept()
@@ -1819,9 +1870,11 @@ async def remote_device_ws(ws: WebSocket, device_id: str = "", device_token: str
         row is None
         or row["revoked"]
         or not hmac.compare_digest(row["token_hash"], _remote_secret_hash(device_token))
+        or not _remote_link_authorized(device_id, token_hash=row["token_hash"])  # 属主已封禁
     ):
         await ws.close(code=4003, reason="device auth failed")
         return
+    token_hash = row["token_hash"]
     with closing(db()) as c:
         c.execute("UPDATE remote_devices SET last_seen = ? WHERE device_id = ?", (now_ms(), device_id))
         c.commit()
@@ -1831,6 +1884,15 @@ async def remote_device_ws(ws: WebSocket, device_id: str = "", device_token: str
         while True:
             msg = await ws.receive_json()
             if isinstance(msg, dict):
+                # 转发边界复核:撤销/封号/令牌轮换后,已建立的连接也不得再转发任何消息。
+                if not _remote_link_authorized(device_id, token_hash=token_hash):
+                    try:
+                        await ws.close(code=4003, reason="device no longer authorized")
+                    except Exception:
+                        pass
+                    if not _remote_link_authorized(device_id):  # 设备级失效:连同控制台一起断开
+                        await remote_hub.close_device(device_id, reason="revoked")
+                    break
                 msg.setdefault("deviceId", device_id)
                 if msg.get("type") == "device_info":
                     await remote_hub.update_device_info(device_id, msg)
@@ -1875,6 +1937,15 @@ async def remote_console_ws(ws: WebSocket, device_id: str = "", token: str = "")
             msg = await ws.receive_json()
             if not isinstance(msg, dict):
                 continue
+            # 转发边界复核:令牌过期、账号封禁、设备撤销/易主后,已建立的控制台不得再下发指令。
+            if not jwt_decode(token, JWT_SECRET) or not _remote_link_authorized(device_id, user_id=u["user_id"]):
+                try:
+                    await ws.close(code=4003, reason="console no longer authorized")
+                except Exception:
+                    pass
+                if not _remote_link_authorized(device_id):  # 设备级失效:连同设备一起断开
+                    await remote_hub.close_device(device_id, reason="revoked")
+                break
             msg.setdefault("from", "console")
             ok = await remote_hub.send_to_device(device_id, msg)
             if not ok:
@@ -5407,7 +5478,33 @@ async def video_generations(body: dict[str, Any], u: sqlite3.Row = Depends(actor
         return JSONResponse(status_code=resp.status_code,
                             content={"error": {"message": msg, "status": resp.status_code}})
     _fire_bg(asyncio.to_thread(_log_media, u["user_id"], "video", payload["model"], charged, ref_id))
+    await _run_sync(_record_video_task, u["user_id"], data, ref_id)  # 同步落库:返回后立即可轮询
     return JSONResponse(content=data)
+
+
+def _record_video_task(user_id: str, data: Any, ref_id: str) -> None:
+    """记录上游返回的视频任务 id → 提交者。INSERT OR IGNORE:已登记的 id 不会被他人覆盖归属。"""
+    if not isinstance(data, dict):
+        return
+    ids = {str(data.get(k)).strip() for k in ("video_id", "id", "task_id")
+           if isinstance(data.get(k), (str, int)) and str(data.get(k)).strip()}
+    if not ids:
+        return
+    with closing(db()) as c:
+        for vid in ids:
+            c.execute(
+                "INSERT OR IGNORE INTO video_tasks(video_id, user_id, provider, ref_id, created_at) "
+                "VALUES(?,?,?,?,?)",
+                (vid, user_id, "agnes", ref_id, now_ms()),
+            )
+        c.commit()
+
+
+def _video_task_owned(user_id: str, video_id: str) -> bool:
+    with closing(db()) as c:
+        return c.execute(
+            "SELECT 1 FROM video_tasks WHERE video_id = ? AND user_id = ?", (video_id, user_id)
+        ).fetchone() is not None
 
 
 @app.get("/v1/video/generations/{video_id}")
@@ -5415,6 +5512,9 @@ async def video_poll(video_id: str, u: sqlite3.Row = Depends(actor)) -> Any:
     """轮询视频结果。透传 Agnes `GET /agnesapi?video_id=...`(注意在根路径、不在 /v1 下;
     完成后视频 URL 在响应的 `remixed_from_video_id` 字段)。video_id 取提交时返回的那个。"""
     rate_limit(f"videopoll:{u['user_id']}", 120, 60)
+    # 归属校验先于上游调用:非本人提交(或未登记)的 id 一律 404,不暴露是否存在。
+    if not await _run_sync(_video_task_owned, u["user_id"], video_id):
+        raise HTTPException(status_code=404, detail="视频任务不存在")
     base, key = _agnes_upstream()
     root = base[:-3] if base.endswith("/v1") else base  # /agnesapi 在根路径,不在 /v1 下
     import httpx  # 惰性 import
@@ -5602,7 +5702,7 @@ def admin_membership(uid: str, body: dict[str, Any], _: bool = Depends(admin_gua
 
 
 @app.post("/admin/api/users/{uid}/ban")
-def admin_ban(uid: str, body: dict[str, Any], _: bool = Depends(admin_guard)) -> dict[str, Any]:
+async def admin_ban(uid: str, body: dict[str, Any], _: bool = Depends(admin_guard)) -> dict[str, Any]:
     if not isinstance(body.get("banned"), bool):  # 必须显式 true/false,防漏字段静默解封
         raise HTTPException(status_code=400, detail="banned 必须是 true 或 false")
     banned = 1 if body["banned"] else 0
@@ -5613,6 +5713,8 @@ def admin_ban(uid: str, body: dict[str, Any], _: bool = Depends(admin_guard)) ->
         c.execute("UPDATE users SET banned = ? WHERE user_id = ?", (banned, uid))
         _admin_log(c, "ban", uid, f"banned={banned} reason={reason}")
         c.commit()
+    if banned:  # 封号即时生效:断开该用户在线的远控设备/控制台长连接
+        await _remote_close_user(uid)
     return {"ok": True, "banned": bool(banned)}
 
 
