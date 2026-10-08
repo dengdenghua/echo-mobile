@@ -76,3 +76,7 @@ app/src/main/assets/proot/ubuntu-base-*.tar.gz.sha256
 muse-analysis/
 *.apk_*
 
+
+# release APK copies belong in release artifacts, not git
+*.apk
+*.apk_*
