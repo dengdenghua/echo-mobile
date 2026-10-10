@@ -92,11 +92,13 @@ class ConfigServer(
                 XLog.w(TAG, "Auth locked out for $source uri=$uri")
                 val now = System.currentTimeMillis()
                 routeContext.recordRemoteAccess(session, "auth_locked_out", false, "uri=$uri", now)
-                return lockedOutResponse()
+                return lockedOutResponse().also { it.closeConnection(true) }
             }
             LocalControlAccessGate.Decision.UNAUTHORIZED -> {
                 routeContext.recordRemoteAccess(session, "auth_denied", false, "uri=$uri", System.currentTimeMillis())
-                return unauthorizedResponse()
+                // Rejected POST bodies are unread; close before another
+                // request can reuse the connection with those bytes pending.
+                return unauthorizedResponse().also { it.closeConnection(true) }
             }
             LocalControlAccessGate.Decision.ALLOW_PUBLIC,
             LocalControlAccessGate.Decision.ALLOW_AUTHENTICATED -> Unit

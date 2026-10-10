@@ -1,4 +1,4 @@
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 param(
     [string]$JavaHome = $env:JAVA_HOME,
     [string]$SocketTempDirectory,

@@ -39,6 +39,8 @@ object McpServerBootstrap {
     private var currentBindHost: String? = null
 
     private var appContext: Context? = null
+    private var requestedRunning = false
+    private var retryAttempt = 0
     private val watcher = McpNetworkWatcher { refreshBindNow() }
 
     @Volatile
@@ -56,6 +58,7 @@ object McpServerBootstrap {
     @Synchronized
     fun start(context: Context, port: Int = McpServer.DEFAULT_PORT) {
         appContext = context.applicationContext
+        requestedRunning = true
         watcher.register(context.applicationContext)
         val existing = server
         if (existing != null) {
@@ -66,11 +69,13 @@ object McpServerBootstrap {
             // 端口变了,先停再起
             stopInternal()
         }
+        currentPort = port
 
         val authToken = try {
             LocalControlAuth.getOrCreateToken()
         } catch (e: Exception) {
             XLog.e(TAG, "Failed to initialize MCP auth token: ${e.message}", e)
+            retryAttempt = watcher.scheduleRetry(retryAttempt)
             return
         }
 
@@ -89,34 +94,46 @@ object McpServerBootstrap {
             server = s
             currentPort = port
             currentBindHost = bindHost
+            retryAttempt = 0
             XLog.i(
                 TAG,
                 "MCP server started on $bindHost:$port (path=${McpServer.MCP_PATH}, tokenLen=${authToken.length})",
             )
         } catch (e: Exception) {
             XLog.e(TAG, "Failed to start MCP server on port $port: ${e.message}", e)
+            s.stop()
             server = null
+            currentBindHost = null
+            retryAttempt = watcher.scheduleRetry(retryAttempt)
         }
     }
 
     /** 停止 MCP server。幂等。 */
     @Synchronized
     fun stop() {
+        requestedRunning = false
+        retryAttempt = 0
         watcher.unregister()
         stopInternal()
+        appContext = null
     }
 
     /**
      * 控制服务器/局域网开关变化时调用；与 WiFi 变化共用去抖，避免连续事件造成重绑抖动。
      */
+    @Synchronized
     fun onNetworkSettingChanged() {
-        if (server != null) watcher.schedule()
+        if (requestedRunning) watcher.schedule()
     }
 
     @Synchronized
     private fun refreshBindNow() {
         val ctx = appContext
-        if (ctx != null && server != null) {
+        if (ctx != null && requestedRunning) {
+            if (server == null) {
+                start(ctx, currentPort)
+                return
+            }
             val desired = McpBindPolicy.resolve(
                 lanModeEnabled = KVUtils.isConfigServerEnabled(),
                 wifiIp = ConfigServerManager.currentWifiIp(ctx),

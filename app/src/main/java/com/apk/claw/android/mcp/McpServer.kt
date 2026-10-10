@@ -111,6 +111,9 @@ class McpServer(
                 """{"jsonrpc":"2.0","id":null,"error":{"code":-32002,"message":"Too many failed attempts"}}""",
             )
             locked.addHeader("Retry-After", (AuthFailureLimiter.DEFAULT_LOCKOUT_MS / MS_PER_SECOND).toString())
+            // The rejected POST body remains unread. Do not let its bytes
+            // become the next request on a persistent HTTP connection.
+            locked.closeConnection(true)
             return corsResponse(locked)
         }
         if (decision != LocalControlAccessGate.Decision.ALLOW_AUTHENTICATED) {
@@ -120,6 +123,7 @@ class McpServer(
                 """{"jsonrpc":"2.0","id":null,"error":{"code":-32001,"message":"Unauthorized"}}""",
             )
             denied.addHeader("WWW-Authenticate", "Bearer realm=\"octopus-mcp\"")
+            denied.closeConnection(true)
             return corsResponse(denied)
         }
 

@@ -56,9 +56,14 @@ internal class McpNetworkWatcher(private val onChanged: () -> Unit) {
     }
 
     /** 每次事件都重置计时，只在安静期结束后评估一次。 */
-    fun schedule() {
+    fun schedule(delayMs: Long = McpBindPolicy.REBIND_DEBOUNCE_MS) {
         handler.removeCallbacks(task)
-        handler.postDelayed(task, McpBindPolicy.REBIND_DEBOUNCE_MS)
+        handler.postDelayed(task, delayMs)
+    }
+
+    fun scheduleRetry(attempt: Int): Int {
+        schedule(McpBindPolicy.retryDelayMs(attempt))
+        return (attempt + 1).coerceAtMost(McpBindPolicy.MAX_RETRY_ATTEMPT)
     }
 
     private companion object {

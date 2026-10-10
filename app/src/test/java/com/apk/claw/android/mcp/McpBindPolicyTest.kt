@@ -5,6 +5,15 @@ import org.junit.Test
 
 class McpBindPolicyTest {
     @Test
+    fun `startup retry backs off without overflowing or becoming unbounded`() {
+        assertEquals(1_000L, McpBindPolicy.retryDelayMs(-1))
+        assertEquals(1_000L, McpBindPolicy.retryDelayMs(0))
+        assertEquals(2_000L, McpBindPolicy.retryDelayMs(1))
+        assertEquals(30_000L, McpBindPolicy.retryDelayMs(5))
+        assertEquals(30_000L, McpBindPolicy.retryDelayMs(Int.MAX_VALUE))
+    }
+
+    @Test
     fun `lan mode with wifi ip binds to that interface only`() {
         assertEquals("192.168.1.5", McpBindPolicy.resolve(true, "192.168.1.5"))
     }

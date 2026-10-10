@@ -6,13 +6,21 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 
 class McpServerAuthTest {
 
+    @Volatile
     private var now = 1_000L
     private lateinit var server: McpServer
+    private val client = OkHttpClient.Builder()
+        .retryOnConnectionFailure(false)
+        .callTimeout(5, TimeUnit.SECONDS)
+        .build()
 
     @Before
     fun setUp() {
@@ -30,16 +38,16 @@ class McpServerAuthTest {
     fun tearDown() = server.stop()
 
     private fun post(auth: String?): Int {
-        val c = URL("http://127.0.0.1:${server.listeningPort}/mcp").openConnection() as HttpURLConnection
-        try {
-            c.requestMethod = "POST"
-            c.doOutput = true
-            c.setRequestProperty("Content-Type", "application/json")
-            if (auth != null) c.setRequestProperty("Authorization", auth)
-            c.outputStream.use { it.write("""{"jsonrpc":"2.0","id":1,"method":"ping"}""".toByteArray()) }
-            return c.responseCode
-        } finally {
-            c.disconnect()
+        // Count wire attempts, without transparent POST retries. Drain the
+        // response before closing so NanoHTTPD can finish writing each reply.
+        val request = Request.Builder()
+            .url("http://127.0.0.1:${server.listeningPort}/mcp")
+            .post("""{"jsonrpc":"2.0","id":1,"method":"ping"}""".toRequestBody("application/json".toMediaType()))
+            .apply { if (auth != null) header("Authorization", auth) }
+            .build()
+        return client.newCall(request).execute().use { response ->
+            response.body?.string()
+            response.code
         }
     }
 
@@ -52,12 +60,14 @@ class McpServerAuthTest {
 
     @Test
     fun `repeated bad tokens lock out with 429 even for the right token`() {
-        assertEquals(401, post("Bearer bad1"))
-        assertEquals(401, post("Bearer bad2"))
-        assertEquals(429, post("Bearer bad3"))
-        assertEquals(429, post("Bearer good"))
-        now += 300_001
-        assertEquals(200, post("Bearer good"))
+        repeat(10) {
+            assertEquals(401, post("Bearer bad1"))
+            assertEquals(401, post("Bearer bad2"))
+            assertEquals(429, post("Bearer bad3"))
+            assertEquals(429, post("Bearer good"))
+            now += 300_001
+            assertEquals(200, post("Bearer good"))
+        }
     }
 
     @Test
