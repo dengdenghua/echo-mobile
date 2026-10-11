@@ -1,8 +1,20 @@
-# Octopus Mobile
+# Echo Mobile
 
 [简体中文](README_CN.md) · [Changelog](CHANGELOG.md)
 
 An AI-powered Android automation app that lets an LLM agent operate an Android device (phone / TV box) through natural language. Users send instructions over a messaging channel (DingTalk, Feishu, QQ, Discord, Telegram, WeChat); the agent interprets the intent and autonomously drives the device.
+
+Echo Mobile is the phone entry point in the Echo family. The current implementation focuses on Android automation and messaging-channel tasks; mobile conversation and private-cloud integration are the product direction.
+
+## The Echo product family
+
+| Product | Positioning | Usage and execution |
+| --- | --- | --- |
+| [Echo AI](https://github.com/dengdenghua/echo-ai) | Desktop AI workspace | Deep work with local files, code, applications, and tools; the interaction reference is Codex on desktop. |
+| [Echo Mobile](https://github.com/dengdenghua/echo-mobile) | Mobile AI entry point | Conversations, voice interaction, task initiation, and results on a phone; the interaction reference is GPT conversations on mobile. |
+| [Echo OS](https://github.com/dengdenghua/echo-os) | Always-on private-cloud execution environment | Runs on a user-owned server, NAS, or private VM for background tasks, browsers, and computation; the execution reference is a Dot's cloud computer. |
+
+These are product roles and the intended integration direction, not a claim that all cross-device features are implemented. Desktop tasks can execute locally, and desktop or mobile clients can connect to private-cloud execution. Assistants and White Ghost squads are execution members; nodes are execution environments, without a required one-to-one mapping. Shared identity, projects, tasks, and execution nodes are the integration direction. Consult each repository for implementation status.
 
 ## Screenshots
 
