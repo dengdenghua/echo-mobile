@@ -1,8 +1,20 @@
-# Octopus Mobile
+# Echo Mobile
 
 [English](README.md)
 
 AI 驱动的 Android 自动化应用，通过自然语言让 LLM Agent 操控 Android 设备（手机）。用户通过消息渠道（钉钉、飞书、QQ、Discord、Telegram）发送指令，AI Agent 理解意图后自主执行设备操作。
+
+Echo Mobile 是 Echo 家族的手机 AI 入口。当前实现以 Android 自动化和消息渠道任务为主，手机对话与私人云协作是产品演进方向。
+
+## Echo 三端定位
+
+| 产品 | 定位 | 使用与运行场景 |
+| --- | --- | --- |
+| [Echo AI](https://github.com/dengdenghua/echo-ai) | 桌面 AI 工作端 | 面向本机文件、代码、应用和工具的深入工作；交互体验参考 Codex 桌面端。 |
+| [Echo Mobile](https://github.com/dengdenghua/echo-mobile) | 手机 AI 入口 | 面向随身对话、语音沟通、任务发起和结果查看；交互体验参考手机上的 GPT 对话。 |
+| [Echo OS](https://github.com/dengdenghua/echo-os) | 私人云常驻执行环境 | 部署在用户自己的服务器、NAS 或私有虚拟机上，承载后台任务、浏览器与计算环境；运行形态参考 Dot 的云端电脑。 |
+
+这是三端的产品定位与协作方向，不代表所有跨端功能已经实现。桌面端可以本机执行；手机端和桌面端也可以连接私人云执行任务。助手和白幽灵小队属于执行成员，执行节点属于运行环境，两者不绑定为一对一关系。三端协作围绕统一身份、项目、任务与执行节点展开，具体实现状态以各仓库文档为准。
 
 ## 截图
 
