@@ -149,7 +149,7 @@ class ClawAccessibilityService : AccessibilityService() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_content_title))
             .setContentText(getString(R.string.notification_content_text))
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_echo)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setAutoCancel(false)

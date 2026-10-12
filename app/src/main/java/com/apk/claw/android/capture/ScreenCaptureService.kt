@@ -124,7 +124,7 @@ class ScreenCaptureService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("正在采集屏幕画面")
             .setContentText("远程高清画面已开启,点此返回应用")
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_echo)
             .setContentIntent(pending)
             .setOngoing(true)
             .setAutoCancel(false)

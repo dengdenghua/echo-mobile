@@ -112,31 +112,36 @@ object OctopusColors {
 }
 
 /**
- * 装饰性强调色（用于工具卡片图标背景、标签等）。
+ * 分类图标色（工具卡片图标、标签、分类入口等）。
  *
- * 这些颜色是"品牌延伸色"，不随主题切换（在亮/暗模式下保持一致），
- * 因为它们用于装饰性场景，对比度由周围的 Surface 背景保证。
+ * ECHO 品牌规定颜色只表达状态、不区分模块或分类（区分靠图标字形），所以这里的每个分类
+ * 都落到中性的 ink-muted（Snow #59616C / Graphite #9AA3AE）；调用方用 `.copy(alpha = …)`
+ * 叠出的浅底随之变成中性浅底。名字保留以免改动调用点；没有任何一项代表系统状态，
+ * 状态色请用 [OctopusColors] 的 Accent / Success / Info / Warning / Error。
+ * 写成 getter，随 [OctopusColors.isLight] 切换主题。
  */
 object OctopusTints {
-    val Skill = Color(0xFF74A7FF)      // 技能 - 蓝
-    val Plugin = Color(0xFFEAB85C)     // 插件 - 黄
-    val Routine = Color(0xFFFF9F5A)    // 例程 - 橙
-    val Cloud = Color(0xFF42C893)      // 云盘 - 绿
-    val Memory = Color(0xFF9B8CFF)     // 记忆 - 紫
-    val Video = Color(0xFFFF6B6B)      // 视频 - 红
-    val Window = Color(0xFF5AA0FF)     // 多窗口 - 天蓝
-    val Evolve = Color(0xFF34C7A8)     // 进化 - 青绿
-    val Trust = Color(0xFF8FD8B1)      // 信任 - 浅绿
-    val Browser = Color(0xFF5DBCD8)    // 浏览器 - 浅青
+    private val Neutral: Color get() = if (OctopusColors.isLight) Color(0xFF59616C) else Color(0xFF9AA3AE)
 
-    /** 热门标签红色（FeatureHubScreen 重复使用 3 次） */
-    val Hot = Color(0xFFFF6B6B)
+    val Skill: Color get() = Neutral      // 技能
+    val Plugin: Color get() = Neutral     // 插件
+    val Routine: Color get() = Neutral    // 例程
+    val Cloud: Color get() = Neutral      // 云盘
+    val Memory: Color get() = Neutral     // 记忆
+    val Video: Color get() = Neutral      // 视频
+    val Window: Color get() = Neutral     // 多窗口
+    val Evolve: Color get() = Neutral     // 进化
+    val Trust: Color get() = Neutral      // 信任
+    val Browser: Color get() = Neutral    // 浏览器
+
+    /** 「热门」标签（FeatureHubScreen 重复使用 3 次）：热度不是系统状态，同样中性。 */
+    val Hot: Color get() = Neutral
 
     /** 浏览器分类色（DiscoverScreen 分类图标 + 快捷方式） */
-    val CatAI = Color(0xFF7C6BFF)
-    val CatVideo = Color(0xFFFF6B7A)
-    val CatDev = Color(0xFF5B9BFF)
-    val CatKnowledge = Color(0xFF30B889)
+    val CatAI: Color get() = Neutral
+    val CatVideo: Color get() = Neutral
+    val CatDev: Color get() = Neutral
+    val CatKnowledge: Color get() = Neutral
 }
 
 /**

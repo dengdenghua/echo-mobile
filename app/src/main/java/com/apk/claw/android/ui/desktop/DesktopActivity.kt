@@ -114,7 +114,7 @@ import java.util.Locale
  * 「数字管家桌面」—— 科幻全息交互桌面(v2)。
  *
  * 统一触屏 + D-pad 焦点导航,适配手机/平板/TV 投屏:
- *  - 全息半透明浮动窗口(聚焦时更实、失焦更透,柔黄边框高亮)
+ *  - 全息半透明浮动窗口(聚焦时更实、失焦更透,core 青边框高亮)
  *  - 所有交互元素可 D-pad 聚焦,方向键遍历
  *  - overscan 安全区(四边 48dp),TV 投屏不裁切
  *  - 放大字号(3m 观看距离可读)
@@ -234,7 +234,7 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
     val connColor = when (connState) {
         ConnectionState.ONLINE -> Holo.Accent
         ConnectionState.CONNECTING, ConnectionState.CONNECTED,
-        ConnectionState.HELLO_SENT, ConnectionState.RECONNECTING -> Color(0xFFFFC24D)
+        ConnectionState.HELLO_SENT, ConnectionState.RECONNECTING -> Holo.Warning
         else -> Holo.AccentDim
     }
     // 对话:主 Agent 会话([ChatAgentBridge])。convo 与对话模式(ChatScreen)共享 SessionStore/ChatStore
@@ -409,34 +409,34 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                 val featuredItems = listOf(
                     TvFeaturedItem(
                         "f1", character.zh, "${character.codename} · ${character.role}",
-                        listOf(Color(0xFF5856D6), Color(0xFFAF52DE)),
+                        listOf(Holo.Surface2, Holo.Panel),
                         action = { openWindow(WinContent.Chat) },
                     ),
                     TvFeaturedItem(
                         "f2", "广场热门", "发现有趣的 Agent 与对话",
-                        listOf(Color(0xFFFF9500), Color(0xFFFFC24D)),
+                        listOf(Holo.Surface2, Holo.Panel),
                         action = { openWindow(WinContent.Square) },
                     ),
                     TvFeaturedItem(
-                        "f3", "小程序中心", "扩展 Octopus 的能力边界",
-                        listOf(Color(0xFF16B8A6), Color(0xFF3DE0D0)),
+                        "f3", "小程序中心", "扩展 Echo 的能力边界",
+                        listOf(Holo.Surface2, Holo.Panel),
                         action = { openWindow(WinContent.Discover) },
                     ),
                 )
                 val quickActions = listOf(
                     TvLauncherItem(
                         "qa_chat", "对话", "和 ${character.zh} 聊聊",
-                        icon = Icons.Filled.ChatBubbleOutline, accentColor = Color(0xFF23A94B),
+                        icon = Icons.Filled.ChatBubbleOutline, accentColor = Holo.TextHud,
                         action = { openWindow(WinContent.Chat) },
                     ),
                     TvLauncherItem(
                         "qa_square", "广场", "Agent 广场",
-                        icon = Icons.Filled.Explore, accentColor = Color(0xFFFF9500),
+                        icon = Icons.Filled.Explore, accentColor = Holo.TextHud,
                         action = { openWindow(WinContent.Square) },
                     ),
                     TvLauncherItem(
                         "qa_desktop", "桌面", "系统桌面",
-                        icon = Icons.Filled.DesktopWindows, accentColor = Color(0xFF0A84FF),
+                        icon = Icons.Filled.DesktopWindows, accentColor = Holo.TextHud,
                         action = {
                             val home = android.content.Intent(android.content.Intent.ACTION_MAIN)
                                 .addCategory(android.content.Intent.CATEGORY_HOME)
@@ -446,7 +446,7 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                     ),
                     TvLauncherItem(
                         "qa_settings", "设置", "应用设置",
-                        icon = Icons.Filled.Settings, accentColor = Color(0xFF8E8E93),
+                        icon = Icons.Filled.Settings, accentColor = Holo.TextHud,
                         action = {
                             runCatching {
                                 ctx.startActivity(
@@ -457,36 +457,36 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                     ),
                 )
                 val squareItems = listOf(
-                    TvLauncherItem("sq1", "热门 Agent", "广场精选", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFFFF9500), badge = "热", action = { openWindow(WinContent.Square) }),
-                    TvLauncherItem("sq2", "新上线", "本周新品", icon = Icons.Filled.PushPin, accentColor = Color(0xFF5856D6), badge = "新", action = { openWindow(WinContent.Square) }),
-                    TvLauncherItem("sq3", "创作灵感", "找点灵感", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFFAF52DE), action = { openWindow(WinContent.Square) }),
-                    TvLauncherItem("sq4", "效率工具", "提效合集", icon = Icons.Filled.Devices, accentColor = Color(0xFF0A84FF), action = { openWindow(WinContent.Square) }),
+                    TvLauncherItem("sq1", "热门 Agent", "广场精选", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, badge = "热", action = { openWindow(WinContent.Square) }),
+                    TvLauncherItem("sq2", "新上线", "本周新品", icon = Icons.Filled.PushPin, accentColor = Holo.TextHud, badge = "新", action = { openWindow(WinContent.Square) }),
+                    TvLauncherItem("sq3", "创作灵感", "找点灵感", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }),
+                    TvLauncherItem("sq4", "效率工具", "提效合集", icon = Icons.Filled.Devices, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }),
                 )
                 // 小程序:读 MiniAppRegistry(不 remember,新装即时出现);空态给一个去广场的入口。
                 val miniAppItems = MiniAppRegistry.all().let { all ->
                     if (all.isEmpty()) {
-                        listOf(TvLauncherItem("ma_empty", "去广场安装", "暂无小程序", icon = Icons.Filled.Apps, accentColor = Color(0xFF16B8A6), action = { openWindow(WinContent.Square) }))
+                        listOf(TvLauncherItem("ma_empty", "去广场安装", "暂无小程序", icon = Icons.Filled.Apps, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }))
                     } else {
                         all.map { m ->
                             TvLauncherItem(
                                 id = "ma_${m.id}", title = m.name.ifBlank { m.id }, subtitle = "小程序",
-                                icon = Icons.Filled.Apps, accentColor = Color(0xFF16B8A6),
+                                icon = Icons.Filled.Apps, accentColor = Holo.TextHud,
                                 action = { openWindow(WinContent.Mini(m.id, m.name)) },
                             )
                         }
                     }
                 }
                 val skillItems = listOf(
-                    TvLauncherItem("sk1", "对话增强", "更自然的对话", icon = Icons.Filled.ChatBubbleOutline, accentColor = Color(0xFF23A94B), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                    TvLauncherItem("sk2", "图像生成", "文字变图片", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFFAF52DE), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                    TvLauncherItem("sk3", "代码助手", "编程好帮手", icon = Icons.Filled.Keyboard, accentColor = Color(0xFF5856D6), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                    TvLauncherItem("sk4", "语音识别", "说说话就行", icon = Icons.Filled.Mic, accentColor = Color(0xFFFF9500), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
+                    TvLauncherItem("sk1", "对话增强", "更自然的对话", icon = Icons.Filled.ChatBubbleOutline, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
+                    TvLauncherItem("sk2", "图像生成", "文字变图片", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
+                    TvLauncherItem("sk3", "代码助手", "编程好帮手", icon = Icons.Filled.Keyboard, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
+                    TvLauncherItem("sk4", "语音识别", "说说话就行", icon = Icons.Filled.Mic, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
                 )
                 val mediaItems = listOf(
-                    TvLauncherItem("md1", "视频", "在线视频", icon = Icons.Filled.Videocam, accentColor = Color(0xFFFF4D6A), action = { openWindow(WinContent.Discover) }),
-                    TvLauncherItem("md2", "音乐", "听点音乐", icon = Icons.Filled.Mic, accentColor = Color(0xFFAF52DE), action = { openWindow(WinContent.Discover) }),
-                    TvLauncherItem("md3", "图片", "图库浏览", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFF16B8A6), action = { openWindow(WinContent.Discover) }),
-                    TvLauncherItem("md4", "资讯", "新闻阅读", icon = Icons.Filled.Language, accentColor = Color(0xFF0A84FF), action = { openWindow(WinContent.Discover) }),
+                    TvLauncherItem("md1", "视频", "在线视频", icon = Icons.Filled.Videocam, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
+                    TvLauncherItem("md2", "音乐", "听点音乐", icon = Icons.Filled.Mic, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
+                    TvLauncherItem("md3", "图片", "图库浏览", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
+                    TvLauncherItem("md4", "资讯", "新闻阅读", icon = Icons.Filled.Language, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
                 )
                 val installedApps = rememberInstalledApps(ctx)
                 // 多行卡片瀑布:Banner + 各分类行,每行横向独立滚动。
@@ -611,7 +611,7 @@ private const val TV_SCENE_EVERY = 3                // 连环画:每几轮对话
 private const val THINKING_DOT_COUNT = 3            // 思考点动画数量
 private const val THINKING_DOT_DURATION_MS = 460    // 思考点单次脉动时长
 private const val THINKING_DOT_STAGGER_MS = 150     // 思考点依次脉动的错峰间隔
-private val TvShelfBg = Color(0xF20A0B0E)
+private val TvShelfBg = Color(0xF2101216)
 // 全屏壁纸的柔和压暗:顶(状态栏/顶栏可读)—中段全透—底(标题/图标可读),均匀无硬边。
 private val TvWallScrim = listOf(Color(0x40000000), Color(0x00000000), Color(0x00000000), Color(0x73000000))
 
@@ -633,7 +633,7 @@ private fun CcTile(
         modifier = Modifier
             .size(width = 108.dp, height = 66.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(if (active) Holo.Accent.copy(alpha = 0.24f) else Color(0xFF24272F))
+            .background(if (active) Holo.Accent.copy(alpha = 0.24f) else Holo.Surface2)
             .holoFocus(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
             .padding(8.dp),
@@ -724,7 +724,7 @@ private fun FloatingAgentAvatar(
 }
 
 /** 全屏内容层的半透明遮罩底色(压暗壁纸,突出内容)。 */
-private val TvOverlayScrim = Color(0xE6060810)
+private val TvOverlayScrim = Color(0xE6060708)
 
 /** 内容层顶栏小圆按钮(返回 / 钉);active=true 高亮。 */
 @Composable
@@ -812,7 +812,7 @@ private fun ChatContent(convo: List<DeskMsg>, running: Boolean, toolNote: String
                 )
             }
         }
-        // 右:会话气泡。去掉了「阶段 x/4」条;思考时底部内联一行黄色竖点脉动,不再弹独立思考窗。
+        // 右:会话气泡。去掉了「阶段 x/4」条;思考时底部内联一行青色竖点脉动,不再弹独立思考窗。
         Column(Modifier.weight(1f)) {
             Box(Modifier.fillMaxSize()) {
                 if (convo.isEmpty() && !running) {
@@ -846,7 +846,7 @@ private fun ChatContent(convo: List<DeskMsg>, running: Boolean, toolNote: String
 }
 
 
-/** 思考指示行:几个黄色竖点脉动 + 内联状态文字(工具名 / 默认「思考中…」)。状态嵌在对话里,不弹独立悬浮窗。 */
+/** 思考指示行:几个青色竖点脉动 + 内联状态文字(工具名 / 默认「思考中…」)。状态嵌在对话里,不弹独立悬浮窗。 */
 @Composable
 private fun ThinkingRow(toolNote: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -855,7 +855,7 @@ private fun ThinkingRow(toolNote: String) {
     }
 }
 
-/** 几个黄色竖点,依次脉动 —— 思考中的极简动态,替代原音波/阶段条。 */
+/** 几个青色竖点,依次脉动 —— 思考中的极简动态,替代原音波/阶段条。 */
 @Composable
 private fun ThinkingDots() {
     val t = rememberInfiniteTransition(label = "think")
@@ -880,7 +880,7 @@ private fun ThinkingDots() {
     }
 }
 
-/** 会话气泡:用户右对齐(黄底深字),角色左对齐(深底浅字)。 */
+/** 会话气泡:用户右对齐(core 青底深字),角色左对齐(深底浅字)。 */
 @Composable
 private fun DialogBubble(m: DeskMsg) {
     Row(Modifier.fillMaxWidth()) {
@@ -892,7 +892,7 @@ private fun DialogBubble(m: DeskMsg) {
         ) {
             Text(
                 m.text,
-                color = if (m.fromUser) Color(0xFF1A1A1A) else Holo.TextHud,
+                color = if (m.fromUser) Holo.OnAccent else Holo.TextHud,
                 fontSize = 14.sp, lineHeight = 20.sp,
             )
         }
@@ -901,7 +901,7 @@ private fun DialogBubble(m: DeskMsg) {
 }
 
 /**
- * 屏幕正底部回复条(对齐 OpenRoom):上排快捷回复气泡 + 下排黄色输入胶囊。
+ * 屏幕正底部回复条(对齐 OpenRoom):上排快捷回复气泡 + 下排雪白输入胶囊(action)。
  * 运行中输入胶囊变停止键。快捷回复为预设短句,点击即发。
  */
 /** 快捷回复气泡:居中 + 自动换行(窄栏 dock 放不下就往下另起一行)。 */
@@ -974,11 +974,11 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                 onExitVoice = { if (!listening) voiceMode = false },
             )
         } else {
-            // 输入胶囊(黄)+ 麦克风(切语音)+ 发送
+            // 输入胶囊(雪白 action)+ 麦克风(切语音)+ 发送
             Row(
                 modifier = Modifier.widthIn(max = 460.dp).fillMaxWidth().height(46.dp)
                     .clip(RoundedCornerShape(23.dp))
-                    .background(Holo.Accent)
+                    .background(Holo.Action)
                     .padding(start = 18.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -986,14 +986,17 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                     value = input,
                     onValueChange = { input = it },
                     singleLine = true,
-                    textStyle = androidx.compose.ui.text.TextStyle(color = Color(0xFF1A1A1A), fontSize = 14.sp),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF1A1A1A)),
+                    textStyle = androidx.compose.ui.text.TextStyle(color = Holo.OnAction, fontSize = 14.sp),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Holo.OnAction),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = { if (input.isNotBlank()) { onSend(input); input = "" } }),
                     modifier = Modifier.weight(1f),
                     decorationBox = { inner ->
                         if (input.isEmpty()) {
-                            Text("$charName 在等你回复…", color = Color(0x991A1A1A), fontSize = 14.sp, maxLines = 1)
+                            Text(
+                                "$charName 在等你回复…",
+                                color = Holo.OnAction.copy(alpha = 0.6f), fontSize = 14.sp, maxLines = 1,
+                            )
                         }
                         inner()
                     },
@@ -1009,7 +1012,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                 ) {
                     Icon(
                         Icons.Filled.Call, contentDescription = "实时语音通话",
-                        tint = Color(0xCC1A1A1A), modifier = Modifier.size(20.dp),
+                        tint = Holo.OnAction.copy(alpha = 0.8f), modifier = Modifier.size(20.dp),
                     )
                 }
                 // 麦克风:收起成小圆气泡语音模式(无权限先申请)
@@ -1022,11 +1025,11 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                 ) {
                     Icon(
                         Icons.Filled.Mic, contentDescription = "语音输入",
-                        tint = Color(0xCC1A1A1A), modifier = Modifier.size(20.dp),
+                        tint = Holo.OnAction.copy(alpha = 0.8f), modifier = Modifier.size(20.dp),
                     )
                 }
                 Box(
-                    Modifier.size(36.dp).clip(CircleShape).background(Color(0xFF1A1A1A))
+                    Modifier.size(36.dp).clip(CircleShape).background(Holo.OnAction)
                         .holoFocus(CircleShape)
                         .clickable {
                             if (running) onStop()
@@ -1096,7 +1099,7 @@ private fun VoiceBubbleInput(
                         )
                     },
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.Mic, contentDescription = "按住说话", tint = Color(0xFF1A1A1A), modifier = Modifier.size(28.dp)) }
+            ) { Icon(Icons.Filled.Mic, contentDescription = "按住说话", tint = Holo.OnAccent, modifier = Modifier.size(28.dp)) }
         }
     }
 }
@@ -1155,7 +1158,7 @@ private fun DesktopAddressBar(currentUrl: String, pageTitle: String, loading: Bo
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 状态点:加载中黄,空闲/完成灰
+        // 状态点:加载中 core 青,空闲/完成灰
         Dot(if (loading) Holo.Accent else Holo.TextSecondary)
         Spacer(Modifier.width(8.dp))
         TextField(

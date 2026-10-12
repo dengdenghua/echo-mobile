@@ -322,7 +322,7 @@ object RemoteConsoleGateway {
 
     private fun enc(value: String): String = URLEncoder.encode(value, "UTF-8")
 
-    private fun defaultDeviceName(): String = "Octopus ${Build.MODEL ?: "Android"}"
+    private fun defaultDeviceName(): String = "Echo ${Build.MODEL ?: "Android"}"
 
     private fun serverDetail(body: String): String? = runCatchingOrNull(TAG) {
         gson.fromJson(body, JsonObject::class.java)

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification small icon: the ECHO mark (open frame + Echo Core) as a single-colour silhouette.
+     The status bar only uses the alpha channel, so it is white on transparent with no background.
+     Same geometry as ic_echo_mark: the mark's 36-unit box (64-unit brand grid, bbox 14..50) sits in a
+     40-unit viewport with 2 units of padding on every side. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+    <group
+        android:translateX="-12"
+        android:translateY="-12">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="6"
+            android:strokeLineCap="butt"
+            android:pathData="M50,17H24a7,7 0,0 0,-7 7v16a7,7 0,0 0,7 7h26" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M33,32a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z" />
+    </group>
+</vector>

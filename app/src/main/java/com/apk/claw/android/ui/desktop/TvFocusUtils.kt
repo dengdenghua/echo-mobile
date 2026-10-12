@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun Modifier.tvFocusHolo(
-    focusedColor: Color = Color(0xFF5856D6),
+    focusedColor: Color = Holo.Accent,
     cornerRadius: Int = 16,
 ): Modifier {
     val interactionSource = remember { MutableInteractionSource() }

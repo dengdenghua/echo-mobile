@@ -650,17 +650,17 @@ private fun iconForEntry(entry: FileEntry): Pair<ImageVector, Color> {
     if (entry.isDir) return Icons.Filled.Folder to OctopusColors.Primary
     if (entry.isSymlink) return Icons.Filled.InsertDriveFile to FMuted
     return when (LsParser.fileTypeOf(entry.name)) {
-        FileType.IMAGE -> Icons.Filled.Image to Color(0xFF42C893)
-        FileType.VIDEO -> Icons.Filled.Movie to Color(0xFFFF6B6B)
-        FileType.AUDIO -> Icons.Filled.AudioFile to Color(0xFF9B8CFF)
-        FileType.APK -> Icons.Filled.SportsEsports to Color(0xFF5DBCD8)
-        FileType.ARCHIVE -> Icons.Filled.FolderZip to Color(0xFFE37318)
-        FileType.PDF -> Icons.Filled.PictureAsPdf to Color(0xFFF6685D)
+        FileType.IMAGE -> Icons.Filled.Image to FSub
+        FileType.VIDEO -> Icons.Filled.Movie to FSub
+        FileType.AUDIO -> Icons.Filled.AudioFile to FSub
+        FileType.APK -> Icons.Filled.SportsEsports to FSub
+        FileType.ARCHIVE -> Icons.Filled.FolderZip to FSub
+        FileType.PDF -> Icons.Filled.PictureAsPdf to FSub
         FileType.TEXT -> Icons.Filled.Description to FSub
-        FileType.DOCUMENT -> Icons.Filled.Description to Color(0xFF5DBCD8)
-        FileType.SPREADSHEET -> Icons.Filled.TableChart to Color(0xFF56C08D)
-        FileType.PRESENTATION -> Icons.Filled.Description to Color(0xFF8A88F4)
-        FileType.CODE -> Icons.Filled.Code to Color(0xFF8A88F4)
+        FileType.DOCUMENT -> Icons.Filled.Description to FSub
+        FileType.SPREADSHEET -> Icons.Filled.TableChart to FSub
+        FileType.PRESENTATION -> Icons.Filled.Description to FSub
+        FileType.CODE -> Icons.Filled.Code to FSub
         FileType.OTHER -> Icons.Filled.InsertDriveFile to FMuted
     }
 }

@@ -47,12 +47,12 @@ object LiveControlOverlay {
             if (value) dismissView() else if (taskActive) displayView(lastStep)
         }
 
-    private val cBg = Color.parseColor("#1C1C1E")
-    private val cBorder = Color.parseColor("#38383A")
-    private val cText = Color.parseColor("#FFFFFF")
-    private val cPrimary = Color.parseColor("#0A84FF")
-    private val cDanger = Color.parseColor("#FF453B")
-    private val cSuccess = Color.parseColor("#30D158")
+    private val cBg = Color.parseColor("#171A1F")
+    private val cBorder = Color.parseColor("#29FFFFFF")
+    private val cText = Color.parseColor("#EEF1F4")
+    private val cPrimary = Color.parseColor("#6FE3F0")
+    private val cDanger = Color.parseColor("#FF6B78")
+    private val cSuccess = Color.parseColor("#6FE3F0")
 
     private fun dp(v: Int): Int = (v * android.content.res.Resources.getSystem().displayMetrics.density).toInt()
 
@@ -95,7 +95,7 @@ object LiveControlOverlay {
                         view.findViewById<TextView>(R.id.lcStop)?.apply {
                             setTextColor(cDanger)
                             background = GradientDrawable().apply {
-                                setColor(Color.argb(40, 255, 69, 59))
+                                setColor(Color.parseColor("#28FF6B78"))
                                 cornerRadius = dp(16).toFloat()
                             }
                             setOnClickListener {

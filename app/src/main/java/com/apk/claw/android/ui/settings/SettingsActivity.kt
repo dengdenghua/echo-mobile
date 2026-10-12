@@ -174,7 +174,7 @@ class SettingsActivity : BaseActivity() {
 
         menuItems[SettingsViewModel.MenuAction.OCTOPUS_RUNTIME.name] = modelGroup.addMenuItem(
             leadingIcon = R.drawable.ic_runtime,
-            title = "Octopus Runtime",
+            title = "Echo Runtime",
             onClick = { viewModel.onMenuItemClick(SettingsViewModel.MenuAction.OCTOPUS_RUNTIME) },
             showDivider = false
         )

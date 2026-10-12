@@ -48,7 +48,7 @@ object ReflexArc {
     private val rules = listOf(
         Triple(
             Regex("^(你好|hi|hello|嗨|哈喽|hey|在吗|在不在)\\s*[!！。.?？]*$", RegexOption.IGNORE_CASE),
-            "你好！我是章鱼AI助手，可以帮你生成各种小程序、操控手机、回答问题。告诉我你想做什么吧 😊",
+            "你好！我是 Echo，你的 AI 手机助手，可以帮你生成各种小程序、操控手机、回答问题。告诉我你想做什么吧 😊",
             0.95
         ),
         Triple(
@@ -58,7 +58,7 @@ object ReflexArc {
         ),
         Triple(
             Regex("^(你是谁|你是什么|who are you|介绍一下你自己|自我介绍)\\s*[!！。.?？]*$", RegexOption.IGNORE_CASE),
-            "我是章鱼（Octopus），一个AI手机助手。我可以：\n" +
+            "我是 Echo，一个 AI 手机助手。我可以：\n" +
                     "• 用一句话帮你生成小程序（比如「做个记账app」「做个计算器」）\n" +
                     "• 通过自然语言操控手机（打开应用、发送消息等）\n" +
                     "• 回答问题、搜索信息\n" +

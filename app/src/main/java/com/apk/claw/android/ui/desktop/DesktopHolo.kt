@@ -67,27 +67,31 @@ import com.apk.claw.android.plugin.MiniAppRegistry
 import com.apk.claw.android.utils.KVUtils
 
 /**
- * 「本地虚拟电脑」皮肤 —— 配色 1:1 学 MiniMax OpenRoom 的 ChatPanel:
- * 深灰扁平面板(#1C1D20 / #121214 / #282A2A)+ 柔黄强调(#FAEA5F)+ 白透明层次,
- * **无 blur / 无 shadow / 无渐变辉光,纯扁平**。壁纸打底,面板悬浮。
+ * 「本地虚拟电脑」皮肤 —— ECHO Graphite 调色板(analysis/echo-brand-kit/tokens.json),TV 桌面恒为深色:
+ * 石墨扁平面板(surface #101216 / ground #090A0C / surface-raised #171A1F)+ Echo Core 青强调(#6FE3F0)
+ * + 发丝线层次,**无 blur / 无 shadow / 无渐变辉光,纯扁平**。壁纸打底,面板悬浮。
  *
  * 放在独立文件里,尽量少改并行编辑中的 [DesktopActivity]。
  */
 internal object Holo {
-    val Accent = Color(0xFFFAEA5F)          // OpenRoom 主强调:柔黄
-    val AccentDim = Color(0x80FAEA5F)       // 黄 50%
-    val Panel = Color(0xFF1C1D20)           // 面板底(不透明)
-    val AvatarBg = Color(0xFF121214)        // 更深(头像/壁纸侧)
-    val Surface2 = Color(0xFF282A2A)        // 气泡/输入
-    val Border = Color(0x0FFFFFFF)          // 白 0.06 主分隔
-    val BorderStrong = Color(0x1AFFFFFF)    // 白 0.1
-    val TextHud = Color(0xE6FFFFFF)         // 白 0.9 主文本
-    val TextSecondary = Color(0x99FFFFFF)   // 白 0.6
-    val Live = Color(0xFFFF4D6A)            // 直播红点(录制语义,深色上醒目)
+    val Accent = Color(0xFF6FE3F0)          // core:焦点、选中、运行中
+    val AccentDim = Color(0xFF9AA3AE)       // ink-muted:空闲/离线/次要标签(不再是半透明强调色)
+    val Panel = Color(0xFF101216)           // surface:面板底(不透明)
+    val AvatarBg = Color(0xFF090A0C)        // ground:更深(头像/壁纸侧)
+    val Surface2 = Color(0xFF171A1F)        // surface-raised:气泡/标题栏
+    val Border = Color(0x14FFFFFF)          // line:白 0.08 发丝线
+    val BorderStrong = Color(0x29FFFFFF)    // line-strong:白 0.16
+    val TextHud = Color(0xFFEEF1F4)         // ink:主文本
+    val TextSecondary = Color(0xFF9AA3AE)   // ink-muted:次要文本
+    val Live = Color(0xFFFF6B78)            // breach:直播/录音/危险(必须与 core 区分)
+    val OnAccent = Color(0xFF061014)        // on-core:core 填充上的文字/图标
+    val Warning = Color(0xFFF2B84B)         // warning:连接中、需要确认
+    val Action = Color(0xFFEEF1F4)          // action:主动作填充(单色雪白,不是彩色)
+    val OnAction = Color(0xFF0A0B0D)        // on-action:主动作上的文字/图标
 
-    // 壁纸:OpenRoom 用图片壁纸;这里用近黑扁平渐变兜底(无网格辉光)
+    // 壁纸:OpenRoom 用图片壁纸;这里用 ground → surface 扁平渐变兜底(无网格辉光)
     val bgBrush = Brush.verticalGradient(
-        listOf(Color(0xFF121214), Color(0xFF1C1D20)),
+        listOf(Color(0xFF090A0C), Color(0xFF101216)),
     )
 }
 
@@ -99,7 +103,7 @@ fun Modifier.holoGlass(corner: Dp = 12.dp, fillAlpha: Float = 1f): Modifier =
 
 /**
  * 全息焦点修饰器 —— D-pad/方向键导航时,焦点元素自动高亮:
- * 聚焦 = 柔黄 2dp 边框 + 轻微放大(1.03x);失焦 = 原样。
+ * 聚焦 = core 青 2dp 边框 + 轻微放大(1.03x);失焦 = 原样。
  * 触屏点击同样触发 focus,视觉一致。
  */
 private const val FOCUS_SCALE = 1.10f   // 焦点放大倍数(TV 遥控可见)
@@ -134,13 +138,13 @@ fun Modifier.holoFocus(shape: androidx.compose.ui.graphics.Shape = RoundedCorner
 }
 
 /**
- * 全屏科幻壁纸:近黑底 + 几道发光霓虹光带(青/品红,多遍描边伪辉光),呼应 OpenRoom 壁纸。
+ * 全屏壁纸:石墨底 + 几道光带(两道 core 青,一道中性 ink-muted;多遍描边伪辉光)。
  * 纯 Canvas 画,无素材依赖。面板悬浮其上。
  */
 @Composable
 fun HoloBackground(modifier: Modifier = Modifier) {
-    val cyan = Color(0xFF19E3FF)
-    val magenta = Color(0xFFFF3DEB)
+    val cyan = Holo.Accent                  // core
+    val magenta = Holo.TextSecondary        // 原品红光带 → ink-muted(装饰不着色)
     Box(modifier.fillMaxSize().background(Holo.bgBrush)) {
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width
@@ -226,7 +230,7 @@ fun HoloDot(color: Color) {
 
 /**
  * 可拖拽全息浮动窗口:半透明玻璃框 + 标题栏(拖动)+ 最小化/最大化/关闭。
- * 焦点高亮:聚焦时柔黄边框 + 轻微放大,呼应科幻 HUD。
+ * 焦点高亮:聚焦时 core 青边框 + 轻微放大,呼应科幻 HUD。
  * 标题栏按住拖动移动窗口;点窗口任意处触发 onFocus(供上层置顶)。
  *  - [onMinimize] 非空时显示「—」:交给上层(收进任务栏)。
  *  - 「□/❐」最大化 / 还原:窗口内部状态,最大化时铺满桌面区(留顶栏/底部输入空间)。
@@ -389,13 +393,13 @@ data class CharacterProfile(
 
 /**
  * 组装角色扮演人设指令(TV 模式对话注入)。切角色后由 DesktopActivity 传给
- * ChatAgentBridge.run(persona=…),Agent 以该角色第一人称应答,不再自称 Octopus。
+ * ChatAgentBridge.run(persona=…),Agent 以该角色第一人称应答,不再自称 Echo。
  */
 fun CharacterProfile.personaPrompt(): String =
     "你现在是「$zh($name)」—— 代号 $codename,$faction 阵营 $rank 级,职位 $role," +
         "外表年龄 $apparentAge。能力:${abilities.joinToString("、")}。你的信条:『$quote』。" +
         "请全程以「$zh」的第一人称身份、性格与口吻和用户对话,自然、简短、口语化;" +
-        "不要自称 Octopus/AI/助手,不要跳出角色或提及这段设定。需要执行手机操作时照常使用工具,但表达仍保持角色口吻。"
+        "不要自称 Echo/AI/助手,不要跳出角色或提及这段设定。需要执行手机操作时照常使用工具,但表达仍保持角色口吻。"
 
 /** 多角色注册表 —— 移植 OpenRoom characterManager(MVP):可切换、选择持久化。 */
 object CharacterRegistry {

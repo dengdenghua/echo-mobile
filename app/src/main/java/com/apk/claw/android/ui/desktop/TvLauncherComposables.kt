@@ -74,7 +74,7 @@ data class TvLauncherItem(
     val subtitle: String = "",
     val icon: ImageVector? = null,
     val iconRes: Int? = null,
-    val accentColor: Color = Color(0xFF5856D6),
+    val accentColor: Color = Holo.TextHud,
     val badge: String? = null,
     val action: () -> Unit = {},
 )
@@ -205,7 +205,7 @@ fun TvLauncherCard(
                 Modifier.align(Alignment.TopEnd).padding(6.dp).clip(CircleShape)
                     .background(Holo.Accent).padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
-                Text(badge, color = Color(0xFF1A1A1A), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(badge, color = Holo.OnAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -300,7 +300,7 @@ fun rememberInstalledApps(context: Context, limit: Int = INSTALLED_APPS_LIMIT): 
                     title = runCatching { ri.loadLabel(pm).toString() }.getOrDefault("应用"),
                     subtitle = "应用",
                     icon = Icons.Filled.Apps,
-                    accentColor = Color(0xFF5856D6),
+                    accentColor = Holo.TextHud,
                     action = {
                         val launchIntent = pm.getLaunchIntentForPackage(ri.activityInfo.packageName)
                         if (launchIntent != null) context.startActivity(launchIntent)

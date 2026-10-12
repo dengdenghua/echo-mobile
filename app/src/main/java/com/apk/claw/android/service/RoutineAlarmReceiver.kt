@@ -61,7 +61,7 @@ class RoutineAlarmReceiver : BroadcastReceiver() {
         val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         // 复用前台服务的通知渠道（若尚未创建，前台服务启动时会创建）
         val n = NotificationCompat.Builder(ctx, ForegroundService.CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_echo)
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))

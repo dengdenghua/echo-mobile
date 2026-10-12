@@ -59,7 +59,7 @@ class RuntimeConfigActivity : BaseActivity() {
         // Toolbar
         val toolbar = CommonToolbar(this)
         toolbar.id = View.generateViewId()
-        toolbar.setTitle("Octopus Runtime")
+        toolbar.setTitle("Echo Runtime")
         toolbar.showBackButton(true) { finish() }
         root.addView(toolbar, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 

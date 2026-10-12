@@ -564,20 +564,6 @@
     <ID>MagicNumber:DesktopActivity.kt$0.5f</ID>
     <ID>MagicNumber:DesktopActivity.kt$0.82f</ID>
     <ID>MagicNumber:DesktopActivity.kt$0.98f</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0x991A1A1A</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xCC1A1A1A</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF0A84FF</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF16B8A6</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF1A1A1A</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF23A94B</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF24272F</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF3DE0D0</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF5856D6</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFF8E8E93</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFFAF52DE</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFFFF4D6A</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFFFF9500</ID>
-    <ID>MagicNumber:DesktopActivity.kt$0xFFFFC24D</ID>
     <ID>MagicNumber:DesktopActivity.kt$100</ID>
     <ID>MagicNumber:DesktopActivity.kt$1000</ID>
     <ID>MagicNumber:DesktopActivity.kt$16</ID>
@@ -612,8 +598,6 @@
     <ID>MagicNumber:DesktopHolo.kt$0.88f</ID>
     <ID>MagicNumber:DesktopHolo.kt$0.94f</ID>
     <ID>MagicNumber:DesktopHolo.kt$0.95f</ID>
-    <ID>MagicNumber:DesktopHolo.kt$0xFF19E3FF</ID>
-    <ID>MagicNumber:DesktopHolo.kt$0xFFFF3DEB</ID>
     <ID>MagicNumber:DesktopHolo.kt$1.06f</ID>
     <ID>MagicNumber:DesktopHolo.kt$1.08f</ID>
     <ID>MagicNumber:DesktopHolo.kt$1.6f</ID>
@@ -670,14 +654,6 @@
     <ID>MagicNumber:FeiShuChannelHandler.kt$FeiShuChannelHandler.&lt;no name provided&gt;$1000</ID>
     <ID>MagicNumber:FeiShuChannelHandler.kt$FeiShuChannelHandler.&lt;no name provided&gt;$5</ID>
     <ID>MagicNumber:FeiShuChannelHandler.kt$FeiShuChannelHandler.&lt;no name provided&gt;$60</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFF42C893</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFF56C08D</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFF5DBCD8</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFF8A88F4</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFF9B8CFF</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFFE37318</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFFF6685D</ID>
-    <ID>MagicNumber:FileManagerActivity.kt$0xFFFF6B6B</ID>
     <ID>MagicNumber:FileManagerActivity.kt$180f</ID>
     <ID>MagicNumber:FileManagerActivity.kt$500</ID>
     <ID>MagicNumber:FileOpsTool.kt$FileOpsTool$100</ID>
@@ -818,10 +794,6 @@
     <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay$64</ID>
     <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay.&lt;no name provided&gt;$16</ID>
     <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay.&lt;no name provided&gt;$22</ID>
-    <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay.&lt;no name provided&gt;$255</ID>
-    <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay.&lt;no name provided&gt;$40</ID>
-    <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay.&lt;no name provided&gt;$59</ID>
-    <ID>MagicNumber:LiveControlOverlay.kt$LiveControlOverlay.&lt;no name provided&gt;$69</ID>
     <ID>MagicNumber:LlmConfigActivity.kt$LlmConfigActivity$1000L</ID>
     <ID>MagicNumber:LlmConfigActivity.kt$LlmConfigActivity$5</ID>
     <ID>MagicNumber:LlmConfigActivity.kt$LlmConfigActivity$60</ID>
@@ -1163,10 +1135,6 @@
     <ID>MagicNumber:TurnScorer.kt$TurnScorer$4</ID>
     <ID>MagicNumber:TurnScorer.kt$TurnScorer$5</ID>
     <ID>MagicNumber:TurnScorer.kt$TurnScorer$80</ID>
-    <ID>MagicNumber:TvFocusUtils.kt$0xFF5856D6</ID>
-    <ID>MagicNumber:TvLauncherComposables.kt$0xFF1A1A1A</ID>
-    <ID>MagicNumber:TvLauncherComposables.kt$0xFF5856D6</ID>
-    <ID>MagicNumber:TvLauncherComposables.kt$TvLauncherItem$0xFF5856D6</ID>
     <ID>MagicNumber:TvModifiers.kt$1.05f</ID>
     <ID>MagicNumber:UiNode.kt$UiNode$60</ID>
     <ID>MagicNumber:UiNode.kt$UiNode$80</ID>
@@ -1423,24 +1391,24 @@
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$private</ID>
     <ID>MaxLineLength:DesktopActivity.kt$)</ID>
     <ID>MaxLineLength:DesktopActivity.kt$.</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md1", "视频", "在线视频", icon = Icons.Filled.Videocam, accentColor = Color(0xFFFF4D6A), action = { openWindow(WinContent.Discover) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md2", "音乐", "听点音乐", icon = Icons.Filled.Mic, accentColor = Color(0xFFAF52DE), action = { openWindow(WinContent.Discover) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md3", "图片", "图库浏览", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFF16B8A6), action = { openWindow(WinContent.Discover) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md4", "资讯", "新闻阅读", icon = Icons.Filled.Language, accentColor = Color(0xFF0A84FF), action = { openWindow(WinContent.Discover) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk1", "对话增强", "更自然的对话", icon = Icons.Filled.ChatBubbleOutline, accentColor = Color(0xFF23A94B), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk2", "图像生成", "文字变图片", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFFAF52DE), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk3", "代码助手", "编程好帮手", icon = Icons.Filled.Keyboard, accentColor = Color(0xFF5856D6), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk4", "语音识别", "说说话就行", icon = Icons.Filled.Mic, accentColor = Color(0xFFFF9500), action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq1", "热门 Agent", "广场精选", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFFFF9500), badge = "热", action = { openWindow(WinContent.Square) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq2", "新上线", "本周新品", icon = Icons.Filled.PushPin, accentColor = Color(0xFF5856D6), badge = "新", action = { openWindow(WinContent.Square) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq3", "创作灵感", "找点灵感", icon = Icons.Filled.AutoAwesome, accentColor = Color(0xFFAF52DE), action = { openWindow(WinContent.Square) })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq4", "效率工具", "提效合集", icon = Icons.Filled.Devices, accentColor = Color(0xFF0A84FF), action = { openWindow(WinContent.Square) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md1", "视频", "在线视频", icon = Icons.Filled.Videocam, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md2", "音乐", "听点音乐", icon = Icons.Filled.Mic, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md3", "图片", "图库浏览", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("md4", "资讯", "新闻阅读", icon = Icons.Filled.Language, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk1", "对话增强", "更自然的对话", icon = Icons.Filled.ChatBubbleOutline, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk2", "图像生成", "文字变图片", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk3", "代码助手", "编程好帮手", icon = Icons.Filled.Keyboard, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sk4", "语音识别", "说说话就行", icon = Icons.Filled.Mic, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq1", "热门 Agent", "广场精选", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, badge = "热", action = { openWindow(WinContent.Square) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq2", "新上线", "本周新品", icon = Icons.Filled.PushPin, accentColor = Holo.TextHud, badge = "新", action = { openWindow(WinContent.Square) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq3", "创作灵感", "找点灵感", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) })</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$TvLauncherItem("sq4", "效率工具", "提效合集", icon = Icons.Filled.Devices, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) })</ID>
     <ID>MaxLineLength:DesktopActivity.kt$WinContent.Discover -&gt; DiscoverScreen(onOpenUrl = { url -&gt; url?.let { engine.navigate(normalizeUrl(it)) } })</ID>
     <ID>MaxLineLength:DesktopActivity.kt$android.content.Intent(ctx, com.apk.claw.android.ui.settings.SettingsActivity::class.java)</ID>
     <ID>MaxLineLength:DesktopActivity.kt$else</ID>
     <ID>MaxLineLength:DesktopActivity.kt$item { TvLauncherRow("快捷入口", quickActions, onItemClick = { it.action() }, firstItemFocus = firstIconFocus) }</ID>
     <ID>MaxLineLength:DesktopActivity.kt$keyboardActions = KeyboardActions(onSend = { if (input.isNotBlank()) { onSend(input); input = "" } })</ID>
-    <ID>MaxLineLength:DesktopActivity.kt$listOf(TvLauncherItem("ma_empty", "去广场安装", "暂无小程序", icon = Icons.Filled.Apps, accentColor = Color(0xFF16B8A6), action = { openWindow(WinContent.Square) }))</ID>
+    <ID>MaxLineLength:DesktopActivity.kt$listOf(TvLauncherItem("ma_empty", "去广场安装", "暂无小程序", icon = Icons.Filled.Apps, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }))</ID>
     <ID>MaxLineLength:DesktopActivity.kt$placeholder = { Text(pageTitle.ifBlank { stringResource(R.string.desktop_address_placeholder) }, fontSize = 13.sp, maxLines = 1, color = Holo.TextSecondary) }</ID>
     <ID>MaxLineLength:DesktopActivity.kt$var marked by remember(currentUrl) { mutableStateOf(com.apk.claw.android.ui.browser.BookmarkManager.isBookmarked(currentUrl)) }</ID>
     <ID>MaxLineLength:DesktopHolo.kt$Modifier.align(Alignment.BottomCenter).fillMaxHeight(0.94f).aspectRatio(0.46f, matchHeightConstraintsFirst = true)</ID>

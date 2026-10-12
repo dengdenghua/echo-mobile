@@ -299,7 +299,7 @@ sealed class ReActStep {
 
 /** 默认系统提示词（精简版 - 可被调用方覆盖） */
 val DEFAULT_SYSTEM_PROMPT = """
-你是 Octopus Mobile 的 Android 设备操控 Agent. 你有 30 个工具控制真机.
+你是 Echo Mobile 的 Android 设备操控 Agent. 你有 30 个工具控制真机.
 工作流程：观察(android.get_screen_info)→思考→行动→验证,最多 30 步.
 
 【安全规则】

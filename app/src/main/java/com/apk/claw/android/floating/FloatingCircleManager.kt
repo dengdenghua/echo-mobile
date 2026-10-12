@@ -36,7 +36,7 @@ import com.lzf.easyfloat.interfaces.OnFloatCallbacks
 /**
  * 统一悬浮助手球 —— 章鱼 + 语音 + 无障碍 三合一。
  *
- * - **待机**：🐙 章鱼圆球，颜色表示无障碍状态（绿=开，红=关），可拖拽
+ * - **待机**：🐙 章鱼圆球，颜色表示无障碍状态（core 青=开，breach 红=关），可拖拽
  * - **点击**：展开语音面板（脉冲动画 + 实时识别 + 停止），识别完自动发给 AI
  * - **长按**：跳转无障碍设置页
  * - 任务运行时仍由 [LiveControlOverlay] 在顶部显示控制条
@@ -54,12 +54,12 @@ object FloatingCircleManager {
     private var listening = false
     private var voiceInput: VoiceInput? = null
 
-    private val cSuccess = Color.parseColor("#30D158")
-    private val cError = Color.parseColor("#FF453B")
-    private val cPrimary = Color.parseColor("#0A84FF")
-    private val cDanger = Color.parseColor("#FF453B")
-    private val cBg = Color.parseColor("#1C1C1E")
-    private val cText = Color.parseColor("#FFFFFF")
+    private val cSuccess = Color.parseColor("#6FE3F0")
+    private val cError = Color.parseColor("#FF6B78")
+    private val cPrimary = Color.parseColor("#6FE3F0")
+    private val cDanger = Color.parseColor("#C42638")
+    private val cBg = Color.parseColor("#171A1F")
+    private val cText = Color.parseColor("#EEF1F4")
 
     private fun dp(v: Int): Int = (v * android.content.res.Resources.getSystem().displayMetrics.density).toInt()
 
@@ -139,7 +139,7 @@ object FloatingCircleManager {
         listening = false
     }
 
-    /** 无障碍状态环颜色:绿=开、红=关。 */
+    /** 无障碍状态环颜色:core 青=开、breach 红=关。 */
     private fun a11yRingColor(): Int = if (ClawAccessibilityService.isRunning()) cSuccess else cError
 
     /** 圆形状态环(深底兜底 + 状态色描边),头像叠在内层。 */

@@ -581,7 +581,7 @@ object RecommendedScripts {
             id = "userscript_ad_block",
             name = "广告拦截",
             description = "隐藏常见广告元素（AdSense/百度推广/弹窗/悬浮广告），页面更干净。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.Block,
@@ -591,7 +591,7 @@ object RecommendedScripts {
             id = "userscript_night_mode",
             name = "夜间模式",
             description = "向页面注入暗色主题样式，保护视力，适合夜间浏览。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.Nightlight,
@@ -601,7 +601,7 @@ object RecommendedScripts {
             id = "userscript_translate",
             name = "页面翻译",
             description = "一键跳转到 Google Translate 翻译当前页面。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.Translate,
@@ -611,7 +611,7 @@ object RecommendedScripts {
             id = "userscript_video_speed",
             name = "视频速度控制",
             description = "为页面视频添加倍速控制（0.5x ~ 3x），快捷键 [ / ] 调速。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.FastForward,
@@ -621,7 +621,7 @@ object RecommendedScripts {
             id = "userscript_unblock_context",
             name = "解除右键限制",
             description = "移除网站对 oncontextmenu / onselectstart / ondragstart 的拦截。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.TouchApp,
@@ -631,7 +631,7 @@ object RecommendedScripts {
             id = "userscript_auto_pager",
             name = "自动翻页",
             description = "滚动到页面底部时自动点击「下一页」链接，实现无限滚动。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.VerticalAlignBottom,
@@ -641,7 +641,7 @@ object RecommendedScripts {
             id = "userscript_clean_read",
             name = "简洁阅读",
             description = "移除侧边栏 / 广告 / 评论等干扰元素，聚焦正文。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.AutoFixHigh,
@@ -651,7 +651,7 @@ object RecommendedScripts {
             id = "userscript_form_fill",
             name = "表单自动填充",
             description = "记忆表单输入内容，下次访问同站点自动回填。",
-            author = "Octopus",
+            author = "Echo",
             version = "1.0.0",
             matchPatterns = listOf("*://*/*"),
             icon = Icons.Filled.NoteAlt,
@@ -681,7 +681,7 @@ private const val AD_BLOCK_JS = """
 // @namespace    octopus/ad-block
 // @version      1.0.0
 // @description  隐藏常见广告元素
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        GM_addStyle
 // @run-at       document-start
@@ -704,7 +704,7 @@ private const val NIGHT_MODE_JS = """
 // @namespace    octopus/night-mode
 // @version      1.0.0
 // @description  页面暗色主题注入
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        GM_addStyle
 // @run-at       document-end
@@ -724,7 +724,7 @@ private const val TRANSLATE_JS = """
 // @namespace    octopus/translate
 // @version      1.0.0
 // @description  调用 Google Translate 翻译当前页面
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -734,7 +734,7 @@ private const val TRANSLATE_JS = """
   var btn = document.createElement('div');
   btn.textContent = '译';
   btn.style.cssText = 'position:fixed;right:16px;bottom:80px;width:44px;height:44px;border-radius:50%;' +
-    'background:#5856D6;color:#fff;font-size:18px;font-weight:bold;display:flex;align-items:center;' +
+    'background:#111317;color:#fff;font-size:18px;font-weight:bold;display:flex;align-items:center;' +
     'justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
   btn.onclick = function () {
     var u = 'https://translate.google.com/translate?sl=auto&tl=zh-CN&u=' + encodeURIComponent(location.href);
@@ -750,7 +750,7 @@ private const val VIDEO_SPEED_JS = """
 // @namespace    octopus/video-speed
 // @version      1.0.0
 // @description  视频播放器倍速控制
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -786,7 +786,7 @@ private const val UNBLOCK_CONTEXT_JS = """
 // @namespace    octopus/unblock-context
 // @version      1.0.0
 // @description  移除 oncontextmenu 拦截
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        none
 // @run-at       document-start
@@ -814,7 +814,7 @@ private const val AUTO_PAGER_JS = """
 // @namespace    octopus/auto-pager
 // @version      1.0.0
 // @description  滚动到底部自动点击下一页
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
@@ -851,7 +851,7 @@ private const val CLEAN_READ_JS = """
 // @namespace    octopus/clean-read
 // @version      1.0.0
 // @description  移除侧边栏/广告/评论
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        GM_addStyle
 // @run-at       document-end
@@ -875,7 +875,7 @@ private const val FORM_FILL_JS = """
 // @namespace    octopus/form-fill
 // @version      1.0.0
 // @description  记忆并填充表单
-// @author       Octopus
+// @author       Echo
 // @match        *://*/*
 // @grant        GM_getValue
 // @grant        GM_setValue

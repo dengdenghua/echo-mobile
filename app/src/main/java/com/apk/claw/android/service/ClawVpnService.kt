@@ -177,7 +177,7 @@ class ClawVpnService : VpnService() {
             .addAddress(VPN_ADDRESS, 32)
             .addRoute(VPN_ROUTE, VPN_NETMASK_PREFIX)
             .addDnsServer(VPN_DNS)
-            .setSession("Octopus VPN")
+            .setSession("Echo VPN")
         // 允许旁路本应用自身流量(防自循环),包括VPN隧道建立时的SOCKS5 TCP连接
         // 但我们也会在每个SocketChannel上手动调用protect(),双重保险
 
