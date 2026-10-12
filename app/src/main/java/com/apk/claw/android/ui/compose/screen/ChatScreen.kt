@@ -11,7 +11,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.rememberScrollState
@@ -26,7 +25,6 @@ import com.apk.claw.android.widget.MjpegImageView
 import java.net.URLEncoder
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.Image
@@ -102,6 +100,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontFamily
@@ -290,10 +289,10 @@ data class PendingClarifyForm(
 
 /** 自增 ID 计数器（线程安全）。仅用于 UI 层稳定 key，不参与业务逻辑。 */
 private val chatIdCounter = java.util.concurrent.atomic.AtomicLong(0L)
-private fun nextId(): Long = chatIdCounter.incrementAndGet()
+internal fun nextId(): Long = chatIdCounter.incrementAndGet()
+internal fun reserveMessageIds(maximum: Long) { chatIdCounter.updateAndGet { maxOf(it, maximum) } }
 
 private const val CHAT_MESSAGES_LIMIT = 240
-private const val CHAT_SCROLL_THROTTLE_MS = 180L
 private const val CHAT_STREAM_UI_THROTTLE_MS = 80L
 
 /** 对话页当前角色的持久化键(与 TV 模式的选择互不影响)。 */
@@ -315,6 +314,14 @@ fun ChatScreen() {
     val dotEnvironment = DotEnvironmentStore.selected
     val taskState = DeviceExecutionStore.state(currentId, currentCharacter, dotEnvironment)
     val messages = taskState.messages
+    val rows by remember(taskState) { derivedStateOf { buildChatRows(messages) } }
+    val readingRows = remember(rows) { rows.map { row ->
+        ReadingRow(row.key, when (row) {
+            is ChatRow.Single -> listOf(row.msg.id)
+            is ChatRow.ToolGroup -> row.tools.map { it.id }
+            is ChatRow.ToolBatch -> row.calls.map { it.id }
+        })
+    } }
     val visibleTask by rememberUpdatedState(taskState)
     // A one-turn execution override never changes the displayed conversation/device.
     var delegatedEnvironment by remember(taskState.storageId) { mutableStateOf<DotEnvironment?>(null) }
@@ -354,17 +361,29 @@ fun ChatScreen() {
     }
     // 设置完成度:每次回到前台重新检测(配置/授权可能在外部页面变更)
     val lifecycleOwner = LocalLifecycleOwner.current
-    var refreshTick by remember { mutableStateOf(0) }
-    DisposableEffect(lifecycleOwner) {
-        val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) refreshTick++ }
-        lifecycleOwner.lifecycle.addObserver(obs)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    var chatForeground by remember(lifecycleOwner) {
+        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
     }
+    var refreshTick by remember { mutableStateOf(0) }
     val llmOk = remember(refreshTick) { ChatAgentBridge.isConfigured() }
     val a11yOk = remember(refreshTick) { ClawAccessibilityService.isRunning() }
     // 工具组展开状态(key=组首工具 id),默认折叠
     val expandedGroups = remember { mutableStateMapOf<Long, Boolean>() }
-    val listState = rememberLazyListState()
+    val readingController = rememberConversationReading(taskState.reading, readingRows, messages,
+        visible = chatForeground && drawerState.isClosed && currentDetail == null &&
+            !showDotPicker && !showDotScreen && !showBackgroundTasks)
+    DisposableEffect(lifecycleOwner, readingController) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) { refreshTick++; chatForeground = true }
+            if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
+                chatForeground = false
+                readingController.deactivate()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val listState = readingController.listState
     val scope = rememberCoroutineScope()
     var ghostChatJob by taskState.job
     var dotRequestGeneration by taskState.generation
@@ -372,27 +391,12 @@ fun ChatScreen() {
     val thinkingText = stringResource(R.string.chat_thinking)
     val newChatTitle = stringResource(R.string.chat_new)
     val dotSendFailed = stringResource(R.string.dot_send_failed)
-    var lastScrollTs by remember { mutableLongStateOf(0L) }
-    var scrollJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-    var followLatest by rememberChatFollowLatest(listState, taskState.storageId) { scrollJob?.cancel() }
-    val draggingMessages by listState.interactionSource.collectIsDraggedAsState()
+    var followLatest by readingController.following
     val showScrollToBottom by remember(listState) {
         derivedStateOf { listState.canScrollForward }
     }
-    val pauseChatFollowing = { followLatest = false; scrollJob?.cancel(); Unit }
-    LaunchedEffect(taskState.storageId) { followLatest = true; lastScrollTs = 0L }
-    val scrollEnd = {
-        val now = System.currentTimeMillis()
-        if (followLatest && !draggingMessages && now - lastScrollTs > CHAT_SCROLL_THROTTLE_MS) {
-            lastScrollTs = now
-            scrollJob?.cancel()
-            scrollJob = scope.launch {
-                val target = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
-                listState.animateScrollToItem(target)
-            }
-        }
-        Unit
-    }
+    val pauseChatFollowing = { readingController.pause() }
+    val scrollEnd = { readingController.followEnd() }
 
     // 运行时消息上限：超过则丢弃最早的部分，防止长会话 OOM/卡顿
     LaunchedEffect(messages.size) {
@@ -471,7 +475,6 @@ fun ChatScreen() {
         DeviceExecutionStore.restorePending()
         if (currentId.isEmpty()) {
             loadCharacterSpace(currentCharacter)
-            if (messages.isNotEmpty()) listState.scrollToItem(messages.size)
         }
     }
     // 切角色:存好当前角色的会话,整体切换到目标角色的会话空间(选择持久化)。
@@ -482,7 +485,6 @@ fun ChatScreen() {
             currentCharacter = charId
             DotRoster.select(charId)
             loadCharacterSpace(charId)
-            scrollEnd()
         }
     }
     LaunchedEffect(DotRoster.activeCharacter) {
@@ -518,7 +520,6 @@ fun ChatScreen() {
             ChatStore.save(taskState.storageId, messages)
             SessionStore.setCurrent(id, currentCharacter); currentId = id
 
-            scrollEnd()
         }
     }
     val newChat = {
@@ -562,7 +563,7 @@ fun ChatScreen() {
                 return@send
             }
             pendingForm = null // 发消息时清除待填表单
-            followLatest = true; lastScrollTs = 0L
+            readingController.resumeFollowing()
             messages.add(ChatMessage.UserMessage(t))
             inputText = ""
             scrollEnd(); persist()
@@ -976,6 +977,7 @@ fun ChatScreen() {
         drawerContent = {
             EchoNavigationDrawer(
                 sessions = sessions, currentId = currentId, isRunning = false,
+                unreadCounts = DeviceExecutionStore.unreadCounts(currentCharacter, dotEnvironment),
                 onNewChat = { createNewChatWithWorkspace(null); closeDrawer() },
                 onSwitch = { switchTo(it); closeDrawer() },
                 onClose = closeDrawer,
@@ -1020,7 +1022,6 @@ fun ChatScreen() {
             )
         } else {
             Box(modifier = Modifier.weight(1f)) {
-                val rows by remember { derivedStateOf { buildChatRows(messages) } }
                 SelectionContainer {
                     LazyColumn(
                         state = listState,
@@ -1035,7 +1036,7 @@ fun ChatScreen() {
                                             DeviceExecutionStore.delegatedTo(taskState).isEmpty(),
                                         onRetry = {
                                             if (DeviceExecutionStore.retry(taskState, msg)) {
-                                                followLatest = true; lastScrollTs = 0L; scrollEnd()
+                                                readingController.jumpToLatest()
                                             }
                                         })
                                     is ChatMessage.AgentMessage -> AgentBubble(msg.text, msg.streaming, pauseChatFollowing)
@@ -1078,9 +1079,12 @@ fun ChatScreen() {
                     }
                 }
                 Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = OctopusSpacing.sm)) {
-                    ScrollToBottomButton(visible = showScrollToBottom && !followLatest, onClick = {
-                        followLatest = true; lastScrollTs = 0L; scrollEnd()
-                    })
+                    ScrollToBottomButton(
+                        visible = taskState.reading.unreadCount > 0 || (showScrollToBottom && !followLatest),
+                        label = if (taskState.reading.unreadCount > 0) pluralStringResource(
+                            R.plurals.chat_new_results, taskState.reading.unreadCount, taskState.reading.unreadCount) else null,
+                        onClick = { readingController.jumpToLatest() },
+                    )
                 }
             }
         }
@@ -3268,7 +3272,7 @@ private val ARTIFACT_IMG_MAX_HEIGHT = 240.dp
 private val DIFF_TRUNCATED_GAP = 4.dp
 
 @Composable
-private fun ScrollToBottomButton(visible: Boolean, onClick: () -> Unit) {
+internal fun ScrollToBottomButton(visible: Boolean, label: String? = null, onClick: () -> Unit) {
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(tween(180)) + scaleIn(initialScale = 0.8f, animationSpec = tween(180)),
@@ -3295,7 +3299,7 @@ private fun ScrollToBottomButton(visible: Boolean, onClick: () -> Unit) {
                 )
                 Spacer(Modifier.width(OctopusSpacing.xs))
                 Text(
-                    stringResource(R.string.chat_scroll_bottom),
+                    label ?: stringResource(R.string.chat_scroll_bottom),
                     color = PrimaryColor,
                     fontSize = OctopusType.label,
                     fontWeight = FontWeight.SemiBold,

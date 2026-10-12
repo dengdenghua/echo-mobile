@@ -1572,6 +1572,10 @@
     <string name="dot_job_queued">排队中</string>
     <string name="dot_job_running">执行中 · 结果回到原对话</string>
     <string name="dot_job_stop">停止</string>
+
+    <plurals name="chat_new_results">
+        <item quantity="other">%d 条新结果</item>
+    </plurals>
     <string name="dot_device_reconnect">重新连接</string>
     <string name="dot_pair_paste">粘贴邀请</string>
     <string name="dot_progress_preparing">准备中</string>

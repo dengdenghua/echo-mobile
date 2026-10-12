@@ -38,8 +38,10 @@ import org.commonmark.parser.Parser
 
 /** User gestures pause immediately; only reaching the actual end resumes following. */
 @Composable
-internal fun rememberChatFollowLatest(state: LazyListState, lane: Any, onPause: () -> Unit): MutableState<Boolean> {
-    val following = remember(state, lane) { mutableStateOf(true) }
+internal fun rememberChatFollowLatest(
+    state: LazyListState, lane: Any, initialFollowing: Boolean = true, onPause: () -> Unit,
+): MutableState<Boolean> {
+    val following = remember(state, lane) { mutableStateOf(initialFollowing) }
     val dragging by state.interactionSource.collectIsDraggedAsState()
     val pause = rememberUpdatedState(onPause)
     var hadGesture by remember(state, lane) { mutableStateOf(false) }

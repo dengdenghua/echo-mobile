@@ -28,8 +28,16 @@ internal object DeviceExecutionStore {
             DeviceExecutionState(session, storage, character, environment, host).also { state ->
                 // Existing Dot history belonged to the NAS connection; migrate it only there.
                 val loaded = ChatStore.load(storage) ?: if (storageOverride == null && remote && environment == DotEnvironment.HOME && !ChatStore.hasSaved(storage)) ChatStore.load(session) else null
-                if (session.isNotBlank() && !ChatStore.hasSaved(storage)) ChatStore.save(storage, loaded.orEmpty())
+                // Persist allocated IDs for legacy history before saving any reading anchor.
+                if (session.isNotBlank()) ChatStore.save(storage, loaded.orEmpty())
                 state.messages.addAll(loaded.orEmpty())
+                state.reading.initialize(state.messages)
+                state.readingWatcher = scope.launch {
+                    snapshotFlow { state.messages.toList() }.collect { messages ->
+                        if (messages.isEmpty()) state.reading.reset()
+                        else state.reading.updateResults(conversationResultKeys(messages))
+                    }
+                }
                 val saved = KVUtils.getString("pending_device_task_$storage", "")
                 if (saved.isNotBlank()) {
                     runCatching { JsonParser.parseString(saved).asJsonObject }.getOrNull()?.let {
@@ -62,9 +70,17 @@ internal object DeviceExecutionStore {
 
     fun hasRunning(session: String): Boolean = states.values.any { it.sessionId == session && it.running.value }
 
+    fun unreadCounts(character: String, environment: DotEnvironment): Map<String, Int> {
+        val remote = DotRoster.find(character) != null && environment != DotEnvironment.PHONE
+        return ConversationReadingStore.counts(character, if (remote) environment.id else DotEnvironment.PHONE.id,
+            if (remote) DotEnvironmentStore.address(environment).trim().trimEnd('/') else "phone")
+    }
+
     fun forget(session: String) {
         val old = states.values.filter { it.sessionId == session }
         old.filterNot { it.running.value }.forEach {
+            it.readingWatcher?.cancel()
+            it.reading.discard()
             ChatStore.clear(it.storageId)
             it.pending = null; savePending(it)
             states.remove(it.storageId)
@@ -298,6 +314,8 @@ internal object DeviceExecutionStore {
 }
 
 internal class DeviceExecutionState(val sessionId: String, val storageId: String, val character: String, val environment: DotEnvironment, val host: String) {
+    val reading = ConversationReadingState(UnreadConversation(storageId, sessionId, character, environment.id, host, 0))
+    var readingWatcher: Job? = null
     val messages = mutableStateListOf<ChatMessage>()
     val running = mutableStateOf(false)
     val taskStatus = mutableStateOf("connecting")

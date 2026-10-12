@@ -1584,6 +1584,11 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="dot_job_queued">Queued</string>
     <string name="dot_job_running">Running · Results return to the conversation</string>
     <string name="dot_job_stop">Stop</string>
+
+    <plurals name="chat_new_results">
+        <item quantity="one">%d new result</item>
+        <item quantity="other">%d new results</item>
+    </plurals>
     <string name="dot_device_reconnect">Reconnect</string>
     <string name="dot_pair_paste">Paste invitation</string>
     <string name="dot_progress_preparing">Preparing</string>

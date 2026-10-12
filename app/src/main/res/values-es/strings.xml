@@ -1409,4 +1409,9 @@ Shizuku es una herramienta local segura y de código abierto.</string>
     <string name="settings_collapse_parallel_tools_subtitle">Agrupar las llamadas paralelas en una sola tarjeta</string>
     <string name="settings_detail_drawer_title">Panel de detalles</string>
     <string name="settings_detail_drawer_subtitle">Abrir los detalles en el panel derecho</string>
+
+    <plurals name="chat_new_results">
+        <item quantity="one">%d resultado nuevo</item>
+        <item quantity="other">%d resultados nuevos</item>
+    </plurals>
 </resources>

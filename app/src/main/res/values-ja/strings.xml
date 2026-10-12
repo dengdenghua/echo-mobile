@@ -1400,4 +1400,8 @@
     <string name="settings_collapse_parallel_tools_subtitle">並列ツール呼び出しを 1 枚のカードに集約</string>
     <string name="settings_detail_drawer_title">詳細パネル</string>
     <string name="settings_detail_drawer_subtitle">詳細を右パネルで開く</string>
+
+    <plurals name="chat_new_results">
+        <item quantity="other">新しい結果 %d 件</item>
+    </plurals>
 </resources>

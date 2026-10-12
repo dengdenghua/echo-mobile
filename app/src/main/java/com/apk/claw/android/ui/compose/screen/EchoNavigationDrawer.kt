@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,7 @@ internal fun EchoNavigationDrawer(
     sessions: List<SessionStore.SessionMeta>, currentId: String, isRunning: Boolean,
     onNewChat: () -> Unit, onSwitch: (String) -> Unit, onClose: () -> Unit,
     onOpenPersonas: () -> Unit,
+    unreadCounts: Map<String, Int> = emptyMap(),
     onOpenDesktopConversations: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
@@ -88,11 +92,11 @@ internal fun EchoNavigationDrawer(
             val recent = matches.filterNot { it.pinned }
             if (pinned.isNotEmpty()) {
                 item { EchoDrawerHeading(stringResource(R.string.echo_pinned)) }
-                items(pinned, key = { it.id }) { EchoSessionLink(it, it.id == currentId, !isRunning, onSwitch) }
+                items(pinned, key = { it.id }) { EchoSessionLink(it, it.id == currentId, !isRunning, unreadCounts[it.id] ?: 0, onSwitch) }
             }
             if (recent.isNotEmpty()) {
                 item { EchoDrawerHeading(stringResource(R.string.echo_recent)) }
-                items(recent, key = { it.id }) { EchoSessionLink(it, it.id == currentId, !isRunning, onSwitch) }
+                items(recent, key = { it.id }) { EchoSessionLink(it, it.id == currentId, !isRunning, unreadCounts[it.id] ?: 0, onSwitch) }
             }
             if (matches.isEmpty()) item {
                 Text(stringResource(R.string.echo_no_chats), color = OctopusColors.TextMuted,
@@ -131,7 +135,10 @@ private fun EchoDrawerHeading(label: String) {
 }
 
 @Composable
-private fun EchoSessionLink(session: SessionStore.SessionMeta, selected: Boolean, enabled: Boolean, onSwitch: (String) -> Unit) {
+private fun EchoSessionLink(
+    session: SessionStore.SessionMeta, selected: Boolean, enabled: Boolean, unread: Int, onSwitch: (String) -> Unit,
+) {
+    val unreadLabel = pluralStringResource(R.plurals.chat_new_results, unread, unread)
     Row(Modifier.fillMaxWidth().background(if (selected) OctopusColors.SurfaceVariant else Color.Transparent, RoundedCornerShape(14.dp))
         .clickable(enabled = enabled) { onSwitch(session.id) }.padding(horizontal = 12.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -141,6 +148,11 @@ private fun EchoSessionLink(session: SessionStore.SessionMeta, selected: Boolean
                 Text(it.trimEnd('/').substringAfterLast('/'), color = OctopusColors.TextMuted,
                     style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
+        }
+        if (unread > 0) Badge(Modifier.padding(horizontal = 8.dp), containerColor = MaterialTheme.colorScheme.primary) {
+            Text(unread.toString(), Modifier.semantics {
+                contentDescription = unreadLabel
+            })
         }
         if (session.pinned) Icon(Icons.Filled.PushPin, null, Modifier.size(14.dp), tint = OctopusColors.TextMuted)
     }
