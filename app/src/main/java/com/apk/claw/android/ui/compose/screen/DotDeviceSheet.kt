@@ -154,6 +154,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
                                 TextButton(onClick = { DeviceExecutionStore.cancel(execution) },
                                     enabled = execution.taskStatus.value != "cancelling") { Text(stringResource(R.string.dot_job_stop)) }
                             }
+                            RemoteTaskProgress(execution.progress.value)
                         }
                     }
                 }

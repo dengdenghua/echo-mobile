@@ -245,6 +245,7 @@ internal object DeviceExecutionStore {
                                 DotRepository.TaskResult("cancelled", "")
                             }
                         } else if (!submitted) DotRepository.submitTask(body, snapshot) else DotRepository.readTask(id, snapshot)
+                        state.progress.value = result.progress
                         delivery(state, id, if (cancelledBeforeSubmit) MessageDeliveryStatus.CANCELLED else MessageDeliveryStatus.SENT)
                         KVUtils.putString(retryKey(deliveryState(state), id), "")
                         state.taskStatus.value = if (pending.get("cancel").asBoolean) "cancelling" else result.status
@@ -300,6 +301,7 @@ internal class DeviceExecutionState(val sessionId: String, val storageId: String
     val messages = mutableStateListOf<ChatMessage>()
     val running = mutableStateOf(false)
     val taskStatus = mutableStateOf("connecting")
+    val progress = mutableStateOf<DotRepository.TaskProgress?>(null)
     val generation = mutableLongStateOf(0L)
     val job = mutableStateOf<Job?>(null)
     val draft = mutableStateOf("")

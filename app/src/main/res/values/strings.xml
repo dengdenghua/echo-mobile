@@ -1586,4 +1586,12 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="dot_job_stop">Stop</string>
     <string name="dot_device_reconnect">Reconnect</string>
     <string name="dot_pair_paste">Paste invitation</string>
+    <string name="dot_progress_preparing">Preparing</string>
+    <string name="dot_progress_planning">Planning</string>
+    <string name="dot_progress_executing">Executing</string>
+    <string name="dot_progress_summarizing">Preparing the result</string>
+    <string name="dot_progress_delivering">Collecting deliverables</string>
+    <string name="dot_progress_step_ok">✓ %1$s</string>
+    <string name="dot_progress_step_failed">Failed · %1$s</string>
+    <plurals name="dot_progress_step_count"><item quantity="one">%1$d step recorded</item><item quantity="other">%1$d steps recorded</item></plurals>
 </resources>

@@ -1574,4 +1574,12 @@
     <string name="dot_job_stop">停止</string>
     <string name="dot_device_reconnect">重新连接</string>
     <string name="dot_pair_paste">粘贴邀请</string>
+    <string name="dot_progress_preparing">准备中</string>
+    <string name="dot_progress_planning">规划中</string>
+    <string name="dot_progress_executing">执行中</string>
+    <string name="dot_progress_summarizing">整理结果</string>
+    <string name="dot_progress_delivering">收集交付文件</string>
+    <string name="dot_progress_step_ok">✓ %1$s</string>
+    <string name="dot_progress_step_failed">失败 · %1$s</string>
+    <plurals name="dot_progress_step_count"><item quantity="one">已执行 %1$d 步</item><item quantity="other">已执行 %1$d 步</item></plurals>
 </resources>

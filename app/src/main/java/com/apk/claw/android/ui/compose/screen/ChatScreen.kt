@@ -1169,6 +1169,7 @@ fun ChatScreen() {
                                     stringResource(status)), fontSize = 13.sp, color = TextPrimary)
                                 val taskPrompt = execution.pending?.getAsJsonObject("request")?.getAsJsonArray("messages")
                                     ?.lastOrNull()?.asJsonObject?.get("content")?.asString.orEmpty()
+                                RemoteTaskProgress(execution.progress.value)
                                 Text(execution.connectionIssue.value ?: taskPrompt,
                                     fontSize = 11.sp, color = TextMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }

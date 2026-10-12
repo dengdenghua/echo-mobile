@@ -53,8 +53,10 @@ internal object DotRepository {
 
     internal data class Connection(val base: String, val token: String, val environment: DotEnvironment? = null)
     internal data class TaskArtifact(val id: String, val name: String, val mime: String, val size: Long, val sha256: String)
+    internal data class TaskStep(val tool: String, val success: Boolean)
+    internal data class TaskProgress(val phase: String, val executedSteps: Int, val recentSteps: List<TaskStep>)
     internal data class TaskResult(val status: String, val answer: String,
-        val artifacts: List<TaskArtifact> = emptyList(), val omittedArtifacts: Int = 0)
+        val artifacts: List<TaskArtifact> = emptyList(), val omittedArtifacts: Int = 0, val progress: TaskProgress? = null)
     internal class TaskHttpException(val code: Int) : Exception("HTTP $code")
 
     fun connection(environment: DotEnvironment) = Connection(
@@ -87,9 +89,18 @@ internal object DotRepository {
                         artifact.get("mime").asString, artifact.get("size").asLong, artifact.get("sha256").asString)
                 }.getOrNull()
             }.orEmpty()
+            val progress = row.get("progress")?.takeIf { it.isJsonObject }?.asJsonObject?.let { data ->
+                runCatching {
+                    TaskProgress(data.get("phase").asString, data.get("executed_steps").asInt.coerceAtLeast(0),
+                        data.getAsJsonArray("recent_steps")?.toList()?.toList()?.takeLast(8)?.map { step ->
+                            val event = step.asJsonObject
+                            TaskStep(event.get("tool").asString.take(96), event.get("success").asInt != 0)
+                        }.orEmpty())
+                }.getOrNull()
+            }
             TaskResult(if (hostStatus == "completed" && executionFailed) "failed" else hostStatus,
                 answer.replace(Regex("<details>.*?</details>", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)), "").trim(),
-                artifacts, row.get("artifacts_omitted")?.asInt ?: 0)
+                artifacts, row.get("artifacts_omitted")?.asInt ?: 0, progress)
         }
     }
 
