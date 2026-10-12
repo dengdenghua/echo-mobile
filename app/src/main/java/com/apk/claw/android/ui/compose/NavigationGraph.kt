@@ -1,16 +1,19 @@
 package com.apk.claw.android.ui.compose
 
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ime
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +39,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,8 +58,7 @@ import com.apk.claw.android.ui.compose.screen.SettingsScreen
 import com.apk.claw.android.ui.compose.screen.PluginMarketplaceScreen
 import com.apk.claw.android.ui.compose.screen.SkillMarketplaceScreen
 import com.apk.claw.android.ui.compose.screen.UniverseScreen
-import com.apk.claw.android.ui.compose.theme.OctopusColors
-import com.apk.claw.android.ui.compose.theme.OctopusSpacing
+import com.apk.claw.android.ui.compose.theme.EchoChatStyle
 import kotlinx.coroutines.launch
 
 /**
@@ -73,6 +79,7 @@ fun OctopusApp() {
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     // 统一的轻量反馈入口：替代分散的 Toast
     val showMessage: (String) -> Unit = { msg ->
         scope.launch {
@@ -83,9 +90,11 @@ fun OctopusApp() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = EchoChatStyle.background,
         contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
+            if (!keyboardVisible) {
             CompactBottomBar(
                 currentRoute = selectedBottomRoute,
                 onSelect = { screen ->
@@ -99,6 +108,7 @@ fun OctopusApp() {
                     }
                 },
             )
+            }
         }
     ) { innerPadding ->
         OctopusNavHost(
@@ -110,8 +120,7 @@ fun OctopusApp() {
 }
 
 // 底部 dock 专用颜色别名（跟随主题切换）
-private val NavPrimaryColor get() = OctopusColors.Primary
-private val NavTextMutedColor get() = OctopusColors.TextMuted
+private val NavTextMutedColor get() = EchoChatStyle.muted
 
 @Composable
 private fun CompactBottomBar(
@@ -122,18 +131,18 @@ private fun CompactBottomBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = OctopusSpacing.md, vertical = 8.dp),
+            .padding(horizontal = 28.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = OctopusColors.Surface,
-            shadowElevation = 3.dp,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            color = Color.Transparent,
+            shadowElevation = 0.dp,
         ) {
             Row(
                 modifier = Modifier
-                    .height(52.dp)
-                    .padding(horizontal = 4.dp),
+                    .height(48.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Screen.bottomBar.forEach { screen ->
@@ -156,33 +165,25 @@ private fun RowScope.BottomTabItem(
     onClick: () -> Unit,
 ) {
     val label = stringResource(screen.labelRes)
-    val contentColor = if (selected) NavPrimaryColor else NavTextMutedColor
+    val contentColor by animateColorAsState(
+        if (selected) EchoChatStyle.text else NavTextMutedColor, label = "dockTint",
+    )
+    val backgroundColor by animateColorAsState(
+        if (selected) EchoChatStyle.softSurface else Color.Transparent, label = "dockSelection",
+    )
     Box(
         modifier = Modifier
             .weight(1f)
-            .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (selected) NavPrimaryColor.copy(alpha = 0.08f) else Color.Transparent)
-            .clickable(onClick = onClick),
+            .height(48.dp)
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                screen.icon,
-                contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(20.dp),
-            )
-            if (selected) {
-                Spacer(Modifier.width(5.dp))
-                Text(
-                    label,
-                    color = contentColor,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                )
-            }
+        Box(
+            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(20.dp)).background(backgroundColor),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(screen.icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(22.dp))
         }
     }
 }

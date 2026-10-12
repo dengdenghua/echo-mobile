@@ -27,6 +27,10 @@ object ChatStore {
         val batchId: String? = null,
         val status: String? = null,
         val durationMs: Long? = null,
+        val remoteTaskId: String? = null,
+        val requestId: String? = null,
+        val delivery: String? = null,
+        val deliveryFailure: String? = null,
     )
 
     private fun key(sessionId: String) = PREFIX + sessionId
@@ -49,14 +53,18 @@ object ChatStore {
     }
 
     fun save(sessionId: String, messages: List<ChatMessage>) {
+        messages.dropLast(MAX_KEEP).filterIsInstance<ChatMessage.UserMessage>().forEach {
+            it.requestId?.let { id -> KVUtils.putString(rejectedDeliveryKey(sessionId, id), "") }
+        }
         runCatching { KVUtils.putString(key(sessionId), encode(messages)) }
     }
 
     internal fun encode(messages: List<ChatMessage>): String {
         val dtos = messages.takeLast(MAX_KEEP).mapNotNull { m ->
             when (m) {
-                is ChatMessage.UserMessage -> Dto("user", m.text)
-                is ChatMessage.AgentMessage -> Dto("agent", m.text)
+                is ChatMessage.UserMessage -> Dto("user", m.text, requestId = m.requestId,
+                    delivery = m.delivery?.name, deliveryFailure = m.deliveryFailure?.name)
+                is ChatMessage.AgentMessage -> Dto("agent", m.text, remoteTaskId = m.remoteTaskId)
                 is ChatMessage.ToolCall -> Dto("tool", m.icon, m.toolName, m.args, m.result ?: "",
                     callId = m.callId, batchId = m.batchId, status = m.status.name, durationMs = m.durationMs)
                 is ChatMessage.Thinking -> null
@@ -82,7 +90,11 @@ object ChatStore {
             val dtos: List<Dto> = gson.fromJson(json, object : TypeToken<List<Dto>>() {}.type)
             dtos.map { d ->
                 when (d.type) {
-                    "user" -> ChatMessage.UserMessage(d.a)
+                    "user" -> ChatMessage.UserMessage(d.a, requestId = d.requestId,
+                        delivery = runCatching { MessageDeliveryStatus.valueOf(d.delivery.orEmpty()) }.getOrNull(),
+                        deliveryFailure = runCatching {
+                            MessageDeliveryFailure.valueOf(d.deliveryFailure.orEmpty())
+                        }.getOrNull())
                     "tool" -> ChatMessage.ToolCall(d.a, d.b, d.c, d.d.ifBlank { null },
                         callId = d.callId, batchId = d.batchId, durationMs = d.durationMs,
                         status = restoredToolStatus(d.status))
@@ -92,14 +104,19 @@ object ChatStore {
                         title = d.b,
                         payloadRef = d.c,
                     )
-                    else -> ChatMessage.AgentMessage(d.a)
+                    else -> ChatMessage.AgentMessage(d.a, remoteTaskId = d.remoteTaskId)
                 }
             }
         }.getOrNull()?.takeIf { it.isNotEmpty() }
     }
 
+    fun hasSaved(sessionId: String): Boolean = KVUtils.getString(key(sessionId), "").isNotBlank()
+
     fun clear(sessionId: String) {
-        runCatching { KVUtils.putString(key(sessionId), "") }
+        load(sessionId)?.filterIsInstance<ChatMessage.UserMessage>()?.forEach {
+            it.requestId?.let { id -> KVUtils.putString(rejectedDeliveryKey(sessionId, id), "") }
+        }
+        runCatching { KVUtils.putString(key(sessionId), "[]") }
     }
 }
 

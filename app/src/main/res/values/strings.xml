@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Octopus Mobile</string>
+    <string name="app_name">Echo</string>
 
     <!-- AppWidget -->
     <string name="widget_subtitle_default">Tap to launch · Long press for voice</string>
@@ -41,7 +41,7 @@
     <string name="guide_desc_accessibility">This is the core permission for controlling the device.
 
 1. Go to System Settings → Accessibility → Downloaded apps
-2. Find "Octopus Mobile" in the list
+2. Find "Echo" in the list
 3. Turn on the switch
 4. Confirm in the system dialog</string>
     <string name="guide_title_notification">Persistent Notification</string>
@@ -49,7 +49,7 @@
     <string name="guide_title_overlay">Overlay Window</string>
     <string name="guide_desc_overlay">Shows a floating panel to view task execution status.
 
-1. Go to System Settings → Apps → Octopus Mobile
+1. Go to System Settings → Apps → Echo
 2. Find "Display over other apps"
 3. Turn on the switch</string>
     <string name="guide_title_battery">Battery Whitelist</string>
@@ -68,20 +68,20 @@
 • Force-stopping apps, modifying system settings
 
 Shizuku is a safe, open-source local helper tool.</string>
-    <string name="advanced_dialog_steps">Setup steps:\n1. Install Shizuku from Play Store or GitHub\n2. Start it once via Wireless Debugging (Android 11+) or PC ADB\n3. Return here, Octopus will detect it automatically</string>
+    <string name="advanced_dialog_steps">Setup steps:\n1. Install Shizuku from Play Store or GitHub\n2. Start it once via Wireless Debugging (Android 11+) or PC ADB\n3. Return here, Echo will detect it automatically</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku is ready, advanced capabilities enabled</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku is installed but not authorized. Open Shizuku to complete authorization.</string>
     <string name="advanced_dialog_status_not_installed">Shizuku is not installed yet.</string>
     <string name="advanced_action_open_shizuku">Open Shizuku</string>
     <string name="advanced_action_install">Install Shizuku</string>
     <string name="advanced_action_downloading">Downloading…</string>
-    <string name="advanced_install_fetching">Connecting to Octopus official site…</string>
+    <string name="advanced_install_fetching">Connecting to Echo official site…</string>
     <string name="advanced_install_downloading">Downloading Shizuku installer…</string>
     <string name="advanced_install_opening">Installer downloaded, opening system installer.</string>
     <string name="advanced_install_not_configured">Shizuku installer is not configured on the official site, please try again later.</string>
     <string name="advanced_install_verify_failed">Installer verification failed, please try again later.</string>
     <string name="advanced_install_failed">Download and install failed, please check your network and retry.</string>
-    <string name="advanced_install_unknown_sources_required">Please allow Octopus to install unknown-source apps first, then return and retry.</string>
+    <string name="advanced_install_unknown_sources_required">Please allow Echo to install unknown-source apps first, then return and retry.</string>
     <string name="advanced_action_learn_more">Learn more</string>
     <string name="advanced_action_close">Close</string>
     <string name="advanced_url_download">https://shizuku.rikka.app/download/</string>
@@ -89,7 +89,7 @@ Shizuku is a safe, open-source local helper tool.</string>
 
     <!-- Home -->
     <string name="home_need_notification_permission">Notification permission required</string>
-    <string name="home_enable_accessibility">Please enable the Octopus Mobile accessibility service</string>
+    <string name="home_enable_accessibility">Please enable the Echo accessibility service</string>
     <string name="home_accessibility_enabled">Accessibility service enabled</string>
     <string name="home_notification_enabled">Persistent notification enabled</string>
     <string name="home_overlay_enabled">Overlay permission enabled</string>
@@ -226,9 +226,9 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="floating_task_received">Received: "%s"</string>
 
     <!-- Foreground Service Notification -->
-    <string name="notification_channel_name">Octopus Mobile Status</string>
-    <string name="notification_channel_description">Shows the running status and statistics of Octopus Mobile</string>
-    <string name="notification_content_title">Octopus Mobile is running</string>
+    <string name="notification_channel_name">Echo Status</string>
+    <string name="notification_channel_description">Shows the running status and statistics of Echo</string>
+    <string name="notification_content_title">Echo is running</string>
     <string name="notification_content_text">Smart task service is running</string>
 
     <!-- Channel Messages -->
@@ -458,18 +458,18 @@ Shizuku is a safe, open-source local helper tool.</string>
     <!-- ChatScreen (Compose) -->
     <string name="chat_remote">Remote</string>
     <string name="chat_local">Local</string>
-    <string name="chat_input_hint">Tell me what to do on your phone...</string>
+    <string name="chat_input_hint">Message Echo…</string>
     <string name="chat_ack">Got it, running on the device…</string>
     <string name="chat_thinking">Thinking</string>
-    <string name="chat_empty_hint">One line to schedule notification checks, app actions, file organizing, and cross-device tasks.</string>
-    <string name="chat_empty_title">What should the phone do for you today?</string>
+    <string name="chat_empty_hint">A little less to do. A little more time for you.</string>
+    <string name="chat_empty_title">What can I help you with?</string>
     <string name="chat_suggestion_notifications">Watch notifications, summarize anything important to me</string>
     <string name="chat_suggestion_files">Find today\'s screenshots and organize them into a folder</string>
     <string name="chat_suggestion_app">Open WeChat and check for unread messages</string>
     <string name="chat_prompt_monitor">Notification Check</string>
     <string name="chat_prompt_organize">File Organizing</string>
     <string name="chat_prompt_control">App Errands</string>
-    <string name="chat_home_prompts_title">Common Tasks</string>
+    <string name="chat_home_prompts_title">Try asking Echo</string>
     <string name="chat_tool_steps">%1$d tool steps</string>
     <string name="chat_new">New chat</string>
     <string name="chat_sessions">Sessions</string>
@@ -485,7 +485,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="chat_sessions_recent">Last 7 days</string>
     <string name="chat_sessions_earlier">Earlier</string>
     <string name="chat_clear_current">Clear current chat</string>
-    <string name="setup_title">Complete setup to start</string>
+    <string name="setup_title">Get Echo ready</string>
     <string name="setup_llm">Configure LLM (API Key)</string>
     <string name="setup_a11y">Enable accessibility service</string>
     <string name="setup_go">Go to settings ›</string>
@@ -513,7 +513,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="device_screenshot_failed">Screenshot failed (needs accessibility or Shizuku)</string>
     <string name="device_android_version">Android %1$s</string>
     <string name="device_nearby">Nearby devices</string>
-    <string name="device_nearby_empty">Searching… Please open Octopus on another device on the same Wi-Fi</string>
+    <string name="device_nearby_empty">Searching… Please open Echo on another device on the same Wi-Fi</string>
     <string name="device_discoverable">%1$s is discoverable</string>
     <string name="device_discoverable_off">Connect to Wi-Fi to be discoverable</string>
     <string name="device_cmd_sent">Sent to %1$s</string>
@@ -687,7 +687,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="routine_runner_starting_execution">Starting execution</string>
     <string name="settings_llm_api_key_configured">Configured</string>
     <string name="settings_rpc_url_default">Not configured (default: ws://10.0.2.2:8765)</string>
-    <string name="settings_octopus_runtime_title">Host Connection · Octopus Runtime</string>
+    <string name="settings_octopus_runtime_title">Host Connection · Echo Runtime</string>
     <string name="settings_rpc_remote_brain_description">RPC remote execution (host dispatches tools/execution)</string>
     <string name="settings_pc_remote_desktop_title">Host Remote Desktop</string>
     <string name="settings_pc_remote_h264_description">View PC screen + touch/keyboard control (H.264/WS, same LAN)</string>
@@ -1070,7 +1070,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="settings_go_setup">Go to settings</string>
     <string name="settings_status_ok">OK</string>
     <string name="settings_status_set">Set</string>
-    <string name="settings_version_template">Octopus Mobile v%1$s · Apache 2.0</string>
+    <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">DingTalk</string>
     <string name="channel_name_feishu">Feishu</string>
     <string name="channel_name_qq">QQ</string>
@@ -1127,7 +1127,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="feat_explore_circle_avatar">%1$s avatar</string>
 
     <!-- Brand header -->
-    <string name="browser_brand_name">Octopus</string>
+    <string name="browser_brand_name">Echo</string>
     <string name="browser_brand_slogan">Reimagining smart browsing</string>
 
     <!-- Voice assistant overlay -->
@@ -1413,4 +1413,161 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="settings_collapse_parallel_tools_subtitle">Aggregate parallel tool calls into one card</string>
     <string name="settings_detail_drawer_title">Detail Drawer</string>
     <string name="settings_detail_drawer_subtitle">Open details in right drawer</string>
+    <string name="chat_input_actions">Conversation shortcuts</string>
+    <string name="chat_text_mode">Type a message</string>
+    <string name="chat_voice_mode">Voice message</string>
+    <string name="chat_send_message">Send message</string>
+    <string name="chat_demo_record">Record a demonstration</string>
+    <string name="chat_demo_recording">Recording demonstration</string>
+
+    <!-- White Ghost squad: Echo Dots -->
+    <string name="dot_squad">White Ghost Squad</string>
+    <string name="dot_connect">Connect to Echo</string>
+    <string name="dot_auth_needed">Sign in to your Echo connection to use this squad</string>
+    <string name="dot_offline">Connect to your Echo to chat with the squad</string>
+    <string name="dot_yours">YOUR DOT</string>
+    <string name="dot_description">Your squad, with a different specialty for every task. Pick a member to continue their conversation.</string>
+    <string name="dot_chat_with">Chat with %1$s</string>
+    <string name="dot_members">Choose your Dot</string>
+    <string name="dot_member_count">%1$d members</string>
+    <string name="dot_selected">Selected</string>
+    <string name="dot_not_installed">Not installed on this Echo</string>
+    <string name="dot_connecting">Connecting to your Echo…</string>
+    <string name="dot_connected">Squad connected · Tap to refresh</string>
+    <string name="dot_connection_help">Enter the address of your desktop Echo service and its access token. Your squad uses this connection.</string>
+    <string name="dot_address">Echo service address</string>
+    <string name="dot_token">Access token (if required)</string>
+    <string name="dot_invalid_address">Enter an HTTP or HTTPS address, without a path.</string>
+    <string name="dot_save_connect">Save and connect</string>
+    <string name="dot_header">Dot · White Ghost Squad</string>
+    <string name="dot_switch">Choose your Dot</string>
+    <string name="dot_send_failed">Could not reach this Dot. Check the Echo connection in the squad picker.</string>
+    <string name="dot_home_title">What can %1$s help you with?</string>
+    <string name="dot_input_hint">Message %1$s…</string>
+    <string name="dot_prompt_task">Help me with a task related to %1$s. Let’s clarify the goal first.</string>
+    <string name="dot_prompt_plan">Help me make a practical plan for today.</string>
+    <string name="dot_prompt_intro">Tell me what you can help me with.</string>
+    <string name="dot_task">Start a task</string>
+    <string name="dot_plan">Plan my day</string>
+    <string name="dot_intro">Get to know my Dot</string>
+    <string name="dot_local_personas">Local characters and Personas</string>
+
+    <!-- Dot execution environments -->
+    <string name="dot_env_home_tab">NAS</string>
+    <string name="dot_env_computer_tab">Computer</string>
+    <string name="dot_env_phone_tab">Phone</string>
+    <string name="dot_env_home">NAS device</string>
+    <string name="dot_env_computer">My computer</string>
+    <string name="dot_env_phone">My phone</string>
+    <string name="dot_env_home_hint">Background tasks · Schedules</string>
+    <string name="dot_env_computer_hint">Projects · Files · Desktop apps</string>
+    <string name="dot_env_phone_hint">Camera · Location · Phone apps</string>
+    <string name="dot_env_configure">Set up this environment</string>
+    <string name="dot_env_home_setup">Enter the Echo service address and access token on your NAS. This connection is saved separately from My computer.</string>
+    <string name="dot_env_computer_setup">Enter the Echo service address on your own computer and its access token. Tasks use this connection when My computer is selected.</string>
+    <string name="dot_env_phone_setup">Phone tasks use the model configured on this phone and its local tools. Enable accessibility in Settings for screen and app actions.</string>
+    <string name="dot_env_phone_settings">Model settings</string>
+    <string name="echo_search_chats">Search chats</string>
+    <string name="echo_clear_search">Clear search</string>
+    <string name="echo_pinned">Pinned</string>
+    <string name="echo_recent">Recent chats</string>
+    <string name="echo_no_chats">No matching chats</string>
+    <string name="echo_subscription">Membership &amp; subscription</string>
+    <string name="echo_rename_chat">Rename chat</string>
+    <string name="echo_pin">Pin chat</string>
+    <string name="echo_unpin">Unpin chat</string>
+    <string name="echo_conversation_tools">Conversation tools</string>
+    <string name="echo_delete_chat">Delete chat</string>
+    <string name="echo_delete_confirm">This removes the saved messages and cannot be undone.</string>
+    <string name="echo_background_tasks">Background tasks (%1$d)</string>
+    <string name="tool_detail_pause_steps">Pause steps</string>
+    <string name="tool_detail_latest_steps">Latest step</string>
+    <string name="echo_task_original_connection">Restore the original device connection to view this task</string>
+    <string name="echo_task_empty_result">The device returned no result</string>
+    <string name="echo_task_stopped">Task stopped</string>
+    <string name="echo_task_interrupted">The device service restarted and interrupted this task. Send it again to continue.</string>
+    <string name="echo_task_failed">The device task failed. Check its Echo service.</string>
+    <string name="echo_task_auth_failed">Device authentication failed. Check its access token.</string>
+    <string name="echo_task_missing">This task is no longer available on the device. Send it again.</string>
+    <string name="echo_task_update_required">Update Echo on the device to support independent background tasks.</string>
+    <string name="echo_task_rejected">The device rejected this task. Check its Echo service.</string>
+    <string name="echo_task_reconnecting">Reconnecting to the device…</string>
+    <string name="echo_task_background_running">The device is running this task in the background…</string>
+    <string name="echo_task_stopping">Stopping this task on the current device…</string>
+    <string name="dot_env_next_task">Run the next task on</string>
+    <string name="dot_env_existing_continue">Existing tasks keep running on their devices</string>
+    <string name="dot_env_switched">Next task: %1$s · Existing tasks continue</string>
+    <string name="dot_env_input_hint">Run on %1$s…</string>
+    <string name="dot_env_send_to">Send task to %1$s</string>
+    <string name="chat_copy_answer">Copy answer</string>
+    <string name="chat_copy_code">Copy code</string>
+    <string name="chat_copy_code_number">Copy code %1$d</string>
+    <string name="chat_answer_copied">Copied</string>
+    <string name="dot_env_suggestion">Use %1$s · %2$s</string>
+    <string name="dot_env_reason_explicit">Specified in your task</string>
+    <string name="dot_env_reason_phone">Needs phone tools</string>
+    <string name="dot_env_reason_computer">Needs desktop tools</string>
+    <string name="dot_env_reason_nas">Suited to background work</string>
+    <string name="dot_env_target_occupied">That device has a draft or an active task. Open it from the device selector first.</string>
+    <string name="dot_delegate_completed">%1$s · Completed</string>
+    <string name="dot_delegate_finished">%1$s · Task ended</string>
+    <string name="dot_delegate_phone_hint">Phone tasks use the phone view. Select Phone from the top device selector.</string>
+    <string name="dot_delegate_next">Next task on %1$s · Results return here</string>
+    <string name="dot_delegate_status">%1$s · %2$s</string>
+    <string name="dot_delegate_running">Running</string>
+    <string name="dot_delegate_queued">Queued</string>
+    <string name="dot_delegate_stopping">Stopping</string>
+    <string name="dot_delegate_connecting">Submitting</string>
+    <string name="dot_delegate_stop">Stop this delegated task</string>
+    <string name="dot_delegate_menu">Delegate to %1$s</string>
+    <string name="dot_delivery_omitted">%1$d output files were not attached (delivery limits or unreadable files). They remain on the execution device.</string>
+    <string name="dot_delivery_fetch_failed">Could not fetch the file. Check the original device connection and access token, then retry.</string>
+    <string name="dot_delivery_integrity_failed">The delivered file did not match its checksum. Please retry.</string>
+    <string name="dot_delivery_export_failed">Could not save the file. Choose another location and retry.</string>
+    <string name="dot_delivery_saved">File saved</string>
+    <string name="dot_delivery_save">Save to phone</string>
+    <string name="dot_delivery_loading">Loading preview…</string>
+    <string name="dot_delivery_text_excerpt">Showing the first 128 KB. Save the file to read the full content.</string>
+    <string name="dot_delivery_preview_failed">Preview unavailable. Save the file to open it with another app.</string>
+    <string name="dot_delivery_previous">Previous</string>
+    <string name="dot_delivery_next">Next</string>
+    <string name="dot_delivery_attached">Delivered %1$d files.</string>
+    <string name="dot_screen_open">View Dot computer screen</string>
+    <string name="dot_screen_switch_role">Switch role</string>
+    <string name="dot_screen_observe_only">Desktop preview · does not take control</string>
+    <string name="dot_screen_unconfigured">Configure this device connection to view its desktop.</string>
+    <string name="dot_screen_update_required">Update Echo on this device to enable desktop preview.</string>
+    <string name="dot_screen_unavailable">No desktop capture is available. Check the desktop session and screen capture permission.</string>
+    <string name="dot_screen_offline">Could not reach this device. Check its connection.</string>
+    <string name="dot_screen_loading">Waiting for a desktop frame…</string>
+    <string name="dot_screen_frame">Current desktop frame</string>
+    <string name="dot_screen_last_frame">Last frame: %1$s</string>
+    <string name="dot_screen_pause">Pause refresh</string>
+    <string name="dot_screen_resume">Resume refresh</string>
+    <string name="dot_screen_fullscreen">Fullscreen</string>
+
+    <!-- User-message delivery is independent of task completion. -->
+    <string name="chat_delivery_sending">Sending…</string>
+    <string name="chat_delivery_sent">Accepted</string>
+    <string name="chat_delivery_failed">Send failed</string>
+    <string name="chat_delivery_cancelled">Not sent</string>
+    <string name="chat_delivery_retry">Retry</string>
+    <string name="chat_delivery_auth_required">Check this device’s sign-in credentials, then retry.</string>
+    <string name="chat_delivery_update_required">Update Echo on this device, then retry.</string>
+    <string name="chat_delivery_rejected">The device rejected this message. Check its connection and settings, then retry.</string>
+    <string name="dot_devices">Devices</string>
+    <string name="dot_devices_hint">View a remote screen here. Your conversation stays on its current device.</string>
+    <string name="dot_device_configured">Connection saved · status not checked</string>
+    <string name="dot_device_unconfigured">Set up a connection first</string>
+    <string name="dot_pair_title">Connect %1$s</string>
+    <string name="dot_pair_hint">Scan an Echo device invitation or enter its HTTP address and access token.</string>
+    <string name="dot_pair_camera">Photograph QR</string>
+    <string name="dot_pair_image">QR image</string>
+    <string name="dot_pair_invitation">Device invitation</string>
+    <string name="dot_pair_import">Import invitation</string>
+    <string name="dot_pair_manual">Address and token</string>
+    <string name="dot_pair_save">Save connection</string>
+    <string name="dot_pair_invalid">Invalid device invitation. Use an Echo device QR or configure manually.</string>
+    <string name="dot_pair_legacy">This is a team WebSocket invitation. For desktop tasks, enter the HTTP service address and its access token.</string>
+    <string name="dot_pair_scan_failed">QR not recognized. Import a clear image or enter the address manually.</string>
 </resources>

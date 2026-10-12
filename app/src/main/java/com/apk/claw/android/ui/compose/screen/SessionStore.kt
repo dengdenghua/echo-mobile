@@ -35,6 +35,8 @@ object SessionStore {
         var updatedAt: Long,
         val character: String? = null,
         var workspace: String? = null,
+        val pinned: Boolean = false,
+        val manuallyNamed: Boolean = false,
     ) {
         /** 归一化角色 key:null/空(历史数据)→ 默认 Octopus。 */
         fun charKey(): String = character?.takeIf { it.isNotBlank() } ?: CHARACTER_DEFAULT
@@ -145,8 +147,29 @@ object SessionStore {
 
     fun updateMeta(id: String, title: String, now: Long) {
         val list = index()
-        list.find { it.id == id }?.let { it.title = title; it.updatedAt = now }
+        list.find { it.id == id }?.let {
+            if (!it.manuallyNamed) it.title = title
+            it.updatedAt = now
+        }
         saveIndex(list)
+    }
+
+    fun rename(id: String, title: String) {
+        val list = index()
+        val at = list.indexOfFirst { it.id == id }
+        if (at >= 0 && title.isNotBlank()) {
+            list[at] = list[at].copy(title = title.trim(), manuallyNamed = true)
+            saveIndex(list)
+        }
+    }
+
+    fun setPinned(id: String, pinned: Boolean) {
+        val list = index()
+        val at = list.indexOfFirst { it.id == id }
+        if (at >= 0) {
+            list[at] = list[at].copy(pinned = pinned)
+            saveIndex(list)
+        }
     }
 
     fun delete(id: String) {
