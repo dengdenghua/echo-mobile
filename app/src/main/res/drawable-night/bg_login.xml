@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 登录页背景：暖渐变（深色） -->
+<!-- 登录页背景：Graphite，surface → ground 的极淡纵向过渡（深色） -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
-        android:angle="315"
-        android:startColor="#FF18161F"
-        android:centerColor="#FF201B26"
-        android:endColor="#FF291F22"
+        android:angle="270"
+        android:startColor="#FF101216"
+        android:endColor="#FF090A0C"
         android:type="linear" />
 </shape>

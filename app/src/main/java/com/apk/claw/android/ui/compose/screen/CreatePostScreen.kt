@@ -235,12 +235,20 @@ fun CreatePostScreen(
                     CircularProgressIndicator(
                         modifier = Modifier.size(14.dp),
                         strokeWidth = 2.dp,
-                        color = Color.White,
+                        color = OctopusColors.OnPrimary,
                     )
                     Spacer(Modifier.width(OctopusSpacing.xs))
-                    Text(stringResource(R.string.create_post_publishing), color = Color.White, fontSize = OctopusType.body)
+                    Text(
+                        stringResource(R.string.create_post_publishing),
+                        color = OctopusColors.OnPrimary,
+                        fontSize = OctopusType.body,
+                    )
                 } else {
-                    Text(stringResource(R.string.create_post_publish), color = Color.White, fontSize = OctopusType.body)
+                    Text(
+                        stringResource(R.string.create_post_publish),
+                        color = OctopusColors.OnPrimary,
+                        fontSize = OctopusType.body,
+                    )
                 }
             }
         }
@@ -401,7 +409,7 @@ private fun ImageThumb(uri: Uri, isCover: Boolean, onSetCover: () -> Unit, onRem
                     .background(OctopusColors.Primary)
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
-                Text("封面", color = Color.White, fontSize = OctopusType.tag, fontWeight = FontWeight.Bold)
+                Text("封面", color = OctopusColors.OnPrimary, fontSize = OctopusType.tag, fontWeight = FontWeight.Bold)
             }
         }
         IconButton(

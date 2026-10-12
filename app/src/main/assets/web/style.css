@@ -155,7 +155,7 @@ input.input-error {
   font-weight: var(--oct-fw-semibold);
   cursor: pointer;
   transition: background var(--oct-dur-fast) var(--oct-ease);
-  color: #fff;
+  color: var(--oct-on-brand);
   background: var(--oct-brand);
   box-shadow: none;
 }

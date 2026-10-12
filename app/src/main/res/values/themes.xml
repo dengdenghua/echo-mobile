@@ -51,12 +51,16 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <!-- 启动页专用主题：冷启动 Window 直接显示纯色背景，无白屏无系统 Logo -->
+    <!-- 启动页专用主题：ECHO 冷启动窗口始终是 Graphite 底 + 标志（不随浅色/深色切换），无白屏 -->
     <style name="Theme.OctopusMobile.Splash" parent="Theme.OctopusMobile">
-        <item name="android:windowBackground">@color/colorBgPrimary</item>
-        <!-- Android 12+ 禁用系统 SplashScreen 的图标 -->
-        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
-        <item name="android:windowSplashScreenBackground">@color/colorBgPrimary</item>
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:statusBarColor">@color/echo_ground_graphite</item>
+        <item name="android:navigationBarColor">@color/echo_ground_graphite</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <!-- Android 12+ 系统 SplashScreen：Graphite 底 + ECHO 标志（自适应图标前景，108dp 网格） -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_echo_foreground</item>
+        <item name="android:windowSplashScreenBackground">@color/echo_ground_graphite</item>
     </style>
 
     <!-- 透明 Activity（用于剪贴板读取等需要前台焦点的操作） -->

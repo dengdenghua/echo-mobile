@@ -1,35 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-icon foreground: the ECHO mark (snow frame + cyan Echo Core) on a transparent 108dp canvas.
+     The mark is drawn on the brand's 64-unit grid (echo-mark-core.svg, bbox 14..50) and scaled 10/9 around
+     the canvas centre: 40dp wide, i.e. 56% of the 72dp visible icon like echo-app-icon.svg, well inside the
+     66dp safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp" android:height="108dp"
-    android:viewportWidth="108" android:viewportHeight="108">
-    <!-- Foreground stays within the adaptive icon safe zone. -->
-    <group android:translateX="17.2" android:translateY="17.2" android:scaleX="1.15" android:scaleY="1.15">
-        <group android:rotation="-28" android:pivotX="32" android:pivotY="32">
-            <path android:fillColor="#00000000" android:strokeColor="#8FAEFF" android:strokeAlpha="0.85"
-                android:strokeWidth="1.5" android:pathData="M7.6,32 A24.4,12.7 0,1 0,56.4 32 A24.4,12.7 0,1 0,7.6 32" />
-        </group>
-        <group android:rotation="42" android:pivotX="32" android:pivotY="32">
-            <path android:fillColor="#00000000" android:strokeColor="#BA91FF" android:strokeAlpha="0.65"
-                android:strokeWidth="1.4" android:pathData="M9.4,32 A22.6,14 0,1 0,54.6 32 A22.6,14 0,1 0,9.4 32" />
-        </group>
-        <group android:rotation="92" android:pivotX="32" android:pivotY="32">
-            <path android:fillColor="#00000000" android:strokeColor="#7CE7F3" android:strokeAlpha="0.4"
-                android:strokeWidth="1.2" android:pathData="M11.2,32 A20.8,9.4 0,1 0,52.8 32 A20.8,9.4 0,1 0,11.2 32" />
-        </group>
-        <path android:strokeColor="#93ADFA" android:strokeAlpha="0.65" android:strokeWidth="0.8"
-            android:pathData="M13,32 A19,19 0,1 0,51 32 A19,19 0,1 0,13 32">
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.1111111"
+        android:scaleY="1.1111111"
+        android:translateX="18.444444"
+        android:translateY="18.444444">
+        <!-- Core glow, as on echo-app-icon.svg -->
+        <path android:pathData="M28.625,32a9.375,9.375 0,1 0,18.75 0a9.375,9.375 0,1 0,-18.75 0z">
             <aapt:attr name="android:fillColor">
-                <gradient android:type="radial" android:centerX="25" android:centerY="22" android:gradientRadius="36">
-                    <item android:offset="0" android:color="#DDE8FF" />
-                    <item android:offset="0.1" android:color="#708FE1" />
-                    <item android:offset="0.32" android:color="#233766" />
-                    <item android:offset="0.72" android:color="#090E25" />
+                <gradient
+                    android:type="radial"
+                    android:centerX="38"
+                    android:centerY="32"
+                    android:gradientRadius="9.375">
+                    <item android:offset="0" android:color="#596FE3F0" />
+                    <item android:offset="1" android:color="#006FE3F0" />
                 </gradient>
             </aapt:attr>
         </path>
-        <path android:fillColor="#00000000" android:strokeColor="#F3F6FF" android:strokeWidth="3.2"
-            android:strokeLineCap="round" android:strokeLineJoin="round"
-            android:pathData="M38,24.6 H27.6 V39.4 H38 M27.6,32 H36" />
+        <!-- Frame -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#EEF1F4"
+            android:strokeWidth="6"
+            android:strokeLineCap="butt"
+            android:pathData="M50,17H24a7,7 0,0 0,-7 7v16a7,7 0,0 0,7 7h26" />
+        <!-- Echo Core -->
+        <path
+            android:fillColor="#6FE3F0"
+            android:pathData="M33,32a5,5 0,1 0,10 0a5,5 0,1 0,-10 0z" />
     </group>
 </vector>

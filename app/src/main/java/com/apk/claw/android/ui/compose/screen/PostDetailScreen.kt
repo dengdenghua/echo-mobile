@@ -821,7 +821,7 @@ private fun CommentInputBar(
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         stringResource(R.string.post_detail_send),
-                        color = if (text.isNotBlank()) Color.White else OctopusColors.TextMuted,
+                        color = if (text.isNotBlank()) OctopusColors.OnPrimary else OctopusColors.TextMuted,
                         fontSize = OctopusType.caption,
                         fontWeight = FontWeight.Bold,
                     )
@@ -859,13 +859,13 @@ private fun SubscribeCard(post: AgentPost, subscribing: Boolean, onSubscribe: ()
             Icon(
                 Icons.Filled.Autorenew,
                 contentDescription = null,
-                tint = if (filled) Color.White else OctopusColors.Primary,
+                tint = if (filled) OctopusColors.OnPrimary else OctopusColors.Primary,
                 modifier = Modifier.size(20.dp),
             )
             Spacer(Modifier.width(OctopusSpacing.xs))
             Text(
                 label,
-                color = if (filled) Color.White else OctopusColors.TextPrimary,
+                color = if (filled) OctopusColors.OnPrimary else OctopusColors.TextPrimary,
                 fontSize = OctopusType.body,
                 fontWeight = FontWeight.Bold,
             )

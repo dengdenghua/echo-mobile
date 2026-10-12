@@ -75,7 +75,7 @@ class AgentPresentation(
      *
      * 布局结构：
      * ┌─────────────────────────────────┐
-     * │  🐙 Octopus Agent  状态栏  时间  │  ← 顶部状态栏
+     * │  Echo Agent    状态栏  时间  │  ← 顶部状态栏
      * ├─────────────────────────────────┤
      * │                                 │
      * │   [App 窗口 1]  [App 窗口 2]    │  ← 主工作区（App freeform 窗口在这里）
@@ -88,20 +88,20 @@ class AgentPresentation(
     private fun buildWorkspaceUI(): View {
         val root = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#1A1A2E"))
+            setBackgroundColor(Color.parseColor("#090A0C"))
             setPadding(0, 0, 0, 0)
         }
 
         // ── 顶部状态栏 ──
         val statusBar = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(Color.parseColor("#16213E"))
+            setBackgroundColor(Color.parseColor("#101216"))
             setPadding(32, 16, 32, 16)
             gravity = Gravity.CENTER_VERTICAL
         }
 
         val titleText = TextView(context).apply {
-            text = "🐙 Octopus Agent Workspace"
+            text = "Echo Agent Workspace"
             textSize = 18f
             setTextColor(Color.WHITE)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -111,7 +111,7 @@ class AgentPresentation(
         val statusText = TextView(context).apply {
             text = "Ready"
             textSize = 14f
-            setTextColor(Color.parseColor("#4CAF50"))
+            setTextColor(Color.parseColor("#6FE3F0"))
         }
         statusTextView = statusText
         statusBar.addView(statusText)
@@ -123,7 +123,7 @@ class AgentPresentation(
 
         // ── 主工作区（App 窗口将在这里显示）──
         val workspace = FrameLayout(context).apply {
-            setBackgroundColor(Color.parseColor("#0F3460"))
+            setBackgroundColor(Color.parseColor("#171A1F"))
         }
         workspaceView = workspace
 
@@ -131,7 +131,7 @@ class AgentPresentation(
         val welcomeText = TextView(context).apply {
             text = "Agent workspace ready.\nUse launch_freeform with display_id to start apps here."
             textSize = 20f
-            setTextColor(Color.parseColor("#E0E0E0"))
+            setTextColor(Color.parseColor("#9AA3AE"))
             gravity = Gravity.CENTER
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -148,7 +148,7 @@ class AgentPresentation(
         // ── 底部 Dock 栏 ──
         val dock = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(Color.parseColor("#16213E"))
+            setBackgroundColor(Color.parseColor("#101216"))
             setPadding(32, 12, 32, 12)
             gravity = Gravity.CENTER
         }
@@ -160,7 +160,7 @@ class AgentPresentation(
                 textSize = 16f
                 setTextColor(Color.WHITE)
                 setPadding(48, 16, 48, 16)
-                setBackgroundColor(Color.parseColor("#1A1A2E"))
+                setBackgroundColor(Color.parseColor("#090A0C"))
                 setOnClickListener { handleDockAction(item) }
             }
             dock.addView(btn, LinearLayout.LayoutParams(

@@ -1,77 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 深色主题颜色 -->
+<!-- ECHO family palette, Graphite theme (night). Source: analysis/echo-brand-kit/tokens.json.
+     ground #090A0C (page) / surface #101216 / surface-raised #171A1F (cards) / surface-sunken #060708 (inputs),
+     ink #EEF1F4 / ink-muted #9AA3AE / ink-faint #6B7380, line = 8% white.
+     The primary action is monochrome (snow button, graphite text); colour only carries state. -->
 <resources>
     <!-- ==================== Text ==================== -->
-    <color name="colorTextPrimary">#EBFFFFFF</color>
-    <color name="colorTextSecondary">#A3FFFFFF</color>
-    <color name="colorTextTertiary">#52FFFFFF</color>
-    <color name="colorTextDisabled">#33FFFFFF</color>
-    <color name="colorTextInverse">#FF000000</color>
-    <color name="colorTextFixedWhitePrimary">#E6FFFFFF</color>
-    <color name="colorTextFixedWhiteSecondary">#99FFFFFF</color>
-    <color name="colorTextFixedBlackPrimary">#F5000000</color>
-    <color name="colorTextFixedBlackSecondary">#AD000000</color>
+    <color name="colorTextPrimary">#FFEEF1F4</color>
+    <color name="colorTextSecondary">#FF9AA3AE</color>
+    <color name="colorTextTertiary">#FF6B7380</color>
+    <color name="colorTextDisabled">#33EEF1F4</color>
+    <color name="colorTextInverse">#FF0A0B0D</color>
+    <color name="colorTextFixedWhitePrimary">#FFEEF1F4</color>
+    <color name="colorTextFixedWhiteSecondary">#99EEF1F4</color>
+    <color name="colorTextFixedBlackPrimary">#FF111317</color>
+    <color name="colorTextFixedBlackSecondary">#FF59616C</color>
 
     <!-- ==================== Fills ==================== -->
-    <color name="colorFillPrimary">#5C787880</color>
-    <color name="colorFillSecondary">#52787880</color>
-    <color name="colorFillTertiary">#3D787880</color>
-    <color name="colorFillQuaternary">#2E787880</color>
+    <color name="colorFillPrimary">#29FFFFFF</color>
+    <color name="colorFillSecondary">#1FFFFFFF</color>
+    <color name="colorFillTertiary">#14FFFFFF</color>
+    <color name="colorFillQuaternary">#0DFFFFFF</color>
 
     <!-- ==================== Containers ==================== -->
-    <color name="colorContainerBrighten">#FF363638</color>
-    <color name="colorContainerLow">#FF202021</color>
-    <color name="colorContainerBase">#FF2C2C2E</color>
-    <color name="colorContainerHigh">#FF333335</color>
-    <color name="colorContainerHighest">#FF3A3A3C</color>
-    <color name="colorContainerInverse">#FFE5E5EA</color>
+    <color name="colorContainerBrighten">#FF171A1F</color>
+    <color name="colorContainerLow">#FF101216</color>
+    <color name="colorContainerBase">#FF1E2228</color>
+    <color name="colorContainerHigh">#FF262A31</color>
+    <color name="colorContainerHighest">#FF2E333B</color>
+    <color name="colorContainerInverse">#FFEEF1F4</color>
 
     <!-- ==================== Backgrounds ==================== -->
-    <color name="colorBgPrimary">#FF0E0E0E</color>
-    <color name="colorBgSecondary">#FF1D1D1F</color>
-    <color name="colorBgTertiary">#FF2C2C2E</color>
+    <color name="colorBgPrimary">#FF090A0C</color>
+    <color name="colorBgSecondary">#FF060708</color>
+    <color name="colorBgTertiary">#FF171A1F</color>
 
     <!-- ==================== Borders & Dividers ==================== -->
-    <color name="colorBorderLow">#05FFFFFF</color>
-    <color name="colorBorderBase">#0DFFFFFF</color>
-    <color name="colorBorderHigh">#FF383838</color>
+    <color name="colorBorderLow">#0DFFFFFF</color>
+    <color name="colorBorderBase">#14FFFFFF</color>
+    <color name="colorBorderHigh">#29FFFFFF</color>
 
     <!-- ==================== Overlays ==================== -->
     <color name="colorOverlayDim">#AD000000</color>
     <color name="colorOverlayScrim">#52000000</color>
     <color name="colorOverlayLabel">#AD000000</color>
 
-    <!-- ==================== Brand ==================== -->
-    <color name="colorBrandPrimary">#FF8A88F4</color>
-    <color name="colorBrandOnPrimary">#FFFFFFFF</color>
-    <color name="colorBrandContainer">#FF292933</color>
-    <color name="colorBrandOnContainer">#FFE5E4FF</color>
-    <color name="colorBrandFixedOnContainer">#FF2F2D84</color>
-    <color name="colorBrandVariant">#FF53538A</color>
-    <color name="colorBrandOnVariant">#FF35343E</color>
-    <color name="colorBrandLowButtonBg">#FF31313D</color>
+    <!-- ==================== Brand: monochrome action ==================== -->
+    <color name="colorBrandPrimary">#FFEEF1F4</color>
+    <color name="colorBrandOnPrimary">#FF0A0B0D</color>
+    <color name="colorBrandContainer">#FF1E2228</color>
+    <color name="colorBrandOnContainer">#FFEEF1F4</color>
+    <color name="colorBrandFixedOnContainer">#FF111317</color>
+    <color name="colorBrandVariant">#FF9AA3AE</color>
+    <color name="colorBrandOnVariant">#FF262A31</color>
+    <color name="colorBrandLowButtonBg">#FF1E2228</color>
 
-    <!-- ==================== Error ==================== -->
-    <color name="colorErrorPrimary">#FFFF9285</color>
-    <color name="colorErrorOnPrimary">#FFFFFFFF</color>
-    <color name="colorErrorContainer">#FF490002</color>
-    <color name="colorErrorOnContainer">#FFFFD8D2</color>
+    <!-- ==================== Error: breach ==================== -->
+    <color name="colorErrorPrimary">#FFFF6B78</color>
+    <color name="colorErrorOnPrimary">#FF0A0B0D</color>
+    <color name="colorErrorContainer">#FF2D1D22</color>
+    <color name="colorErrorOnContainer">#FFFF9AA3</color>
 
-    <!-- ==================== Warning ==================== -->
-    <color name="colorWarningPrimary">#FFFA9550</color>
-    <color name="colorWarningOnPrimary">#FFFFFFFF</color>
-    <color name="colorWarningContainer">#FF3B1700</color>
-    <color name="colorWarningOnContainer">#FFFFD9C2</color>
+    <!-- ==================== Warning: amber ==================== -->
+    <color name="colorWarningPrimary">#FFF2B84B</color>
+    <color name="colorWarningOnPrimary">#FF0A0B0D</color>
+    <color name="colorWarningContainer">#FF2B261C</color>
+    <color name="colorWarningOnContainer">#FFF2B84B</color>
 
-    <!-- ==================== Success ==================== -->
-    <color name="colorSuccessPrimary">#FF56C08D</color>
-    <color name="colorSuccessOnPrimary">#FFFFFFFF</color>
-    <color name="colorSuccessContainer">#FF002515</color>
-    <color name="colorSuccessOnContainer">#FF92DAB2</color>
+    <!-- ==================== Success: Echo Core (stable sync) ==================== -->
+    <color name="colorSuccessPrimary">#FF6FE3F0</color>
+    <color name="colorSuccessOnPrimary">#FF061014</color>
+    <color name="colorSuccessContainer">#FF1B2B30</color>
+    <color name="colorSuccessOnContainer">#FF6FE3F0</color>
 
-    <!-- ==================== Info ==================== -->
-    <color name="colorInfoPrimary">#FF009CF0</color>
-    <color name="colorInfoOnPrimary">#FFFFFFFF</color>
-    <color name="colorInfoContainer">#FF003552</color>
-    <color name="colorInfoOnContainer">#FFAFE3FF</color>
+    <!-- ==================== Info: signal ==================== -->
+    <color name="colorInfoPrimary">#FFA9C7FF</color>
+    <color name="colorInfoOnPrimary">#FF0A0B0D</color>
+    <color name="colorInfoContainer">#FF222832</color>
+    <color name="colorInfoOnContainer">#FFA9C7FF</color>
 </resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ECHO family identity (analysis/echo-brand-kit/tokens.json). Theme-independent brand colors:
+     the launcher tile and the splash are always Graphite, whatever the system theme. -->
+<resources>
+    <color name="echo_icon_background">#101216</color>
+    <color name="echo_ground_graphite">#090A0C</color>
+    <color name="echo_ink_graphite">#EEF1F4</color>
+    <color name="echo_ink_muted_graphite">#9AA3AE</color>
+</resources>

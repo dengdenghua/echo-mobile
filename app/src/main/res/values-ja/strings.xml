@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Octopus Mobile</string>
+    <string name="app_name">Echo</string>
 
     <!-- AppWidget -->
     <string name="widget_subtitle_default">タップで起動 · 長押しで音声</string>
@@ -33,11 +33,11 @@
     <string name="guide_skip">スキップ</string>
     <string name="guide_start">はじめる</string>
     <string name="guide_title_accessibility">ユーザー補助サービス</string>
-    <string name="guide_desc_accessibility">AIがデバイスを操作するための基本権限です。\n\n1. 設定 → ユーザー補助 → ダウンロード済みアプリを開く\n2. リストから「Octopus Mobile」を見つける\n3. スイッチをオンにする\n4. システムダイアログで確認する</string>
+    <string name="guide_desc_accessibility">AIがデバイスを操作するための基本権限です。\n\n1. 設定 → ユーザー補助 → ダウンロード済みアプリを開く\n2. リストから「Echo」を見つける\n3. スイッチをオンにする\n4. システムダイアログで確認する</string>
     <string name="guide_title_notification">常駐通知</string>
     <string name="guide_desc_notification">アプリをバックグラウンドで実行し続け、システムによる強制終了を防ぎます。\n\nホーム画面のカードをタップして有効にしてください。Android 13以降は通知権限が先に求められます。</string>
     <string name="guide_title_overlay">システムオーバーレイ</string>
-    <string name="guide_desc_overlay">AI実行状態を表示するフローティングパネルです。\n\n1. 設定 → アプリ → Octopus Mobileを開く\n2.「他のアプリの上に重ねて表示」を見つける\n3. スイッチをオンにする</string>
+    <string name="guide_desc_overlay">AI実行状態を表示するフローティングパネルです。\n\n1. 設定 → アプリ → Echoを開く\n2.「他のアプリの上に重ねて表示」を見つける\n3. スイッチをオンにする</string>
     <string name="guide_title_battery">バッテリーホワイトリスト</string>
     <string name="guide_desc_battery">システムがバックグラウンドでアプリを停止するのを防ぎます。\n\nホーム画面のカードをタップし、システムダイアログで「許可」を確認してください。(一部の端末では「制限なし」に変更が必要です)</string>
     <string name="guide_title_storage">ファイルアクセス</string>
@@ -48,20 +48,20 @@
     <string name="home_card_advanced_subtitle">保護ダイアログのタップ・セキュア画面の撮影</string>
     <string name="advanced_dialog_title">Shizuku で高度な権限を取得</string>
     <string name="advanced_dialog_intro">デフォルトではAIはAndroidのユーザー補助APIを使用し、ほとんどのアプリで十分です。できないこと：\n\n• 権限/システムダイアログのタップ（FLAG_SECURE）\n• DRM 保護画面のスクリーンショット\n• 他アプリの強制停止、システム設定の変更\n\nこれらには Shizuku をインストールしてください — 安全でオープンソースの補助ツールです。</string>
-    <string name="advanced_dialog_steps">設定手順：\n1. Play ストアまたは GitHub から Shizuku をインストール\n2. ワイヤレスデバッグ（Android 11+）または PC ADB で一度起動\n3. ここに戻る — Octopus Mobile が自動的に検出</string>
+    <string name="advanced_dialog_steps">設定手順：\n1. Play ストアまたは GitHub から Shizuku をインストール\n2. ワイヤレスデバッグ（Android 11+）または PC ADB で一度起動\n3. ここに戻る — Echo が自動的に検出</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku 準備完了 — 高度な権限が有効</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku はインストール済みですが未承認。Shizuku を開いて承認してください。</string>
     <string name="advanced_dialog_status_not_installed">Shizuku は未インストールです。</string>
     <string name="advanced_action_open_shizuku">Shizuku を開く</string>
     <string name="advanced_action_install">Shizuku をインストール</string>
     <string name="advanced_action_downloading">ダウンロード中…</string>
-    <string name="advanced_install_fetching">Octopus 公式サーバーに接続しています…</string>
+    <string name="advanced_install_fetching">Echo 公式サーバーに接続しています…</string>
     <string name="advanced_install_downloading">Shizuku インストーラーをダウンロードしています…</string>
     <string name="advanced_install_opening">ダウンロード完了。システムインストーラーを開きます。</string>
     <string name="advanced_install_not_configured">公式サーバーに Shizuku インストーラーがまだ設定されていません。後でもう一度お試しください。</string>
     <string name="advanced_install_verify_failed">インストーラーの検証に失敗しました。後でもう一度お試しください。</string>
     <string name="advanced_install_failed">ダウンロードに失敗しました。ネットワークを確認してもう一度お試しください。</string>
-    <string name="advanced_install_unknown_sources_required">Octopus に不明なアプリのインストールを許可してから、戻って再試行してください。</string>
+    <string name="advanced_install_unknown_sources_required">Echo に不明なアプリのインストールを許可してから、戻って再試行してください。</string>
     <string name="advanced_action_learn_more">詳細</string>
     <string name="advanced_action_close">閉じる</string>
     <string name="advanced_url_download">https://shizuku.rikka.app/download/</string>
@@ -69,7 +69,7 @@
 
     <!-- ホーム -->
     <string name="home_need_notification_permission">通知権限が必要です</string>
-    <string name="home_enable_accessibility">Octopus Mobileユーザー補助サービスを有効にしてください</string>
+    <string name="home_enable_accessibility">Echoユーザー補助サービスを有効にしてください</string>
     <string name="home_accessibility_enabled">ユーザー補助サービスが有効です</string>
     <string name="home_notification_enabled">常駐通知が有効です</string>
     <string name="home_overlay_enabled">オーバーレイ権限が有効です</string>
@@ -196,9 +196,9 @@
     <string name="floating_task_received">受信：\"%s\"</string>
 
     <!-- フォアグラウンドサービス通知 -->
-    <string name="notification_channel_name">Octopus Mobile ステータス</string>
-    <string name="notification_channel_description">Octopus Mobileの実行状態と統計を表示</string>
-    <string name="notification_content_title">Octopus Mobile 実行中</string>
+    <string name="notification_channel_name">Echo ステータス</string>
+    <string name="notification_channel_description">Echoの実行状態と統計を表示</string>
+    <string name="notification_content_title">Echo 実行中</string>
     <string name="notification_content_text">AI Agentサービスが稼働中</string>
 
     <!-- チャネルメッセージ -->
@@ -373,7 +373,7 @@
     <string name="device_screenshot_failed">スクショ失敗（アクセシビリティ/Shizuku が必要）</string>
     <string name="device_android_version">Android %1$s</string>
     <string name="device_nearby">近くのデバイス</string>
-    <string name="device_nearby_empty">検索中…同じ Wi-Fi の別端末で Octopus を開いてください</string>
+    <string name="device_nearby_empty">検索中…同じ Wi-Fi の別端末で Echo を開いてください</string>
     <string name="device_discoverable">検出可能：%1$s</string>
     <string name="device_discoverable_off">Wi-Fi 接続で検出可能になります</string>
     <string name="device_cmd_sent">%1$s に送信しました</string>
@@ -510,7 +510,7 @@
     <string name="routine_runner_starting_execution">実行開始</string>
     <string name="settings_llm_api_key_configured">設定済み</string>
     <string name="settings_rpc_url_default">未構成（デフォルト: ws://10.0.2.2:8765）</string>
-    <string name="settings_octopus_runtime_title">ホスト接続 · Octopus Runtime</string>
+    <string name="settings_octopus_runtime_title">ホスト接続 · Echo Runtime</string>
     <string name="settings_rpc_remote_brain_description">RPC リモート実行（ホストが tool/execute を送信）</string>
     <string name="settings_pc_remote_desktop_title">ホストリモートデスクトップ</string>
     <string name="settings_pc_remote_h264_description">PC画面を表示 + タッチ/キーボード操作（H.264/WS、同一LAN）</string>
@@ -871,7 +871,7 @@
     <string name="settings_go_setup">設定へ</string>
     <string name="settings_status_ok">OK</string>
     <string name="settings_status_set">SET</string>
-    <string name="settings_version_template">Octopus Mobile v%1$s · Apache 2.0</string>
+    <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">DingTalk</string>
     <string name="channel_name_feishu">Feishu</string>
     <string name="channel_name_qq">QQ</string>
@@ -936,7 +936,7 @@
     <string name="feat_explore_circle_avatar">%1$s アバター</string>
 
     <!-- ブランドヘッダー -->
-    <string name="browser_brand_name">Octopus</string>
+    <string name="browser_brand_name">Echo</string>
     <string name="browser_brand_slogan">AIで再定義するブラウジング</string>
 
     <!-- 音声アシスタントオーバーレイ -->

@@ -1,33 +1,36 @@
 /* ═══════════════════════════════════════════════════════
-   Octopus Design Tokens
-   全产品统一的视觉令牌：颜色 / 字号 / 间距 / 圆角 / 阴影 / 动效
+   ECHO Design Tokens（Echo Mobile 内置页面）
+   ECHO 家族视觉令牌：颜色 / 字号 / 间距 / 圆角 / 阴影 / 动效
+   来源：analysis/echo-brand-kit/tokens.json —— 浅色 Snow，深色 Graphite。
+   变量名保留 --oct-* 前缀，现有样式表无需改名
    所有页面应在自身样式表前 <link> 引入本文件
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  /* ── 品牌色 ── */
-  --oct-brand:        #4f6df5;   /* 主品牌蓝紫 */
-  --oct-brand-strong: #3c5be0;
-  --oct-brand-soft:   rgba(79, 109, 245, .14);
-  --oct-accent:       #34c76f;   /* 辅助绿（成功 / 进行中） */
+  /* ── 品牌色：主动作是单色的（action / on-action），不是彩色的 ── */
+  --oct-brand:        #111317;   /* action：ink */
+  --oct-brand-strong: #2a2e35;   /* action 悬停 / 按下 */
+  --oct-brand-soft:   rgba(10, 12, 16, .08);
+  --oct-on-brand:     #ffffff;   /* on-action：主按钮上的文字 */
+  --oct-accent:       #08788a;   /* core：Echo Core 青（选中 / 进行中 / 成功） */
 
-  /* ── 语义色 ── */
-  --oct-success: #34c76f;
-  --oct-warning: #ff9f0a;
-  --oct-danger:  #ff3b30;
-  --oct-info:    #5ac8fa;
+  /* ── 语义色（Echo Core 灯语） ── */
+  --oct-success: #08788a;        /* core：稳定同步 */
+  --oct-warning: #8a5600;        /* warning：概率预警 */
+  --oct-danger:  #c42638;        /* breach：身份破坏 */
+  --oct-info:    #2f5db8;        /* signal：医疗遥测 */
 
-  /* ── 中性色阶（浅色） ── */
-  --oct-bg:           #f5f6f8;
-  --oct-bg-elevated:  #ffffff;
-  --oct-surface:      #ffffff;
-  --oct-surface-2:    #f0f1f4;
-  --oct-border:       rgba(0, 0, 0, .10);
-  --oct-border-strong:rgba(0, 0, 0, .18);
-  --oct-text:         #1d1d1f;
-  --oct-text-2:       #62708a;
-  --oct-text-3:       #86868b;
-  --oct-overlay:      rgba(0, 0, 0, .50);
+  /* ── 中性色阶（Snow） ── */
+  --oct-bg:           #eef0f3;   /* ground */
+  --oct-bg-elevated:  #ffffff;   /* surface-raised */
+  --oct-surface:      #ffffff;   /* surface-raised */
+  --oct-surface-2:    #e6e9ed;   /* surface-sunken */
+  --oct-border:       rgba(10, 12, 16, .08);   /* line */
+  --oct-border-strong:rgba(10, 12, 16, .16);   /* line-strong */
+  --oct-text:         #111317;   /* ink */
+  --oct-text-2:       #59616c;   /* ink-muted */
+  --oct-text-3:       #59616c;   /* ink-muted：占位符、时间戳 */
+  --oct-overlay:      rgba(9, 10, 12, .50);
 
   /* ── 字号阶梯（4px 基线，1.25 比例） ── */
   --oct-fs-xs:   11px;
@@ -78,8 +81,8 @@
   --oct-transition-all:       all var(--oct-dur-fast) var(--oct-ease);
 
   /* ── 字体 ── */
-  --oct-font-ui:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --oct-font-mono: 'SF Mono', Monaco, Menlo, Consolas, monospace;
+  --oct-font-ui:   Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --oct-font-mono: "JetBrains Mono", 'SF Mono', Monaco, Menlo, Consolas, monospace;
 
   /* ── z-index 层级 ── */
   --oct-z-base:    1;
@@ -91,19 +94,26 @@
 /* ── 暗色主题覆盖 ── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --oct-brand:        #6e8cff;
-    --oct-brand-strong: #5a7bff;
-    --oct-brand-soft:   rgba(110, 140, 255, .18);
+    --oct-brand:        #eef1f4;   /* action：snow */
+    --oct-brand-strong: #d6dbe1;
+    --oct-brand-soft:   rgba(255, 255, 255, .08);
+    --oct-on-brand:     #0a0b0d;
+    --oct-accent:       #6fe3f0;
 
-    --oct-bg:           #0e1018;
-    --oct-bg-elevated:  #1a1d28;
-    --oct-surface:      #1d1f2c;
-    --oct-surface-2:    #262a38;
-    --oct-border:       rgba(255, 255, 255, .10);
-    --oct-border-strong:rgba(255, 255, 255, .20);
-    --oct-text:         #f4f7fb;
-    --oct-text-2:       #a9b1c1;
-    --oct-text-3:       #7a8294;
+    --oct-success: #6fe3f0;
+    --oct-warning: #f2b84b;
+    --oct-danger:  #ff6b78;
+    --oct-info:    #a9c7ff;
+
+    --oct-bg:           #090a0c;   /* ground */
+    --oct-bg-elevated:  #171a1f;   /* surface-raised */
+    --oct-surface:      #101216;   /* surface */
+    --oct-surface-2:    #171a1f;   /* surface-raised */
+    --oct-border:       rgba(255, 255, 255, .08);
+    --oct-border-strong:rgba(255, 255, 255, .16);
+    --oct-text:         #eef1f4;
+    --oct-text-2:       #9aa3ae;
+    --oct-text-3:       #9aa3ae;
     --oct-overlay:      rgba(0, 0, 0, .65);
 
     --oct-shadow-sm: 0 1px 2px rgba(0, 0, 0, .20);
@@ -114,7 +124,7 @@
 
 /* ── 全局焦点态规范（键盘可达性） ── */
 :focus-visible {
-  outline: 2px solid var(--oct-brand);
+  outline: 2px solid var(--oct-accent);
   outline-offset: 2px;
 }
 
@@ -138,7 +148,7 @@ button,
 
 /* ── 焦点环辅助类（用于纯视觉元素获得键盘焦点时的轮廓） ── */
 .focus-ring:focus-visible {
-  outline: 2px solid var(--oct-brand);
+  outline: 2px solid var(--oct-accent);
   outline-offset: 2px;
   border-radius: var(--oct-radius-sm);
 }

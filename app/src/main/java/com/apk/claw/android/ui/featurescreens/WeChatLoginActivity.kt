@@ -136,7 +136,13 @@ private fun PrimaryButton(text: String, onClick: () -> Unit) {
         color = FPrimary,
         modifier = Modifier.clickable(onClick = onClick),
     ) {
-        Text(text, color = androidx.compose.ui.graphics.Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 28.dp, vertical = 12.dp))
+        Text(
+            text,
+            color = com.apk.claw.android.ui.compose.theme.OctopusColors.OnPrimary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 28.dp, vertical = 12.dp),
+        )
     }
 }
 

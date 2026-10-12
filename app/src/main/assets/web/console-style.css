@@ -395,7 +395,7 @@ html, body {
 
 #send {
   background: var(--oct-brand);
-  color: #fff;
+  color: var(--oct-on-brand);
   border: none;
   border-radius: var(--oct-radius-sm);
   padding: 0 var(--oct-sp-4);

@@ -271,13 +271,13 @@ internal fun AgentPostCard(post: AgentPost, onClick: () -> Unit = {}) {
                         Icon(
                             Icons.Filled.Bolt,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = OctopusColors.OnPrimary,
                             modifier = Modifier.size(12.dp),
                         )
                         Spacer(Modifier.width(2.dp))
                         Text(
                             if (post.priceCredits > 0) "${post.priceCredits}积分" else "可复刻",
-                            color = Color.White,
+                            color = OctopusColors.OnPrimary,
                             fontSize = OctopusType.tag,
                             fontWeight = FontWeight.Bold,
                         )

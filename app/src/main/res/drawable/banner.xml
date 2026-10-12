@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android TV 启动器 banner(320×180):深底 #111827 + 居中 app 图标。
-     ic_launcher_background 颜色 / ic_launcher_foreground mipmap 不存在,
-     改用 @drawable/ic_launcher 矢量图居中。minSdk=28 支持 item width/height。 -->
+<!-- Android TV launcher banner (320×180): Graphite ground with the ECHO mark centred. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <color android:color="#111827"/>
+        <color android:color="@color/echo_icon_background"/>
     </item>
     <item
-        android:drawable="@drawable/ic_launcher"
+        android:drawable="@drawable/ic_echo_mark"
         android:gravity="center"
-        android:width="108dp"
-        android:height="108dp"/>
+        android:width="64dp"
+        android:height="64dp"/>
 </layer-list>

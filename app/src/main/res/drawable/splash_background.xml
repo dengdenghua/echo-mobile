@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Cold-start window of SplashActivity (Android 9–11): Graphite ground with the ECHO mark centred.
+     Android 12+ uses windowSplashScreenBackground / windowSplashScreenAnimatedIcon instead. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 背景色跟随主题 colorBgPrimary -->
-    <item android:drawable="@color/colorBgPrimary" />
-    <!-- 居中显示 logo -->
+    <item android:drawable="@color/echo_ground_graphite" />
     <item
-        android:width="80dp"
-        android:height="80dp"
-        android:drawable="@drawable/ic_launcher"
+        android:width="64dp"
+        android:height="64dp"
+        android:drawable="@drawable/ic_echo_mark"
         android:gravity="center" />
 </layer-list>

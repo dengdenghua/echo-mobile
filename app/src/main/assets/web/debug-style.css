@@ -234,7 +234,7 @@ h1 {
   margin-top: var(--oct-sp-2);
   padding: 6px var(--oct-sp-4);
   background: var(--oct-brand);
-  color: #fff;
+  color: var(--oct-on-brand);
   border: none;
   border-radius: var(--oct-radius-sm);
   font-size: var(--oct-fs-sm);
@@ -262,7 +262,7 @@ h1 {
 
 .tool-btn.active {
   background: var(--oct-brand);
-  color: #fff;
+  color: var(--oct-on-brand);
   border-color: var(--oct-brand);
 }
 
@@ -348,7 +348,7 @@ h1 {
   width: 100%;
   padding: var(--oct-sp-3);
   background: var(--oct-brand);
-  color: #fff;
+  color: var(--oct-on-brand);
   border: none;
   border-radius: var(--oct-radius-md);
   font-size: var(--oct-fs-md);

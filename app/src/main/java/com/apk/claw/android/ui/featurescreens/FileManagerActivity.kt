@@ -580,7 +580,7 @@ private fun ShizukuEmptyState(onAuthorize: () -> Unit) {
         )
         Spacer(Modifier.height(20.dp))
         Button(onClick = onAuthorize, colors = ButtonDefaults.buttonColors(containerColor = OctopusColors.Primary)) {
-            Text("去授权", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text("去授权", color = OctopusColors.OnPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
