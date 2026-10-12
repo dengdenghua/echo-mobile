@@ -37,6 +37,7 @@ internal fun EchoNavigationDrawer(
     sessions: List<SessionStore.SessionMeta>, currentId: String, isRunning: Boolean,
     onNewChat: () -> Unit, onSwitch: (String) -> Unit, onClose: () -> Unit,
     onOpenPersonas: () -> Unit,
+    onOpenDesktopConversations: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var query by remember { mutableStateOf("") }
@@ -69,6 +70,7 @@ internal fun EchoNavigationDrawer(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp))
         LazyColumn(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
             if (query.isBlank()) {
+                if (onOpenDesktopConversations != null) item { EchoDrawerLink(Icons.Filled.Sync, stringResource(R.string.dot_history_title), onClick = onOpenDesktopConversations) }
                 item { EchoDrawerLink(Icons.Filled.Extension, stringResource(R.string.settings_plugin_mgmt)) { launch(PluginActivity::class.java) } }
                 item { EchoDrawerLink(Icons.Filled.Bolt, stringResource(R.string.feat_skills)) { launch(SkillsActivity::class.java) } }
                 item { EchoDrawerLink(Icons.Filled.Schedule, stringResource(R.string.routines_title)) { launch(RoutinesActivity::class.java) } }

@@ -1584,4 +1584,13 @@
     <plurals name="dot_progress_step_count"><item quantity="one">已执行 %1$d 步</item><item quantity="other">已执行 %1$d 步</item></plurals>
     <string name="dot_progress_expand">展开执行步骤</string>
     <string name="dot_progress_collapse">收起执行步骤</string>
+    <string name="dot_history_title">桌面对话</string>
+    <string name="dot_history_back">返回对话列表</string>
+    <string name="dot_history_readonly">同步历史预览 · 暂请在桌面继续对话</string>
+    <string name="dot_history_update_required">对话不可访问，或主机需要更新</string>
+    <string name="dot_history_empty">暂无桌面对话</string>
+    <string name="dot_history_more">更多对话</string>
+    <string name="dot_history_earlier">加载更早消息</string>
+    <string name="dot_history_user">你</string>
+    <string name="dot_history_assistant">助手</string>
 </resources>

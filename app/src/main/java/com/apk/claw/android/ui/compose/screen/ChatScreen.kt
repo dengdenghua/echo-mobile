@@ -967,6 +967,8 @@ fun ChatScreen() {
     var clearChatOpen by remember { mutableStateOf(false) }
     var deleteChatOpen by remember { mutableStateOf(false) }
     var conversationOptionsExpanded by remember { mutableStateOf(false) }
+    var showDesktopConversations by remember { mutableStateOf(false) }
+    if (showDesktopConversations) DesktopConversationsSheet(dotEnvironment) { showDesktopConversations = false }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -978,6 +980,7 @@ fun ChatScreen() {
                 onSwitch = { switchTo(it); closeDrawer() },
                 onClose = closeDrawer,
                 onOpenPersonas = { closeDrawer(); charMenuOpen = true },
+                onOpenDesktopConversations = { closeDrawer(); showDesktopConversations = true },
             )
         },
     ) {

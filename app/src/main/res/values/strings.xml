@@ -1596,4 +1596,13 @@ Shizuku is a safe, open-source local helper tool.</string>
     <plurals name="dot_progress_step_count"><item quantity="one">%1$d step recorded</item><item quantity="other">%1$d steps recorded</item></plurals>
     <string name="dot_progress_expand">Show execution steps</string>
     <string name="dot_progress_collapse">Hide execution steps</string>
+    <string name="dot_history_title">Desktop conversations</string>
+    <string name="dot_history_back">Conversation list</string>
+    <string name="dot_history_readonly">Synced history preview · Continue on desktop for now</string>
+    <string name="dot_history_update_required">Conversation unavailable, or the host needs updating</string>
+    <string name="dot_history_empty">No desktop conversations yet</string>
+    <string name="dot_history_more">More conversations</string>
+    <string name="dot_history_earlier">Earlier messages</string>
+    <string name="dot_history_user">You</string>
+    <string name="dot_history_assistant">Assistant</string>
 </resources>
