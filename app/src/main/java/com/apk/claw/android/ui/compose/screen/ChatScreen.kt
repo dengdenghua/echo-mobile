@@ -26,7 +26,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.apk.claw.android.ui.compose.theme.EchoChatStyle
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.ui.res.painterResource
@@ -34,6 +39,8 @@ import com.apk.claw.android.ui.desktop.CharacterRegistry
 import com.apk.claw.android.ui.desktop.personaPrompt
 import com.apk.claw.android.utils.KVUtils
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.automirrored.filled.Notes
@@ -64,9 +71,9 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.FiberManualRecord
-import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Search
@@ -85,6 +92,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -151,24 +159,24 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 // 颜色
-private val PrimaryColor get() = OctopusColors.Primary
+private val PrimaryColor get() = EchoChatStyle.accent
 private val SuccessColor get() = OctopusColors.Success
 private val WarningColor get() = OctopusColors.Warning
 private val ErrorColor get() = OctopusColors.Error
 private val AccentColor get() = OctopusColors.Accent
-private val BackgroundColor get() = OctopusColors.Background
-private val SurfaceColor get() = OctopusColors.Surface
+private val BackgroundColor get() = EchoChatStyle.background
+private val SurfaceColor get() = EchoChatStyle.surface
 private val SurfaceVariantColor get() = OctopusColors.SurfaceVariant
-private val SurfaceDeepColor get() = OctopusColors.SurfaceDeep
-private val TextPrimary get() = OctopusColors.TextPrimary
+private val SurfaceDeepColor get() = EchoChatStyle.softSurface
+private val TextPrimary get() = EchoChatStyle.text
 private val TextSecondary get() = OctopusColors.TextSecondary
-private val TextMuted get() = OctopusColors.TextMuted
-private val BorderColor get() = OctopusColors.Border
+private val TextMuted get() = EchoChatStyle.muted
+private val BorderColor get() = EchoChatStyle.border
 private val OverlayDimColor get() = OctopusColors.OverlayDim
 private val OnPrimaryColor get() = OctopusColors.OnPrimary
 private val VideoBackgroundColor get() = Color.Black
-private val AgentBubbleColor get() = OctopusColors.Surface
-private val UserBubbleColor get() = OctopusColors.Primary
+private val AgentBubbleColor get() = EchoChatStyle.softSurface
+private val UserBubbleColor get() = EchoChatStyle.accentSurface
 
 // 消息数据模型
 sealed class ChatMessage {
@@ -268,7 +276,6 @@ private const val CHAT_SCROLL_THROTTLE_MS = 180L
 private const val CHAT_STREAM_UI_THROTTLE_MS = 80L
 
 /** 对话页当前角色的持久化键(与 TV 模式的选择互不影响)。 */
-private const val CHAT_CHARACTER_KEY = "chat_current_character"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -279,9 +286,12 @@ fun ChatScreen() {
     val messages = remember { mutableStateListOf<ChatMessage>() }
     // 角色空间:点顶栏「Octopus」可切角色(与 TV 模式同一批角色),会话与历史按角色完全隔离。
     var currentCharacter by remember {
-        mutableStateOf(KVUtils.getString(CHAT_CHARACTER_KEY, SessionStore.CHARACTER_DEFAULT))
+        mutableStateOf(DotRoster.activeCharacter)
     }
     var charMenuOpen by remember { mutableStateOf(false) }
+    var showDotPicker by remember { mutableStateOf(false) }
+    val dotEnvironment = DotEnvironmentStore.selected
+    var showEnvironmentConnection by remember { mutableStateOf(false) }
     // 互聊花名册管理对话框
     var multiRosterDialogOpen by remember { mutableStateOf(false) }
 
@@ -322,9 +332,11 @@ fun ChatScreen() {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var ghostChatJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    var dotRequestGeneration by remember { mutableLongStateOf(0L) }
     val ackText = stringResource(R.string.chat_ack)
     val thinkingText = stringResource(R.string.chat_thinking)
     val newChatTitle = stringResource(R.string.chat_new)
+    val dotSendFailed = stringResource(R.string.dot_send_failed)
     var lastScrollTs by remember { mutableLongStateOf(0L) }
     val showScrollToBottom by remember {
         derivedStateOf {
@@ -381,9 +393,13 @@ fun ChatScreen() {
         messages.clear(); messages.addAll(ChatStore.load(cid) ?: emptyList())
     }
     val stop = {
+        dotRequestGeneration++
         ghostChatJob?.cancel()
         ghostChatJob = null
         ChatAgentBridge.cancel()
+        isRunning = false
+        messages.removeAll { it is ChatMessage.Thinking }
+        persist()
     }
     // 切上下文(切角色/切会话/新建/删除)前先停掉运行中的任务 + 清掉 Thinking 占位气泡,
     // 防止正在流式返回的 onText/onDone 回调往新会话/新角色的 messages 里写内容造成串台。
@@ -393,6 +409,24 @@ fun ChatScreen() {
             isRunning = false
             messages.removeAll { it is ChatMessage.Thinking }
         }
+    }
+    val switchEnvironment = { environment: DotEnvironment ->
+        if (!isRunning) {
+            DotEnvironmentStore.select(environment)
+            if (environment == DotEnvironment.PHONE) {
+                ControlTarget.setLocal()
+                previewDevice = null
+            }
+        }
+    }
+    LaunchedEffect(dotEnvironment) {
+        if (dotEnvironment == DotEnvironment.PHONE) ControlTarget.setLocal()
+    }
+    if (showEnvironmentConnection) {
+        DotConnectionDialog(dotEnvironment,
+            onDismiss = { showEnvironmentConnection = false },
+            onSaved = { showEnvironmentConnection = false; refreshTick++ },
+        )
     }
     // 初始化:确保至少一个会话,加载当前角色的当前会话
     LaunchedEffect(Unit) {
@@ -407,10 +441,19 @@ fun ChatScreen() {
             cancelForSwitch()
             if (currentId.isNotEmpty()) ChatStore.save(currentId, messages)
             currentCharacter = charId
-            KVUtils.putString(CHAT_CHARACTER_KEY, charId)
+            DotRoster.select(charId)
             loadCharacterSpace(charId)
             scrollEnd()
         }
+    }
+    LaunchedEffect(DotRoster.activeCharacter) {
+        switchCharacter(DotRoster.activeCharacter)
+    }
+    if (showDotPicker) {
+        DotPickerSheet(
+            onDismiss = { showDotPicker = false },
+            onOpenChat = { switchCharacter(it); showDotPicker = false },
+        )
     }
     val switchTo = { id: String ->
         if (id != currentId && id.isNotEmpty()) {
@@ -458,40 +501,46 @@ fun ChatScreen() {
             inputText = ""
             scrollEnd(); persist()
             val ghostPersona = GhostChatSessionStore.load(currentId)
-            if (ghostPersona != null) {
+            val dot = DotRoster.find(currentCharacter)
+            if ((dot != null && dotEnvironment != DotEnvironment.PHONE) || ghostPersona != null) {
+                val sendingSession = currentId
+                val sendingCharacter = currentCharacter
+                val sendingEnvironment = dotEnvironment
+                val requestGeneration = ++dotRequestGeneration
+                val history = messages.mapNotNull {
+                    when (it) {
+                        is ChatMessage.UserMessage -> GhostChatMessage("user", it.text)
+                        is ChatMessage.AgentMessage -> GhostChatMessage("assistant", it.text)
+                        else -> null
+                    }
+                }
                 isRunning = true
                 val thinking = ChatMessage.Thinking(thinkingText)
-                if (!messages.contains(thinking)) messages.add(thinking)
+                messages.add(thinking)
                 scrollEnd()
-                val history = messages
-                    .dropLast(1)
-                    .mapNotNull {
-                        when (it) {
-                            is ChatMessage.UserMessage -> GhostChatMessage("user", it.text)
-                            is ChatMessage.AgentMessage -> GhostChatMessage("assistant", it.text)
-                            else -> null
-                        }
-                    }
                 ghostChatJob = scope.launch {
                     try {
-                        val answer = UniverseRepository.chatWithGhost(
-                            feed = ghostPersona,
-                            userText = t,
-                            history = history,
-                        )
-                        messages.remove(thinking)
-                        messages.add(ChatMessage.AgentMessage(answer))
-                    } catch (_: CancellationException) {
-                        messages.remove(thinking)
-                        messages.add(ChatMessage.AgentMessage("已停止。"))
-                    } catch (error: Throwable) {
-                        messages.remove(thinking)
-                        messages.add(ChatMessage.AgentMessage("⚠️ 母体 Runtime 未回应：${error.message.orEmpty()}"))
+                        val answer = if (dot != null) DotRepository.chat(dot, sendingSession, history, sendingEnvironment)
+                        else UniverseRepository.chatWithGhost(ghostPersona!!, t, history.dropLast(1))
+                        if (currentId == sendingSession && currentCharacter == sendingCharacter && dotRequestGeneration == requestGeneration) {
+                            messages.remove(thinking)
+                            messages.add(ChatMessage.AgentMessage(answer))
+                        }
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        if (currentId == sendingSession && currentCharacter == sendingCharacter && dotRequestGeneration == requestGeneration) {
+                            messages.remove(thinking)
+                            messages.add(ChatMessage.AgentMessage(dotSendFailed))
+                        }
                     } finally {
-                        ghostChatJob = null
-                        isRunning = false
-                        scrollEnd()
-                        persist()
+                        if (currentId == sendingSession && currentCharacter == sendingCharacter && dotRequestGeneration == requestGeneration) {
+                            messages.remove(thinking)
+                            ghostChatJob = null
+                            isRunning = false
+                            scrollEnd()
+                            persist()
+                        }
                     }
                 }
             } else if (ChatAgentBridge.isConfigured()) {
@@ -546,7 +595,7 @@ fun ChatScreen() {
                 }
                 // ── 互聊模式分支：多 Persona 轮流发言 ──
                 // 花名册非空时走 MultiPersonaOrchestrator；为空则走下面的单 Agent 路径（保持原行为）。
-                val multiRosterIds = PersonaStore.MultiMode.getRoster()
+                val multiRosterIds = if (dot != null) emptyList() else PersonaStore.MultiMode.getRoster()
                 if (multiRosterIds.isNotEmpty()) {
                     showThinking()
                     val priorTurns = messages.dropLast(1).mapNotNull {
@@ -608,7 +657,7 @@ fun ChatScreen() {
                     prompt = t,
                     conversationContext = convContext,
                     // 非默认角色注入人设:该角色第一人称应答;Octopus 本体不扮演(persona=null)。
-                    persona = CharacterRegistry.all
+                    persona = dot?.let { DotRoster.phonePersona(it) } ?: CharacterRegistry.all
                         .firstOrNull { it.id == currentCharacter }?.personaPrompt(),
                     // 注入当前会话的工作空间(类似 Codex --cd 选定项目目录)。
                     // SessionMeta.workspace 非空时覆盖全局默认;为 null 时 effectiveWorkspace() 回退全局。
@@ -762,8 +811,9 @@ fun ChatScreen() {
     }
     val closeDrawer = { scope.launch { drawerState.close() }; Unit }
 
-    // ── 语音优先输入：麦克风「按住说话」，松手即发 ──────────────────
-    var voiceMode by remember { mutableStateOf(true) }   // 默认语音优先；键盘为次选
+    // 文本默认展开；语音模式仍支持按住说话、松手发送。
+    var voiceMode by remember { mutableStateOf(false) }
+    var inputActionsOpen by remember { mutableStateOf(false) }
     var listening by remember { mutableStateOf(false) }
     var partial by remember { mutableStateOf("") }       // 实时部分识别结果
     val voice = remember { VoiceInput(context) }
@@ -821,42 +871,283 @@ fun ChatScreen() {
             )
         },
     ) {
-    Column(modifier = Modifier.fillMaxSize().background(OctopusBackground.pageBrush()).tvOverscan()) {
-        Row(
+    Box(modifier = Modifier.fillMaxSize().background(BackgroundColor).tvOverscan()) {
+    Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+        // 设备实时预览(选了远程设备后出现在上半屏);「进入控制」开横屏全控页
+        previewDevice?.let { dev ->
+            key(dev.deviceId) {
+                DevicePreviewPanel(
+                    device = dev,
+                    onEnter = { runCatching { com.apk.claw.android.ui.device.RemoteControlActivity.start(context, dev.deviceId) } },
+                    onClose = { previewDevice = null },
+                )
+            }
+        }
+
+        // 设置指引:未配置完成时显示,配齐后自动隐藏
+        if ((DotRoster.find(currentCharacter) == null || dotEnvironment == DotEnvironment.PHONE) && (!llmOk || !a11yOk)) {
+            SetupGuideCard(
+                llmOk = llmOk,
+                a11yOk = a11yOk,
+                onConfigLlm = { runCatching { context.startActivity(android.content.Intent(context, LlmConfigActivity::class.java)) } },
+                onEnableA11y = { runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) } },
+            )
+        }
+
+        // 消息列表 / 空状态
+        if (messages.none { it !is ChatMessage.Thinking }) {
+            ChatHomeWorkbench(
+                dot = DotRoster.find(currentCharacter),
+                llmOk = llmOk,
+                target = ControlTarget.label(),
+                onUsePrompt = { suggestion ->
+                    inputText = suggestion
+                    voiceMode = false
+                },
+            )
+        } else {
+            Box(modifier = Modifier.weight(1f)) {
+                val rows by remember { derivedStateOf { buildChatRows(messages) } }
+                SelectionContainer {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
+                    ) {
+                        items(rows, key = { it.key }) { row ->
+                            when (row) {
+                                is ChatRow.Single -> when (val msg = row.msg) {
+                                    is ChatMessage.UserMessage -> UserBubble(msg.text)
+                                    is ChatMessage.AgentMessage -> AgentBubble(msg.text)
+                                    is ChatMessage.ToolCall -> ToolCallItem(msg)
+                                    is ChatMessage.Thinking -> ThinkingItem(msg.text)
+                                    is ChatMessage.Artifact -> ArtifactCard(
+                                        artifact = msg,
+                                        onClick = {
+                                            // refine-chat-interaction Task 4:根据 artifact.kind 创建对应 DetailPane。
+                                            // 关闭右侧栏详情开关时点击无操作(回退到现状,INV-U3)。
+                                            if (KVUtils.isDetailDrawerEnabled()) {
+                                                currentDetail = artifactDetailPane(msg) { currentDetail = null }
+                                            }
+                                        },
+                                    )
+                                }
+                                is ChatRow.ToolGroup -> ToolGroupItem(
+                                    tools = row.tools,
+                                    expanded = expandedGroups[row.tools.first().id] == true,
+                                    onToggle = { id -> expandedGroups[id] = expandedGroups[id] != true },
+                                )
+                                is ChatRow.ToolBatch -> {
+                                    // refine-chat-interaction:折叠并行工具开关。
+                                    // 开启时聚合为单张 ToolBatchCard;关闭时每个 ToolCall 独立渲染(回退到现状,INV-U3)。
+                                    if (KVUtils.isCollapseParallelTools()) {
+                                        ToolBatchCard(
+                                            calls = row.calls,
+                                            onShowDetail = { currentDetail = ToolsDetailPane(row.calls) },
+                                        )
+                                    } else {
+                                        row.calls.forEach { call ->
+                                            ToolCallItem(call)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        item { Spacer(modifier = Modifier.height(OctopusSpacing.sm)) }
+                    }
+                }
+                Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = OctopusSpacing.sm)) {
+                    ScrollToBottomButton(visible = showScrollToBottom, onClick = { scrollEnd() })
+                }
+            }
+        }
+
+        // ── 澄清问卷（选择题卡片）：待填写时显示在输入框上方，用户点选选项后填入输入框 ──
+        pendingForm?.let { form ->
+            ClarifyFormCard(
+                form = form,
+                onSelect = { qIdx, optIdx ->
+                    pendingForm = form.copy(
+                        selections = form.selections.toMutableList().apply { this[qIdx] = optIdx }
+                    )
+                },
+                onConfirm = {
+                    val answers = form.questions.mapIndexed { i, q ->
+                        val sel = form.selections[i]
+                        if (sel >= 0) "${q.q}${q.options[sel]}" else null
+                    }.filterNotNull()
+                    val filled = if (answers.isNotEmpty()) answers.joinToString("\n") + "\n" else ""
+                    inputText = filled
+                    pendingForm = null
+                },
+                onCancel = { pendingForm = null },
+            )
+        }
+
+        // One clean composer above the Dock. A multiline field keeps the writing area wide.
+        Surface(
+            modifier = Modifier.fillMaxWidth().imePadding()
+                .padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 2.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = EchoChatStyle.surface,
+            border = BorderStroke(1.dp, EchoChatStyle.border.copy(alpha = .65f)),
+            shadowElevation = 0.dp,
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (voiceMode) {
+                    IconButton(onClick = { voiceMode = false }, modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Filled.Keyboard, contentDescription = stringResource(R.string.chat_text_mode), tint = TextMuted)
+                    }
+                    val listeningText = stringResource(R.string.chat_voice_listening_release)
+                    val pillText = when {
+                        isRunning -> stringResource(R.string.chat_voice_stop_agent)
+                        listening -> partial.ifBlank { listeningText }
+                        else -> stringResource(R.string.chat_voice_hold_to_speak)
+                    }
+                    val pillGesture = if (isRunning) Modifier.clickable(onClick = stop) else {
+                        Modifier.pointerInput(Unit) {
+                            detectTapGestures(onPress = {
+                                if (hasMic()) {
+                                    startListening()
+                                    tryAwaitRelease()
+                                    voice.stop()
+                                } else micPermLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            })
+                        }
+                    }
+                    Box(
+                        modifier = Modifier.weight(1f).height(48.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(if (isRunning || listening) ErrorColor else EchoChatStyle.accentSurface)
+                            .semantics { contentDescription = pillText }
+                            .then(pillGesture),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(if (isRunning) Icons.Filled.Stop else Icons.Filled.Mic,
+                                contentDescription = null,
+                                tint = if (isRunning || listening) Color.White else PrimaryColor,
+                                modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(pillText, color = if (isRunning || listening) Color.White else PrimaryColor,
+                                fontSize = 14.sp, fontWeight = FontWeight.Medium,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                } else {
+                    Box {
+                        IconButton(onClick = { inputActionsOpen = true }, modifier = Modifier.size(48.dp)) {
+                            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.chat_input_actions), tint = TextMuted)
+                        }
+                        DropdownMenu(expanded = inputActionsOpen, onDismissRequest = { inputActionsOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.voice_call_entry)) },
+                                leadingIcon = { Icon(Icons.Filled.Call, contentDescription = null) },
+                                onClick = {
+                                    inputActionsOpen = false
+                                    runCatching { context.startActivity(Intent(context, VoiceCallActivity::class.java)) }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.chat_voice_mode)) },
+                                leadingIcon = { Icon(Icons.Filled.Mic, contentDescription = null) },
+                                onClick = { inputActionsOpen = false; voiceMode = true },
+                            )
+                        }
+                    }
+                    val composerDot = DotRoster.find(currentCharacter)
+                    val inputHint = if (composerDot != null) stringResource(R.string.dot_input_hint, composerDot.name) else stringResource(R.string.chat_input_hint)
+                    BasicTextField(
+                        value = inputText,
+                        onValueChange = { inputText = it },
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                            .semantics { contentDescription = inputHint },
+                        textStyle = TextStyle(color = TextPrimary, fontSize = 16.sp, lineHeight = 23.sp),
+                        cursorBrush = SolidColor(PrimaryColor),
+                        maxLines = 4,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
+                        decorationBox = { innerTextField ->
+                            Box(Modifier.padding(vertical = 12.dp, horizontal = 4.dp), contentAlignment = Alignment.CenterStart) {
+                                if (inputText.isEmpty()) Text(inputHint, color = TextMuted, fontSize = 16.sp)
+                                innerTextField()
+                            }
+                        },
+                    )
+                    val showSend = inputText.isNotBlank() || isRunning
+                    IconButton(
+                        onClick = { if (isRunning) stop() else if (showSend) send() else voiceMode = true },
+                        modifier = Modifier.size(48.dp).padding(3.dp)
+                            .background(if (isRunning) ErrorColor else if (showSend) PrimaryColor else Color.Transparent, CircleShape),
+                    ) {
+                        Icon(
+                            if (isRunning) Icons.Filled.Stop else if (showSend) Icons.AutoMirrored.Filled.Send else Icons.Filled.Mic,
+                            contentDescription = stringResource(if (isRunning) R.string.chat_voice_stop_agent else if (showSend) R.string.chat_send_message else R.string.chat_voice_mode),
+                            tint = if (isRunning) Color.White else if (showSend) {
+                                if (OctopusColors.isLight) Color.White else EchoChatStyle.background
+                            } else TextMuted,
+                            modifier = Modifier.size(21.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+        Box(
             modifier = Modifier
+                .align(Alignment.TopCenter)
+                .zIndex(1f)
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .height(56.dp)
-                .padding(start = OctopusSpacing.sm, end = OctopusSpacing.md),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(horizontal = 8.dp, vertical = 8.dp),
         ) {
-            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+            IconButton(onClick = { scope.launch { drawerState.open() } }, modifier = Modifier.align(Alignment.TopStart)) {
                 Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.chat_sessions), tint = TextSecondary)
             }
-            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                // 点标题切角色:Octopus 本体 + TV 模式同一批角色,会话/历史随角色整体切换。
+            Column(
+                // Identity and environment share one floating group, without a large enclosing card.
+                modifier = Modifier.align(Alignment.TopCenter).widthIn(max = 208.dp).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                // 顶部头像和姓名是 Dot 入口，身份编号与桌面端一致。
                 val curProfile = CharacterRegistry.all.firstOrNull { it.id == currentCharacter }
+                val currentDot = DotRoster.find(currentCharacter)
                 Box {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { charMenuOpen = true }.tvFocusable(),
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable { showDotPicker = true }.tvFocusable(),
                     ) {
+                        Image(
+                            painterResource(currentDot?.avatar ?: curProfile?.avatarRes ?: R.drawable.ic_echo_foreground),
+                            contentDescription = currentDot?.name,
+                            modifier = Modifier.size(if (currentDot != null) 64.dp else 30.dp).clip(CircleShape).background(Color(0xFF141B3A)),
+                        )
+                        if (currentDot == null) {
+                        Spacer(Modifier.width(8.dp))
                         Text(
-                            curProfile?.zh ?: "Octopus",
+                            currentDot?.name ?: curProfile?.zh ?: stringResource(R.string.app_name),
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = OctopusType.titleLg,
+                            fontSize = 18.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.widthIn(max = 128.dp),
                             color = TextPrimary,
                         )
                         Icon(
                             Icons.Filled.ExpandMore,
-                            contentDescription = "切换角色",
+                            contentDescription = stringResource(R.string.dot_switch),
                             tint = TextMuted,
                             modifier = Modifier.size(OctopusIconSize.small),
                         )
+                        }
                     }
                     DropdownMenu(expanded = charMenuOpen, onDismissRequest = { charMenuOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text("Octopus · 默认助手") },
+                            text = { Text("${stringResource(R.string.app_name)} · 默认助手") },
                             onClick = { charMenuOpen = false; switchCharacter(SessionStore.CHARACTER_DEFAULT) },
                         )
                         CharacterRegistry.all.forEach { c ->
@@ -918,56 +1209,27 @@ fun ChatScreen() {
                         )
                     }
                 }
-                Spacer(Modifier.width(OctopusSpacing.sm))
-                val ready = llmOk && a11yOk
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                val demoRecording = com.apk.claw.android.octopus_mobile.DemoRecorder.isRecording()
+                if (currentDot == null || demoRecording) Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(6.dp)
-                            .background(if (ready) SuccessColor else WarningColor, CircleShape)
+                            .background(if (demoRecording) ErrorColor else PrimaryColor, CircleShape)
                     )
                     Spacer(modifier = Modifier.width(OctopusSpacing.xs))
                     Text(
-                        stringResource(if (ready) R.string.chat_agent_ready else R.string.chat_agent_setup_needed),
+                        stringResource(if (demoRecording) R.string.chat_demo_recording else R.string.dot_header),
                         fontSize = OctopusType.tag,
                         color = TextMuted,
                     )
                 }
+                if (currentDot != null) {
+                    DotEnvironmentSelector(dotEnvironment, !isRunning, switchEnvironment)
+                }
             }
-        // 录制示范技能按钮：顶栏 REC 文字按钮，录制中红点闪烁
-            val isRecording = com.apk.claw.android.octopus_mobile.DemoRecorder.isRecording()
-            val recPulse by rememberInfiniteTransition(label = "rec").animateFloat(
-                initialValue = 0.4f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(animation = tween(600), repeatMode = RepeatMode.Reverse),
-                label = "recPulse",
-            )
-            Row(
-                modifier = Modifier
-                    .clickable { com.apk.claw.android.octopus_mobile.DemoRecorder.toggle() }
-                    .padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.xs),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        // 录制中=红点闪烁;没工作=灰点(和下面 REC 文字的 TextMuted 一致,不再是暗橙)
-                        .background(
-                            if (isRecording) ErrorColor.copy(alpha = recPulse) else TextMuted.copy(alpha = 0.6f),
-                            CircleShape,
-                        )
-                )
-                Spacer(Modifier.width(OctopusSpacing.xs))
-                Text(
-                    "REC",
-                    color = if (isRecording) ErrorColor else TextMuted,
-                    fontSize = OctopusType.micro,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp,
-                )
-            }
+            Row(Modifier.align(Alignment.TopEnd), verticalAlignment = Alignment.CenterVertically) {
             // 目标选择器:决定 Agent 在「本机」还是某台局域网设备上执行(移到右上,与三点并排)
-            TargetSelector(onPreview = { previewDevice = it })
+            if (DotRoster.find(currentCharacter) == null) TargetSelector(onPreview = { previewDevice = it })
             Spacer(modifier = Modifier.width(OctopusSpacing.xs))
             Box {
                 IconButton(onClick = { moreMenuOpen = true }) {
@@ -975,6 +1237,23 @@ fun ChatScreen() {
                 }
                 DropdownMenu(expanded = moreMenuOpen, onDismissRequest = { moreMenuOpen = false }) {
                     val dismiss = { moreMenuOpen = false }
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.chat_demo_record)) },
+                        leadingIcon = { Icon(Icons.Filled.FiberManualRecord, contentDescription = null, tint = ErrorColor) },
+                        onClick = {
+                            moreMenuOpen = false
+                            com.apk.claw.android.octopus_mobile.DemoRecorder.toggle()
+                        },
+                    )
+                    if (DotRoster.find(currentCharacter) != null) DropdownMenuItem(
+                        text = { Text(stringResource(R.string.dot_env_configure)) },
+                        enabled = !isRunning,
+                        onClick = { moreMenuOpen = false; showEnvironmentConnection = true },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.dot_local_personas)) },
+                        onClick = { moreMenuOpen = false; charMenuOpen = true },
+                    )
                     // 功能快捷区:菜单能装很长,别浪费 —— 直达常用功能,少绕导航。
                     MoreMenuLink(Icons.Filled.Apps, R.string.feat_miniapps, MiniAppListActivity::class.java, dismiss)
                     MoreMenuLink(Icons.Filled.Bolt, R.string.feat_skills, SkillsActivity::class.java, dismiss)
@@ -1051,271 +1330,8 @@ fun ChatScreen() {
             }
         }
 
-        // 设备实时预览(选了远程设备后出现在上半屏);「进入控制」开横屏全控页
-        previewDevice?.let { dev ->
-            key(dev.deviceId) {
-                DevicePreviewPanel(
-                    device = dev,
-                    onEnter = { runCatching { com.apk.claw.android.ui.device.RemoteControlActivity.start(context, dev.deviceId) } },
-                    onClose = { previewDevice = null },
-                )
-            }
         }
 
-        // 设置指引:未配置完成时显示,配齐后自动隐藏
-        if (!llmOk || !a11yOk) {
-            SetupGuideCard(
-                llmOk = llmOk,
-                a11yOk = a11yOk,
-                onConfigLlm = { runCatching { context.startActivity(android.content.Intent(context, LlmConfigActivity::class.java)) } },
-                onEnableA11y = { runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) } },
-            )
-        }
-
-        // 消息列表 / 空状态
-        if (messages.none { it !is ChatMessage.Thinking }) {
-            ChatHomeWorkbench(
-                llmOk = llmOk,
-                a11yOk = a11yOk,
-                isRunning = isRunning,
-                target = ControlTarget.label(),
-                deviceCount = devices.size,
-                onUsePrompt = { suggestion ->
-                    inputText = suggestion
-                    send()
-                },
-            )
-        } else {
-            Box(modifier = Modifier.weight(1f)) {
-                val rows by remember { derivedStateOf { buildChatRows(messages) } }
-                SelectionContainer {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize().padding(horizontal = OctopusSpacing.lg),
-                        verticalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
-                    ) {
-                        items(rows, key = { it.key }) { row ->
-                            when (row) {
-                                is ChatRow.Single -> when (val msg = row.msg) {
-                                    is ChatMessage.UserMessage -> UserBubble(msg.text)
-                                    is ChatMessage.AgentMessage -> AgentBubble(msg.text)
-                                    is ChatMessage.ToolCall -> ToolCallItem(msg)
-                                    is ChatMessage.Thinking -> ThinkingItem(msg.text)
-                                    is ChatMessage.Artifact -> ArtifactCard(
-                                        artifact = msg,
-                                        onClick = {
-                                            // refine-chat-interaction Task 4:根据 artifact.kind 创建对应 DetailPane。
-                                            // 关闭右侧栏详情开关时点击无操作(回退到现状,INV-U3)。
-                                            if (KVUtils.isDetailDrawerEnabled()) {
-                                                currentDetail = artifactDetailPane(msg) { currentDetail = null }
-                                            }
-                                        },
-                                    )
-                                }
-                                is ChatRow.ToolGroup -> ToolGroupItem(
-                                    tools = row.tools,
-                                    expanded = expandedGroups[row.tools.first().id] == true,
-                                    onToggle = { id -> expandedGroups[id] = expandedGroups[id] != true },
-                                )
-                                is ChatRow.ToolBatch -> {
-                                    // refine-chat-interaction:折叠并行工具开关。
-                                    // 开启时聚合为单张 ToolBatchCard;关闭时每个 ToolCall 独立渲染(回退到现状,INV-U3)。
-                                    if (KVUtils.isCollapseParallelTools()) {
-                                        ToolBatchCard(
-                                            calls = row.calls,
-                                            onShowDetail = { currentDetail = ToolsDetailPane(row.calls) },
-                                        )
-                                    } else {
-                                        row.calls.forEach { call ->
-                                            ToolCallItem(call)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        item { Spacer(modifier = Modifier.height(OctopusSpacing.sm)) }
-                    }
-                }
-                Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = OctopusSpacing.sm)) {
-                    ScrollToBottomButton(visible = showScrollToBottom, onClick = { scrollEnd() })
-                }
-            }
-        }
-
-        // ── 澄清问卷（选择题卡片）：待填写时显示在输入框上方，用户点选选项后填入输入框 ──
-        pendingForm?.let { form ->
-            ClarifyFormCard(
-                form = form,
-                onSelect = { qIdx, optIdx ->
-                    pendingForm = form.copy(
-                        selections = form.selections.toMutableList().apply { this[qIdx] = optIdx }
-                    )
-                },
-                onConfirm = {
-                    val answers = form.questions.mapIndexed { i, q ->
-                        val sel = form.selections[i]
-                        if (sel >= 0) "${q.q}${q.options[sel]}" else null
-                    }.filterNotNull()
-                    val filled = if (answers.isNotEmpty()) answers.joinToString("\n") + "\n" else ""
-                    inputText = filled
-                    pendingForm = null
-                },
-                onCancel = { pendingForm = null },
-            )
-        }
-
-        // 输入框（imePadding 让键盘弹起时输入框自动上移，不被键盘遮挡）
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.sm),
-            shape = OctopusShape.xl,
-            color = OctopusBackground.cardSurface,
-            border = BorderStroke(1.dp, OctopusBackground.cardBorder),
-            shadowElevation = OctopusThemeStyle.cardShadow(6.dp),
-        ) {
-            Column(modifier = Modifier.padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.sm)) {
-            if (voiceMode) {
-                // ── 语音优先：左侧键盘切换（次选）+ 大麦克风「按住说话」 ──
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .background(SurfaceDeepColor, CircleShape)
-                            .clickable { voiceMode = false },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(Icons.Filled.Keyboard, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(OctopusIconSize.medium))
-                    }
-                    Spacer(modifier = Modifier.width(OctopusSpacing.md))
-                    val red = ErrorColor
-                    val pillColor = if (isRunning || listening) red else SurfaceDeepColor
-                    val listeningText = stringResource(R.string.chat_voice_listening_release)
-                    val pillText = when {
-                        isRunning -> stringResource(R.string.chat_voice_stop_agent)
-                        listening -> partial.ifBlank { listeningText }
-                        else -> stringResource(R.string.chat_voice_hold_to_speak)
-                    }
-                    // 运行中=点按停止；否则=按住说话（松手即发）
-                    val pillGesture = if (isRunning) {
-                        Modifier.clickable(onClick = stop)
-                    } else {
-                        Modifier.pointerInput(Unit) {
-                            detectTapGestures(onPress = {
-                                if (hasMic()) {
-                                    startListening()
-                                    tryAwaitRelease()
-                                    voice.stop()   // 松手 → 收尾 → onResult 自动 send()
-                                } else {
-                                    micPermLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                }
-                            })
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp)
-                            .background(pillColor, OctopusShape.large)
-                            .then(pillGesture),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.Mic, contentDescription = null, tint = if (isRunning || listening) OnPrimaryColor else TextSecondary, modifier = Modifier.size(OctopusIconSize.small))
-                            Spacer(Modifier.width(OctopusSpacing.sm))
-                            Text(
-                                pillText,
-                                color = if (isRunning || listening) OnPrimaryColor else TextSecondary,
-                                fontSize = OctopusType.bodyStrong,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-                }
-            } else {
-                // ── 文本模式：左侧实时语音通话 + 麦克风切回 + 文本框 + 发送/停止 ──
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .background(SurfaceDeepColor, CircleShape)
-                            .clickable {
-                                runCatching {
-                                    context.startActivity(
-                                        android.content.Intent(context, VoiceCallActivity::class.java),
-                                    )
-                                }
-                            }
-                            .tvFocusable(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            Icons.Filled.Call,
-                            contentDescription = stringResource(R.string.voice_call_entry),
-                            tint = PrimaryColor,
-                            modifier = Modifier.size(OctopusIconSize.medium),
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(OctopusSpacing.md))
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .background(SurfaceDeepColor, CircleShape)
-                            .clickable { voiceMode = true }
-                            .tvFocusable(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(Icons.Filled.KeyboardVoice, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(OctopusIconSize.medium))
-                    }
-                    Spacer(modifier = Modifier.width(OctopusSpacing.md))
-                    OutlinedTextField(
-                        value = inputText,
-                        onValueChange = { inputText = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text(stringResource(R.string.chat_input_hint), color = TextMuted) },
-                        shape = OctopusShape.large,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PrimaryColor,
-                            unfocusedBorderColor = BorderColor,
-                            focusedContainerColor = SurfaceDeepColor,
-                            unfocusedContainerColor = SurfaceDeepColor,
-                            cursorColor = PrimaryColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                        ),
-                        singleLine = true,
-                        textStyle = TextStyle(fontSize = OctopusType.bodyStrong),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                        keyboardActions = KeyboardActions(onSend = { send() }),
-                    )
-                    Spacer(modifier = Modifier.width(OctopusSpacing.md))
-                    // 运行中=红色停止键(可中断);否则=发送键(无输入时淡化)
-                    val btnActive = isRunning || inputText.isNotBlank()
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .background(
-                                (if (isRunning) ErrorColor else PrimaryColor)
-                                    .copy(alpha = if (btnActive) 1f else 0.35f),
-                                CircleShape
-                            )
-                            .clickable(onClick = if (isRunning) stop else send)
-                            .tvFocusable(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            if (isRunning) Icons.Filled.Stop else Icons.AutoMirrored.Filled.Send,
-                            contentDescription = null,
-                            tint = OnPrimaryColor,
-                            modifier = Modifier.size(OctopusIconSize.medium),
-                        )
-                    }
-                }
-            }
-            }
-        }
     }
     // 新建对话工作空间选择对话框(类似 Codex 启动时选项目目录)
     if (showNewChatWorkspaceDialog) {
@@ -1523,7 +1539,7 @@ private fun ChatSessionDrawer(
         modifier = Modifier.fillMaxHeight().width(304.dp),
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.lg)) {
-            Text("Octopus", color = TextPrimary, fontSize = OctopusType.headlineSm, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.app_name), color = TextPrimary, fontSize = OctopusType.headlineSm, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(OctopusSpacing.xs))
             Text(stringResource(R.string.chat_drawer_subtitle), color = TextMuted, fontSize = OctopusType.label)
             Spacer(Modifier.height(OctopusSpacing.lg))
@@ -1624,14 +1640,16 @@ private fun AgentHomeStatusCard(
 
 @Composable
 private fun ColumnScope.ChatHomeWorkbench(
+    dot: DotMember? = null,
     llmOk: Boolean,
-    a11yOk: Boolean,
-    isRunning: Boolean,
     target: String,
-    deviceCount: Int,
     onUsePrompt: (String) -> Unit,
 ) {
-    val prompts = listOf(
+    val prompts = if (dot != null) listOf(
+        HomePrompt(stringResource(R.string.dot_task), stringResource(R.string.dot_prompt_task, dotSpecialty(dot)), Icons.Filled.AutoAwesome, AccentColor),
+        HomePrompt(stringResource(R.string.dot_plan), stringResource(R.string.dot_prompt_plan), Icons.Filled.Search, PrimaryColor),
+        HomePrompt(stringResource(R.string.dot_intro), stringResource(R.string.dot_prompt_intro), Icons.Filled.Chat, SuccessColor),
+    ) else listOf(
         HomePrompt(
             label = stringResource(R.string.chat_prompt_monitor),
             text = stringResource(R.string.chat_suggestion_notifications),
@@ -1651,107 +1669,74 @@ private fun ColumnScope.ChatHomeWorkbench(
             color = SuccessColor,
         ),
     )
+    BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+    // Position the empty welcome content within the full conversation canvas.
+    // This spacing is independent of the floating header's measured height.
+    val welcomeInset = if (dot != null) (maxHeight * .24f).coerceAtLeast(156.dp) else OctopusSpacing.md
     LazyColumn(
         modifier = Modifier
-            .weight(1f)
-            .fillMaxWidth()
-            .padding(horizontal = OctopusSpacing.lg),
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
-        contentPadding = PaddingValues(top = OctopusSpacing.md, bottom = OctopusSpacing.lg),
+        contentPadding = PaddingValues(top = welcomeInset, bottom = OctopusSpacing.lg),
     ) {
         item {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = OctopusShape.xl,
-                color = OctopusBackground.cardSurface,
-                border = BorderStroke(1.dp, OctopusBackground.cardBorder),
-                shadowElevation = OctopusThemeStyle.cardShadow(10.dp),
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Column(modifier = Modifier.padding(OctopusSpacing.xl)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = CircleShape,
-                            color = PrimaryColor.copy(alpha = 0.16f),
-                            border = BorderStroke(1.dp, PrimaryColor.copy(alpha = 0.24f)),
-                        ) {
-                            Icon(
-                                Icons.Filled.Psychology,
-                                contentDescription = null,
-                                tint = PrimaryColor,
-                                modifier = Modifier.padding(OctopusSpacing.md).size(OctopusIconSize.large),
-                            )
-                        }
-                        Spacer(Modifier.width(OctopusSpacing.md))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                stringResource(R.string.chat_empty_title),
-                                fontSize = OctopusType.headlineSm,
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary,
-                                letterSpacing = 0.sp,
-                                lineHeight = 28.sp,
-                            )
-                            Spacer(Modifier.height(OctopusSpacing.xs))
-                            Text(
-                                stringResource(R.string.chat_empty_hint),
-                                fontSize = OctopusType.body,
-                                color = TextMuted,
-                                lineHeight = 18.sp,
-                            )
-                        }
+                if (dot == null) {
+                    Image(
+                        painterResource(R.drawable.ic_echo_foreground),
+                        contentDescription = null,
+                        modifier = Modifier.size(76.dp).clip(CircleShape).background(Color(0xFF141B3A)),
+                    )
+                    Spacer(Modifier.height(20.dp))
+                }
+                Text(
+                    if (dot != null) stringResource(R.string.dot_home_title, dot.name) else stringResource(R.string.chat_empty_title),
+                    color = TextPrimary, fontSize = 26.sp, fontWeight = FontWeight.SemiBold,
+                    lineHeight = 33.sp, letterSpacing = (-0.6).sp, textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    if (dot != null) dotSpecialty(dot) else stringResource(R.string.chat_empty_hint),
+                    color = TextMuted, fontSize = 14.sp, lineHeight = 21.sp,
+                    textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 18.dp),
+                )
+                Spacer(Modifier.height(20.dp))
+                if (dot == null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    var tierMenu by remember { mutableStateOf(false) }
+                    var tier by remember { mutableStateOf(AccountConfig.modelTier) }
+                    val tierLabel = when (tier) {
+                        AccountConfig.TIER_FLASH -> stringResource(R.string.account_tier_flash)
+                        AccountConfig.TIER_PREMIUM -> stringResource(R.string.account_tier_premium)
+                        else -> stringResource(R.string.account_tier_fast)
                     }
-                    Spacer(Modifier.height(OctopusSpacing.lg))
-                    Row(horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm), modifier = Modifier.fillMaxWidth()) {
-                        // 模型档位：点开直接切「快速 / 标准 / 高级」(写入 AccountConfig.modelTier，下次任务即生效)
-                        var tierMenu by remember { mutableStateOf(false) }
-                        var tier by remember { mutableStateOf(AccountConfig.modelTier) }
-                        val tierLabel = when (tier) {
-                            AccountConfig.TIER_FLASH -> stringResource(R.string.account_tier_flash)
-                            AccountConfig.TIER_PREMIUM -> stringResource(R.string.account_tier_premium)
-                            else -> stringResource(R.string.account_tier_fast)
-                        }
-                        Box(modifier = Modifier.weight(1f)) {
-                            HomeTinyStat(
-                                label = stringResource(R.string.chat_metric_model),
-                                value = if (llmOk) tierLabel else stringResource(R.string.chat_agent_setup_needed),
-                                ok = llmOk,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { tierMenu = true },
-                            )
-                            DropdownMenu(expanded = tierMenu, onDismissRequest = { tierMenu = false }) {
-                                listOf(
-                                    AccountConfig.TIER_FAST to R.string.account_tier_fast,
-                                    AccountConfig.TIER_FLASH to R.string.account_tier_flash,
-                                    AccountConfig.TIER_PREMIUM to R.string.account_tier_premium,
-                                ).forEach { (t, nameRes) ->
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(nameRes)) },
-                                        trailingIcon = {
-                                            if (t == tier) Icon(Icons.Filled.Check, contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(OctopusIconSize.small))
-                                        },
-                                        onClick = { AccountConfig.modelTier = t; tier = t; tierMenu = false },
-                                    )
-                                }
+                    Box(modifier = Modifier.weight(1f)) {
+                        HomeTinyStat(
+                            label = stringResource(R.string.chat_metric_model), value = tierLabel,
+                            ok = llmOk, modifier = Modifier.fillMaxWidth(), onClick = { tierMenu = true },
+                        )
+                        DropdownMenu(expanded = tierMenu, onDismissRequest = { tierMenu = false }) {
+                            listOf(
+                                AccountConfig.TIER_FAST to R.string.account_tier_fast,
+                                AccountConfig.TIER_FLASH to R.string.account_tier_flash,
+                                AccountConfig.TIER_PREMIUM to R.string.account_tier_premium,
+                            ).forEach { (t, nameRes) ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(nameRes)) },
+                                    trailingIcon = { if (t == tier) Icon(Icons.Filled.Check, contentDescription = null, tint = PrimaryColor) },
+                                    onClick = { AccountConfig.modelTier = t; tier = t; tierMenu = false },
+                                )
                             }
                         }
-                        HomeTinyStat(
-                            label = stringResource(R.string.chat_metric_target),
-                            value = target,
-                            ok = true,
-                            modifier = Modifier.weight(1f),
-                        )
                     }
+                    HomeTinyStat(label = stringResource(R.string.chat_metric_target), value = target,
+                        ok = true, modifier = Modifier.weight(1f))
                 }
             }
-        }
-        item {
-            AgentHomeStatusCard(
-                llmOk = llmOk,
-                a11yOk = a11yOk,
-                isRunning = isRunning,
-                target = target,
-                deviceCount = deviceCount,
-            )
         }
         item {
             Text(
@@ -1768,6 +1753,8 @@ private fun ColumnScope.ChatHomeWorkbench(
     }
 }
 
+}
+
 private data class HomePrompt(
     val label: String,
     val text: String,
@@ -1779,20 +1766,15 @@ private data class HomePrompt(
 private fun HomeTinyStat(label: String, value: String, ok: Boolean, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Surface(
         modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
-        shape = OctopusShape.large,
-        color = SurfaceDeepColor.copy(alpha = 0.78f),
-        border = BorderStroke(1.dp, if (ok) PrimaryColor.copy(alpha = 0.18f) else BorderColor),
+        shape = RoundedCornerShape(18.dp), color = EchoChatStyle.softSurface,
     ) {
-        Column(modifier = Modifier.padding(horizontal = OctopusSpacing.md, vertical = OctopusSpacing.sm)) {
-            Text(label, color = TextMuted, fontSize = OctopusType.tag, maxLines = 1)
-            Spacer(Modifier.height(OctopusSpacing.xs))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(value, color = if (ok) TextPrimary else WarningColor, fontSize = OctopusType.label, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                if (onClick != null) {
-                    Spacer(Modifier.width(OctopusSpacing.xs))
-                    Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = TextMuted, modifier = Modifier.size(OctopusIconSize.small))
-                }
-            }
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label, color = TextMuted, fontSize = 11.sp, maxLines = 1)
+            Spacer(Modifier.width(6.dp))
+            Text(value, color = if (ok) TextPrimary else TextMuted, fontSize = 12.sp,
+                fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f))
+            if (onClick != null) Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = TextMuted, modifier = Modifier.size(14.dp))
         }
     }
 }
@@ -1800,10 +1782,10 @@ private fun HomeTinyStat(label: String, value: String, ok: Boolean, modifier: Mo
 @Composable
 private fun PromptSuggestion(prompt: HomePrompt, onClick: () -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(vertical = OctopusSpacing.xs).clickable(onClick = onClick),
-        shape = OctopusShape.large,
-        color = OctopusBackground.cardSurface,
-        border = BorderStroke(1.dp, OctopusBackground.cardBorder),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        color = EchoChatStyle.surface,
+        border = BorderStroke(1.dp, EchoChatStyle.border),
         shadowElevation = OctopusThemeStyle.cardShadow(1.dp),
     ) {
         Row(modifier = Modifier.padding(horizontal = OctopusSpacing.md, vertical = OctopusSpacing.md), verticalAlignment = Alignment.CenterVertically) {
@@ -1814,7 +1796,7 @@ private fun PromptSuggestion(prompt: HomePrompt, onClick: () -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(prompt.label, color = TextPrimary, fontSize = OctopusType.bodyStrong, fontWeight = FontWeight.SemiBold, maxLines = 1)
                 Spacer(Modifier.height(OctopusSpacing.xs))
-                Text(prompt.text, color = TextSecondary, fontSize = OctopusType.body, lineHeight = 17.sp)
+                Text(prompt.text, color = TextSecondary, fontSize = OctopusType.body, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -2116,7 +2098,7 @@ private fun UserBubble(text: String) {
     ) {
         Box {
             Surface(
-                shape = OctopusShape.userBubble,
+                shape = RoundedCornerShape(22.dp, 22.dp, 6.dp, 22.dp),
                 color = UserBubbleColor,
                 shadowElevation = 0.dp,
                 modifier = Modifier
@@ -2127,8 +2109,8 @@ private fun UserBubble(text: String) {
                     text,
                     modifier = Modifier.padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.md),
                     fontSize = OctopusType.bodyStrong,
-                    color = OnPrimaryColor,
-                    lineHeight = 21.sp,
+                    color = EchoChatStyle.onAccentSurface,
+                    lineHeight = 23.sp,
                 )
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -2168,7 +2150,7 @@ private fun AgentBubble(text: String) {
     ) {
         Surface(
             modifier = Modifier.widthIn(max = maxBubbleWidth),
-            shape = OctopusShape.agentBubble,
+            shape = RoundedCornerShape(22.dp, 22.dp, 22.dp, 6.dp),
             color = AgentBubbleColor,
             shadowElevation = 0.dp,
         ) {
@@ -2216,7 +2198,11 @@ private fun MarkdownText(text: String) {
                 setLineSpacing(0f, 1.35f)
             }
         },
-        update = { tv -> markwon.setMarkdown(tv, text) },
+        update = { tv ->
+            tv.setTextColor(textColor)
+            tv.setLinkTextColor(linkColor)
+            markwon.setMarkdown(tv, text)
+        },
     )
 }
 
@@ -2274,22 +2260,31 @@ private fun SetupGuideCard(
     onConfigLlm: () -> Unit,
     onEnableA11y: () -> Unit,
 ) {
+    var expanded by remember { mutableStateOf(false) }
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = OctopusSpacing.lg, vertical = OctopusSpacing.sm),
-        shape = OctopusShape.large,
-        color = PrimaryColor.copy(alpha = 0.10f),
-        border = BorderStroke(1.dp, PrimaryColor.copy(alpha = 0.25f)),
-        shadowElevation = OctopusThemeStyle.cardShadow(1.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(20.dp), color = EchoChatStyle.accentSurface,
     ) {
-        Column(modifier = Modifier.padding(OctopusSpacing.lg)) {
-            Text(
-                stringResource(R.string.setup_title),
-                fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold, color = TextPrimary,
-            )
-            Spacer(modifier = Modifier.height(OctopusSpacing.sm))
-            SetupRow(stringResource(R.string.setup_llm), llmOk, onConfigLlm)
-            Spacer(modifier = Modifier.height(OctopusSpacing.xs))
-            SetupRow(stringResource(R.string.setup_a11y), a11yOk, onEnableA11y)
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Filled.Bolt, contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.setup_title), modifier = Modifier.weight(1f),
+                    color = EchoChatStyle.onAccentSurface, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Text("${(if (llmOk) 1 else 0) + (if (a11yOk) 1 else 0)}/2", color = PrimaryColor, fontSize = 12.sp)
+                Spacer(Modifier.width(6.dp))
+                Icon(if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(18.dp))
+            }
+            AnimatedVisibility(expanded) {
+                Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp)) {
+                    SetupRow(stringResource(R.string.setup_llm), llmOk, onConfigLlm)
+                    SetupRow(stringResource(R.string.setup_a11y), a11yOk, onEnableA11y)
+                }
+            }
         }
     }
 }

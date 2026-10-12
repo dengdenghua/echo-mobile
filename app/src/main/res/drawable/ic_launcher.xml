@@ -1,45 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Octopus 应用图标 = 官网 octoapk.com 品牌 logo(深底白章鱼)。
-     由官网 public/icon.svg(logo-02,88x88)转换为 Android 矢量:rect/circle→path、
-     transform:rotate→<group rotation>。launcher / 悬浮窗 / 闪屏 / 通知 / widget 全局复用。 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="88"
-    android:viewportHeight="88">
-
-    <!-- 背景:深色圆角方块 #111827(rx=28) -->
-    <path android:fillColor="#111827"
-        android:pathData="M28,0 L60,0 A28,28 0 0 1 88,28 L88,60 A28,28 0 0 1 60,88 L28,88 A28,28 0 0 1 0,60 L0,28 A28,28 0 0 1 28,0 Z" />
-
-    <!-- 章鱼整体绕中心(44,44)放大 1.22×,比官网原版更满更醒目;背景方块不缩放。 -->
-    <group android:scaleX="1.22" android:scaleY="1.22" android:pivotX="44" android:pivotY="44">
-        <!-- 章鱼头(白) -->
-        <path android:fillColor="#FFFFFF"
-            android:pathData="M44,19.5 A19,19 0 0 1 63,38.5 v2.28 A16.72,16.72 0 0 1 46.28,57.5 h-4.56 A16.72,16.72 0 0 1 25,40.78 V38.5 a19,19 0 0 1 19,-19 Z" />
-
-        <!-- 4 条触手(白,各绕自身顶端中点旋转) -->
-        <group android:rotation="28" android:pivotX="28" android:pivotY="43.5">
-            <path android:fillColor="#FFFFFF"
-                android:pathData="M28,43.5 L28,43.5 A5,5 0 0 1 33,48.5 L33,63.5 A5,5 0 0 1 28,68.5 L28,68.5 A5,5 0 0 1 23,63.5 L23,48.5 A5,5 0 0 1 28,43.5 Z" />
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Echo sphere E: shared with login, splash, overlays and widgets. -->
+    <path android:pathData="M24,0 H84 A24,24 0,0 1,108 24 V84 A24,24 0,0 1,84 108 H24 A24,24 0,0 1,0 84 V24 A24,24 0,0 1,24 0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="108" android:endY="108">
+                <item android:offset="0" android:color="#243966" />
+                <item android:offset="0.5" android:color="#141B3A" />
+                <item android:offset="1" android:color="#0C1022" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <group android:translateX="3.44" android:translateY="3.44" android:scaleX="1.58" android:scaleY="1.58">
+        <group android:rotation="-28" android:pivotX="32" android:pivotY="32">
+            <path android:fillColor="#00000000" android:strokeColor="#8FAEFF" android:strokeAlpha="0.85"
+                android:strokeWidth="1.5" android:pathData="M7.6,32 A24.4,12.7 0,1 0,56.4 32 A24.4,12.7 0,1 0,7.6 32" />
         </group>
-        <group android:rotation="8" android:pivotX="41" android:pivotY="43.5">
-            <path android:fillColor="#FFFFFF"
-                android:pathData="M41,43.5 L41,43.5 A5,5 0 0 1 46,48.5 L46,63.5 A5,5 0 0 1 41,68.5 L41,68.5 A5,5 0 0 1 36,63.5 L36,48.5 A5,5 0 0 1 41,43.5 Z" />
+        <group android:rotation="42" android:pivotX="32" android:pivotY="32">
+            <path android:fillColor="#00000000" android:strokeColor="#BA91FF" android:strokeAlpha="0.65"
+                android:strokeWidth="1.4" android:pathData="M9.4,32 A22.6,14 0,1 0,54.6 32 A22.6,14 0,1 0,9.4 32" />
         </group>
-        <group android:rotation="-8" android:pivotX="47" android:pivotY="43.5">
-            <path android:fillColor="#FFFFFF"
-                android:pathData="M47,43.5 L47,43.5 A5,5 0 0 1 52,48.5 L52,63.5 A5,5 0 0 1 47,68.5 L47,68.5 A5,5 0 0 1 42,63.5 L42,48.5 A5,5 0 0 1 47,43.5 Z" />
+        <group android:rotation="92" android:pivotX="32" android:pivotY="32">
+            <path android:fillColor="#00000000" android:strokeColor="#7CE7F3" android:strokeAlpha="0.4"
+                android:strokeWidth="1.2" android:pathData="M11.2,32 A20.8,9.4 0,1 0,52.8 32 A20.8,9.4 0,1 0,11.2 32" />
         </group>
-        <group android:rotation="-28" android:pivotX="60" android:pivotY="43.5">
-            <path android:fillColor="#FFFFFF"
-                android:pathData="M60,43.5 L60,43.5 A5,5 0 0 1 65,48.5 L65,63.5 A5,5 0 0 1 60,68.5 L60,68.5 A5,5 0 0 1 55,63.5 L55,48.5 A5,5 0 0 1 60,43.5 Z" />
-        </group>
-
-        <!-- 眼睛(深色,压在头上) -->
-        <path android:fillColor="#111827"
-            android:pathData="M35,38.5 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 Z" />
-        <path android:fillColor="#111827"
-            android:pathData="M47,38.5 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 Z" />
+        <path android:strokeColor="#93ADFA" android:strokeAlpha="0.65" android:strokeWidth="0.8"
+            android:pathData="M13,32 A19,19 0,1 0,51 32 A19,19 0,1 0,13 32">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="25" android:centerY="22" android:gradientRadius="36">
+                    <item android:offset="0" android:color="#DDE8FF" />
+                    <item android:offset="0.1" android:color="#708FE1" />
+                    <item android:offset="0.32" android:color="#233766" />
+                    <item android:offset="0.72" android:color="#090E25" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:fillColor="#00000000" android:strokeColor="#F3F6FF" android:strokeWidth="3.2"
+            android:strokeLineCap="round" android:strokeLineJoin="round"
+            android:pathData="M38,24.6 H27.6 V39.4 H38 M27.6,32 H36" />
     </group>
 </vector>

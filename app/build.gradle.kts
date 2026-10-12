@@ -340,7 +340,7 @@ androidComponents {
                 // 分包带具体 ABI;universal 通用包无 ABI 过滤 → 标成 _universal 以区分
                 val abiTag = if (abi != null) "_$abi" else "_universal"
                 // 文件名必须可复现:只含版本号、versionCode 与 ABI,不含构建时间戳。
-                val fileName = "OctopusMobile_v${versionName}_vc${versionCode}${abiTag}.apk"
+                val fileName = "EchoMobile_v${versionName}_vc${versionCode}${abiTag}.apk"
                 println("output file name: $fileName")
                 output.outputFileName.set(fileName)
             }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Octopus Mobile</string>
+    <string name="app_name">Echo</string>
 
     <!-- AppWidget -->
     <string name="widget_subtitle_default">Toque para iniciar · Pressione e segure para voz</string>
@@ -41,7 +41,7 @@
     <string name="guide_desc_accessibility">Esta é a permissão principal para controlar o dispositivo.
 
 1. Vá em Configurações do sistema → Acessibilidade → Apps baixados
-2. Encontre "Octopus Mobile" na lista
+2. Encontre "Echo" na lista
 3. Ligue o interruptor
 4. Confirme na caixa de diálogo do sistema</string>
     <string name="guide_title_notification">Notificação persistente</string>
@@ -49,7 +49,7 @@
     <string name="guide_title_overlay">Janela sobreposta</string>
     <string name="guide_desc_overlay">Mostra um painel flutuante para visualizar o status de execução da tarefa.
 
-1. Vá em Configurações do sistema → Apps → Octopus Mobile
+1. Vá em Configurações do sistema → Apps → Echo
 2. Encontre "Exibir sobre outros apps"
 3. Ligue o interruptor</string>
     <string name="guide_title_battery">Lista branca de bateria</string>
@@ -68,20 +68,20 @@
 • Forçar parada de apps, modificar configurações do sistema
 
 Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
-    <string name="advanced_dialog_steps">Etapas de configuração:\n1. Instale o Shizuku da Play Store ou GitHub\n2. Inicie-o uma vez via Depuração sem fio (Android 11+) ou ADB no PC\n3. Volte aqui, o Octopus detectará automaticamente</string>
+    <string name="advanced_dialog_steps">Etapas de configuração:\n1. Instale o Shizuku da Play Store ou GitHub\n2. Inicie-o uma vez via Depuração sem fio (Android 11+) ou ADB no PC\n3. Volte aqui, o Echo detectará automaticamente</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku está pronto, recursos avançados ativados</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku está instalado, mas não autorizado. Abra o Shizuku para concluir a autorização.</string>
     <string name="advanced_dialog_status_not_installed">Shizuku ainda não está instalado.</string>
     <string name="advanced_action_open_shizuku">Abrir Shizuku</string>
     <string name="advanced_action_install">Instalar Shizuku</string>
     <string name="advanced_action_downloading">Baixando…</string>
-    <string name="advanced_install_fetching">Conectando ao site oficial do Octopus…</string>
+    <string name="advanced_install_fetching">Conectando ao site oficial do Echo…</string>
     <string name="advanced_install_downloading">Baixando instalador do Shizuku…</string>
     <string name="advanced_install_opening">Instalador baixado, abrindo instalador do sistema.</string>
     <string name="advanced_install_not_configured">O instalador do Shizuku não está configurado no site oficial, tente novamente mais tarde.</string>
     <string name="advanced_install_verify_failed">Falha na verificação do instalador, tente novamente mais tarde.</string>
     <string name="advanced_install_failed">Falha no download e na instalação, verifique sua rede e tente novamente.</string>
-    <string name="advanced_install_unknown_sources_required">Permita que o Octopus instale apps de fontes desconhecidas primeiro, depois retorne e tente novamente.</string>
+    <string name="advanced_install_unknown_sources_required">Permita que o Echo instale apps de fontes desconhecidas primeiro, depois retorne e tente novamente.</string>
     <string name="advanced_action_learn_more">Saiba mais</string>
     <string name="advanced_action_close">Fechar</string>
     <string name="advanced_url_download">https://shizuku.rikka.app/download/</string>
@@ -89,7 +89,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
 
     <!-- Home -->
     <string name="home_need_notification_permission">Permissão de notificação necessária</string>
-    <string name="home_enable_accessibility">Ative o serviço de acessibilidade do Octopus Mobile</string>
+    <string name="home_enable_accessibility">Ative o serviço de acessibilidade do Echo</string>
     <string name="home_accessibility_enabled">Serviço de acessibilidade ativado</string>
     <string name="home_notification_enabled">Notificação persistente ativada</string>
     <string name="home_overlay_enabled">Permissão de sobreposição ativada</string>
@@ -226,9 +226,9 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="floating_task_received">Recebido: "%s"</string>
 
     <!-- Notificação de serviço em primeiro plano -->
-    <string name="notification_channel_name">Status do Octopus Mobile</string>
-    <string name="notification_channel_description">Mostra o status de execução e estatísticas do Octopus Mobile</string>
-    <string name="notification_content_title">O Octopus Mobile está em execução</string>
+    <string name="notification_channel_name">Status do Echo</string>
+    <string name="notification_channel_description">Mostra o status de execução e estatísticas do Echo</string>
+    <string name="notification_content_title">O Echo está em execução</string>
     <string name="notification_content_text">Serviço de tarefas inteligentes em execução</string>
 
     <!-- Mensagens do canal -->
@@ -513,7 +513,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="device_screenshot_failed">Falha na captura de tela (requer acessibilidade ou Shizuku)</string>
     <string name="device_android_version">Android %1$s</string>
     <string name="device_nearby">Dispositivos próximos</string>
-    <string name="device_nearby_empty">Procurando… Abra o Octopus em outro dispositivo no mesmo Wi-Fi</string>
+    <string name="device_nearby_empty">Procurando… Abra o Echo em outro dispositivo no mesmo Wi-Fi</string>
     <string name="device_discoverable">%1$s está detectável</string>
     <string name="device_discoverable_off">Conecte-se ao Wi-Fi para ser detectável</string>
     <string name="device_cmd_sent">Enviado para %1$s</string>
@@ -687,7 +687,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="routine_runner_starting_execution">Iniciando execução</string>
     <string name="settings_llm_api_key_configured">Configurado</string>
     <string name="settings_rpc_url_default">Não configurado (padrão: ws://10.0.2.2:8765)</string>
-    <string name="settings_octopus_runtime_title">Conexão com host · Octopus Runtime</string>
+    <string name="settings_octopus_runtime_title">Conexão com host · Echo Runtime</string>
     <string name="settings_rpc_remote_brain_description">Execução remota RPC (host despacha ferramentas/execução)</string>
     <string name="settings_pc_remote_desktop_title">Área de trabalho remota do host</string>
     <string name="settings_pc_remote_h264_description">Ver tela do PC + controle de toque/teclado (H.264/WS, mesma LAN)</string>
@@ -1070,7 +1070,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="settings_go_setup">Ir para configurações</string>
     <string name="settings_status_ok">OK</string>
     <string name="settings_status_set">Definir</string>
-    <string name="settings_version_template">Octopus Mobile v%1$s · Apache 2.0</string>
+    <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">DingTalk</string>
     <string name="channel_name_feishu">Feishu</string>
     <string name="channel_name_qq">QQ</string>
@@ -1127,7 +1127,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="feat_explore_circle_avatar">Avatar de %1$s</string>
 
     <!-- Cabeçalho da marca -->
-    <string name="browser_brand_name">Octopus</string>
+    <string name="browser_brand_name">Echo</string>
     <string name="browser_brand_slogan">Reinventando a navegação inteligente</string>
 
     <!-- Sobreposição do assistente de voz -->
