@@ -1594,4 +1594,6 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="dot_progress_step_ok">✓ %1$s</string>
     <string name="dot_progress_step_failed">Failed · %1$s</string>
     <plurals name="dot_progress_step_count"><item quantity="one">%1$d step recorded</item><item quantity="other">%1$d steps recorded</item></plurals>
+    <string name="dot_progress_expand">Show execution steps</string>
+    <string name="dot_progress_collapse">Hide execution steps</string>
 </resources>

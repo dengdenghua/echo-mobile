@@ -1582,4 +1582,6 @@
     <string name="dot_progress_step_ok">✓ %1$s</string>
     <string name="dot_progress_step_failed">失败 · %1$s</string>
     <plurals name="dot_progress_step_count"><item quantity="one">已执行 %1$d 步</item><item quantity="other">已执行 %1$d 步</item></plurals>
+    <string name="dot_progress_expand">展开执行步骤</string>
+    <string name="dot_progress_collapse">收起执行步骤</string>
 </resources>
