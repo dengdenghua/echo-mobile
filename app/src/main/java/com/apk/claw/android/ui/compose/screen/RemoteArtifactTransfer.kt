@@ -65,7 +65,7 @@ internal object RemoteArtifactTransfer {
             if (file.isFile && file.length() == source.size && hash(file) == source.sha256) return@withLock file
             val environment = DotEnvironment.entries.first { it.id == source.environment }
             require(environment != DotEnvironment.PHONE)
-            val connection = DotRepository.connection(environment)
+            val connection = DotPairingRepository.connection(environment)
             if (connection.base != source.base) throw DeliveryException(R.string.echo_task_original_connection)
             val builder = Request.Builder().url("${source.base}/api/mobile/tasks/$taskId/artifacts/$artifactId")
             if (connection.token.isNotBlank()) builder.header("Authorization", "Bearer ${connection.token}")

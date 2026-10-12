@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 internal object DotRepository {
     private val gson = Gson()
     private val client = OctoHttp.shared.newBuilder()
+        .followRedirects(false).followSslRedirects(false)
         .connectTimeout(5, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).build()
     private val taskClient = client.newBuilder().readTimeout(15, TimeUnit.SECONDS).build()
     private val rosterClient = client.newBuilder().readTimeout(5, TimeUnit.SECONDS).build()
@@ -26,12 +27,13 @@ internal object DotRepository {
             it.fragment == null && it.username.isEmpty() && it.password.isEmpty()
     } == true
 
-    private fun request(path: String, environment: DotEnvironment): Request.Builder {
+    private suspend fun request(path: String, environment: DotEnvironment): Request.Builder {
         require(environment != DotEnvironment.PHONE) { "Phone tasks use the local agent" }
-        val base = DotEnvironmentStore.address(environment).trim().trimEnd('/')
+        val connection = DotPairingRepository.connection(environment)
+        val base = connection.base
         require(validBaseUrl(base)) { "Invalid Echo address" }
         return Request.Builder().url(base + path).apply {
-            DotEnvironmentStore.token(environment).takeIf { it.isNotBlank() }?.let { header("Authorization", "Bearer $it") }
+            connection.token.takeIf { it.isNotBlank() }?.let { header("Authorization", "Bearer $it") }
         }
     }
 
@@ -49,21 +51,27 @@ internal object DotRepository {
         rows.mapNotNull { it.asJsonObject.get("name")?.asString }.toSet()
     }
 
-    internal data class Connection(val base: String, val token: String)
+    internal data class Connection(val base: String, val token: String, val environment: DotEnvironment? = null)
     internal data class TaskArtifact(val id: String, val name: String, val mime: String, val size: Long, val sha256: String)
     internal data class TaskResult(val status: String, val answer: String,
         val artifacts: List<TaskArtifact> = emptyList(), val omittedArtifacts: Int = 0)
     internal class TaskHttpException(val code: Int) : Exception("HTTP $code")
 
     fun connection(environment: DotEnvironment) = Connection(
-        DotEnvironmentStore.address(environment).trim().trimEnd('/'), DotEnvironmentStore.token(environment))
+        DotEnvironmentStore.address(environment).trim().trimEnd('/'), DotEnvironmentStore.token(environment), environment)
 
-    private suspend fun taskRequest(path: String, connection: Connection, body: String? = null): TaskResult = withContext(Dispatchers.IO) {
+    private suspend fun taskRequest(path: String, connection: Connection, body: String? = null, mayRefresh: Boolean = true): TaskResult = withContext(Dispatchers.IO) {
         require(validBaseUrl(connection.base)) { "Invalid device address" }
         val builder = Request.Builder().url(connection.base + path)
         if (connection.token.isNotBlank()) builder.header("Authorization", "Bearer ${connection.token}")
         if (body != null) builder.post(body.toRequestBody(jsonType)) else builder.get()
         taskClient.newCall(builder.build()).execute().use { response ->
+            if (response.code == 401 && mayRefresh && connection.environment?.let { DotPairingRepository.paired(it) } == true) {
+                response.close()
+                val renewed = DotPairingRepository.connection(connection.environment, forceRefresh = true)
+                require(renewed.base == connection.base) { "Original device connection changed" }
+                return@withContext taskRequest(path, renewed, body, mayRefresh = false)
+            }
             if (!response.isSuccessful) throw TaskHttpException(response.code)
             val row = JsonParser.parseString(response.body!!.string()).asJsonObject
             val result = row.get("result")?.takeUnless { it.isJsonNull }?.asJsonObject

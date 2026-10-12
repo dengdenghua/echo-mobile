@@ -23,7 +23,7 @@ internal object DotScreenRepository {
 
     suspend fun frame(environment: DotEnvironment): Bitmap {
         require(environment != DotEnvironment.PHONE)
-        val connection = DotRepository.connection(environment)
+        val connection = DotPairingRepository.connection(environment)
         require(DotRepository.validBaseUrl(connection.base))
         val request = Request.Builder().url(connection.base + "/api/computer/screen").apply {
             if (connection.token.isNotBlank()) header("Authorization", "Bearer ${connection.token}")

@@ -235,7 +235,7 @@ internal object DeviceExecutionStore {
                         delay(3000); continue
                     }
                     try {
-                        val snapshot = DotRepository.connection(environment)
+                        val snapshot = DotPairingRepository.connection(environment)
                         var cancelledBeforeSubmit = false
                         val result = if (!submitted && pending.get("cancel").asBoolean) {
                             try { DotRepository.readTask(id, snapshot) }

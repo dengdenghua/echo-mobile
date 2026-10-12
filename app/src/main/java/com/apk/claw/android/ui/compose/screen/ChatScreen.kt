@@ -493,7 +493,17 @@ fun ChatScreen() {
             val target = DeviceExecutionStore.delegatedTo(taskState).lastOrNull()?.environment
                 ?: dotEnvironment.takeUnless { it == DotEnvironment.PHONE } ?: DotEnvironment.COMPUTER
             DotDeviceSheet(member, target, onDismiss = { showDotScreen = false },
-                onChangeRole = { showDotScreen = false; showDotPicker = true })
+                onChangeRole = { showDotScreen = false; showDotPicker = true },
+                onOpenTask = { execution ->
+                    showDotScreen = false
+                    closeDetailForSwitch()
+                    ChatStore.save(taskState.storageId, messages)
+                    val destination = DeviceExecutionStore.deliveryState(execution)
+                    DotEnvironmentStore.select(destination.environment)
+                    switchCharacter(destination.character)
+                    SessionStore.setCurrent(destination.sessionId, destination.character)
+                    currentId = destination.sessionId
+                })
         }
     }
     if (showDotPicker) {
@@ -1328,7 +1338,7 @@ fun ChatScreen() {
                             .combinedClickable(
                                 onClick = { if (currentDot != null) showDotScreen = true else showDotPicker = true },
                                 onLongClick = { showDotPicker = true },
-                                onClickLabel = stringResource(R.string.dot_screen_open),
+                                onClickLabel = stringResource(if (currentDot != null) R.string.dot_devices else R.string.dot_screen_switch_role),
                                 onLongClickLabel = stringResource(R.string.dot_screen_switch_role),
                             ).tvFocusable(),
                     )

@@ -127,6 +127,7 @@ object KVUtils {
 
     /** 必须走加密存储的敏感 Key 集合 */
     private val SECURE_KEYS = setOf(
+        "dot_computer_token",
         KEY_DINGTALK_APP_SECRET,
         KEY_FEISHU_APP_SECRET,
         KEY_QQ_APP_SECRET,
@@ -160,6 +161,8 @@ object KVUtils {
     /** 必须走加密存储的敏感 Key 前缀集合（用于动态 key，如按 mountId 分键的挂载凭据）。
      *  任何以此集合中前缀开头的 key 都会走 [securePrefs] 加密存储。 */
     private val SECURE_KEY_PREFIXES = setOf(
+        "dot_pair_refresh_",
+        "dot_pair_nonce_",
         // 远程工作空间挂载凭据(RemoteWorkspaceMounts)—— 按 mountId 分键
         "remote_workspace_password_",
         "remote_workspace_ssh_private_key_",

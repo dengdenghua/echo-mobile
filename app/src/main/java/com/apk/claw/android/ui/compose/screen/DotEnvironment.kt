@@ -65,8 +65,9 @@ internal object DotEnvironmentStore {
         DotEnvironment.PHONE -> ""
     }
 
-    fun saveConnection(environment: DotEnvironment, address: String, token: String) {
+    fun saveConnection(environment: DotEnvironment, address: String, token: String, paired: Boolean = false) {
         require(environment != DotEnvironment.PHONE)
+        if (!paired) DotPairingRepository.forget(environment)
         if (environment == DotEnvironment.HOME) {
             AccountConfig.octopusRuntimeBaseUrl = address.trim().trimEnd('/')
             KVUtils.setOctopusAuthToken(token.trim())
