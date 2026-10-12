@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_detail_title">ツール実行の詳細</string>
+    <string name="tool_detail_empty">実行履歴はありません</string>
+    <string name="tool_detail_command">コマンド</string>
+    <string name="tool_detail_code">コード</string>
+    <string name="tool_detail_directory">作業ディレクトリ</string>
+    <string name="tool_detail_arguments">その他の引数</string>
+    <string name="tool_detail_output">出力</string>
+    <string name="tool_detail_copy">コピー</string>
+    <string name="tool_detail_pause">追従を一時停止</string>
+    <string name="tool_detail_latest">最新を表示</string>
+    <string name="tool_detail_waiting">実行中、出力を待っています…</string>
+    <string name="tool_detail_no_output">テキスト出力なし</string>
+    <string name="tool_detail_collapse">実行詳細を閉じる</string>
+    <string name="tool_detail_expand">実行詳細を開く</string>
+    <string name="tool_detail_details">詳細</string>
+    <plurals name="tool_detail_running_count">
+        <item quantity="other">%1$d 実行中</item>
+    </plurals>
+    <plurals name="tool_detail_success_count">
+        <item quantity="other">%1$d 成功</item>
+    </plurals>
+    <plurals name="tool_detail_failure_count">
+        <item quantity="other">%1$d 失敗</item>
+    </plurals>
+    <plurals name="tool_detail_stopped_count">
+        <item quantity="other">%1$d 停止</item>
+    </plurals>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_detail_title">도구 실행 상세</string>
+    <string name="tool_detail_empty">실행 기록 없음</string>
+    <string name="tool_detail_command">명령</string>
+    <string name="tool_detail_code">코드</string>
+    <string name="tool_detail_directory">작업 디렉터리</string>
+    <string name="tool_detail_arguments">기타 인수</string>
+    <string name="tool_detail_output">출력</string>
+    <string name="tool_detail_copy">복사</string>
+    <string name="tool_detail_pause">자동 스크롤 일시 정지</string>
+    <string name="tool_detail_latest">최신 출력 보기</string>
+    <string name="tool_detail_waiting">실행 중, 출력 대기 중…</string>
+    <string name="tool_detail_no_output">텍스트 출력 없음</string>
+    <string name="tool_detail_collapse">실행 상세 접기</string>
+    <string name="tool_detail_expand">실행 상세 펼치기</string>
+    <string name="tool_detail_details">상세</string>
+    <plurals name="tool_detail_running_count">
+        <item quantity="other">%1$d 실행 중</item>
+    </plurals>
+    <plurals name="tool_detail_success_count">
+        <item quantity="other">%1$d 성공</item>
+    </plurals>
+    <plurals name="tool_detail_failure_count">
+        <item quantity="other">%1$d 실패</item>
+    </plurals>
+    <plurals name="tool_detail_stopped_count">
+        <item quantity="other">%1$d 중지</item>
+    </plurals>
+</resources>

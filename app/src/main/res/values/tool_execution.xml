@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_detail_title">Tool execution details</string>
+    <string name="tool_detail_empty">No executions yet</string>
+    <string name="tool_detail_command">Command</string>
+    <string name="tool_detail_code">Code</string>
+    <string name="tool_detail_directory">Working directory</string>
+    <string name="tool_detail_arguments">Other arguments</string>
+    <string name="tool_detail_output">Output</string>
+    <string name="tool_detail_copy">Copy</string>
+    <string name="tool_detail_pause">Pause follow</string>
+    <string name="tool_detail_latest">View latest</string>
+    <string name="tool_detail_waiting">Running, waiting for output…</string>
+    <string name="tool_detail_no_output">No text output</string>
+    <string name="tool_detail_collapse">Collapse execution</string>
+    <string name="tool_detail_expand">Expand execution</string>
+    <string name="tool_detail_details">Details</string>
+    <plurals name="tool_detail_running_count">
+        <item quantity="one">%1$d running</item>
+        <item quantity="other">%1$d running</item>
+    </plurals>
+    <plurals name="tool_detail_success_count">
+        <item quantity="one">%1$d succeeded</item>
+        <item quantity="other">%1$d succeeded</item>
+    </plurals>
+    <plurals name="tool_detail_failure_count">
+        <item quantity="one">%1$d failed</item>
+        <item quantity="other">%1$d failed</item>
+    </plurals>
+    <plurals name="tool_detail_stopped_count">
+        <item quantity="one">%1$d stopped</item>
+        <item quantity="other">%1$d stopped</item>
+    </plurals>
+</resources>

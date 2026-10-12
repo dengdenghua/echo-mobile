@@ -2,6 +2,9 @@ package com.apk.claw.android.agent
 
 import com.apk.claw.android.tool.ToolResult
 import java.util.UUID
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 /** One immutable snapshot per execution; names and loop rounds are not execution identities. */
 data class ToolExecutionProgress(
@@ -21,6 +24,9 @@ data class ToolExecutionProgress(
 /** Keeps the UI log bounded without altering the ToolResult consumed by the agent/artifact handlers. */
 private const val OUTPUT_SNAPSHOT_INTERVAL_NS = 50_000_000L
 private const val NANOS_PER_MILLISECOND = 1_000_000L
+private val outputScheduler = ScheduledThreadPoolExecutor(1) { task ->
+    Thread(task, "tool-output-flush").apply { isDaemon = true }
+}.apply { removeOnCancelPolicy = true }
 
 internal class ToolExecutionReporter(
     private val callback: AgentCallback,
@@ -35,6 +41,7 @@ internal class ToolExecutionReporter(
     private var output = ""
     private var finished = false
     private var lastOutputAt = 0L
+    private var pendingOutput: ScheduledFuture<*>? = null
 
     init {
         callback.onToolProgress(snapshot(ToolExecutionProgress.Phase.STARTED))
@@ -48,17 +55,30 @@ internal class ToolExecutionReporter(
         if (finished || chunk.isEmpty()) return
         output = boundedToolOutput(output + chunk)
         val now = System.nanoTime()
-        // Emit at most 20 snapshots/sec, including the first chunk. finish always flushes.
+        // Emit the first chunk immediately and flush a quiet tail within the same 50ms window.
         if (lastOutputAt == 0L || now - lastOutputAt >= OUTPUT_SNAPSHOT_INTERVAL_NS) {
-            lastOutputAt = now
-            callback.onToolProgress(snapshot(ToolExecutionProgress.Phase.OUTPUT))
+            flushOutput()
+        } else if (pendingOutput == null) {
+            pendingOutput = outputScheduler.schedule(::flushOutput,
+                OUTPUT_SNAPSHOT_INTERVAL_NS - (now - lastOutputAt), TimeUnit.NANOSECONDS)
         }
+    }
+
+    @Synchronized
+    private fun flushOutput() {
+        pendingOutput?.cancel(false)
+        pendingOutput = null
+        if (finished) return
+        lastOutputAt = System.nanoTime()
+        callback.onToolProgress(snapshot(ToolExecutionProgress.Phase.OUTPUT))
     }
 
     @Synchronized
     fun finish(result: ToolResult) {
         if (finished) return
         finished = true
+        pendingOutput?.cancel(false)
+        pendingOutput = null
         val finalOutput = if (result.isSuccess) result.textBody ?: result.data else result.error
         val finalText = finalOutput.orEmpty()
         // stdout already shown remains available when a timeout/error returns only a diagnostic.

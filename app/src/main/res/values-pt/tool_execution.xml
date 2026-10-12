@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_detail_title">Detalhes da execução</string>
+    <string name="tool_detail_empty">Nenhuma execução</string>
+    <string name="tool_detail_command">Comando</string>
+    <string name="tool_detail_code">Código</string>
+    <string name="tool_detail_directory">Diretório de trabalho</string>
+    <string name="tool_detail_arguments">Outros argumentos</string>
+    <string name="tool_detail_output">Saída</string>
+    <string name="tool_detail_copy">Copiar</string>
+    <string name="tool_detail_pause">Pausar acompanhamento</string>
+    <string name="tool_detail_latest">Ver mais recente</string>
+    <string name="tool_detail_waiting">Em execução, aguardando saída…</string>
+    <string name="tool_detail_no_output">Sem saída de texto</string>
+    <string name="tool_detail_collapse">Recolher execução</string>
+    <string name="tool_detail_expand">Expandir execução</string>
+    <string name="tool_detail_details">Detalhes</string>
+    <plurals name="tool_detail_running_count">
+        <item quantity="one">%1$d em execução</item>
+        <item quantity="many">%1$d em execução</item>
+        <item quantity="other">%1$d em execução</item>
+    </plurals>
+    <plurals name="tool_detail_success_count">
+        <item quantity="one">%1$d concluído</item>
+        <item quantity="many">%1$d concluídos</item>
+        <item quantity="other">%1$d concluídos</item>
+    </plurals>
+    <plurals name="tool_detail_failure_count">
+        <item quantity="one">%1$d falhou</item>
+        <item quantity="many">%1$d falharam</item>
+        <item quantity="other">%1$d falharam</item>
+    </plurals>
+    <plurals name="tool_detail_stopped_count">
+        <item quantity="one">%1$d parado</item>
+        <item quantity="many">%1$d parados</item>
+        <item quantity="other">%1$d parados</item>
+    </plurals>
+</resources>

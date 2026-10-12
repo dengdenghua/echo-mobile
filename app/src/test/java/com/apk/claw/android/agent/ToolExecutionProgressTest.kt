@@ -10,13 +10,20 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class ToolExecutionProgressTest {
     @Suppress("EmptyFunctionBlock") // These events are irrelevant to this progress observer fixture.
     private class Callback : AgentCallback {
-        val progress = mutableListOf<ToolExecutionProgress>()
+        val progress = CopyOnWriteArrayList<ToolExecutionProgress>()
         var starts = 0
-        override fun onToolProgress(progress: ToolExecutionProgress) { this.progress.add(progress) }
+        var observed: ((ToolExecutionProgress) -> Unit)? = null
+        override fun onToolProgress(progress: ToolExecutionProgress) {
+            this.progress.add(progress)
+            observed?.invoke(progress)
+        }
         override fun onLoopStart(round: Int) {}
         override fun onContent(round: Int, content: String) {}
         override fun onToolCall(round: Int, toolId: String, toolName: String, parameters: String) { starts++ }
@@ -57,6 +64,42 @@ class ToolExecutionProgressTest {
         assertTrue(completed.output.contains("line 99\n"))
         assertTrue(completed.output.endsWith("timeout"))
         assertTrue(cb.progress.size < 100)
+    }
+
+    @Test
+    fun `quiet throttled tail is visible before execution finishes`() {
+        val cb = Callback()
+        val flushed = CountDownLatch(1)
+        cb.observed = { if (it.phase == ToolExecutionProgress.Phase.OUTPUT && it.output.endsWith("tail"))
+            flushed.countDown() }
+        val execution = ToolExecutionReporter(cb, 1, "run_shell", "命令", "{}")
+        execution.execute {
+            ToolOutputContext.emit("first\n")
+            ToolOutputContext.emit("tail")
+        }
+        try {
+            assertTrue("Quiet output should not wait for completion", flushed.await(1, TimeUnit.SECONDS))
+            assertFalse(cb.progress.any { it.phase == ToolExecutionProgress.Phase.FINISHED })
+        } finally {
+            execution.finish(ToolResult.success("first\ntail"))
+        }
+    }
+
+    @Test
+    fun `finish cancels a pending flush and is always the last event`() {
+        val cb = Callback()
+        val execution = ToolExecutionReporter(cb, 1, "run_shell", "命令", "{}")
+        execution.execute {
+            ToolOutputContext.emit("first\n")
+            ToolOutputContext.emit("tail")
+        }
+        execution.finish(ToolResult.error("stopped"))
+        val eventsAtFinish = cb.progress.toList()
+        val unexpectedOutput = CountDownLatch(1)
+        cb.observed = { unexpectedOutput.countDown() }
+        assertFalse(unexpectedOutput.await(150, TimeUnit.MILLISECONDS))
+        assertEquals(eventsAtFinish, cb.progress.toList())
+        assertEquals(ToolExecutionProgress.Phase.FINISHED, cb.progress.last().phase)
     }
 
     @Test

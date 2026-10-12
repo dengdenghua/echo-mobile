@@ -2572,9 +2572,14 @@ private fun ToolGroupItem(
                         "· ${tools.last().toolName} ${toolCallSummary(tools.last())}",
                         fontSize = OctopusType.caption, color = TextMuted,
                         fontFamily = FontFamily.Monospace, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
                     )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = { onShowDetail(tools) }) {
+                    Text(stringResource(R.string.tool_detail_details), fontSize = OctopusType.tag)
+                }
                 Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = TextMuted, modifier = Modifier.size(OctopusIconSize.small))
             }
             if (expanded) {
@@ -2678,8 +2683,7 @@ private fun ToolBatchCard(
     require(calls.isNotEmpty()) { "ToolBatchCard requires at least one call" }
     val firstId = calls.first().id
     var expanded by remember(firstId) { mutableStateOf(false) }
-    val allDone = calls.all { it.status != ChatMessage.ToolCallStatus.RUNNING }
-    val title = if (allDone) "${calls.size} 个工具已执行" else "${calls.size} 个工具并行执行中…"
+    val title = toolExecutionSummary(calls)
     val names = buildString {
         calls.take(2).joinToString(", ") { it.toolName }.let { append(it) }
         if (calls.size > 2) append(" 等 ${calls.size} 个")
@@ -2701,13 +2705,11 @@ private fun ToolBatchCard(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f),
                 )
-                if (expanded) {
-                    TextButton(
-                        onClick = onShowDetail,
-                        contentPadding = PaddingValues(horizontal = OctopusSpacing.sm, vertical = 0.dp),
-                    ) {
-                        Text("详情", fontSize = OctopusType.tag)
-                    }
+                TextButton(
+                    onClick = onShowDetail,
+                    contentPadding = PaddingValues(horizontal = OctopusSpacing.sm, vertical = 0.dp),
+                ) {
+                    Text(stringResource(R.string.tool_detail_details), fontSize = OctopusType.tag)
                 }
             }
             Spacer(modifier = Modifier.height(OctopusSpacing.xs))

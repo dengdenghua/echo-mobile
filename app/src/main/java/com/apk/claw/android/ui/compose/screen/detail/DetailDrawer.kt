@@ -5,6 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.compose.theme.OctopusSpacing
@@ -35,6 +37,7 @@ fun DetailDrawer(
     if (currentPane == null) return
     ModalBottomSheet(
         onDismissRequest = onClose,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = currentPane is ToolsDetailPane),
         containerColor = OctopusColors.Surface,
         shape = OctopusShape.medium,
     ) {
@@ -44,14 +47,15 @@ fun DetailDrawer(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    currentPane.title,
+                    if (currentPane is ToolsDetailPane) stringResource(R.string.tool_detail_title)
+                    else currentPane.title,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onClose) { Text("关闭") }
+                TextButton(onClick = onClose) { Text(stringResource(R.string.common_close)) }
             }
             Spacer(Modifier.height(OctopusSpacing.sm))
-            currentPane.Render()
+            key(currentPane) { currentPane.Render() }
         }
     }
 }

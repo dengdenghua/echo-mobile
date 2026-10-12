@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_detail_title">工具执行详情</string>
+    <string name="tool_detail_empty">暂无执行记录</string>
+    <string name="tool_detail_command">命令</string>
+    <string name="tool_detail_code">代码</string>
+    <string name="tool_detail_directory">工作目录</string>
+    <string name="tool_detail_arguments">其他参数</string>
+    <string name="tool_detail_output">输出</string>
+    <string name="tool_detail_copy">复制</string>
+    <string name="tool_detail_pause">暂停跟随</string>
+    <string name="tool_detail_latest">查看最新</string>
+    <string name="tool_detail_waiting">执行中，等待输出…</string>
+    <string name="tool_detail_no_output">无文本输出</string>
+    <string name="tool_detail_collapse">收起执行详情</string>
+    <string name="tool_detail_expand">展开执行详情</string>
+    <string name="tool_detail_details">详情</string>
+    <plurals name="tool_detail_running_count">
+        <item quantity="other">%1$d 运行中</item>
+    </plurals>
+    <plurals name="tool_detail_success_count">
+        <item quantity="other">%1$d 成功</item>
+    </plurals>
+    <plurals name="tool_detail_failure_count">
+        <item quantity="other">%1$d 失败</item>
+    </plurals>
+    <plurals name="tool_detail_stopped_count">
+        <item quantity="other">%1$d 已停止</item>
+    </plurals>
+</resources>
