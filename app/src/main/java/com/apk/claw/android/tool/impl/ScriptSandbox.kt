@@ -313,6 +313,7 @@ object ScriptSandbox {
     private fun installPrint(cx: Context, scope: Scriptable) {
         val printFn = jsFunc(scope) { _, args ->
             val output = outputOf(scope)
+            val previousLength = output.length
             val line = args.joinToString(" ") { jsValueToString(it) }
             // 超限后截断而非报错(对齐 Python 沙箱行为),让 LLM 拿到部分结果用于反馈循环
             if (output.length < MAX_OUTPUT_CHARS) {
@@ -323,6 +324,9 @@ object ScriptSandbox {
                 } else {
                     output.appendLine(line)
                 }
+            }
+            if (output.length > previousLength) {
+                com.apk.claw.android.agent.ToolOutputContext.emit(output.substring(previousLength))
             }
             Undefined.instance
         }

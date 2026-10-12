@@ -5,6 +5,7 @@ import android.os.Looper
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.GoalVerifier
+import com.apk.claw.android.agent.ToolExecutionProgress
 import com.apk.claw.android.agent.AgentCallback
 import com.apk.claw.android.agent.AgentConfig
 import com.apk.claw.android.agent.DefaultAgentService
@@ -63,11 +64,13 @@ object ChatAgentBridge {
      * 恢复崩溃前未完成的任务。回调与 [run] 一致。
      * @return true 如果成功开始恢复
      */
+    @Suppress("ReturnCount") // Distinct busy, missing-checkpoint, and resume paths.
     fun resumePendingTask(
         onTool: (icon: String, name: String, args: String, result: String?) -> Unit,
         onText: (String) -> Unit,
         onDone: (String) -> Unit,
         onError: (String) -> Unit,
+        onToolProgress: ((ToolExecutionProgress) -> Unit)? = null,
     ): Boolean {
         if (!TaskCheckpoint.hasPending()) return false
         if (!busy.compareAndSet(false, true)) {
@@ -85,7 +88,12 @@ object ChatAgentBridge {
         curStart = System.currentTimeMillis()
         LiveControlOverlay.show("恢复任务中…") { cancel() }
         val batcher = StreamBatcher(main) { txt -> onText(txt) }
+        val progressSink = onToolProgress
         val resumed = service.resumeTask(object : AgentCallback {
+            override fun onToolProgress(progress: ToolExecutionProgress) {
+                if (progress.phase == ToolExecutionProgress.Phase.STARTED) batcher.flushNow()
+                progressSink?.let { main.post { it(progress) } }
+            }
             override fun onLoopStart(round: Int) {
                 LiveControlOverlay.updateStep(ClawApplication.instance.getString(R.string.chat_agent_bridge_thinking))
             }
@@ -101,7 +109,7 @@ object ChatAgentBridge {
             ) {
                 curSteps++
                 val summary = if (result.isSuccess) "✓ " + (result.data ?: "") else "✗ " + (result.error ?: "")
-                main.post { onTool(toolId, toolName, parameters, summary.take(48)) }
+                if (progressSink == null) main.post { onTool(iconFor(toolId), toolName, parameters, summary.take(48)) }
             }
 
             private var goalVerdict = GoalVerifier.unverified("尚未核验")
@@ -285,6 +293,7 @@ object ChatAgentBridge {
          * 为 null 时行为与从前一致（用全局激活 Persona）。
          */
         personaIdOverride: String? = null,
+        onToolProgress: ((ToolExecutionProgress) -> Unit)? = null,
     ) {
         // 忙判断必须在改动任何共享状态(updateConfig/curTask)之前,拒绝并发任务。
         if (!busy.compareAndSet(false, true)) {
@@ -343,7 +352,12 @@ object ChatAgentBridge {
         val restorePersona = {
             if (personaIdOverride != null) PersonaStore.setActive(ctx, saveActive)
         }
+        val progressSink = onToolProgress
         service.executeTask(taskPrompt, object : AgentCallback {
+            override fun onToolProgress(progress: ToolExecutionProgress) {
+                if (progress.phase == ToolExecutionProgress.Phase.STARTED) batcher.flushNow()
+                progressSink?.let { main.post { it(progress) } }
+            }
             override fun onLoopStart(round: Int) {
                 LiveControlOverlay.updateStep(ClawApplication.instance.getString(R.string.chat_agent_bridge_thinking))
             }
@@ -362,11 +376,11 @@ object ChatAgentBridge {
             ) {
                 recorder?.onToolResult(toolId, result.isSuccess)
                 val summary = if (result.isSuccess) "✓ " + (result.data ?: "") else "✗ " + (result.error ?: "")
-                val icon = iconFor(toolName)
-                val friendly = ToolRegistry.getInstance().getDisplayName(toolName)
+                val icon = iconFor(toolId)
+                val friendly = toolName
                 curSteps++
                 LiveControlOverlay.updateStep("$icon $friendly")
-                main.post { onTool(icon, friendly, parameters, summary.take(48)) }
+                if (progressSink == null) main.post { onTool(icon, friendly, parameters, summary.take(48)) }
                 val img = result.imageBase64
                 if (img != null && onImage != null) {
                     main.post { onImage(toolName, img) }

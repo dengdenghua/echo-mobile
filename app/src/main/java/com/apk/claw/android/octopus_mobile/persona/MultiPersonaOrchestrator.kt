@@ -35,6 +35,7 @@ object MultiPersonaOrchestrator {
      * @param onText 流式 token 回调(透传给 ChatAgentBridge)
      * @param onError 任一步出错(主线程)；err 在 MultiPersonaOrchestrator 层已包好上下文
      */
+    @Suppress("LongParameterList") // Existing callback API; optional progress preserves caller compatibility.
     fun run(
         topic: String,
         priorTurns: List<Pair<Boolean, String>>,
@@ -44,6 +45,8 @@ object MultiPersonaOrchestrator {
         onTool: (icon: String, name: String, args: String, result: String?) -> Unit,
         onText: (String) -> Unit,
         onError: (String) -> Unit,
+        onToolProgress: ((com.apk.claw.android.agent.ToolExecutionProgress) -> Unit)? = null,
+        isActive: () -> Boolean = { true },
     ) {
         val ctx = ClawApplication.instance
         val rosterIds = PersonaStore.MultiMode.getRoster()
@@ -63,6 +66,7 @@ object MultiPersonaOrchestrator {
 
         // 链式触发第 i 个 Persona
         fun fireNext(i: Int) {
+            if (!isActive()) return
             if (i >= roster.size) {
                 onAllDone()
                 return
@@ -85,8 +89,10 @@ object MultiPersonaOrchestrator {
                 persona = null,  // personaIdOverride 已处理人设注入，不再走 free-form persona 路径
                 personaIdOverride = persona.id,
                 onTool = onTool,
+                onToolProgress = onToolProgress,
                 onText = onText,
                 onDone = { reply ->
+                    if (!isActive()) return@run
                     acc.add(false to reply)
                     onTurnDone(persona, reply)
                     fireNext(i + 1)

@@ -1,6 +1,7 @@
 package com.apk.claw.android.ui.compose.screen.detail
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,14 +27,15 @@ import com.apk.claw.android.ui.compose.theme.OctopusType
  *
  * 由 ToolBatchCard 的「详情」入口打开,逐行渲染工具调用:
  * - 状态图标(✓ 绿 / ✗ 红 / ⏳ 主色)+ 工具名 + 耗时 + result 摘要
- * - 点击单行展开查看完整 result(折叠默认)
+ * - 默认展开参数与完整 result;点击行可折叠
  *
  * 极简 flat UI(INV-U5):OctopusShape.small 圆角、单色实底、无阴影、无渐变。
  *
  * @param calls 同一批次的工具调用列表(来自 ToolBatchCard)
  */
 class ToolsDetailPane(
-    private val calls: List<ChatMessage.ToolCall>,
+    calls: List<ChatMessage.ToolCall> = emptyList(),
+    private val callsProvider: () -> List<ChatMessage.ToolCall> = { calls },
 ) : DetailPane {
 
     override val title: String = "工具执行详情"
@@ -45,13 +47,15 @@ class ToolsDetailPane(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
+            val calls = callsProvider()
+            if (calls.isEmpty()) Text("暂无执行记录", color = OctopusColors.TextMuted)
             calls.forEach { call -> ToolCallRow(call) }
         }
     }
 
     @Composable
     private fun ToolCallRow(call: ChatMessage.ToolCall) {
-        var expanded by remember(call.id) { mutableStateOf(false) }
+        var expanded by remember(call.id) { mutableStateOf(true) }
         Surface(
             shape = OctopusShape.small,
             color = OctopusColors.SurfaceDeep,
@@ -61,54 +65,64 @@ class ToolsDetailPane(
                 .clickable { expanded = !expanded },
         ) {
             Column(modifier = Modifier.padding(OctopusSpacing.sm)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        when (call.status) {
-                            ChatMessage.ToolCallStatus.SUCCESS -> "✓"
-                            ChatMessage.ToolCallStatus.FAILURE -> "✗"
-                            ChatMessage.ToolCallStatus.RUNNING -> "⏳"
-                        },
-                        color = when (call.status) {
-                            ChatMessage.ToolCallStatus.SUCCESS -> OctopusColors.Success
-                            ChatMessage.ToolCallStatus.FAILURE -> OctopusColors.Error
-                            ChatMessage.ToolCallStatus.RUNNING -> OctopusColors.Primary
-                        },
-                        fontSize = OctopusType.caption,
-                    )
-                    Spacer(modifier = Modifier.width(OctopusSpacing.sm))
-                    Text(
-                        call.toolName,
-                        fontSize = OctopusType.caption,
-                        color = OctopusColors.TextSecondary,
-                        fontFamily = FontFamily.Monospace,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                    call.durationMs?.let {
-                        Spacer(modifier = Modifier.width(OctopusSpacing.xs))
-                        Text("${it}ms", fontSize = OctopusType.tag, color = OctopusColors.TextMuted)
+                ToolCallHeader(call)
+                if (expanded) {
+                    Spacer(modifier = Modifier.height(OctopusSpacing.sm))
+                    SelectionContainer {
+                        Column {
+                            if (call.args.isNotBlank()) {
+                                Text(call.args, fontSize = OctopusType.tag,
+                                    color = OctopusColors.TextSecondary, fontFamily = FontFamily.Monospace)
+                                Spacer(modifier = Modifier.height(OctopusSpacing.sm))
+                            }
+                            Text(call.result ?: if (call.status == ChatMessage.ToolCallStatus.RUNNING)
+                                "执行中，等待输出…" else "无文本输出",
+                                fontSize = OctopusType.tag, color = OctopusColors.TextMuted,
+                                fontFamily = FontFamily.Monospace)
+                        }
                     }
-                }
-                val summary = remember(call.result) { summarize(call.result) }
-                if (summary.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(OctopusSpacing.xs))
-                    Text(
-                        if (expanded) call.result.orEmpty() else summary,
-                        fontSize = OctopusType.tag,
-                        color = OctopusColors.TextMuted,
-                        fontFamily = FontFamily.Monospace,
-                        maxLines = if (expanded) Int.MAX_VALUE else 1,
-                        overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
-                    )
+                } else {
+                    Text(com.apk.claw.android.ui.compose.screen.toolCallSummary(call),
+                        fontSize = OctopusType.tag, color = OctopusColors.TextMuted,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
     }
 
-    private fun summarize(result: String?): String {
-        if (result.isNullOrBlank()) return ""
-        val firstLine = result.lineSequence().firstOrNull().orEmpty()
-        return if (firstLine.length > 80) firstLine.take(80) + "…" else firstLine
+
+    @Composable
+    private fun ToolCallHeader(call: ChatMessage.ToolCall) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                when (call.status) {
+                    ChatMessage.ToolCallStatus.SUCCESS -> "✓"
+                    ChatMessage.ToolCallStatus.FAILURE -> "✗"
+                    ChatMessage.ToolCallStatus.RUNNING -> "⏳"
+                    ChatMessage.ToolCallStatus.CANCELLED -> "■"
+                },
+                color = when (call.status) {
+                    ChatMessage.ToolCallStatus.SUCCESS -> OctopusColors.Success
+                    ChatMessage.ToolCallStatus.FAILURE -> OctopusColors.Error
+                    ChatMessage.ToolCallStatus.RUNNING -> OctopusColors.Primary
+                    ChatMessage.ToolCallStatus.CANCELLED -> OctopusColors.TextMuted
+                },
+                fontSize = OctopusType.caption,
+            )
+            Spacer(modifier = Modifier.width(OctopusSpacing.sm))
+            Text(
+                call.toolName,
+                fontSize = OctopusType.caption,
+                color = OctopusColors.TextSecondary,
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            call.durationMs?.let {
+                Spacer(modifier = Modifier.width(OctopusSpacing.xs))
+                Text("${it}ms", fontSize = OctopusType.tag, color = OctopusColors.TextMuted)
+            }
+        }
     }
 }

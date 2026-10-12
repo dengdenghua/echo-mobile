@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -148,6 +149,7 @@ import com.apk.claw.android.ui.compose.theme.tvFocusable
 import com.apk.claw.android.ui.compose.theme.tvOverscan
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
 // 颜色
@@ -196,10 +198,12 @@ sealed class ChatMessage {
         val durationMs: Long? = null,
         /** 工具执行状态:running / success / failure。null 表示未启动(默认)。 */
         val status: ToolCallStatus = ToolCallStatus.SUCCESS,
+        /** Unique execution identity; preserved while snapshots update this row. */
+        val callId: String? = null,
     ) : ChatMessage()
 
     /** 工具执行状态(用于 [ToolBatchCard] 展开态图标渲染)。 */
-    enum class ToolCallStatus { RUNNING, SUCCESS, FAILURE }
+    enum class ToolCallStatus { RUNNING, SUCCESS, FAILURE, CANCELLED }
 
     data class Thinking(val text: String, override val id: Long = nextId()) : ChatMessage()
 
@@ -299,6 +303,15 @@ fun ChatScreen() {
     // refine-chat-interaction Task 3:右侧详情抽屉当前面板。
     // null = 关闭,消息流可独立浏览(INV-U4)。具体 DetailPane 实例化由 Task 4 完成。
     var currentDetail by remember { mutableStateOf<DetailPane?>(null) }
+    val openToolDetail: (List<ChatMessage.ToolCall>) -> Unit = { calls ->
+        if (KVUtils.isDetailDrawerEnabled()) {
+            val ids = calls.map { it.id }.toSet()
+            val batches = calls.mapNotNull { it.batchId }.toSet()
+            currentDetail = ToolsDetailPane(callsProvider = {
+                messages.filterIsInstance<ChatMessage.ToolCall>().filter { it.id in ids || it.batchId in batches }
+            })
+        }
+    }
     val context = LocalContext.current
     val devices by ClawApplication.instance.deviceRegistry.deviceList.collectAsState()
     // 设备已不再独立成页：在主对话界面启动局域网发现 + 配置服务，
@@ -322,10 +335,14 @@ fun ChatScreen() {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var ghostChatJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    var dotRequestGeneration by remember { mutableLongStateOf(0L) }
     val ackText = stringResource(R.string.chat_ack)
     val thinkingText = stringResource(R.string.chat_thinking)
     val newChatTitle = stringResource(R.string.chat_new)
     var lastScrollTs by remember { mutableLongStateOf(0L) }
+    var followLatest by remember { mutableStateOf(true) }
+    var scrollJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    val draggingMessages by listState.interactionSource.collectIsDraggedAsState()
     val showScrollToBottom by remember {
         derivedStateOf {
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
@@ -333,11 +350,22 @@ fun ChatScreen() {
             lastVisible < total - 2
         }
     }
+    LaunchedEffect(draggingMessages) {
+        if (draggingMessages) {
+            followLatest = false
+            scrollJob?.cancel()
+        } else {
+            snapshotFlow { listState.isScrollInProgress }.first { !it }
+            followLatest = !showScrollToBottom
+        }
+    }
+    LaunchedEffect(currentId) { followLatest = true; lastScrollTs = 0L }
     val scrollEnd = {
         val now = System.currentTimeMillis()
-        if (now - lastScrollTs > CHAT_SCROLL_THROTTLE_MS) {
+        if (followLatest && !draggingMessages && now - lastScrollTs > CHAT_SCROLL_THROTTLE_MS) {
             lastScrollTs = now
-            scope.launch {
+            scrollJob?.cancel()
+            scrollJob = scope.launch {
                 val target = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                 listState.animateScrollToItem(target)
             }
@@ -378,16 +406,23 @@ fun ChatScreen() {
         val cid = SessionStore.currentId(char)?.takeIf { c -> idx.any { it.id == c } } ?: idx.first().id
         SessionStore.setCurrent(cid, char)
         currentId = cid
+        currentDetail = null
         messages.clear(); messages.addAll(ChatStore.load(cid) ?: emptyList())
     }
     val stop = {
+        dotRequestGeneration++
         ghostChatJob?.cancel()
         ghostChatJob = null
         ChatAgentBridge.cancel()
+        isRunning = false
+        interruptToolCalls(messages, "已停止")
+        messages.removeAll { it is ChatMessage.Thinking }
+        persist()
     }
     // 切上下文(切角色/切会话/新建/删除)前先停掉运行中的任务 + 清掉 Thinking 占位气泡,
     // 防止正在流式返回的 onText/onDone 回调往新会话/新角色的 messages 里写内容造成串台。
     val cancelForSwitch = {
+        currentDetail = null
         if (isRunning) {
             stop()
             isRunning = false
@@ -454,6 +489,7 @@ fun ChatScreen() {
         val t = inputText.trim()
         if (t.isNotEmpty() && !isRunning) {
             pendingForm = null // 发消息时清除待填表单
+            followLatest = true; lastScrollTs = 0L
             messages.add(ChatMessage.UserMessage(t))
             inputText = ""
             scrollEnd(); persist()
@@ -496,6 +532,13 @@ fun ChatScreen() {
                 }
             } else if (ChatAgentBridge.isConfigured()) {
                 isRunning = true
+                val sendingSession = currentId
+                val sendingCharacter = currentCharacter
+                val requestGeneration = ++dotRequestGeneration
+                val acceptsCallback = {
+                    isRunning && requestGeneration == dotRequestGeneration &&
+                        currentId == sendingSession && currentCharacter == sendingCharacter
+                }
                 val thinking = ChatMessage.Thinking(thinkingText)
                 val showThinking = { if (!messages.contains(thinking)) { messages.add(thinking); scrollEnd() } }
                 val hideThinking = { messages.remove(thinking) }
@@ -544,6 +587,21 @@ fun ChatScreen() {
                     }
                     streamId = null; buf = StringBuilder()
                 }
+                val updateTool: (com.apk.claw.android.agent.ToolExecutionProgress) -> Unit = { progress ->
+                    if (acceptsCallback()) {
+                        if (progress.phase == com.apk.claw.android.agent.ToolExecutionProgress.Phase.STARTED) {
+                            finalizeStream(null); hideThinking()
+                        }
+                        updateToolCall(messages, progress)
+                        if (progress.phase == com.apk.claw.android.agent.ToolExecutionProgress.Phase.FINISHED) {
+                            if (messages.filterIsInstance<ChatMessage.ToolCall>().none {
+                                it.status == ChatMessage.ToolCallStatus.RUNNING
+                            }) showThinking()
+                            persist()
+                        }
+                        scrollEnd()
+                    }
+                }
                 // ── 互聊模式分支：多 Persona 轮流发言 ──
                 // 花名册非空时走 MultiPersonaOrchestrator；为空则走下面的单 Agent 路径（保持原行为）。
                 val multiRosterIds = PersonaStore.MultiMode.getRoster()
@@ -558,8 +616,11 @@ fun ChatScreen() {
                     }
                     com.apk.claw.android.octopus_mobile.persona.MultiPersonaOrchestrator.run(
                         topic = t,
+                        onToolProgress = updateTool,
+                        isActive = acceptsCallback,
                         priorTurns = priorTurns,
                         onTurnStart = { persona ->
+                            if (!acceptsCallback()) return@run
                             // 切到下一个 Persona：重置流式缓冲，重新显示思考气泡
                             finalizeStream(null)
                             hideThinking()
@@ -567,27 +628,33 @@ fun ChatScreen() {
                             if (!messages.contains(turnThinking)) { messages.add(turnThinking); scrollEnd() }
                         },
                         onTurnDone = { persona, reply ->
+                            if (!acceptsCallback()) return@run
                             // 每个 Persona 的回复作为独立 AgentMessage 落盘，前缀带 avatar+name 以便区分
                             val tagged = "**${persona.avatar} ${persona.name}**\n\n$reply"
                             finalizeStream(tagged)
                             scrollEnd(); persist()
                         },
                         onAllDone = {
+                            if (!acceptsCallback()) return@run
                             hideThinking()
+                            interruptToolCalls(messages, "执行已中断")
                             isRunning = false
                             scrollEnd(); persist()
                         },
                         onTool = { icon, name, args, res ->
+                            if (!acceptsCallback()) return@run
                             com.apk.claw.android.agent.AgentProgressBus.set(null)
                             finalizeStream(null); hideThinking()
                             messages.add(ChatMessage.ToolCall(icon, name, args, res))
                             showThinking(); persist()
                         },
-                        onText = { txt -> appendStream(txt) },
+                        onText = { txt -> if (acceptsCallback()) appendStream(txt) },
                         onError = { e ->
+                            if (!acceptsCallback()) return@run
                             com.apk.claw.android.agent.AgentProgressBus.set(null)
                             hideThinking(); finalizeStream(null)
                             messages.add(ChatMessage.AgentMessage("⚠️ $e"))
+                            interruptToolCalls(messages, "执行已中断")
                             isRunning = false; scrollEnd(); persist()
                         },
                     )
@@ -606,6 +673,7 @@ fun ChatScreen() {
                 )
                 ChatAgentBridge.run(
                     prompt = t,
+                    onToolProgress = updateTool,
                     conversationContext = convContext,
                     // 非默认角色注入人设:该角色第一人称应答;Octopus 本体不扮演(persona=null)。
                     persona = CharacterRegistry.all
@@ -614,26 +682,33 @@ fun ChatScreen() {
                     // SessionMeta.workspace 非空时覆盖全局默认;为 null 时 effectiveWorkspace() 回退全局。
                     workspace = SessionStore.metaOf(currentId)?.effectiveWorkspace(),
                     onTool = { icon, name, args, res ->
+                        if (!acceptsCallback()) return@run
                         com.apk.claw.android.agent.AgentProgressBus.set(null)
                         finalizeStream(null); hideThinking()
                         messages.add(ChatMessage.ToolCall(icon, name, args, res))
                         showThinking(); persist()
                     },
-                    onText = { txt -> appendStream(txt) },
+                    onText = { txt -> if (acceptsCallback()) appendStream(txt) },
                     onDone = { ans ->
+                        if (!acceptsCallback()) return@run
                         com.apk.claw.android.agent.AgentProgressBus.set(null)
-                        hideThinking(); finalizeStream(ans); isRunning = false; scrollEnd(); persist()
+                        hideThinking(); finalizeStream(ans)
+                        interruptToolCalls(messages, "执行已中断")
+                        isRunning = false; scrollEnd(); persist()
                     },
                     onError = { e ->
+                        if (!acceptsCallback()) return@run
                         com.apk.claw.android.agent.AgentProgressBus.set(null)
                         hideThinking(); finalizeStream(null)
                         messages.add(ChatMessage.AgentMessage("⚠️ $e"))
+                        interruptToolCalls(messages, "执行已中断")
                         isRunning = false; scrollEnd(); persist()
                     },
                     // ── 产物回调(类 Claude Artifacts)──
                     // HTML 产物:preview_html / generate_app 产生的 HTML 字符串。
                     // payload 格式 "$height\n$html"(PreviewHtmlTool 注入),解析时按首个 \n 分割。
                     onHtml = { toolName, htmlPayload ->
+                        if (!acceptsCallback()) return@run
                         val refId = "${currentId}_${System.currentTimeMillis()}_html"
                         // payload 格式 "$height\n$html",剥掉首行高度信息取实际 HTML
                         val actualHtml = htmlPayload.substringAfter('\n', htmlPayload)
@@ -647,6 +722,7 @@ fun ChatScreen() {
                     },
                     // 图片产物:take_screenshot 等产生的 JPEG base64
                     onImage = { toolName, imageBase64 ->
+                        if (!acceptsCallback()) return@run
                         val refId = "${currentId}_${System.currentTimeMillis()}_img"
                         ChatStore.savePayload(refId, imageBase64)
                         val title = if (toolName == "take_screenshot") "截图" else "图片"
@@ -657,6 +733,7 @@ fun ChatScreen() {
                     },
                     // 文件产物:run_code writeFile / file_ops write / generate_app 等产生的文件路径
                     onFile = { toolName, filePath ->
+                        if (!acceptsCallback()) return@run
                         val title = when (toolName) {
                             "generate_app" -> "生成的小应用"
                             "file_ops" -> "写入的文件"
@@ -671,6 +748,7 @@ fun ChatScreen() {
                     },
                     // diff 产物:edit_file 等产生的 unified diff
                     onDiff = { toolName, diff ->
+                        if (!acceptsCallback()) return@run
                         val refId = "${currentId}_${System.currentTimeMillis()}_diff"
                         ChatStore.savePayload(refId, diff)
                         val title = if (toolName == "edit_file") "代码改动" else "diff"
@@ -681,6 +759,7 @@ fun ChatScreen() {
                     },
                     // 结构化问卷表单：工具需要用户点选选项时下发，显示在输入框上方
                     onForm = { toolName, formJson ->
+                        if (!acceptsCallback()) return@run
                         val questions = runCatching {
                             val arr = org.json.JSONArray(formJson)
                             (0 until arr.length()).map { i ->
@@ -705,6 +784,7 @@ fun ChatScreen() {
                     // 卡片在消息流中折叠展示(CodeSnippetPreview 占位已在 Task 1 实现),
                     // 标题「file.kt:42-58」,详情走右侧栏 CodeDetailPane。
                     onCodeSnippet = { toolName, result ->
+                        if (!acceptsCallback()) return@run
                         val artifact = com.apk.claw.android.tool.impl.handleSearchCodeResult(result, currentId)
                         if (artifact != null) {
                             messages.add(artifact)
@@ -717,6 +797,7 @@ fun ChatScreen() {
                     // 右侧栏 TextDetailPane 显示全文。stdout 超 500 字符时保持折叠(默认 true),
                     // 否则展开(body 短,直接看预览更顺手)。
                     onTextBody = { toolName, body ->
+                        if (!acceptsCallback()) return@run
                         val refId = "${currentId}_${System.currentTimeMillis()}_text"
                         ChatStore.savePayload(refId, body)
                         val title = if (toolName == "run_code") "运行输出" else "文本输出"
@@ -733,6 +814,7 @@ fun ChatScreen() {
                     // 这里生成 PLAN 类 Artifact:plan JSON 存到 ChatStore,卡片在消息流中折叠展示,
                     // 标题「计划(N 步)」,详情走右侧栏 PlanDetailPane(PlanPreview 占位已在 Task 1 实现)。
                     onPlan = { toolName, planJson ->
+                        if (!acceptsCallback()) return@run
                         val refId = "${currentId}_${System.currentTimeMillis()}_plan"
                         ChatStore.savePayload(refId, planJson)
                         val stepCount = runCatching { org.json.JSONArray(planJson).length() }.getOrDefault(0)
@@ -747,6 +829,7 @@ fun ChatScreen() {
                     // 这里生成 TEXT 类 Artifact 卡片。body 以 "URL: " 开头时,TextPreview
                     // 会显示「打开」按钮(Intent.ACTION_VIEW),例如 PR 卡片可一键跳转浏览器。
                     onTextArtifact = { toolName, title, refId ->
+                        if (!acceptsCallback()) return@run
                         messages.add(ChatMessage.Artifact(
                             ChatMessage.ArtifactKind.TEXT, title, refId,
                         ))
@@ -1099,7 +1182,7 @@ fun ChatScreen() {
                                 is ChatRow.Single -> when (val msg = row.msg) {
                                     is ChatMessage.UserMessage -> UserBubble(msg.text)
                                     is ChatMessage.AgentMessage -> AgentBubble(msg.text)
-                                    is ChatMessage.ToolCall -> ToolCallItem(msg)
+                                    is ChatMessage.ToolCall -> ToolCallItem(msg) { openToolDetail(listOf(msg)) }
                                     is ChatMessage.Thinking -> ThinkingItem(msg.text)
                                     is ChatMessage.Artifact -> ArtifactCard(
                                         artifact = msg,
@@ -1116,6 +1199,7 @@ fun ChatScreen() {
                                     tools = row.tools,
                                     expanded = expandedGroups[row.tools.first().id] == true,
                                     onToggle = { id -> expandedGroups[id] = expandedGroups[id] != true },
+                                    onShowDetail = openToolDetail,
                                 )
                                 is ChatRow.ToolBatch -> {
                                     // refine-chat-interaction:折叠并行工具开关。
@@ -1123,11 +1207,11 @@ fun ChatScreen() {
                                     if (KVUtils.isCollapseParallelTools()) {
                                         ToolBatchCard(
                                             calls = row.calls,
-                                            onShowDetail = { currentDetail = ToolsDetailPane(row.calls) },
+                                            onShowDetail = { openToolDetail(row.calls) },
                                         )
                                     } else {
                                         row.calls.forEach { call ->
-                                            ToolCallItem(call)
+                                            ToolCallItem(call) { openToolDetail(listOf(call)) }
                                         }
                                     }
                                 }
@@ -1137,7 +1221,9 @@ fun ChatScreen() {
                     }
                 }
                 Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = OctopusSpacing.sm)) {
-                    ScrollToBottomButton(visible = showScrollToBottom, onClick = { scrollEnd() })
+                    ScrollToBottomButton(visible = showScrollToBottom, onClick = {
+                        followLatest = true; lastScrollTs = 0L; scrollEnd()
+                    })
                 }
             }
         }
@@ -2453,8 +2539,13 @@ private fun toolColor(name: String): Color = when (name) {
 
 /** 单个工具直接显示;多个工具折叠成可展开的「N 步骤」块。 */
 @Composable
-private fun ToolGroupItem(tools: List<ChatMessage.ToolCall>, expanded: Boolean, onToggle: (Long) -> Unit) {
-    if (tools.size == 1) { ToolCallItem(tools[0]); return }
+private fun ToolGroupItem(
+    tools: List<ChatMessage.ToolCall>,
+    expanded: Boolean,
+    onToggle: (Long) -> Unit,
+    onShowDetail: (List<ChatMessage.ToolCall>) -> Unit,
+) {
+    if (tools.size == 1) { ToolCallItem(tools[0]) { onShowDetail(tools) }; return }
     val gid = tools.first().id
     val firstTint = toolColor(tools.first().toolName)
     val firstIcon = toolIcon(tools.first().toolName)
@@ -2478,7 +2569,7 @@ private fun ToolGroupItem(tools: List<ChatMessage.ToolCall>, expanded: Boolean, 
                 if (!expanded) {
                     Spacer(modifier = Modifier.width(OctopusSpacing.sm))
                     Text(
-                        "· ${tools.last().toolName}",
+                        "· ${tools.last().toolName} ${toolCallSummary(tools.last())}",
                         fontSize = OctopusType.caption, color = TextMuted,
                         fontFamily = FontFamily.Monospace, maxLines = 1,
                     )
@@ -2488,26 +2579,8 @@ private fun ToolGroupItem(tools: List<ChatMessage.ToolCall>, expanded: Boolean, 
             }
             if (expanded) {
                 tools.forEach { t ->
-                    val tint = toolColor(t.toolName)
-                    val icon = toolIcon(t.toolName)
                     Spacer(modifier = Modifier.height(OctopusSpacing.sm))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        ToolColorBar(tint)
-                        Spacer(modifier = Modifier.width(OctopusSpacing.sm))
-                        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(OctopusIconSize.small))
-                        Spacer(modifier = Modifier.width(OctopusSpacing.sm))
-                        Text(t.toolName, fontSize = OctopusType.caption, color = PrimaryColor, fontFamily = FontFamily.Monospace, maxLines = 1)
-                        if (t.args.isNotEmpty()) {
-                            Spacer(modifier = Modifier.width(OctopusSpacing.xs))
-                            Text(t.args, modifier = Modifier.weight(1f), fontSize = OctopusType.tag, color = TextMuted, fontFamily = FontFamily.Monospace, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                        if (t.result != null) {
-                            Spacer(modifier = Modifier.width(OctopusSpacing.sm))
-                            Text(t.result, modifier = Modifier.widthIn(max = 120.dp), fontSize = OctopusType.tag, color = SuccessColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
+                    ToolCallItem(t) { onShowDetail(listOf(t)) }
                 }
             }
         }
@@ -2525,10 +2598,11 @@ private fun ToolColorBar(color: Color) {
 }
 
 @Composable
-private fun ToolCallItem(msg: ChatMessage.ToolCall) {
+private fun ToolCallItem(msg: ChatMessage.ToolCall, onShowDetail: () -> Unit = {}) {
     val tint = toolColor(msg.toolName)
     val icon = toolIcon(msg.toolName)
     Surface(
+        modifier = Modifier.clickable(onClick = onShowDetail),
         shape = OctopusShape.medium,
         color = PrimaryColor.copy(alpha = 0.08f),
         border = BorderStroke(1.dp, PrimaryColor.copy(alpha = 0.15f)),
@@ -2566,14 +2640,14 @@ private fun ToolCallItem(msg: ChatMessage.ToolCall) {
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
-            if (msg.result != null) {
+            run {
                 Spacer(modifier = Modifier.width(OctopusSpacing.sm))
                 // 结果限宽 + 单行省略，避免与 args 抢宽度后被压成竖排字符。
                 Text(
-                    msg.result,
+                    toolCallSummary(msg),
                     modifier = Modifier.widthIn(max = 120.dp),
                     fontSize = OctopusType.caption,
-                    color = SuccessColor,
+                    color = toolStatusColor(msg.status),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -2627,7 +2701,7 @@ private fun ToolBatchCard(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f),
                 )
-                if (expanded && allDone) {
+                if (expanded) {
                     TextButton(
                         onClick = onShowDetail,
                         contentPadding = PaddingValues(horizontal = OctopusSpacing.sm, vertical = 0.dp),
@@ -2647,11 +2721,13 @@ private fun ToolBatchCard(
                                 ChatMessage.ToolCallStatus.SUCCESS -> "✓"
                                 ChatMessage.ToolCallStatus.FAILURE -> "✗"
                                 ChatMessage.ToolCallStatus.RUNNING -> "⏳"
+                                ChatMessage.ToolCallStatus.CANCELLED -> "■"
                             },
                             color = when (call.status) {
                                 ChatMessage.ToolCallStatus.SUCCESS -> SuccessColor
                                 ChatMessage.ToolCallStatus.FAILURE -> ErrorColor
                                 ChatMessage.ToolCallStatus.RUNNING -> PrimaryColor
+                                ChatMessage.ToolCallStatus.CANCELLED -> TextMuted
                             },
                             fontSize = OctopusType.caption,
                         )
@@ -3259,4 +3335,12 @@ private fun ClarifyFormCard(
             }
         }
     }
+}
+
+@Composable
+private fun toolStatusColor(status: ChatMessage.ToolCallStatus): Color = when (status) {
+    ChatMessage.ToolCallStatus.RUNNING -> PrimaryColor
+    ChatMessage.ToolCallStatus.SUCCESS -> SuccessColor
+    ChatMessage.ToolCallStatus.FAILURE -> ErrorColor
+    ChatMessage.ToolCallStatus.CANCELLED -> TextMuted
 }

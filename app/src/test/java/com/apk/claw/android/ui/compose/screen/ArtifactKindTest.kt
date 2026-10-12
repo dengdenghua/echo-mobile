@@ -82,9 +82,10 @@ class ArtifactKindTest {
     }
 
     @Test
-    fun `ToolCallStatus enum has 3 values`() {
+    fun `ToolCallStatus includes cancellation alongside execution outcomes`() {
         val values = ChatMessage.ToolCallStatus.values().toList()
-        assertEquals(3, values.size)
+        assertEquals(4, values.size)
+        assertTrue(ChatMessage.ToolCallStatus.CANCELLED in values)
         assertTrue(ChatMessage.ToolCallStatus.RUNNING in values)
         assertTrue(ChatMessage.ToolCallStatus.SUCCESS in values)
         assertTrue(ChatMessage.ToolCallStatus.FAILURE in values)

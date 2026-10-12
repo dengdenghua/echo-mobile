@@ -23,6 +23,10 @@ object ChatStore {
         val type: String,
         val a: String = "", val b: String = "", val c: String = "", val d: String = "",
         val e: String = "",
+        val callId: String? = null,
+        val batchId: String? = null,
+        val status: String? = null,
+        val durationMs: Long? = null,
     )
 
     private fun key(sessionId: String) = PREFIX + sessionId
@@ -45,11 +49,16 @@ object ChatStore {
     }
 
     fun save(sessionId: String, messages: List<ChatMessage>) {
+        runCatching { KVUtils.putString(key(sessionId), encode(messages)) }
+    }
+
+    internal fun encode(messages: List<ChatMessage>): String {
         val dtos = messages.takeLast(MAX_KEEP).mapNotNull { m ->
             when (m) {
                 is ChatMessage.UserMessage -> Dto("user", m.text)
                 is ChatMessage.AgentMessage -> Dto("agent", m.text)
-                is ChatMessage.ToolCall -> Dto("tool", m.icon, m.toolName, m.args, m.result ?: "")
+                is ChatMessage.ToolCall -> Dto("tool", m.icon, m.toolName, m.args, m.result ?: "",
+                    callId = m.callId, batchId = m.batchId, status = m.status.name, durationMs = m.durationMs)
                 is ChatMessage.Thinking -> null
                 is ChatMessage.Artifact -> Dto(
                     "artifact",
@@ -59,18 +68,24 @@ object ChatStore {
                 )
             }
         }
-        runCatching { KVUtils.putString(key(sessionId), gson.toJson(dtos)) }
+        return gson.toJson(dtos)
     }
 
     fun load(sessionId: String): List<ChatMessage>? {
         val json = KVUtils.getString(key(sessionId), "")
+        return decode(json)
+    }
+
+    internal fun decode(json: String): List<ChatMessage>? {
         if (json.isBlank()) return null
         return runCatching {
             val dtos: List<Dto> = gson.fromJson(json, object : TypeToken<List<Dto>>() {}.type)
             dtos.map { d ->
                 when (d.type) {
                     "user" -> ChatMessage.UserMessage(d.a)
-                    "tool" -> ChatMessage.ToolCall(d.a, d.b, d.c, d.d.ifBlank { null })
+                    "tool" -> ChatMessage.ToolCall(d.a, d.b, d.c, d.d.ifBlank { null },
+                        callId = d.callId, batchId = d.batchId, durationMs = d.durationMs,
+                        status = restoredToolStatus(d.status))
                     "artifact" -> ChatMessage.Artifact(
                         kind = runCatching { ChatMessage.ArtifactKind.valueOf(d.a) }
                             .getOrDefault(ChatMessage.ArtifactKind.FILE),
@@ -87,3 +102,9 @@ object ChatStore {
         runCatching { KVUtils.putString(key(sessionId), "") }
     }
 }
+
+/** A persisted running task has no attached live execution after recreation. */
+internal fun restoredToolStatus(value: String?): ChatMessage.ToolCallStatus =
+    runCatching { ChatMessage.ToolCallStatus.valueOf(value ?: "SUCCESS") }
+        .getOrDefault(ChatMessage.ToolCallStatus.SUCCESS)
+        .let { if (it == ChatMessage.ToolCallStatus.RUNNING) ChatMessage.ToolCallStatus.CANCELLED else it }

@@ -506,7 +506,7 @@ class DefaultAgentService : AgentService {
                     val toolName = toolRequest.name() ?: ""
                     val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
                     val toolArgs = toolRequest.arguments() ?: "{}"
-                    callback.onToolCall(iterations, toolName, displayName, toolArgs)
+                    val execution = ToolExecutionReporter(callback, iterations, toolName, displayName, toolArgs)
 
                     val mapType = object : TypeToken<Map<String, Any>>() {}.type
                     val params: Map<String, Any> = try {
@@ -516,7 +516,8 @@ class DefaultAgentService : AgentService {
                         emptyMap()
                     }
 
-                    val toolResult = execTool(toolName, params)
+                    val toolResult = execution.execute { execTool(toolName, params) }
+                    execution.finish(toolResult)
                     val paramsString = if (params.isEmpty()) "" else params.toString()
                     callback.onToolResult(iterations, toolName, displayName, paramsString, toolResult)
 
@@ -1263,9 +1264,9 @@ class DefaultAgentService : AgentService {
      *
      * 分两阶段:
      *  1. **并行执行阶段**:所有 readonly 工具提交到 [toolParallelExecutor],
-     *     每个工具独立调用 [execTool] 拿 [ToolResult]。此阶段不修改任何共享状态(messages、callback)。
+     *     每个工具独立调用 [execTool] 拿 [ToolResult]。此阶段仅上报执行日志,不修改 Agent messages。
      *  2. **串行 commit 阶段**:按 LLM 提交顺序依次等待 Future,在每个工具结果出来后:
-     *     - callback.onToolCall / onToolResult(主线程串行)
+     *     - onToolResult(主 Agent 线程串行;开始/日志/完成快照按真实执行时机上报)
      *     - appendToolResult 修改 messages(避免竞态)
      *     - 处理 finish/参数错误 等特殊情况
      *
@@ -1282,18 +1283,6 @@ class DefaultAgentService : AgentService {
             return executeReadonlyTool(readonlyReqs[0], callback)
         }
 
-        // TODO refine-chat-interaction Task 2(SubTask 2.5):
-        //  在此生成 `val batchId = java.util.UUID.randomUUID().toString()`,把 batchId 透传到
-        //  chat 层的 ChatMessage.ToolCall.batchId,使同批并行工具在 UI 聚合为单张 ToolBatchCard
-        //  (见 ChatScreen.kt 的 ToolBatchCard / groupToolCallsByBatch)。
-        //
-        //  当前阻塞:
-        //   1. AgentCallback.onToolCall/onToolResult 签名不含 batchId 字段(AgentCallback.kt:12-13),
-        //      ChatAgentBridge.onTool 回调同样未携带 batchId —— 需先扩展回调签名或新增 onBatchStart/End。
-        //   2. 本方法走 toolParallelExecutor 线程池,而 [ToolRegistry.executeToolsBatch](ToolRegistry.kt:653)
-        //      未在此处被调用 —— SubTask 2.5 待 ReAct 循环接入 executeToolsBatch 后再统一生成 batchId。
-        //  Task 2 子代理仅完成 UI 侧 ToolBatchCard + 消息渲染聚合,batchId 生成留作此 TODO。
-
         // 多个 readonly 工具:并行执行,串行 commit
         val pool = toolParallelExecutor ?: return ToolHandleResult.CONTINUE
         val cancelTask = cancelToken
@@ -1309,7 +1298,14 @@ class DefaultAgentService : AgentService {
             val result: ToolResult?,  // 参数解析失败时为 null
         )
 
-        val futures = readonlyReqs.map { req ->
+        val batchId = java.util.UUID.randomUUID().toString()
+        val executions = readonlyReqs.map { req ->
+            val name = req.name() ?: ""
+            ToolExecutionReporter(callback, iterations, name,
+                ToolRegistry.getInstance().getDisplayName(name), req.arguments() ?: "{}", batchId)
+        }
+        val futures = readonlyReqs.mapIndexed { index, req ->
+            val execution = executions[index]
             pool.submit<ReadonlyExec> {
                 val toolName = req.name() ?: ""
                 val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
@@ -1322,19 +1318,21 @@ class DefaultAgentService : AgentService {
                     val err = "参数解析失败:JSON 格式有误。原始参数: $toolArgs" +
                         (if (schema.isNotEmpty()) "\n正确参数格式: $schema" else "") +
                         "\n请按此格式重新调用。"
+                    execution.finish(ToolResult.error(err))
                     return@submit ReadonlyExec(req, toolName, displayName, toolArgs, null, err, null)
                 }
 
                 // 执行工具(纯查询,无副作用;cancelToken 通过 ToolRegistry.executeTool 内部 ThreadLocal 传递)
                 AgentMetrics.toolCall()
-                val rawResult = execTool(toolName, params)
+                val rawResult = execution.execute { execTool(toolName, params) }
                 if (!rawResult.isSuccess) AgentMetrics.toolFailure()
+                execution.finish(rawResult)
                 ReadonlyExec(req, toolName, displayName, toolArgs, params, null, rawResult)
             }
         }
 
         // ── 阶段 2:按提交顺序串行 commit ──
-        for (future in futures) {
+        for ((index, future) in futures.withIndex()) {
             if (cancelTask.isCancelled()) {
                 callback.onComplete(iterations, ClawApplication.instance.getString(R.string.agent_task_cancel), totalTokens)
                 return ToolHandleResult.TERMINATE
@@ -1344,12 +1342,12 @@ class DefaultAgentService : AgentService {
                 future.get()  // 阻塞等单个工具完成(按提交顺序)
             } catch (e: Exception) {
                 // 线程被中断或工具抛异常:构造错误结果
-                val req = readonlyReqs[futures.indexOf(future)]
+                val req = readonlyReqs[index]
                 val toolName = req.name() ?: ""
                 val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
                 val args = req.arguments() ?: "{}"
                 val errResult = ToolResult.error("工具执行异常: ${e.message}")
-                callback.onToolCall(iterations, toolName, displayName, args)
+                executions[index].finish(errResult)
                 callback.onToolResult(iterations, toolName, displayName, args, errResult)
                 appendToolResult(req, errResult)
                 continue
@@ -1360,7 +1358,6 @@ class DefaultAgentService : AgentService {
 
             // UI callback(主 Agent 线程串行)
             val paramsStr = if (exec.params.isNullOrEmpty()) "" else exec.params.toString()
-            callback.onToolCall(iterations, exec.toolName, exec.displayName, exec.args)
             callback.onToolResult(iterations, exec.toolName, exec.displayName, paramsStr, result)
 
             // finish 工具特殊处理(虽不算 readonly,但若 LLM 错调到 finish 仍要走原流程)
@@ -1404,7 +1401,7 @@ class DefaultAgentService : AgentService {
         val toolName = toolRequest.name() ?: ""
         val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
         val toolArgs = toolRequest.arguments() ?: "{}"
-        callback.onToolCall(iterations, toolName, displayName, toolArgs)
+        val execution = ToolExecutionReporter(callback, iterations, toolName, displayName, toolArgs)
 
         val params = parseToolArgs(toolName, toolArgs) ?: run {
             val schema = formatToolSchema(toolName)
@@ -1414,6 +1411,7 @@ class DefaultAgentService : AgentService {
                 "\n请按此格式重新调用。"
             )
             appendToolResult(toolRequest, errorResult)
+            execution.finish(errorResult)
             callback.onToolResult(iterations, toolName, displayName, toolArgs, errorResult)
             return ToolHandleResult.CONTINUE
         }
@@ -1424,10 +1422,11 @@ class DefaultAgentService : AgentService {
         }
 
         AgentMetrics.toolCall()
-        val rawResult = execTool(toolName, params)
+        val rawResult = execution.execute { execTool(toolName, params) }
         if (!rawResult.isSuccess) AgentMetrics.toolFailure()
 
         val paramsString = if (params.isEmpty()) "" else params.toString()
+        execution.finish(rawResult)
         callback.onToolResult(iterations, toolName, displayName, paramsString, rawResult)
 
         // finish 工具特殊处理(保守:即使被归为 readonly 也保留主循环耦合逻辑)
@@ -1509,7 +1508,7 @@ class DefaultAgentService : AgentService {
         val toolName = toolRequest.name() ?: ""
         val displayName = ToolRegistry.getInstance().getDisplayName(toolName)
         val toolArgs = toolRequest.arguments() ?: "{}"
-        callback.onToolCall(iterations, toolName, displayName, toolArgs)
+        val execution = ToolExecutionReporter(callback, iterations, toolName, displayName, toolArgs)
 
         val params = parseToolArgs(toolName, toolArgs) ?: run {
             // 附上工具参数 schema,让 LLM 知道正确格式,减少重复格式错误
@@ -1520,6 +1519,7 @@ class DefaultAgentService : AgentService {
                 "\n请按此格式重新调用。"
             )
             appendToolResult(toolRequest, errorResult)
+            execution.finish(errorResult)
             callback.onToolResult(iterations, toolName, displayName, toolArgs, errorResult)
             return ToolHandleResult.CONTINUE
         }
@@ -1544,7 +1544,7 @@ class DefaultAgentService : AgentService {
         // ── 动作录制：工具执行前抓锚点（点击后屏幕就变了，只能在点之前抓）──
         actionRecorder?.onToolCall(toolName, toolArgs)
         AgentMetrics.toolCall()
-        val rawResult = execTool(toolName, params)
+        val rawResult = execution.execute { execTool(toolName, params) }
         if (!rawResult.isSuccess) AgentMetrics.toolFailure()
         // ── 动作录制：工具执行后记录成功/失败 ──
         actionRecorder?.onToolResult(toolName, rawResult.isSuccess)
@@ -1593,6 +1593,7 @@ class DefaultAgentService : AgentService {
         }
 
         val paramsString = if (params.isEmpty()) "" else params.toString()
+        execution.finish(result)
         callback.onToolResult(iterations, toolName, displayName, paramsString, result)
 
         when (handleDialogResult(result, callback)) {

@@ -708,8 +708,10 @@ object LinuxSandbox {
 
         val stdoutBuf = ByteArrayOutputStream()
         val stderrBuf = ByteArrayOutputStream()
-        val stdoutThread = drainStream(process.inputStream, stdoutBuf)
-        val stderrThread = drainStream(process.errorStream, stderrBuf)
+        val outputSink = com.apk.claw.android.agent.ToolOutputContext.current()
+        val stdoutThread = drainStream(process.inputStream, stdoutBuf, outputSink)
+        val stderrThread = drainStream(process.errorStream, stderrBuf,
+            com.apk.claw.android.agent.ToolOutputContext.stderrSink(outputSink))
         stdoutThread.start()
         stderrThread.start()
 
@@ -736,19 +738,10 @@ object LinuxSandbox {
 
         stdoutThread.join(1000)
         stderrThread.join(1000)
-
         val exitCode = process.exitValue()
         val stdout = truncate(stdoutBuf.toString(Charsets.UTF_8.name()))
         val stderr = truncate(stderrBuf.toString(Charsets.UTF_8.name()))
-
-        val output = buildString {
-            if (stdout.isNotEmpty()) append(stdout)
-            if (stderr.isNotEmpty()) {
-                if (isNotEmpty()) append("\n--- stderr ---\n")
-                append(stderr)
-            }
-            if (isEmpty()) append("(命令执行成功,无输出)")
-        }
+        val output = combineProcessOutput(stdout, stderr)
 
         return if (exitCode == 0) {
             ToolResult.success(output)
@@ -760,19 +753,33 @@ object LinuxSandbox {
         }
     }
 
+    private fun combineProcessOutput(stdout: String, stderr: String): String = buildString {
+        if (stdout.isNotEmpty()) append(stdout)
+        if (stderr.isNotEmpty()) {
+            if (isNotEmpty()) append("\n--- stderr ---\n")
+            append(stderr)
+        }
+        if (isEmpty()) append("(命令执行成功,无输出)")
+    }
+
     /** 读取流到 buffer 的线程工厂。 */
     private fun drainStream(
         input: java.io.InputStream,
         buf: ByteArrayOutputStream,
+        onOutput: ((String) -> Unit)? = null,
     ): Thread = Thread {
         try {
-            input.use { stream ->
-                val tmp = ByteArray(4096)
+            input.reader(Charsets.UTF_8).use { reader ->
+                val tmp = CharArray(4096)
                 var n: Int
-                while (stream.read(tmp).also { n = it } != -1) {
-                    // 软上限:超过 1MB 停止读取,避免 OOM;最终输出再截到 64KB
-                    if (buf.size() > 1_048_576) break
-                    buf.write(tmp, 0, n)
+                while (reader.read(tmp).also { n = it } != -1) {
+                    val chunk = String(tmp, 0, n)
+                    onOutput?.invoke(chunk)
+                    // Keep draining after the retention cap so the child cannot block on a full pipe.
+                    if (buf.size() < 1_048_576) {
+                        val bytes = chunk.toByteArray(Charsets.UTF_8)
+                        buf.write(bytes, 0, minOf(bytes.size, 1_048_576 - buf.size()))
+                    }
                 }
             }
         } catch (_: Exception) {

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
  * 仅用于 git_* 工具内部,不对外暴露为工具本身。
  */
 object GitCommandRunner {
+    private const val STREAM_BUFFER_CHARS = 4096
 
     /**
      * 单次命令执行结果。
@@ -52,11 +53,12 @@ object GitCommandRunner {
         // stdout / stderr 必须并发读，否则子进程写满 pipe 缓冲区后会阻塞死锁；
         // 同时也不能在 waitFor 之前同步 readText，否则“进程不退出且不关流”时
         // 超时逻辑永远没有机会执行。
+        val outputSink = com.apk.claw.android.agent.ToolOutputContext.current()
         val stdoutFuture = CompletableFuture.supplyAsync {
-            process.inputStream.bufferedReader().use { it.readText() }
+            readOutput(process.inputStream, outputSink)
         }
         val stderrFuture = CompletableFuture.supplyAsync {
-            process.errorStream.bufferedReader().use { it.readText() }
+            readOutput(process.errorStream, com.apk.claw.android.agent.ToolOutputContext.stderrSink(outputSink))
         }
 
         val finished = process.waitFor(timeoutSec, TimeUnit.SECONDS)
@@ -80,6 +82,19 @@ object GitCommandRunner {
             success = exit == 0,
         )
     }
+
+    private fun readOutput(input: java.io.InputStream, observer: ((String) -> Unit)? = null): String =
+        input.reader(Charsets.UTF_8).use { reader ->
+            val output = StringBuilder()
+            val chars = CharArray(STREAM_BUFFER_CHARS)
+            var count: Int
+            while (reader.read(chars).also { count = it } != -1) {
+                val chunk = String(chars, 0, count)
+                output.append(chunk)
+                observer?.invoke(chunk)
+            }
+            output.toString()
+        }
 
     /** 读取异步流；进程已被终止时最多等待 5 秒，避免读线程永久拖住调用方。 */
     private fun readStream(future: CompletableFuture<String>): String = try {

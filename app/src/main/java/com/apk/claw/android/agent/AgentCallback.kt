@@ -10,6 +10,7 @@ interface AgentCallback {
      */
     fun onLoopStart(round: Int)
     fun onContent(round: Int, content: String)
+    fun onToolProgress(progress: ToolExecutionProgress) {}
     fun onToolCall(round: Int, toolId: String, toolName: String, parameters: String)
     fun onToolResult(round: Int, toolId: String, toolName: String, parameters: String, result: ToolResult)
     /** Execution completion and goal achievement are distinct. Emitted before onComplete. */
