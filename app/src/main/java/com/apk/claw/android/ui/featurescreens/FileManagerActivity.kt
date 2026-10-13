@@ -156,7 +156,8 @@ private fun FileManagerScreen(onBack: () -> Unit) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(OctopusBackground.pageBrush())) {
+    // safeDrawingPadding:顶栏让开状态栏(之前压在时间/电量上),底部和横屏侧边让开导航栏
+    Column(modifier = Modifier.fillMaxSize().background(OctopusBackground.pageBrush()).safeDrawingPadding()) {
         // 顶栏:返回 + 路径面包屑 + 操作
         TopBar(
             currentPath = currentPath,

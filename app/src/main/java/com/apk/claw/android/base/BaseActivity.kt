@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -89,7 +90,7 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * 为根视图添加状态栏高度的顶部 padding
+     * 根视图挂载后按系统栏 insets 补 padding（见 [applyPaddingToRootView]）
      * 子类可通过重写 isApplyStatusBarPadding() 来禁用
      */
     private fun applyStatusBarPadding() {
@@ -100,19 +101,32 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * 为根视图应用状态栏高度 padding
+     * 按真实的 WindowInsets 给根视图补 padding：状态栏、导航栏（横屏时在侧边）和挖孔区，
+     * 叠加在布局自带的 padding 之上。
+     *
+     * 不用 BarUtils.getStatusBarHeight()：它读的是系统 dimen（24dp），而 API 35 强制
+     * edge-to-edge 后真实的状态栏 inset 可达 48dp 以上，标题栏会钻到状态栏下面，导航栏也没让开。
+     * 窗口不是 edge-to-edge 时（低版本），系统栏在内容区之外，这里拿到的 inset 为 0，不会多出空白。
+     *
      * 如果布局已经处理了 insets，可以重写此方法自定义行为
      */
     protected open fun applyPaddingToRootView(rootView: View) {
         if (!isApplyStatusBarPadding()) return
-
-        val statusBarHeight = BarUtils.getStatusBarHeight()
-        val existingPaddingTop = rootView.paddingTop
-
-        // 只在没有 padding 或 padding 小于状态栏高度时才添加
-        if (existingPaddingTop < statusBarHeight) {
-            rootView.updatePadding(top = statusBarHeight)
+        val base = Insets.of(rootView.paddingLeft, rootView.paddingTop, rootView.paddingRight, rootView.paddingBottom)
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout(),
+            )
+            view.updatePadding(
+                left = base.left + bars.left,
+                top = base.top + bars.top,
+                right = base.right + bars.right,
+                bottom = base.bottom + bars.bottom,
+            )
+            // 根视图已让开系统栏，子视图不再重复处理
+            WindowInsetsCompat.CONSUMED
         }
+        ViewCompat.requestApplyInsets(rootView)
     }
 
     /**

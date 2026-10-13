@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
@@ -15,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -134,18 +136,22 @@ private fun DeviceTasksScreen(onBack: () -> Unit) {
     val perform: (String, Map<String, Any?>) -> Unit = { command, args ->
         scope.launch { state.perform(command, args) }
     }
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text("跨端任务", style = MaterialTheme.typography.headlineSmall)
-        Text("与电脑共享任务进度和结果。手机可操作本机，以及设备中心明确授权的其他设备。")
-        TaskSubmission(state) { perform("submit", it) }
-        if (state.error.isNotBlank()) Text(state.error, color = MaterialTheme.colorScheme.error)
-        if (state.loadError.isNotBlank()) Text(state.loadError, color = MaterialTheme.colorScheme.error)
-        if (state.tasks.isEmpty()) Text("暂无可显示的任务")
-        state.tasks.forEach { task -> DeviceTaskCard(task, state.busy, perform) }
-        TextButton(onClick = onBack) { Text("返回") }
+    // Surface 提供页面底色和内容色:没有它 Text 默认是黑色,Graphite 下标题和说明几乎看不见
+    Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+        Column(
+            // safeDrawingPadding:标题让开状态栏(之前压在时间/电量上),底部和横屏侧边让开导航栏
+            Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text("跨端任务", style = MaterialTheme.typography.headlineSmall)
+            Text("与电脑共享任务进度和结果。手机可操作本机，以及设备中心明确授权的其他设备。")
+            TaskSubmission(state) { perform("submit", it) }
+            if (state.error.isNotBlank()) Text(state.error, color = MaterialTheme.colorScheme.error)
+            if (state.loadError.isNotBlank()) Text(state.loadError, color = MaterialTheme.colorScheme.error)
+            if (state.tasks.isEmpty()) Text("暂无可显示的任务")
+            state.tasks.forEach { task -> DeviceTaskCard(task, state.busy, perform) }
+            TextButton(onClick = onBack) { Text("返回") }
+        }
     }
 }
 
