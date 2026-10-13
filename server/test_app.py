@@ -2083,6 +2083,71 @@ class TestAppUpdate:
         assert r2.content == payload
         assert r2.headers["content-type"] == "application/vnd.android.package-archive"
 
+    NEW_CERT = "ab" * 32  # 1.1.0 起的新签名证书指纹(64 位 hex)
+
+    def _configure_key_change(self, monkeypatch, tmp_path, *, notes_file=True):
+        apk = tmp_path / "octopus-app.apk"
+        apk.write_bytes(b"apk")
+        monkeypatch.setattr(app_module, "APP_UPDATE_APK_PATH", str(apk))
+        monkeypatch.setattr(app_module, "APP_UPDATE_VERSION_CODE", 15)
+        monkeypatch.setattr(app_module, "APP_UPDATE_VERSION_NAME", "1.1.0")
+        monkeypatch.setattr(app_module, "APP_UPDATE_NOTES", "常规更新说明")
+        monkeypatch.setattr(app_module, "APP_UPDATE_FORCE", True)
+        # apksigner 打印的是带冒号的大写指纹,服务端要能认
+        printed = ":".join(self.NEW_CERT[i:i + 2] for i in range(0, 64, 2)).upper()
+        monkeypatch.setattr(app_module, "APP_UPDATE_SIGNING_CERT_SHA256", app_module._normalize_cert_sha256(printed))
+        if notes_file:
+            f = tmp_path / "key-change.txt"
+            f.write_text("【重要】先卸载旧版\n第二行\n", encoding="utf-8")
+            monkeypatch.setattr(app_module, "APP_UPDATE_KEY_CHANGE_NOTES_FILE", str(f))
+            monkeypatch.setattr(app_module, "APP_UPDATE_KEY_CHANGE_NOTES", "")
+        else:
+            monkeypatch.setattr(app_module, "APP_UPDATE_KEY_CHANGE_NOTES_FILE", "")
+            monkeypatch.setattr(app_module, "APP_UPDATE_KEY_CHANGE_NOTES", "先卸载旧版")
+
+    def test_old_clients_get_key_change_notes_and_never_force(self, client, monkeypatch, tmp_path):
+        """1.0.0(vc9–14)不带 cert:它们都是遗失的旧密钥签的,覆盖安装必失败 → 换签名说明,且不强制。"""
+        self._configure_key_change(monkeypatch, tmp_path)
+        data = client.get("/app/latest").json()
+        assert data["versionCode"] == 15
+        assert data["notes"] == "【重要】先卸载旧版\n第二行"
+        assert data["force"] is False
+        assert data["signingCertSha256"] == self.NEW_CERT
+        assert data["url"].endswith("/app/latest.apk")
+
+    def test_same_key_clients_get_regular_notes(self, client, monkeypatch, tmp_path):
+        self._configure_key_change(monkeypatch, tmp_path)
+        data = client.get("/app/latest", params={"cert": self.NEW_CERT.upper()}).json()
+        assert data["notes"] == "常规更新说明"
+        assert data["force"] is True
+
+    def test_other_key_clients_get_key_change_notes(self, client, monkeypatch, tmp_path):
+        """例如 debug 包或以后再换一次密钥:报了 cert 但对不上,同样走换签名说明。"""
+        self._configure_key_change(monkeypatch, tmp_path, notes_file=False)
+        data = client.get("/app/latest", params={"cert": "cd" * 32}).json()
+        assert data["notes"] == "先卸载旧版"
+        assert data["force"] is False
+
+    def test_key_change_off_by_default(self, client, monkeypatch, tmp_path):
+        """没配 KEY_CHANGE_NOTES:与以前完全一样,老客户端拿常规说明。"""
+        self._configure_key_change(monkeypatch, tmp_path, notes_file=False)
+        monkeypatch.setattr(app_module, "APP_UPDATE_KEY_CHANGE_NOTES", "")
+        data = client.get("/app/latest").json()
+        assert data["notes"] == "常规更新说明"
+        assert data["force"] is True
+
+    def test_notes_file_is_read_per_request_and_falls_back(self, client, monkeypatch, tmp_path):
+        self._configure_key_change(monkeypatch, tmp_path)
+        notes = tmp_path / "notes.txt"
+        notes.write_text("第一版说明\n", encoding="utf-8")
+        monkeypatch.setattr(app_module, "APP_UPDATE_NOTES_FILE", str(notes))
+        params = {"cert": self.NEW_CERT}
+        assert client.get("/app/latest", params=params).json()["notes"] == "第一版说明"
+        notes.write_text("改过的说明", encoding="utf-8")
+        assert client.get("/app/latest", params=params).json()["notes"] == "改过的说明"
+        notes.unlink()  # 文件没了 → 退回环境变量里的单行文案
+        assert client.get("/app/latest", params=params).json()["notes"] == "常规更新说明"
+
     def test_download_404_when_apk_missing(self, client, monkeypatch, tmp_path):
         monkeypatch.setattr(app_module, "APP_UPDATE_APK_PATH", str(tmp_path / "missing.apk"))
         r = client.get("/app/latest.apk")

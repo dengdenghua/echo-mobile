@@ -122,6 +122,32 @@ SHIZUKU_LICENSE_URL=https://github.com/RikkaApps/Shizuku
 
 注意:分发第三方 APK 前应保留来源和开源许可信息,并定期用官方版本更新该文件。
 
+## App 在线更新(OTA)
+
+App 启动时和「设置 → 版本号」处会请求公开的 `GET /app/latest`,有更高的 versionCode 就弹「发现新版本」,
+点「立即更新」下载 `/app/latest.apk` 并拉起系统安装器。服务端不构建、不签名 APK,只分发运维放好的包:
+
+```bash
+cp OctopusMobile_v1.1.0_vc15_universal.apk /home/ubuntu/octopus-server/downloads/octopus-app.apk
+```
+
+`.env`:
+
+```bash
+APP_UPDATE_APK_PATH=/home/ubuntu/octopus-server/downloads/octopus-app.apk
+APP_UPDATE_VERSION_CODE=15
+APP_UPDATE_VERSION_NAME=1.1.0
+APP_UPDATE_NOTES_FILE=/home/ubuntu/octopus-server/downloads/notes.txt      # 多行说明,每次请求现读
+APP_UPDATE_SIGNING_CERT_SHA256=<Release 说明里的签名证书 SHA-256>
+APP_UPDATE_KEY_CHANGE_NOTES_FILE=/home/ubuntu/octopus-server/downloads/key-change-notes.txt
+```
+
+**换签名(1.1.0)**:1.0.0(versionCode 9–14)的签名密钥已遗失,1.1.0 起用新密钥签名。Android 不允许把
+不同签名的包覆盖安装到旧版上,旧版点「立即更新」只会得到「应用未安装」。配了
+`APP_UPDATE_KEY_CHANGE_NOTES(_FILE)` 后,签名对不上的客户端(1.0.0 不带 `cert` 参数;1.1.0 起带自身签名指纹)
+拿到的是这段换签名说明而不是常规说明,且 `force` 恒为 false。说明文案见仓库
+`docs/release-notes/ota/`。1.0.0 的更新弹窗不能滚动,说明控制在 12 行以内。
+
 ## 在你的服务器上跑(已实测该机:2 vCPU / 1GB / Python 3.12)
 
 ```bash

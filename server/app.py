@@ -4314,6 +4314,7 @@ def download_shizuku_apk() -> FileResponse:
 # App 在线更新(OTA)。同 Shizuku 下载镜像一个模式:运维把 universal 签名 APK 放到
 # APP_UPDATE_APK_PATH,配 APP_UPDATE_VERSION_CODE/_VERSION_NAME/_NOTES/_FORCE 声明这个包的版本号,
 # 服务端只做受控静态分发——不在这里构建/签名 APK(签名密钥不经手服务端)。
+# 多行说明用 *_FILE(UTF-8 文本文件,每次请求现读,改文案不用重启);文件读不到时退回同名环境变量。
 APP_UPDATE_APK_PATH = os.environ.get(
     "APP_UPDATE_APK_PATH",
     os.path.join(os.path.dirname(__file__), "downloads", "octopus-app.apk"),
@@ -4321,24 +4322,69 @@ APP_UPDATE_APK_PATH = os.environ.get(
 APP_UPDATE_VERSION_CODE = int(os.environ.get("APP_UPDATE_VERSION_CODE", "0") or "0")
 APP_UPDATE_VERSION_NAME = os.environ.get("APP_UPDATE_VERSION_NAME", "")
 APP_UPDATE_NOTES = os.environ.get("APP_UPDATE_NOTES", "")
+APP_UPDATE_NOTES_FILE = os.environ.get("APP_UPDATE_NOTES_FILE", "")
 APP_UPDATE_FORCE = os.environ.get("APP_UPDATE_FORCE", "").strip().lower() in ("1", "true", "yes")
 
 
+def _normalize_cert_sha256(value: str | None) -> str:
+    """签名证书 SHA-256 指纹 → 64 位小写 hex。apksigner/keytool 打印的 `AB:CD:…` 也认。"""
+    return re.sub(r"[^0-9a-f]", "", (value or "").lower())
+
+
+# 换签名迁移:1.0.0(versionCode 9–14)的签名密钥已遗失,1.1.0 起换了新密钥。系统拒绝把不同签名的
+# APK 覆盖安装到旧版上(「应用未安装」),旧版用户只能先卸载再装。
+#   APP_UPDATE_SIGNING_CERT_SHA256  这份 APK 的签名证书指纹(release.yml 的 Release 说明里有)。
+#   APP_UPDATE_KEY_CHANGE_NOTES(_FILE)  发给「装的是另一把密钥签的包」的客户端的说明(先卸载、会丢什么)。
+# 客户端从 1.1.0 起在查询里带 `cert`(自身签名证书指纹);不带的都是 1.0.0 及更早、旧密钥签的包。
+# 不配 KEY_CHANGE_NOTES 时行为与以前完全一样。
+APP_UPDATE_SIGNING_CERT_SHA256 = _normalize_cert_sha256(os.environ.get("APP_UPDATE_SIGNING_CERT_SHA256", ""))
+APP_UPDATE_KEY_CHANGE_NOTES = os.environ.get("APP_UPDATE_KEY_CHANGE_NOTES", "")
+APP_UPDATE_KEY_CHANGE_NOTES_FILE = os.environ.get("APP_UPDATE_KEY_CHANGE_NOTES_FILE", "")
+
+
+def _text_setting(inline: str, path: str) -> str:
+    """*_FILE 优先(多行文案放文件里),读不到就用环境变量里的单行文案。"""
+    if path:
+        try:
+            with open(path, encoding="utf-8") as f:
+                return f.read().strip()
+        except OSError:
+            pass
+    return inline
+
+
+def _client_needs_reinstall(client_cert: str | None) -> bool:
+    """客户端装的包与服务端这份 APK 签名不同 → 只能先卸载再装。"""
+    cert = _normalize_cert_sha256(client_cert)
+    if not cert:
+        return True  # 1.1.0 之前的客户端不报指纹,它们都是旧密钥签的
+    return bool(APP_UPDATE_SIGNING_CERT_SHA256) and cert != APP_UPDATE_SIGNING_CERT_SHA256
+
+
 @app.get("/app/latest")
-def app_latest(request: Request) -> dict[str, Any]:
+def app_latest(request: Request, cert: str | None = None) -> dict[str, Any]:
     """App 在线更新(OTA)元信息。客户端契约(AppUpdater.kt):
-    {versionCode, versionName, url, notes, force},公开无需鉴权(检查更新不该要求已登录)。
+    {versionCode, versionName, url, notes, force, signingCertSha256},公开无需鉴权(检查更新不该要求已登录)。
     未配置版本号或 APK 文件缺失时返回 versionCode=0——客户端逻辑是
     `vc <= BuildConfig.VERSION_CODE` 判定"已最新",0 恒小于等于任何真实版本号,
-    天然表现为"没有更新"而不是报错,运维还没放包时不会误导用户。"""
+    天然表现为"没有更新"而不是报错,运维还没放包时不会误导用户。
+
+    `cert`:客户端自身签名证书的 SHA-256(1.1.0 起才带)。配了 APP_UPDATE_KEY_CHANGE_NOTES 时,
+    签名对不上的客户端拿到的是换签名说明,且 force 恒为 false(点「立即更新」装不上,强制弹窗只会把人困住)。"""
     if APP_UPDATE_VERSION_CODE <= 0 or not os.path.isfile(APP_UPDATE_APK_PATH):
         return {"versionCode": 0, "versionName": "", "url": "", "notes": "", "force": False}
+    notes = _text_setting(APP_UPDATE_NOTES, APP_UPDATE_NOTES_FILE)
+    force = APP_UPDATE_FORCE
+    key_change_notes = _text_setting(APP_UPDATE_KEY_CHANGE_NOTES, APP_UPDATE_KEY_CHANGE_NOTES_FILE)
+    if key_change_notes and _client_needs_reinstall(cert):
+        notes, force = key_change_notes, False
     return {
         "versionCode": APP_UPDATE_VERSION_CODE,
         "versionName": APP_UPDATE_VERSION_NAME or f"v{APP_UPDATE_VERSION_CODE}",
         "url": str(request.url_for("download_app_apk")),
-        "notes": APP_UPDATE_NOTES,
-        "force": APP_UPDATE_FORCE,
+        "notes": notes,
+        "force": force,
+        "signingCertSha256": APP_UPDATE_SIGNING_CERT_SHA256,
     }
 
 
