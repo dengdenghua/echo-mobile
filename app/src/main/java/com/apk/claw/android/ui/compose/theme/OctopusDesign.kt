@@ -161,6 +161,10 @@ object OctopusShape {
     val medium = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
     val large = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
     val xl = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+    /** `radius-lg`: dialogs, bottom sheets and panels such as the chat composer. */
+    val dialog = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
+    /** `radius-xl`: floating chrome bars (the Dock, the chat header capsule). */
+    val dock = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
     val capsule = androidx.compose.foundation.shape.RoundedCornerShape(50)
 
     /** 向后兼容：原 OctopusShape.Card/Panel/Control 的 Dp 值 */

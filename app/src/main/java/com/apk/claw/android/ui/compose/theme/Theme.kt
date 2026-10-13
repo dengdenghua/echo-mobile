@@ -128,6 +128,20 @@ fun OctopusTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        shapes = EchoShapes,
         content = content
     )
 }
+
+/**
+ * ECHO radius ladder for Material components (BRAND.md): `radius-sm` 6 for inputs and menus,
+ * `radius-md` 10 for cards, `radius-lg` 14 for dialogs and bottom sheets. Without it, M3 falls back to
+ * its baseline 28 dp dialogs and sheets.
+ */
+private val EchoShapes = Shapes(
+    extraSmall = OctopusShape.small,
+    small = OctopusShape.small,
+    medium = OctopusShape.large,
+    large = OctopusShape.dialog,
+    extraLarge = OctopusShape.dialog,
+)

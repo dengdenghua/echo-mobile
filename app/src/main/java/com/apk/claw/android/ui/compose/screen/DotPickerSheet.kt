@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
@@ -28,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
+import com.apk.claw.android.ui.compose.theme.OctopusColors
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import kotlinx.coroutines.CancellationException
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +70,7 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
             horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Surface(shape = RoundedCornerShape(28.dp), color = Style.surface, border = BorderStroke(1.dp, Style.border)) {
+                Surface(shape = OctopusShape.large, color = Style.surface, border = BorderStroke(1.dp, Style.border)) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             Image(painterResource(selected.avatar), null, Modifier.size(84.dp).clip(CircleShape))
@@ -83,8 +84,12 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
                         Button(
                             onClick = { DotRoster.select(selected.agentId); onOpenChat(selected.agentId) },
                             enabled = installed?.contains(selected.agentId) != false,
-                            modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(24.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Style.accent, contentColor = Style.background),
+                            modifier = Modifier.fillMaxWidth().height(48.dp), shape = OctopusShape.small,
+                            // 主按钮单色;core 青只留给选中标记
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = OctopusColors.Primary,
+                                contentColor = OctopusColors.OnPrimary,
+                            ),
                         ) {
                             Text(stringResource(R.string.dot_chat_with, selected.name), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                             Spacer(Modifier.width(8.dp))
@@ -102,7 +107,7 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
             items(DotRoster.members, key = { it.agentId }) { member ->
                 val active = selected.agentId == member.agentId
                 Surface(
-                    onClick = { DotRoster.select(member.agentId) }, shape = RoundedCornerShape(22.dp),
+                    onClick = { DotRoster.select(member.agentId) }, shape = OctopusShape.large,
                     color = if (active) Style.accentSurface else Style.surface,
                     border = BorderStroke(1.dp, if (active) Style.accent.copy(alpha = .5f) else Style.border),
                 ) {
@@ -119,7 +124,7 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
                 }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Surface(onClick = { if (connectionIssue != null) showConnection = true else refresh++ }, shape = RoundedCornerShape(16.dp), color = Style.softSurface) {
+                Surface(onClick = { if (connectionIssue != null) showConnection = true else refresh++ }, shape = OctopusShape.large, color = Style.softSurface) {
                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         if (loading) CircularProgressIndicator(Modifier.size(16.dp), color = Style.accent, strokeWidth = 2.dp)
                         else Icon(if (connectionIssue != null) Icons.Filled.Link else Icons.Filled.Refresh, null, Modifier.size(16.dp), tint = Style.muted)

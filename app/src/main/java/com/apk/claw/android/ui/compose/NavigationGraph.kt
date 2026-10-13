@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -72,6 +72,7 @@ import com.apk.claw.android.ui.compose.screen.PluginMarketplaceScreen
 import com.apk.claw.android.ui.compose.screen.SkillMarketplaceScreen
 import com.apk.claw.android.ui.compose.screen.UniverseScreen
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import kotlinx.coroutines.launch
 
 /**
@@ -119,15 +120,8 @@ fun OctopusApp() {
                 CompactBottomBar(
                     currentRoute = selectedBottomRoute,
                     onSelect = { screen ->
-                        if (selectedBottomRoute == screen.route && currentDestination?.route == screen.route) {
-                            return@CompactBottomBar
-                        }
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (selectedBottomRoute != screen.route || currentDestination?.route != screen.route) {
+                            navController.navigateToTab(screen)
                         }
                     },
                 )
@@ -152,6 +146,15 @@ fun OctopusApp() {
     }
 }
 
+/** 切换底部 Tab:回到起始页再进入,保存/恢复各 Tab 的状态。 */
+private fun NavHostController.navigateToTab(screen: Screen) {
+    navigate(screen.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 // 底部 dock 专用颜色别名（跟随主题切换）
 private val NavTextMutedColor get() = EchoChatStyle.muted
 
@@ -172,7 +175,7 @@ private fun CompactBottomBar(
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(32.dp),
+            shape = OctopusShape.dock,
             color = Color.Transparent,
             shadowElevation = 0.dp,
         ) {
@@ -216,7 +219,7 @@ private fun RowScope.BottomTabItem(
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(20.dp)).background(backgroundColor),
+            modifier = Modifier.size(40.dp).clip(OctopusShape.large).background(backgroundColor),
             contentAlignment = Alignment.Center,
         ) {
             Icon(screen.icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(22.dp))

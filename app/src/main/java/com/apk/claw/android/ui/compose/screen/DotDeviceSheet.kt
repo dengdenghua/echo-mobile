@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
@@ -26,6 +25,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 
 /** Viewing a device never changes the conversation's execution environment. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +88,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
                     } while (true)
                 }
                 val tasks = DeviceExecutionStore.active().filter { it.environment == environment && it.host == address.trimEnd('/') }
-                Surface(shape = RoundedCornerShape(20.dp), color = Style.surface,
+                Surface(shape = OctopusShape.large, color = Style.surface,
                     border = BorderStroke(1.dp, Style.border)) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -122,7 +122,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
                                     else -> refresh++
                                 }
                             }, enabled = !checking,
-                                modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
+                                modifier = Modifier.weight(1f), shape = OctopusShape.small) {
                                 Text(stringResource(when {
                                     !configured -> R.string.dot_pair_bind
                                     issue == R.string.dot_pair_revoked -> R.string.dot_pair_bind

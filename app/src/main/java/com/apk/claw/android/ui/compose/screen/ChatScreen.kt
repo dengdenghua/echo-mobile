@@ -37,6 +37,7 @@ import com.apk.claw.android.ui.compose.theme.EchoChatStyle
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.colorResource
 import com.apk.claw.android.ui.desktop.CharacterRegistry
 import com.apk.claw.android.ui.desktop.personaPrompt
 import com.apk.claw.android.utils.KVUtils
@@ -168,7 +169,7 @@ import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
 // 颜色
-private val PrimaryColor get() = EchoChatStyle.accent
+private val PrimaryColor get() = OctopusColors.Primary  // 主按钮单色(ink/snow);core 青只做点状强调
 private val SuccessColor get() = OctopusColors.Success
 private val WarningColor get() = OctopusColors.Warning
 private val ErrorColor get() = OctopusColors.Error
@@ -185,7 +186,7 @@ private val OverlayDimColor get() = OctopusColors.OverlayDim
 private val OnPrimaryColor get() = OctopusColors.OnPrimary
 private val VideoBackgroundColor get() = Color.Black
 private val AgentBubbleColor get() = EchoChatStyle.softSurface
-private val UserBubbleColor get() = EchoChatStyle.accentSurface
+private val UserBubbleColor get() = EchoChatStyle.accentSurface  // 中性,比 Agent 气泡高一级
 
 // 消息数据模型
 sealed class ChatMessage {
@@ -1170,7 +1171,7 @@ fun ChatScreen() {
             Column(Modifier.fillMaxWidth().heightIn(max = 160.dp).verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)) {
                 delegatedTasks.forEach { execution ->
-                    Surface(shape = RoundedCornerShape(16.dp), color = EchoChatStyle.surface,
+                    Surface(shape = OctopusShape.large, color = EchoChatStyle.surface,
                         modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
                         Row(Modifier.padding(start = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(execution.environment.icon, null, tint = PrimaryColor, modifier = Modifier.size(20.dp))
@@ -1201,10 +1202,11 @@ fun ChatScreen() {
             }
         }
         // One clean composer above the Dock. A multiline field keeps the writing area wide.
+        // navigationBarsPadding:Dock 在时这段已被 Dock 消费(为 0);抽屉打开收起 Dock 时,输入框停在导航栏上方
         Surface(
-            modifier = Modifier.fillMaxWidth().imePadding()
+            modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding()
                 .padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 2.dp),
-            shape = RoundedCornerShape(28.dp),
+            shape = OctopusShape.dialog,
             color = EchoChatStyle.surface,
             border = BorderStroke(1.dp, EchoChatStyle.border.copy(alpha = .65f)),
             shadowElevation = 0.dp,
@@ -1236,7 +1238,7 @@ fun ChatScreen() {
                     }
                     Box(
                         modifier = Modifier.weight(1f).height(48.dp)
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(OctopusShape.large)
                             .background(if (isRunning || listening) ErrorColor else EchoChatStyle.accentSurface)
                             .semantics { contentDescription = pillText }
                             .then(pillGesture),
@@ -1245,10 +1247,10 @@ fun ChatScreen() {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(if (isRunning) Icons.Filled.Stop else Icons.Filled.Mic,
                                 contentDescription = null,
-                                tint = if (isRunning || listening) Color.White else PrimaryColor,
+                                tint = if (isRunning || listening) OnPrimaryColor else PrimaryColor,
                                 modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text(pillText, color = if (isRunning || listening) Color.White else PrimaryColor,
+                            Text(pillText, color = if (isRunning || listening) OnPrimaryColor else PrimaryColor,
                                 fontSize = 14.sp, fontWeight = FontWeight.Medium,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
@@ -1306,16 +1308,14 @@ fun ChatScreen() {
                     IconButton(
                         onClick = { if (isRunning) stop() else if (showSend) send() else voiceMode = true },
                         modifier = Modifier.size(48.dp).padding(3.dp)
-                            .background(if (isRunning) ErrorColor else if (showSend) PrimaryColor else Color.Transparent, CircleShape),
+                            .background(if (isRunning) ErrorColor else if (showSend) PrimaryColor else Color.Transparent, OctopusShape.large),
                     ) {
                         Icon(
                             if (isRunning) Icons.Filled.Stop else if (showSend) Icons.AutoMirrored.Filled.Send else Icons.Filled.Mic,
                             contentDescription = if (composerDot != null && showSend && !isRunning)
                                 stringResource(R.string.dot_env_send_to, stringResource(executionEnvironment.title))
                             else stringResource(if (isRunning) R.string.chat_voice_stop_agent else if (showSend) R.string.chat_send_message else R.string.chat_voice_mode),
-                            tint = if (isRunning) Color.White else if (showSend) {
-                                if (OctopusColors.isLight) Color.White else EchoChatStyle.background
-                            } else TextMuted,
+                            tint = if (isRunning || showSend) OnPrimaryColor else TextMuted,
                             modifier = Modifier.size(21.dp),
                         )
                     }
@@ -1337,7 +1337,7 @@ fun ChatScreen() {
             Row(
                 modifier = Modifier.align(Alignment.TopCenter)
                     .widthIn(max = (LocalConfiguration.current.screenWidthDp - 128).coerceAtLeast(128).dp)
-                    .background(EchoChatStyle.surface, RoundedCornerShape(40.dp))
+                    .background(EchoChatStyle.surface, OctopusShape.dock)
                     .padding(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1349,10 +1349,14 @@ fun ChatScreen() {
                 val projectName = projectPath?.replace('\\', '/')?.trimEnd('/')?.substringAfterLast('/')
                     ?.takeIf { it.isNotBlank() } ?: projectPath
                 Box {
+                    val avatarRes = currentDot?.avatar ?: curProfile?.avatarRes
+                    // 默认 Echo 显示 App 图标同款:石墨底 + 雪白框 + core 光点(浅色主题下白框才看得见)
+                    val markGround = colorResource(R.color.echo_icon_background)
                     Image(
-                        painterResource(currentDot?.avatar ?: curProfile?.avatarRes ?: R.drawable.ic_echo_foreground),
+                        painterResource(avatarRes ?: R.drawable.ic_echo_foreground),
                         contentDescription = currentDot?.name ?: curProfile?.zh ?: stringResource(R.string.app_name),
                         modifier = Modifier.size(56.dp).clip(CircleShape)
+                            .then(if (avatarRes == null) Modifier.background(markGround) else Modifier)
                             .combinedClickable(
                                 onClick = { if (currentDot != null) showDotScreen = true else showDotPicker = true },
                                 onLongClick = { showDotPicker = true },
@@ -1889,27 +1893,28 @@ private fun ColumnScope.ChatHomeWorkbench(
     onUsePrompt: (String) -> Unit,
 ) {
     val prompts = if (dot != null) listOf(
-        HomePrompt(stringResource(R.string.dot_task), stringResource(R.string.dot_prompt_task, dotSpecialty(dot)), Icons.Filled.AutoAwesome, AccentColor),
-        HomePrompt(stringResource(R.string.dot_plan), stringResource(R.string.dot_prompt_plan), Icons.Filled.Search, PrimaryColor),
-        HomePrompt(stringResource(R.string.dot_intro), stringResource(R.string.dot_prompt_intro), Icons.Filled.Chat, SuccessColor),
+        HomePrompt(
+            stringResource(R.string.dot_task),
+            stringResource(R.string.dot_prompt_task, dotSpecialty(dot)),
+            Icons.Filled.AutoAwesome,
+        ),
+        HomePrompt(stringResource(R.string.dot_plan), stringResource(R.string.dot_prompt_plan), Icons.Filled.Search),
+        HomePrompt(stringResource(R.string.dot_intro), stringResource(R.string.dot_prompt_intro), Icons.Filled.Chat),
     ) else listOf(
         HomePrompt(
             label = stringResource(R.string.chat_prompt_monitor),
             text = stringResource(R.string.chat_suggestion_notifications),
             icon = Icons.Filled.Visibility,
-            color = AccentColor,
         ),
         HomePrompt(
             label = stringResource(R.string.chat_prompt_organize),
             text = stringResource(R.string.chat_suggestion_files),
             icon = Icons.Filled.Search,
-            color = PrimaryColor,
         ),
         HomePrompt(
             label = stringResource(R.string.chat_prompt_control),
             text = stringResource(R.string.chat_suggestion_app),
             icon = Icons.Filled.TouchApp,
-            color = SuccessColor,
         ),
     )
     BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
@@ -1975,7 +1980,7 @@ private fun ColumnScope.ChatHomeWorkbench(
         }
         item {
             Surface(
-                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth(), shape = OctopusShape.large,
                 color = EchoChatStyle.surface,
                 border = BorderStroke(1.dp, EchoChatStyle.border.copy(alpha = .6f)),
             ) {
@@ -1999,14 +2004,13 @@ private data class HomePrompt(
     val label: String,
     val text: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val color: Color,
 )
 
 @Composable
 private fun HomeTinyStat(label: String, value: String, ok: Boolean, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Surface(
         modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
-        shape = RoundedCornerShape(18.dp), color = EchoChatStyle.softSurface,
+        shape = OctopusShape.small, color = EchoChatStyle.softSurface,
     ) {
         Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(label, color = TextMuted, fontSize = 11.sp, maxLines = 1)
@@ -2026,7 +2030,7 @@ private fun PromptSuggestion(prompt: HomePrompt, onClick: () -> Unit) {
             .clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(prompt.icon, contentDescription = null, tint = prompt.color, modifier = Modifier.size(20.dp))
+        Icon(prompt.icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(16.dp))
         Text(prompt.label, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -2354,7 +2358,7 @@ internal fun UserBubble(message: ChatMessage.UserMessage, retryEnabled: Boolean 
         Column(horizontalAlignment = Alignment.End) {
           Box {
             Surface(
-                shape = RoundedCornerShape(22.dp, 22.dp, 6.dp, 22.dp),
+                shape = OctopusShape.userBubble,
                 color = UserBubbleColor,
                 shadowElevation = 0.dp,
                 modifier = Modifier
@@ -2493,7 +2497,7 @@ private fun SetupGuideCard(
     var expanded by remember { mutableStateOf(false) }
     Surface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(20.dp), color = EchoChatStyle.accentSurface,
+        shape = OctopusShape.large, color = EchoChatStyle.accentSurface,
     ) {
         Column {
             Row(

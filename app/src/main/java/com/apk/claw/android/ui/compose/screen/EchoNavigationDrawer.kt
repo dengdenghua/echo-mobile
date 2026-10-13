@@ -1,6 +1,7 @@
 package com.apk.claw.android.ui.compose.screen
 
 import android.content.Intent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,10 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -29,6 +33,7 @@ import com.apk.claw.android.R
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.compose.theme.OctopusColors
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.featurescreens.*
 import com.apk.claw.android.ui.plugin.PluginActivity
 import com.apk.claw.android.ui.settings.SettingsActivity
@@ -57,9 +62,14 @@ internal fun EchoNavigationDrawer(
             .width((LocalConfiguration.current.screenWidthDp * .84f).dp),
         drawerContainerColor = OctopusColors.Background,
         drawerContentColor = OctopusColors.TextPrimary,
-        drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
+        drawerShape = RoundedCornerShape(topEnd = 14.dp, bottomEnd = 14.dp),  // radius-lg
     ) {
         Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            // ECHO 标识:App 图标同款石墨底 + 雪白框 + core 光点
+            Image(painterResource(R.drawable.ic_echo_foreground), contentDescription = null,
+                modifier = Modifier.size(32.dp).clip(OctopusShape.medium)
+                    .background(colorResource(R.color.echo_icon_background)))
+            Spacer(Modifier.width(12.dp))
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f))
             IconButton(enabled = !isRunning, onClick = onNewChat) {
@@ -70,7 +80,7 @@ internal fun EchoNavigationDrawer(
             placeholder = { Text(stringResource(R.string.echo_search_chats)) },
             leadingIcon = { Icon(Icons.Filled.Search, null) },
             trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, stringResource(R.string.echo_clear_search)) } },
-            shape = RoundedCornerShape(16.dp),
+            shape = OctopusShape.small,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp))
         LazyColumn(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
             if (query.isBlank()) {
@@ -139,7 +149,7 @@ private fun EchoSessionLink(
     session: SessionStore.SessionMeta, selected: Boolean, enabled: Boolean, unread: Int, onSwitch: (String) -> Unit,
 ) {
     val unreadLabel = pluralStringResource(R.plurals.chat_new_results, unread, unread)
-    Row(Modifier.fillMaxWidth().background(if (selected) OctopusColors.SurfaceVariant else Color.Transparent, RoundedCornerShape(14.dp))
+    Row(Modifier.fillMaxWidth().background(if (selected) OctopusColors.SurfaceVariant else Color.Transparent, OctopusShape.small)
         .clickable(enabled = enabled) { onSwitch(session.id) }.padding(horizontal = 12.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(session.title, maxLines = 1, overflow = TextOverflow.Ellipsis,

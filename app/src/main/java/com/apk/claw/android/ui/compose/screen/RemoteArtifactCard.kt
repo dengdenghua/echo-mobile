@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.InsertDriveFile
@@ -30,6 +29,7 @@ import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,11 +90,11 @@ internal fun RemoteArtifactCard(artifact: ChatMessage.Artifact) {
             finally { busy = false }
         }
     }
-    Surface(shape = RoundedCornerShape(16.dp), color = EchoChatStyle.surface,
+    Surface(shape = OctopusShape.large, color = EchoChatStyle.surface,
         modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.InsertDriveFile, null, tint = EchoChatStyle.accent, modifier = Modifier.size(22.dp))
+                Icon(Icons.Filled.InsertDriveFile, null, tint = EchoChatStyle.muted, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(artifact.title, color = EchoChatStyle.text, fontSize = 13.sp,

@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.theme.EchoChatStyle
 import com.apk.claw.android.utils.OctoHttp
 import com.google.gson.JsonParser
 import kotlinx.coroutines.*
@@ -159,7 +160,10 @@ internal fun DesktopConversationsSheet(initialEnvironment: DotEnvironment, onDis
                         }
                     }) { Text(stringResource(R.string.dot_history_earlier)) } }
                     items(page?.messages.orEmpty(), key = { it.id }) { message ->
-                        Surface(shape = MaterialTheme.shapes.medium, color = if (message.user) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant) {
+                        // 与对话页气泡一致:用户消息比助手消息高一级的中性底,不用 core 着色的大面积底
+                        Surface(shape = MaterialTheme.shapes.medium,
+                            color = if (message.user) EchoChatStyle.accentSurface else EchoChatStyle.softSurface,
+                            contentColor = EchoChatStyle.text) {
                             Column(Modifier.fillMaxWidth().padding(12.dp)) {
                                 Text(stringResource(if (message.user) R.string.dot_history_user else R.string.dot_history_assistant), style = MaterialTheme.typography.labelSmall)
                                 Text(message.text, style = MaterialTheme.typography.bodyMedium)

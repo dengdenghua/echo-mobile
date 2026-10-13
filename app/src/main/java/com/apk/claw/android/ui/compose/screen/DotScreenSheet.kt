@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
@@ -39,10 +38,15 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
+import com.apk.claw.android.ui.compose.theme.OctopusColors
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import java.text.DateFormat
 import java.util.Date
+
+/** The remote screen viewport stays graphite in both themes, like a video frame (ECHO `ground` graphite). */
+private val ScreenGround = Color(0xFF101216)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,7 +124,7 @@ internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironmen
             Text(stringResource(R.string.dot_screen_observe_only), color = Style.muted, fontSize = 11.sp)
             Spacer(Modifier.height(12.dp))
             Box(Modifier.fillMaxWidth().then(if (full) Modifier.weight(1f) else Modifier.height(340.dp))
-                .clip(RoundedCornerShape(16.dp)).background(Color(0xFF101216)), contentAlignment = Alignment.Center) {
+                .clip(OctopusShape.large).background(ScreenGround), contentAlignment = Alignment.Center) {
                 val image = frame
                 if (image != null) {
                     var zoom by remember(environment, full) { mutableFloatStateOf(1f) }
@@ -139,8 +143,9 @@ internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironmen
                             modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = zoom, scaleY = zoom,
                                 translationX = pan.x, translationY = pan.y), contentScale = ContentScale.Fit)
                     }
-                } else if (fetching) CircularProgressIndicator(Modifier.size(28.dp), color = Color.White, strokeWidth = 2.dp)
-                else Text(stringResource(issue ?: R.string.dot_screen_loading), color = Color.White,
+                } else if (fetching) CircularProgressIndicator(Modifier.size(28.dp), color = OctopusColors.TextFixedWhitePrimary, strokeWidth = 2.dp)
+                else Text(stringResource(issue ?: R.string.dot_screen_loading),
+                    color = OctopusColors.TextFixedWhitePrimary,
                     fontSize = 13.sp, modifier = Modifier.padding(20.dp))
             }
             issue?.let { Text(stringResource(it), color = Style.muted, fontSize = 12.sp,
