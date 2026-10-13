@@ -2,6 +2,7 @@ package com.apk.claw.android.ui.compose.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -129,8 +130,10 @@ fun OctopusTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         shapes = EchoShapes,
-        content = content
-    )
+    ) {
+        // 选区手柄与高亮用 core(M3 默认取 primary,在 ECHO 里是单色)
+        CompositionLocalProvider(LocalTextSelectionColors provides EchoFieldColors.selection, content = content)
+    }
 }
 
 /**

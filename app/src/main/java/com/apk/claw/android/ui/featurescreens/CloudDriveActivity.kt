@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.media.MediaScanner
 import com.apk.claw.android.media.PlayerActivity
 import com.apk.claw.android.media.WebDAVEntry
@@ -197,8 +198,8 @@ private fun AddMountDialog(
     var user by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     val colors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = FPrimary, unfocusedBorderColor = FBorder,
-        focusedTextColor = FText, unfocusedTextColor = FText, cursorColor = FPrimary,
+        focusedBorderColor = OctopusColors.Accent, unfocusedBorderColor = OctopusColors.BorderHigh,
+        focusedTextColor = FText, unfocusedTextColor = FText, cursorColor = OctopusColors.Accent,
     )
     AlertDialog(
         onDismissRequest = onDismiss,

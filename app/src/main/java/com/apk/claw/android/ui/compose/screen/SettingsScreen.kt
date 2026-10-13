@@ -97,6 +97,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
 import kotlinx.coroutines.launch
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 // ── 准备状态：计数和清单都取自 SetupReadiness，与信任中心的就绪度一致 ──────────
 
@@ -213,6 +214,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         onValueChange = { pairCode = it.filter(Char::isDigit).take(9) },
                         singleLine = true,
                         label = { Text(stringResource(R.string.remote_console_pair_code_label)) },
+                        colors = EchoFieldColors.outlined(),
                     )
                 }
             },
@@ -256,6 +258,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         singleLine = true,
                         label = { Text(stringResource(R.string.settings_workspace_hint)) },
                         modifier = Modifier.fillMaxWidth(),
+                        colors = EchoFieldColors.outlined(),
                     )
                 }
             },
@@ -288,6 +291,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         singleLine = true,
                         label = { Text(stringResource(R.string.settings_fallback_label)) },
                         modifier = Modifier.fillMaxWidth(),
+                        colors = EchoFieldColors.outlined(),
                     )
                 }
             },

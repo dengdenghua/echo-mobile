@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.octopus_mobile.memory.MemoryStore
 import com.apk.claw.android.octopus_mobile.memory.MemoryStore.Memory
 import com.apk.claw.android.octopus_mobile.memory.MemoryStore.MemoryType
@@ -121,9 +122,9 @@ private fun AddMemoryDialog(onDismiss: () -> Unit, onConfirm: (String, MemoryTyp
                     placeholder = { Text(stringResource(R.string.memory_input_placeholder), color = FMuted) },
                     keyboardOptions = KeyboardOptions.Default,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = FPrimary, unfocusedBorderColor = FBorder,
+                        focusedBorderColor = OctopusColors.Accent, unfocusedBorderColor = OctopusColors.BorderHigh,
                         focusedTextColor = FText, unfocusedTextColor = FText,
-                        cursorColor = FPrimary,
+                        cursorColor = OctopusColors.Accent,
                     ),
                     modifier = Modifier.fillMaxWidth(),
                 )

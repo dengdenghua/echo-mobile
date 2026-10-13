@@ -71,6 +71,7 @@ import com.apk.claw.android.ui.compose.theme.tvOverscan
 import com.apk.claw.android.utils.OctoHttp
 import com.apk.claw.android.utils.XLog
 import okhttp3.Request
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /**
  * 油猴脚本商店 —— 已安装 / 推荐两个 Tab。
@@ -530,6 +531,7 @@ private fun InstallFromUrlDialog(
                 enabled = !downloading,
                 placeholder = { Text("https://example.com/script.user.js", fontSize = OctopusType.caption) },
                 modifier = Modifier.fillMaxWidth(),
+                colors = EchoFieldColors.outlined(),
             )
         },
         confirmButton = {

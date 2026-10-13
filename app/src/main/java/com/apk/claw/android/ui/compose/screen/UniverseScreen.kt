@@ -59,6 +59,7 @@ import com.apk.claw.android.ui.compose.theme.OctopusSpacing
 import com.apk.claw.android.ui.compose.theme.OctopusTints
 import com.apk.claw.android.ui.compose.theme.OctopusType
 import kotlinx.coroutines.launch
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 @Composable
 internal fun UniverseScreen(
@@ -469,6 +470,7 @@ private fun UniverseEndpointCard(
                 singleLine = true,
                 label = { Text("ECHO Base URL") },
                 modifier = Modifier.fillMaxWidth(),
+                colors = EchoFieldColors.outlined(),
             )
             OutlinedTextField(
                 value = runtimeValue,
@@ -476,6 +478,7 @@ private fun UniverseEndpointCard(
                 singleLine = true,
                 label = { Text("母体 Runtime HTTP") },
                 modifier = Modifier.fillMaxWidth(),
+                colors = EchoFieldColors.outlined(),
             )
             OctopusPill(
                 icon = Icons.Filled.Save,
@@ -745,6 +748,7 @@ private fun GhostChatPanel(
                 )
             },
             modifier = Modifier.fillMaxWidth(),
+            colors = EchoFieldColors.outlined(),
         )
         OctopusPill(
             icon = Icons.AutoMirrored.Filled.Send,

@@ -808,7 +808,7 @@ private fun CommentInputBar(
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = OctopusColors.SurfaceVariant,
                     unfocusedContainerColor = OctopusColors.SurfaceVariant,
-                    focusedIndicatorColor = OctopusColors.Primary,
+                    focusedIndicatorColor = OctopusColors.Accent,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedTextColor = OctopusColors.TextPrimary,
                     unfocusedTextColor = OctopusColors.TextPrimary,

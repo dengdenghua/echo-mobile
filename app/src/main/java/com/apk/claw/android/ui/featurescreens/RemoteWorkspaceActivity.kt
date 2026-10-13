@@ -35,6 +35,7 @@ import com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceMounts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /**
  * Remote workspace manager - mount SFTP/WebDAV/local dirs for Agent programming.
@@ -298,7 +299,8 @@ private fun AddMountDialog(
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(name, { name = it }, label = { Text("Name *") },
-                    singleLine = true, modifier = Modifier.fillMaxWidth())
+                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    colors = EchoFieldColors.outlined())
                 Spacer(Modifier.height(8.dp))
                 Text("Protocol")
                 Row {
@@ -317,23 +319,29 @@ private fun AddMountDialog(
                     placeholder = {
                         Text(if (type == RemoteWorkspaceMounts.Type.LOCAL)
                             "/sdcard/Documents/project" else "nas.example.com")
-                    })
+                    },
+                    colors = EchoFieldColors.outlined())
                 if (type != RemoteWorkspaceMounts.Type.LOCAL) {
                     OutlinedTextField(port, { port = it }, label = { Text("Port") },
-                        singleLine = true, modifier = Modifier.fillMaxWidth())
+                        singleLine = true, modifier = Modifier.fillMaxWidth(),
+                        colors = EchoFieldColors.outlined())
                     OutlinedTextField(user, { user = it }, label = { Text("User") },
-                        singleLine = true, modifier = Modifier.fillMaxWidth())
+                        singleLine = true, modifier = Modifier.fillMaxWidth(),
+                        colors = EchoFieldColors.outlined())
                     OutlinedTextField(password, { password = it }, label = { Text("Password") },
                         singleLine = true, modifier = Modifier.fillMaxWidth(),
-                        visualTransformation = PasswordVisualTransformation())
+                        visualTransformation = PasswordVisualTransformation(),
+                        colors = EchoFieldColors.outlined())
                     if (type == RemoteWorkspaceMounts.Type.SFTP) {
                         OutlinedTextField(privateKey, { privateKey = it },
                             label = { Text("SSH private key (PEM, optional)") },
-                            modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 5)
+                            modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 5,
+                            colors = EchoFieldColors.outlined())
                     }
                 }
                 OutlinedTextField(rootPath, { rootPath = it }, label = { Text("Root path") },
-                    singleLine = true, modifier = Modifier.fillMaxWidth())
+                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    colors = EchoFieldColors.outlined())
             }
         },
         confirmButton = {

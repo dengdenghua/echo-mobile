@@ -63,6 +63,7 @@ import com.apk.claw.android.widget.AdvancedPermissionDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /**
  * 文件管理器 Activity —— UI 入口.
@@ -605,6 +606,7 @@ private fun TextInputDialog(
                 label = { Text(hint) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                colors = EchoFieldColors.outlined(),
             )
         },
         confirmButton = {

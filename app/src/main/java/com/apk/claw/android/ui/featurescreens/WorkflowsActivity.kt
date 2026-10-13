@@ -46,6 +46,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /**
  * 工作流页 —— 列出所有工作流，支持新建/编辑/删除/导入/导出/运行。
@@ -275,6 +276,7 @@ private fun WorkflowScheduleDialog(
                         label = { Text("时 (0-23)") },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
+                        colors = EchoFieldColors.outlined(),
                     )
                     Text(":", color = FText, fontSize = 18.sp)
                     OutlinedTextField(
@@ -283,6 +285,7 @@ private fun WorkflowScheduleDialog(
                         label = { Text("分 (0-59)") },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
+                        colors = EchoFieldColors.outlined(),
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -516,6 +519,7 @@ private fun StepEditor(
                                     Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(14.dp), tint = FSub)
                                 }
                             },
+                            colors = EchoFieldColors.outlined(),
                         )
                         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                             toolNames.forEach { n ->
@@ -589,6 +593,7 @@ private fun StepEditor(
                         minLines = 3,
                         textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp, color = FText),
                         shape = OctopusShape.small,
+                        colors = EchoFieldColors.outlined(),
                     )
                     // 显示所有可选 stepId（同 workflow 内的其他 step）作为提示
                     Text(
@@ -621,6 +626,7 @@ private fun FParamField(label: String, value: String, onChange: (String) -> Unit
             minLines = 1,
             textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp, color = FText),
             shape = OctopusShape.small,
+            colors = EchoFieldColors.outlined(),
         )
     }
 }
@@ -701,5 +707,6 @@ private fun FTextField(value: String, minLines: Int = 1, modifier: Modifier = Mo
         minLines = minLines,
         textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, color = FText),
         shape = OctopusShape.small,
+        colors = EchoFieldColors.outlined(),
     )
 }

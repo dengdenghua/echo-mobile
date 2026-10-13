@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import java.io.File
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /** 文件夹浏览器只在外部存储根内活动,拿到的都是沙箱能用的真实路径。 */
 private const val FOLDER_ROOT = "/sdcard"
@@ -160,6 +161,7 @@ fun FolderBrowserDialog(
                     singleLine = true,
                     label = { Text("文件夹名") },
                     modifier = Modifier.fillMaxWidth(),
+                    colors = EchoFieldColors.outlined(),
                 )
             },
             confirmButton = {

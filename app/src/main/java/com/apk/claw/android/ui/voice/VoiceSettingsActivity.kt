@@ -167,8 +167,8 @@ private fun VoiceSettingsScreen(onClose: () -> Unit) {
                 placeholder = { Text("例如:你是我的健身教练,说话简短有力,多鼓励我。", color = OctopusColors.TextMuted, fontSize = OctopusType.body) },
                 shape = OctopusShape.large,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = OctopusColors.Primary,
-                    unfocusedBorderColor = OctopusColors.Border,
+                    focusedBorderColor = OctopusColors.Accent,
+                    unfocusedBorderColor = OctopusColors.BorderHigh,
                     focusedTextColor = OctopusColors.TextPrimary,
                     unfocusedTextColor = OctopusColors.TextPrimary,
                 ),

@@ -41,6 +41,7 @@ import com.apk.claw.android.octopus_mobile.persona.PersonaPromptBuilder
 import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusShape
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /**
  * 角色卡页 —— 列出所有角色，支持切换/新建/编辑/删除/导入/导出。
@@ -321,5 +322,6 @@ private fun FTextField(value: String, minLines: Int = 1, onChange: (String) -> U
         minLines = minLines,
         textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, color = FText),
         shape = OctopusShape.small,
+        colors = EchoFieldColors.outlined(),
     )
 }

@@ -32,6 +32,7 @@ import com.apk.claw.android.tool.mcp.McpManager
 import com.apk.claw.android.tool.mcp.McpServerConfig
 import com.apk.claw.android.tool.mcp.McpServerConfigStore
 import com.apk.claw.android.ui.compose.theme.OctopusShape
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /**
  * MCP Server 配置页 —— 管理外部 MCP(Model Context Protocol)工具服务器。
@@ -239,6 +240,7 @@ private fun McpServerEditDialog(
                     singleLine = true,
                     enabled = !isEdit,
                     modifier = Modifier.fillMaxWidth(),
+                    colors = EchoFieldColors.outlined(),
                 )
                 Text(
                     "仅字母/数字/下划线/中划线,作为工具名前缀 mcp_<id>_<tool>",
@@ -250,6 +252,7 @@ private fun McpServerEditDialog(
                     label = { Text("显示名") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
+                    colors = EchoFieldColors.outlined(),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     FilterChip(
@@ -272,6 +275,7 @@ private fun McpServerEditDialog(
                             label = { Text("命令(每行一个 argv)") },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp),
                             minLines = 3,
+                            colors = EchoFieldColors.outlined(),
                         )
                         Text(
                             "例:npx\n@modelcontextprotocol/server-filesystem\n/sdcard/Download",
@@ -283,6 +287,7 @@ private fun McpServerEditDialog(
                             label = { Text("环境变量(每行 KEY=VALUE)") },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
                             minLines = 2,
+                            colors = EchoFieldColors.outlined(),
                         )
                     }
                     McpServerConfig.TransportType.SSE -> {
@@ -293,6 +298,7 @@ private fun McpServerEditDialog(
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                             modifier = Modifier.fillMaxWidth(),
+                            colors = EchoFieldColors.outlined(),
                         )
                         OutlinedTextField(
                             value = headersText,
@@ -300,6 +306,7 @@ private fun McpServerEditDialog(
                             label = { Text("请求头(每行 KEY: VALUE)") },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
                             minLines = 2,
+                            colors = EchoFieldColors.outlined(),
                         )
                     }
                 }

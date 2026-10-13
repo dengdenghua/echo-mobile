@@ -458,11 +458,11 @@ private fun AddImageButton(added: Int, onClick: () -> Unit) {
 private fun fieldColors() = TextFieldDefaults.colors(
     focusedContainerColor = OctopusBackground.cardSurface,
     unfocusedContainerColor = OctopusBackground.cardSurface,
-    focusedIndicatorColor = OctopusColors.Primary,
+    focusedIndicatorColor = OctopusColors.Accent,
     unfocusedIndicatorColor = OctopusColors.Border,
     focusedTextColor = OctopusColors.TextPrimary,
     unfocusedTextColor = OctopusColors.TextPrimary,
-    focusedLabelColor = OctopusColors.Primary,
+    focusedLabelColor = OctopusColors.Accent,
     unfocusedLabelColor = OctopusColors.TextMuted,
 )
 

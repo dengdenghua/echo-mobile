@@ -167,6 +167,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import java.util.Calendar
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 // 颜色
 private val PrimaryColor get() = OctopusColors.Primary  // 主按钮单色(ink/snow);core 青只做点状强调
@@ -1563,7 +1564,14 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
     if (renameChatOpen) {
         var title by remember(currentId) { mutableStateOf(sessions.firstOrNull { it.id == currentId }?.title.orEmpty()) }
         AlertDialog(onDismissRequest = { renameChatOpen = false }, title = { Text(stringResource(R.string.echo_rename_chat)) },
-            text = { OutlinedTextField(value = title, onValueChange = { title = it.take(80) }, singleLine = true) },
+            text = {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it.take(80) },
+                    singleLine = true,
+                    colors = EchoFieldColors.outlined(),
+                )
+            },
             confirmButton = { TextButton(enabled = title.isNotBlank(), onClick = {
                 SessionStore.rename(currentId, title)
                 val at = sessions.indexOfFirst { it.id == currentId }
@@ -1753,6 +1761,7 @@ private fun WorkspacePickerDialog(
                         TextButton(onClick = { showBrowser = true }) { Text("浏览") }
                     },
                     modifier = Modifier.fillMaxWidth(),
+                    colors = EchoFieldColors.outlined(),
                 )
             }
         },

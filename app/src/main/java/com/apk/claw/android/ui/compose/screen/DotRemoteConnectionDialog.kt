@@ -24,6 +24,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 @Composable
 internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: () -> Unit, onSaved: () -> Unit) {
@@ -142,19 +143,23 @@ internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: (
                 if (showInvitation) {
                     OutlinedTextField(invitation, enabled = !binding, onValueChange = { invitation = it; issue = null },
                         modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_pair_invitation)) },
-                        visualTransformation = PasswordVisualTransformation(), singleLine = true)
+                        visualTransformation = PasswordVisualTransformation(), singleLine = true,
+                        colors = EchoFieldColors.outlined())
                     TextButton(enabled = invitation.isNotBlank() && !decoding && !binding,
                         onClick = { applyInvitation(invitation) }) { Text(stringResource(R.string.dot_pair_import)) }
                 }
                 OutlinedTextField(address, onValueChange = {
                     address = it; invitation = ""; importedInvitation = ""; expectedHost = null; issue = null
-                }, modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_address)) }, singleLine = true, enabled = !binding)
+                }, modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_address)) }, singleLine = true, enabled = !binding,
+                colors = EchoFieldColors.outlined())
                 if (!advanced) OutlinedTextField(code, onValueChange = { code = it; issue = null },
-                    modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_pair_code)) }, singleLine = true, enabled = !binding)
+                    modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_pair_code)) }, singleLine = true, enabled = !binding,
+                    colors = EchoFieldColors.outlined())
                 if (advanced) {
                     OutlinedTextField(token, onValueChange = { token = it; invitation = ""; importedInvitation = ""; issue = null },
                         modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_token)) },
-                        visualTransformation = PasswordVisualTransformation(), singleLine = true, enabled = !binding)
+                        visualTransformation = PasswordVisualTransformation(), singleLine = true, enabled = !binding,
+                        colors = EchoFieldColors.outlined())
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(enabled = !binding, onClick = {

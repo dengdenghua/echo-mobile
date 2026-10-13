@@ -65,6 +65,7 @@ import com.apk.claw.android.octopus_mobile.safety.PermissionMode
 import com.apk.claw.android.octopus_mobile.safety.PermissionModeManager
 import com.apk.claw.android.octopus_mobile.ToolAuditLog
 import com.apk.claw.android.octopus_mobile.proactive.ProactiveRuleEngine
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 class TrustCenterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -624,6 +625,7 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
                         value = draft, onValueChange = { draft = it },
                         placeholder = { Text("输入一条规矩…") },
                         modifier = Modifier.fillMaxWidth(),
+                        colors = EchoFieldColors.outlined(),
                     )
                 }
             },
@@ -713,6 +715,7 @@ private fun UserMemoryCard(tick: Int, onReset: () -> Unit) {
                         value = draft, onValueChange = { draft = it },
                         placeholder = { Text("输入一条…") },
                         modifier = Modifier.fillMaxWidth(),
+                        colors = EchoFieldColors.outlined(),
                     )
                 }
             },

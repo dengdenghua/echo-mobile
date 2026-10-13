@@ -35,6 +35,7 @@ import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.featurescreens.*
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /** Global destinations live here; the overflow menu belongs to the current conversation. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +79,8 @@ internal fun EchoNavigationDrawer(
             leadingIcon = { Icon(Icons.Filled.Search, null) },
             trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, stringResource(R.string.echo_clear_search)) } },
             shape = OctopusShape.small,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp))
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            colors = EchoFieldColors.outlined())
         LazyColumn(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
             if (query.isBlank()) {
                 // 与桌面端侧栏对齐:Hub(智能体 · 应用 · 技能)、自动化;记忆、活动、信任中心、插件管理在设置里

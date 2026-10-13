@@ -39,6 +39,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
+import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 
 /** Uses the existing paired socket; no operator password or web token is copied to the phone. */
 class DeviceTasksActivity : ComponentActivity() {
@@ -183,6 +184,7 @@ private fun TaskSubmission(state: TaskWorkspaceState, submit: (Map<String, Any?>
             }
         },
         label = { Text("任务内容") }, modifier = Modifier.fillMaxWidth(),
+        colors = EchoFieldColors.outlined(),
     )
     val firstTarget = state.stages.firstOrNull()?.deviceId ?: state.target
     val online = state.devices.any { it.string("id") == firstTarget && it.get("online").asBoolean }
@@ -309,7 +311,8 @@ private fun StageSubmission(state: TaskWorkspaceState) {
         OutlinedTextField(value = stage.task, enabled = !state.busy, modifier = Modifier.fillMaxWidth(),
             label = { Text("第 ${index + 1} 阶段任务") }, onValueChange = {
                 if (it.length <= MAX_STAGE_TASK_LENGTH) update(index, stage.copy(task = it))
-            })
+            },
+            colors = EchoFieldColors.outlined())
         if (state.stages.size > 2) TextButton(enabled = !state.busy, onClick = {
             state.stages = state.stages.filterIndexed { i, _ -> i != index }
             state.submissionId = UUID.randomUUID().toString()
