@@ -1679,4 +1679,22 @@
     <string name="account_gate_voice_call">Las llamadas de voz en directo usan el servicio de voz de la cuenta. El chat de texto funciona sin cuenta.</string>
     <string name="account_gate_media">Generar imágenes y vídeos usa créditos de la cuenta. Inicia sesión para usarlo.</string>
     <string name="account_gate_cloud_sync">La sincronización de marcadores, historial y pestañas va con tu cuenta. Inicia sesión para usarla.</string>
+
+    <!-- In-app update (AppUpdateHost), including a signing-key change -->
+    <string name="update_found_title">Nueva versión %1$s</string>
+    <string name="update_default_notes">Hay una actualización disponible. Te recomendamos instalarla.</string>
+    <string name="update_now">Actualizar ahora</string>
+    <string name="update_downloading">Descargando…</string>
+    <string name="update_downloading_progress">Descargando %1$d%%</string>
+    <string name="update_later">Más tarde</string>
+    <string name="update_download_failed">Error de descarga: %1$s</string>
+    <string name="update_package_corrupt">El paquete descargado está incompleto. Inténtalo más tarde.</string>
+    <string name="update_package_other_app">El archivo descargado no es un paquete de Echo, así que no se instaló.</string>
+    <string name="update_package_not_newer">El paquete descargado no es más nuevo que esta versión, así que no se instaló.</string>
+    <string name="update_reinstall_title">Desinstala esta versión antes de instalar %1$s</string>
+    <string name="update_reinstall_body">La nueva versión está firmada con otra clave, así que Android no la instala encima de esta (diría «App no instalada»).\n\n1. Exporta lo que quieras conservar: en Ajustes > Avanzado puedes exportar cada Tarjeta de personaje y Flujo de trabajo. Anota la clave de API de modelo que hayas puesto.\n2. Toca Descargar en el navegador. El paquete se guarda en la carpeta Descargas y sigue ahí después de desinstalar.\n3. Desinstala Echo en los ajustes del sistema y abre el paquete descargado para instalarlo.\n\nDesinstalar borra los chats y los ajustes locales de este teléfono. Tu cuenta, créditos y membresía están en el servidor; vuelve a iniciar sesión para recuperarlos.</string>
+    <string name="update_reinstall_download">Descargar en el navegador</string>
+    <string name="update_link_copied">No se encontró un navegador. Enlace de descarga copiado: %1$s</string>
+    <string name="update_check_network">No se puede conectar con el servidor de actualizaciones. Revisa la conexión e inténtalo de nuevo.</string>
+    <string name="update_check_failed">No se pudo buscar actualizaciones. Inténtalo más tarde.</string>
 </resources>

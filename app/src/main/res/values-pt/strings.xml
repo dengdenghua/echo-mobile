@@ -1679,4 +1679,22 @@
     <string name="account_gate_voice_call">Chamadas de voz ao vivo usam o serviço de voz da conta. O chat de texto funciona sem conta.</string>
     <string name="account_gate_media">Gerar imagens e vídeos usa créditos da conta. Entre para usar.</string>
     <string name="account_gate_cloud_sync">A sincronização de favoritos, histórico e abas passa pela sua conta. Entre para usar.</string>
+
+    <!-- In-app update (AppUpdateHost), including a signing-key change -->
+    <string name="update_found_title">Nova versão %1$s</string>
+    <string name="update_default_notes">Há uma atualização disponível. Recomendamos instalá-la.</string>
+    <string name="update_now">Atualizar agora</string>
+    <string name="update_downloading">Baixando…</string>
+    <string name="update_downloading_progress">Baixando %1$d%%</string>
+    <string name="update_later">Mais tarde</string>
+    <string name="update_download_failed">Falha no download: %1$s</string>
+    <string name="update_package_corrupt">O pacote baixado está incompleto. Tente novamente mais tarde.</string>
+    <string name="update_package_other_app">O arquivo baixado não é um pacote do Echo, então não foi instalado.</string>
+    <string name="update_package_not_newer">O pacote baixado não é mais novo que esta versão, então não foi instalado.</string>
+    <string name="update_reinstall_title">Desinstale esta versão antes de instalar %1$s</string>
+    <string name="update_reinstall_body">A nova versão foi assinada com outra chave, então o Android não a instala por cima desta (diria \"App não instalado\").\n\n1. Exporte o que quiser manter: em Configurações > Avançado dá para exportar cada Cartão de personagem e Fluxo de trabalho. Anote a chave de API de modelo que você colocou.\n2. Toque em Baixar no navegador. O pacote vai para a pasta Downloads do telefone e continua lá depois de desinstalar.\n3. Desinstale o Echo nas configurações do sistema e abra o pacote baixado para instalar.\n\nDesinstalar apaga as conversas e as configurações locais deste telefone. Sua conta, créditos e assinatura ficam no servidor; entre de novo para recuperá-los.</string>
+    <string name="update_reinstall_download">Baixar no navegador</string>
+    <string name="update_link_copied">Nenhum navegador encontrado. Link de download copiado: %1$s</string>
+    <string name="update_check_network">Não foi possível acessar o servidor de atualização. Verifique a conexão e tente de novo.</string>
+    <string name="update_check_failed">Não foi possível verificar atualizações. Tente mais tarde.</string>
 </resources>

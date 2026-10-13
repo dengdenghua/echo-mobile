@@ -1689,4 +1689,22 @@
     <string name="account_gate_voice_call">Live voice calls run on the account voice service. Text chat works without an account.</string>
     <string name="account_gate_media">Image and video generation uses account credits. Sign in to use it.</string>
     <string name="account_gate_cloud_sync">Syncing bookmarks, history and tabs goes through your account. Sign in to use it.</string>
+
+    <!-- In-app update (AppUpdateHost), including a signing-key change -->
+    <string name="update_found_title">New version %1$s</string>
+    <string name="update_default_notes">An update is available. We recommend installing it.</string>
+    <string name="update_now">Update now</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_downloading_progress">Downloading %1$d%%</string>
+    <string name="update_later">Later</string>
+    <string name="update_download_failed">Download failed: %1$s</string>
+    <string name="update_package_corrupt">The downloaded package is incomplete. Try again later.</string>
+    <string name="update_package_other_app">The downloaded file is not an Echo package, so it was not installed.</string>
+    <string name="update_package_not_newer">The downloaded package is not newer than this version, so it was not installed.</string>
+    <string name="update_reinstall_title">Uninstall this version before installing %1$s</string>
+    <string name="update_reinstall_body">The new version is signed with a different key, so Android will not install it over this one (it would say \"App not installed\").\n\n1. Export what you want to keep: Settings > Advanced > Character cards and Workflows can each be exported. Write down any model API key you entered.\n2. Tap Download in browser. The package goes to the phone\'s Downloads folder and stays there after you uninstall.\n3. Uninstall Echo in system Settings, then open the downloaded package to install it.\n\nUninstalling deletes the chats and local settings on this phone. Your account, credits and membership are kept on the server; sign in again to get them back.</string>
+    <string name="update_reinstall_download">Download in browser</string>
+    <string name="update_link_copied">No browser found. Download link copied: %1$s</string>
+    <string name="update_check_network">Can\'t reach the update server. Check your connection and try again.</string>
+    <string name="update_check_failed">Couldn\'t check for updates. Try again later.</string>
 </resources>

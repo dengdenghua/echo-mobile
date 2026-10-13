@@ -845,8 +845,16 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                                     val latest = updCtx.getString(R.string.settings_update_latest)
                                     Toast.makeText(updCtx, latest, Toast.LENGTH_SHORT).show()
                                 }
-                                is AppUpdater.CheckResult.Error ->
-                                    Toast.makeText(updCtx, r.message, Toast.LENGTH_LONG).show()
+                                is AppUpdater.CheckResult.Error -> {
+                                    val msg = updCtx.getString(
+                                        if (r.kind == AppUpdater.ErrorKind.NETWORK) {
+                                            R.string.update_check_network
+                                        } else {
+                                            R.string.update_check_failed
+                                        },
+                                    )
+                                    Toast.makeText(updCtx, msg, Toast.LENGTH_LONG).show()
+                                }
                                 // 有新版:弹窗由根部 AppUpdateHost 自动弹出
                                 is AppUpdater.CheckResult.Available -> Unit
                             }
