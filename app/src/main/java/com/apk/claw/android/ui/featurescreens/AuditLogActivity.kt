@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +53,7 @@ fun AuditLogScreen(onBack: () -> Unit) {
             if (entries.isNotEmpty()) {
                 Text(
                     "清空",
-                    color = FWarning, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                    color = FError, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { ToolAuditLog.clear(); tick++ },
                 )
             }
@@ -106,7 +105,7 @@ private fun AuditEntryCard(entry: ToolAuditLog.Entry) {
     FCard {
         // 签名校验失败:HMAC 不匹配,条目可能被篡改或伪造。显著标红提醒。
         if (entry.tampered) {
-            FPill("⚠ 签名校验失败 · 可能被篡改/伪造", Color(0xFFE53935))
+            FPill("⚠ 签名校验失败 · 可能被篡改/伪造", FError)
             Spacer(Modifier.height(6.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -134,7 +133,7 @@ private fun AuditEntryCard(entry: ToolAuditLog.Entry) {
             val (statusText, statusColor) = when {
                 entry.blockedBy != null -> "已拦截（${entry.blockedBy}）" to FWarning
                 entry.success -> "成功" to FSuccess
-                else -> "失败" to FWarning
+                else -> "失败" to FError
             }
             FPill(statusText, statusColor)
             Spacer(Modifier.weight(1f))

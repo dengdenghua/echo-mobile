@@ -45,6 +45,9 @@ val FBorder get() = OctopusColors.Border
 val FSuccess get() = OctopusColors.Success
 val FWarning get() = OctopusColors.Warning
 
+/** Breach red: errors, failures, deletion and security events only. */
+val FError get() = OctopusColors.Error
+
 /**
  * FeatureScreen Activity chrome shared by the secondary Compose pages.
  */

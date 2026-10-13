@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.skill.PromptSkillStore
 import com.apk.claw.android.tool.ToolRegistry
-import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.utils.KVUtils
 
@@ -47,10 +46,10 @@ private val CORE = setOf(
 
 private val TILE_SIZE = 44.dp
 
-/** 给图标格子一个稳定的强调色(按序号轮换,和主题联动)。 */
+/** 图标格子底色:ECHO 不用颜色区分类别,统一中性 ink-muted(保留 index 参数以兼容调用点)。 */
 @Composable
 private fun accentAt(index: Int): Color {
-    val palette = listOf(FPrimary, OctopusColors.Info, FSuccess, FWarning)
+    val palette = listOf(FMuted)
     return palette[(index % palette.size + palette.size) % palette.size]
 }
 
@@ -221,7 +220,7 @@ private fun PromptSkillCard(
         Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
             Text(
                 "删除",
-                color = FWarning, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                color = FError, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable(onClick = onDelete).padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }

@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,7 +25,7 @@ class ActivityActivity : ComponentActivity() {
     }
 }
 
-private val cDanger = Color(0xFFFF453B)
+private val cDanger get() = FError
 
 private fun outcomeLabel(o: String) = when (o) {
     "success" -> ClawApplication.instance.getString(R.string.channel_msg_tool_success)
