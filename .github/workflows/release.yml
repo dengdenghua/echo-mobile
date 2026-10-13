@@ -266,6 +266,32 @@ jobs:
           printf '%s\n' "${CERT}" | grep -q '^Signer #1:' \
             || { echo "::error::AAB JAR 签名校验失败"; exit 1; }
 
+      - name: Signing certificate and OTA server files
+        # 1.1.0 换了签名密钥(1.0.0 的密钥已遗失),旧版只能先卸载再装。账号服务器 /app/latest 用这里的
+        # 证书指纹判断哪些客户端要看「先卸载」说明;dist/ota/ 是给它的现成配置和文案(随 workflow artifact 下载)。
+        run: |
+          set -euo pipefail
+          BT="$(ls -d "${ANDROID_HOME}"/build-tools/* 2>/dev/null | sort -V | tail -1)"
+          UNIVERSAL="$(ls dist/*_universal.apk | head -1)"
+          CERT="$("${BT}/apksigner" verify --print-certs "${UNIVERSAL}" \
+            | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -1)"
+          if [ -z "${CERT}" ]; then
+            echo "::error::读不到 ${UNIVERSAL} 的签名证书 SHA-256"
+            exit 1
+          fi
+          echo "签名证书 SHA-256: ${CERT}"
+          echo "SIGNING_CERT_SHA256=${CERT}" >> "$GITHUB_ENV"
+          mkdir -p dist/ota
+          {
+            echo "APP_UPDATE_VERSION_CODE=${VERSION_CODE}"
+            echo "APP_UPDATE_VERSION_NAME=${VERSION_NAME}"
+            echo "APP_UPDATE_SIGNING_CERT_SHA256=${CERT}"
+          } > dist/ota/app-update.env
+          for f in docs/release-notes/ota/"${VERSION_NAME}"*.txt; do
+            if [ -f "${f}" ]; then cp "${f}" dist/ota/; fi
+          done
+          ls -la dist/ota
+
       - name: Archive R8 mapping and native debug symbols
         run: |
           set -euo pipefail
@@ -305,7 +331,15 @@ jobs:
         run: |
           set -euo pipefail
           {
+            # 本版说明(含「先卸载旧版」等升级须知)放在 docs/release-notes/<tag>.md,随 tag 一起评审。
+            if [ -f "docs/release-notes/${GITHUB_REF_NAME}.md" ]; then
+              cat "docs/release-notes/${GITHUB_REF_NAME}.md"
+              echo ""
+              echo "---"
+              echo ""
+            fi
             echo "versionName=${VERSION_NAME}  versionCode=${VERSION_CODE}"
+            echo "签名证书 SHA-256 / signing certificate SHA-256: ${SIGNING_CERT_SHA256}"
             echo ""
             echo "产物:分 ABI APK + universal APK + AAB。"
             echo "SHA256SUMS.txt 为各制品 SHA-256;SBOM 见 echo-mobile-sbom.spdx.json。"

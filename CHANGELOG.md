@@ -10,9 +10,27 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 `versionCode 15`, tag `v1.1.0`. The first release built, signed and published by
 `release.yml` (split APKs, universal APK, AAB, SHA-256 list, SBOM, build provenance).
 It covers everything since the last 1.0.0 OTA build (`versionCode 14`, 2026-07-07).
-Upgrades in place over any 1.0.0 build signed with the same key.
+
+**Not an in-place upgrade.** The key that signed the 1.0.0 builds is lost, so 1.1.0 is signed
+with a new key and Android will not install it over 1.0.0 ("App not installed"). Users must
+uninstall 1.0.0 (「八爪鱼」 / Octopus Mobile) first, which deletes its chats and local settings;
+1.0.0 has no export. Accounts, credits and membership are on the server and come back on
+sign-in. The release notes (`docs/release-notes/v1.1.0.md`) and the in-app update notes for
+1.0.0 (`docs/release-notes/ota/1.1.0-key-change.*.txt`, served by the account server) say so.
 
 ### Added
+- **不登录使用 (use without an account)**: the sign-in screen has a secondary action that opens
+  a local mode: chat on a model you configured, model settings, pairing with your own Echo
+  (`echo://` invitations), local skills and tools. The choice is remembered; sign in later
+  from Settings or the drawer without losing local data. Account features (wallet and plugin
+  payments, Square posts / comments / likes / subscriptions, the web console, voice calls,
+  image and video generation, browser cloud sync) say 「登录后可用」 with 去登录 instead of
+  failing, and the web console no longer retries in the background while signed out.
+- **Signing-key changes are explained**: the updater sends its signing certificate with the
+  update check, reads the server APK's fingerprint, and checks a downloaded APK before opening
+  the installer. A different key shows 「安装 X 前要先卸载当前版本」 (what to export, what is
+  lost, a browser download that survives the uninstall) instead of the installer's bare "App
+  not installed"; a corrupt or wrong package is not handed to the installer at all.
 - **Echo identity**: the app is now Echo, with the ECHO mark, notification icon and the
   Graphite (dark) / Snow (light) themes. Colours, radii, focus outlines and status colours
   follow one palette across chat, settings, Square and the TV desktop.
@@ -83,6 +101,9 @@ Upgrades in place over any 1.0.0 build signed with the same key.
 - The update check runs once per launch instead of on every rotation.
 
 ### Build
+- `release.yml` uses `docs/release-notes/<tag>.md` as the top of the GitHub Release notes,
+  prints the signing certificate SHA-256, and puts the account server's update settings
+  (`dist/ota/app-update.env`) and notes in the workflow artifact.
 - A release build without signing configured stops at once and names the missing
   `KEYSTORE_FILE` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`; `release.yml` checks
   the four signing secrets before its test gates and opens the keystore before building.
@@ -90,6 +111,10 @@ Upgrades in place over any 1.0.0 build signed with the same key.
   the debug sources instead of packaging an unsigned release.
 
 ### Server (`server/`)
+- **Key-change update notes**: `/app/latest` takes the client's signing certificate
+  (`?cert=`, sent from 1.1.0 on) and returns `signingCertSha256`. With
+  `APP_UPDATE_KEY_CHANGE_NOTES(_FILE)` set, clients on another key (every 1.0.0 build) get those
+  notes and never a forced dialog. `*_NOTES_FILE` settings hold multi-line notes, read per request.
 - **Real logout / session revocation**: `users.token_version` column;
   new JWTs carry a `tv` claim and `actor`/WebSocket auth (incl. the per-message
   console re-check) reject a mismatch. `POST /auth/logout` bumps the version

@@ -1,0 +1,10 @@
+[Important] Uninstall the old version before this update
+The new Echo (formerly Octopus Mobile) is signed with a new key, so it cannot install over the old app. Tapping Update now ends in "App not installed".
+
+How to upgrade:
+1. If you entered your own model API key in the old app, write it down.
+2. Uninstall "Octopus Mobile" in system Settings > Apps.
+3. Open https://api.octoapk.com/app/latest.apk in your phone's browser, download it and install it.
+4. Open Echo and sign in with the same email, or choose "Use without an account".
+
+Uninstalling deletes the chats and local settings on this phone (the old app has no export). Your account, credits and membership are kept on the server and come back when you sign in.
