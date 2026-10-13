@@ -5,9 +5,14 @@
     <ID>ComplexCondition:AuditChain.kt$AuditChain$headAnchor != null &amp;&amp; headAnchor.isNotEmpty() &amp;&amp; n &gt; 0 &amp;&amp; sigs[0] != headAnchor</ID>
     <ID>ComplexCondition:BaseTool.kt$BaseTool$x &lt; 0 || x &gt;= size[0] || y &lt; 0 || y &gt;= size[1]</ID>
     <ID>ComplexCondition:ChannelRouteHandler.kt$ChannelRouteHandler$reinitDingtalk || reinitFeishu || reinitQQ || reinitDiscord || reinitTelegram</ID>
+    <ID>ComplexCondition:ChatScreen.kt$!isRunning &amp;&amp; !dismissedSuggestion &amp;&amp; deviceSuggestion != null &amp;&amp; deviceSuggestion.environment != executionEnvironment</ID>
+    <ID>ComplexCondition:ChatScreen.kt$(DotRoster.find(currentCharacter) == null || dotEnvironment == DotEnvironment.PHONE) &amp;&amp; (!llmOk || !a11yOk)</ID>
     <ID>ComplexCondition:DefaultAgentService.kt$DefaultAgentService$msg is ToolExecutionResultMessage &amp;&amp; msg.toolName() == "get_screen_info" &amp;&amp; i != lastScreenIdx &amp;&amp; msg.text() != screenPlaceholder</ID>
     <ID>ComplexCondition:DemoRecorder.kt$DemoRecorder$last != null &amp;&amp; last.tool == "input_text" &amp;&amp; id.isNotBlank() &amp;&amp; last.anchorId == id</ID>
+    <ID>ComplexCondition:DeviceExecutionStore.kt$DeviceExecutionStore$(!submitted &amp;&amp; e.code in listOf(400, 401, 403, 404, 413, 409, 422)) || (submitted &amp;&amp; e.code == 404)</ID>
+    <ID>ComplexCondition:DeviceExecutionStore.kt$DeviceExecutionStore$storageOverride == null &amp;&amp; remote &amp;&amp; environment == DotEnvironment.HOME &amp;&amp; !ChatStore.hasSaved(storage)</ID>
     <ID>ComplexCondition:DiffParser.kt$DiffParser$body.startsWith("@@ ") || body.startsWith("--- ") || body.startsWith("+++ ") || body.startsWith("diff --git ")</ID>
+    <ID>ComplexCondition:DotScreenSheet.kt$!foreground || configure || (!automatic &amp;&amp; lastRefresh == refresh)</ID>
     <ID>ComplexCondition:H264Decoder.kt$H264Decoder$profileIdc in 100..110 || profileIdc == 122 || profileIdc == 244 || profileIdc == 44 || profileIdc == 83 || profileIdc == 86 || profileIdc == 118 || profileIdc == 128</ID>
     <ID>ComplexCondition:KVUtils.kt$KVUtils$(legacyApiKey.isNotEmpty() || legacyBaseUrl.isNotEmpty() || legacyModelName.isNotEmpty()) &amp;&amp; !contains(KEY_LLM_PROVIDER)</ID>
     <ID>ComplexCondition:McpSession.kt$McpSession$!initialized &amp;&amp; method != "initialize" &amp;&amp; method != "notifications/initialized" &amp;&amp; method != "ping"</ID>
@@ -28,8 +33,7 @@
     <ID>CyclomaticComplexMethod:ChannelConfigActivity.kt$ChannelConfigActivity$private fun onSaveClicked(channelType: ChannelType)</ID>
     <ID>CyclomaticComplexMethod:ChannelRouteHandler.kt$ChannelRouteHandler$private fun handlePostChannels(session: NanoHTTPD.IHTTPSession, ctx: RouteContext): NanoHTTPD.Response</ID>
     <ID>CyclomaticComplexMethod:ChatAgentBridge.kt$ChatAgentBridge$private fun iconFor(tool: String): String</ID>
-    <ID>CyclomaticComplexMethod:ChatScreen.kt$@Composable private fun ToolBatchCard( calls: List&lt;ChatMessage.ToolCall&gt;, onShowDetail: () -&gt; Unit = {}, )</ID>
-    <ID>CyclomaticComplexMethod:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ChatScreen()</ID>
+    <ID>CyclomaticComplexMethod:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable fun ChatScreen(onOpenSettings: () -&gt; Unit = {})</ID>
     <ID>CyclomaticComplexMethod:ClawAccessibilityService.kt$ClawAccessibilityService$private fun buildNodeTree(node: AccessibilityNodeInfo, sb: StringBuilder, depth: Int)</ID>
     <ID>CyclomaticComplexMethod:ClawAccessibilityService.kt$ClawAccessibilityService$private fun buildNodeTreeFull(node: AccessibilityNodeInfo, sb: StringBuilder, depth: Int)</ID>
     <ID>CyclomaticComplexMethod:ClawVpnService.kt$ClawVpnService$private fun handleTcp(packet: ByteArray, ihl: Int, totalLen: Int, srcIp: Int, dstIp: Int)</ID>
@@ -45,12 +49,21 @@
     <ID>CyclomaticComplexMethod:DefaultAgentService.kt$DefaultAgentService$private fun compressHistoryForSend(messages: MutableList&lt;ChatMessage&gt;)</ID>
     <ID>CyclomaticComplexMethod:DefaultAgentService.kt$DefaultAgentService$private fun handleSystemDialogWithVision( messages: MutableList&lt;ChatMessage&gt;, callback: AgentCallback, iterations: Int ): Boolean</ID>
     <ID>CyclomaticComplexMethod:DesktopActivity.kt$@Composable private fun DesktopWorkspace(engine: BrowserEngine)</ID>
+    <ID>CyclomaticComplexMethod:DesktopConversations.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DesktopConversationsSheet(initialEnvironment: DotEnvironment, onDismiss: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:DeviceDetailActivity.kt$DeviceDetailActivity$private fun buildLayout(): ScrollView</ID>
+    <ID>CyclomaticComplexMethod:DeviceExecutionStore.kt$DeviceExecutionStore$private fun resume(state: DeviceExecutionState)</ID>
     <ID>CyclomaticComplexMethod:DeviceListActivity.kt$DeviceListActivity$private fun buildLayout(): LinearLayout</ID>
     <ID>CyclomaticComplexMethod:DeviceRouteHandler.kt$DeviceRouteHandler$private fun handleControlInput(session: NanoHTTPD.IHTTPSession, ctx: RouteContext): NanoHTTPD.Response</ID>
+    <ID>CyclomaticComplexMethod:DeviceTaskSuggestion.kt$DeviceTaskSuggestion$fun suggest(text: String): Suggestion?</ID>
     <ID>CyclomaticComplexMethod:DiffParser.kt$DiffParser$fun applyHunks( originalContent: String, hunks: List&lt;Hunk&gt;, acceptedIndices: Set&lt;Int&gt;, ): String</ID>
     <ID>CyclomaticComplexMethod:DiffParser.kt$DiffParser$fun parse(diffText: String): List&lt;FileChange&gt;</ID>
     <ID>CyclomaticComplexMethod:DiffViewActivity.kt$DiffViewActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>CyclomaticComplexMethod:DotDeviceSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironment, onDismiss: () -&gt; Unit, onChangeRole: () -&gt; Unit, onOpenTask: (DeviceExecutionState) -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:DotEnvironment.kt$@Composable internal fun DotEnvironmentSelector( selected: DotEnvironment, enabled: Boolean, onSelect: (DotEnvironment) -&gt; Unit, modifier: Modifier = Modifier, runningEnvironments: Set&lt;DotEnvironment&gt; = emptySet(), onConfigure: () -&gt; Unit = {}, )</ID>
+    <ID>CyclomaticComplexMethod:DotPickerSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DotPickerSheet(onDismiss: () -&gt; Unit, onOpenChat: (String) -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:DotRemoteConnectionDialog.kt$@Composable internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: () -&gt; Unit, onSaved: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:DotRepository.kt$DotRepository$private suspend fun taskRequest(path: String, connection: Connection, body: String? = null, mayRefresh: Boolean = true): TaskResult</ID>
+    <ID>CyclomaticComplexMethod:DotScreenSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironment, onDismiss: () -&gt; Unit, onChangeRole: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:DualConfigWriter.kt$DualConfigWriter$private fun handleIncomingMessage(rawJson: String)</ID>
     <ID>CyclomaticComplexMethod:EchoUniverseTools.kt$EchoUniverseTools.ObserveTool$override fun execute(params: Map&lt;String, Any&gt;): ToolResult</ID>
     <ID>CyclomaticComplexMethod:EvolutionEngine.kt$EvolutionEngine$fun deepReflect(window: Int = 20): ReflectResult</ID>
@@ -98,6 +111,9 @@
     <ID>CyclomaticComplexMethod:PluginRegistryStore.kt$PluginRegistryStore$suspend fun install(context: Context, asset: RegistryAsset, data: RegistryDownloadData): String?</ID>
     <ID>CyclomaticComplexMethod:PopupDetector.kt$PopupDetector$fun tryDismiss(): Boolean</ID>
     <ID>CyclomaticComplexMethod:PostDetailScreen.kt$@Composable fun PostDetailScreen( postId: String, onBack: () -&gt; Unit, onOpenAuthor: (String) -&gt; Unit = {}, onMessage: (String) -&gt; Unit = {}, )</ID>
+    <ID>CyclomaticComplexMethod:RemoteArtifactCard.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun RemoteArtifactCard(artifact: ChatMessage.Artifact)</ID>
+    <ID>CyclomaticComplexMethod:RemoteArtifactTransfer.kt$RemoteArtifactTransfer$suspend fun fetch(source: RemoteArtifactSource): File</ID>
+    <ID>CyclomaticComplexMethod:RemoteTaskProgress.kt$@Composable internal fun RemoteTaskProgress(progress: DotRepository.TaskProgress?)</ID>
     <ID>CyclomaticComplexMethod:RemoteWorkspaceActivity.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun RemoteWorkspaceScreen(onBack: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:RoutineRunner.kt$RoutineRunner$fun run(ctx: Context, r: RoutineStore.Routine, actualPrompt: String? = null): String</ID>
     <ID>CyclomaticComplexMethod:RuntimeConfigActivity.kt$RuntimeConfigActivity$private fun buildLayout()</ID>
@@ -166,11 +182,11 @@
     <ID>ImplicitDefaultLocale:WorkflowsActivity.kt$String.format("%02d", workflow.scheduleHour!!)</ID>
     <ID>ImplicitDefaultLocale:WorkflowsActivity.kt$String.format("%02d", workflow.scheduleMinute!!)</ID>
     <ID>InstanceOfCheckForException:LightweightLlmClient.kt$LightweightLlmClient$e is LlmException</ID>
+    <ID>InstanceOfCheckForException:RemoteArtifactCard.kt$e is RemoteArtifactTransfer.DeliveryException</ID>
     <ID>InstanceOfCheckForException:ToolRegistry.kt$ToolRegistry$e is IllegalArgumentException</ID>
     <ID>LargeClass:ClawVpnService.kt$ClawVpnService : VpnService</ID>
     <ID>LargeClass:DefaultAgentService.kt$DefaultAgentService : AgentService</ID>
     <ID>LargeClass:DiffParserTest.kt$DiffParserTest</ID>
-    <ID>LargeClass:SettingsActivity.kt$SettingsActivity : BaseActivity</ID>
     <ID>LargeClass:ShizukuShellService.kt$ShizukuShellService</ID>
     <ID>LongMethod:AgentPresentation.kt$AgentPresentation$private fun buildWorkspaceUI(): View</ID>
     <ID>LongMethod:AppViewModel.kt$AppViewModel$fun initOctopusMobile()</ID>
@@ -188,12 +204,11 @@
     <ID>LongMethod:ChannelConfigActivity.kt$ChannelConfigActivity$private fun initViews(channelType: ChannelType)</ID>
     <ID>LongMethod:ChannelRouteHandler.kt$ChannelRouteHandler$private fun handlePostChannels(session: NanoHTTPD.IHTTPSession, ctx: RouteContext): NanoHTTPD.Response</ID>
     <ID>LongMethod:ChatScreen.kt$@Composable private fun ClarifyFormCard( form: PendingClarifyForm, onSelect: (qIdx: Int, optIdx: Int) -&gt; Unit, onConfirm: () -&gt; Unit, onCancel: () -&gt; Unit, )</ID>
-    <ID>LongMethod:ChatScreen.kt$@Composable private fun ColumnScope.ChatHomeWorkbench( llmOk: Boolean, a11yOk: Boolean, isRunning: Boolean, target: String, deviceCount: Int, onUsePrompt: (String) -&gt; Unit, )</ID>
+    <ID>LongMethod:ChatScreen.kt$@Composable private fun ColumnScope.ChatHomeWorkbench( dot: DotMember? = null, llmOk: Boolean, target: String, onUsePrompt: (String) -&gt; Unit, )</ID>
     <ID>LongMethod:ChatScreen.kt$@Composable private fun MultiRosterPickerDialog(onDismiss: () -&gt; Unit)</ID>
     <ID>LongMethod:ChatScreen.kt$@Composable private fun TargetSelector(onPreview: (DeviceInfo?) -&gt; Unit = {})</ID>
     <ID>LongMethod:ChatScreen.kt$@Composable private fun ToolBatchCard( calls: List&lt;ChatMessage.ToolCall&gt;, onShowDetail: () -&gt; Unit = {}, )</ID>
-    <ID>LongMethod:ChatScreen.kt$@Composable private fun ToolGroupItem(tools: List&lt;ChatMessage.ToolCall&gt;, expanded: Boolean, onToggle: (Long) -&gt; Unit)</ID>
-    <ID>LongMethod:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ChatScreen()</ID>
+    <ID>LongMethod:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable fun ChatScreen(onOpenSettings: () -&gt; Unit = {})</ID>
     <ID>LongMethod:ClawAccessibilityService.kt$ClawAccessibilityService$private fun buildNodeTree(node: AccessibilityNodeInfo, sb: StringBuilder, depth: Int)</ID>
     <ID>LongMethod:ClawApplication.kt$ClawApplication$protected open fun initializeApp()</ID>
     <ID>LongMethod:ClawVpnService.kt$ClawVpnService$private fun handleTcp(packet: ByteArray, ihl: Int, totalLen: Int, srcIp: Int, dstIp: Int)</ID>
@@ -208,15 +223,23 @@
     <ID>LongMethod:DefaultAgentService.kt$DefaultAgentService$private fun handleSystemDialogWithVision( messages: MutableList&lt;ChatMessage&gt;, callback: AgentCallback, iterations: Int ): Boolean</ID>
     <ID>LongMethod:DesktopActivity.kt$@Composable private fun DesktopReplyBar(running: Boolean, onSend: (String) -&gt; Unit, onStop: () -&gt; Unit)</ID>
     <ID>LongMethod:DesktopActivity.kt$@Composable private fun DesktopWorkspace(engine: BrowserEngine)</ID>
+    <ID>LongMethod:DesktopConversations.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DesktopConversationsSheet(initialEnvironment: DotEnvironment, onDismiss: () -&gt; Unit)</ID>
     <ID>LongMethod:DesktopHolo.kt$@Composable fun CharacterHud(modifier: Modifier = Modifier)</ID>
     <ID>LongMethod:DesktopHolo.kt$@Composable fun HoloWindow( title: String, startX: Dp, startY: Dp, width: Dp, height: Dp, onClose: () -&gt; Unit, onFocus: () -&gt; Unit, onMinimize: (() -&gt; Unit)? = null, content: @Composable () -&gt; Unit, )</ID>
     <ID>LongMethod:DeviceDetailActivity.kt$DeviceDetailActivity$private fun buildLayout(): ScrollView</ID>
+    <ID>LongMethod:DeviceExecutionStore.kt$DeviceExecutionStore$private fun resume(state: DeviceExecutionState)</ID>
     <ID>LongMethod:DeviceListActivity.kt$DeviceListActivity$private fun buildLayout(): LinearLayout</ID>
     <ID>LongMethod:DeviceRouteHandler.kt$DeviceRouteHandler$private fun handleControlInput(session: NanoHTTPD.IHTTPSession, ctx: RouteContext): NanoHTTPD.Response</ID>
     <ID>LongMethod:DiffParser.kt$DiffParser$fun parse(diffText: String): List&lt;FileChange&gt;</ID>
     <ID>LongMethod:DiffViewActivity.kt$@Composable private fun HunkCard( hunk: Hunk, accepted: Boolean?, onAccept: () -&gt; Unit, onReject: () -&gt; Unit, )</ID>
     <ID>LongMethod:DiffViewActivity.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun DiffViewScreen( fileChanges: List&lt;FileChange&gt;, filePath: String, hunkState: SnapshotStateMap&lt;Pair&lt;Int, Int&gt;, Boolean&gt;, onBack: () -&gt; Unit, onAcceptAll: () -&gt; Unit, onRejectAll: () -&gt; Unit, onAcceptHunk: (Int, Int) -&gt; Unit, onRejectHunk: (Int, Int) -&gt; Unit, )</ID>
     <ID>LongMethod:DiscoverScreen.kt$@Composable private fun BrowserOmnibox( value: String, onValueChange: (String) -&gt; Unit, selectedOption: BrowserSearchOption, options: List&lt;BrowserSearchOption&gt;, engineMenuOpen: Boolean, onEngineMenuChange: (Boolean) -&gt; Unit, onEngineSelected: (BrowserSearchOption) -&gt; Unit, onSubmit: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DotDeviceSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironment, onDismiss: () -&gt; Unit, onChangeRole: () -&gt; Unit, onOpenTask: (DeviceExecutionState) -&gt; Unit)</ID>
+    <ID>LongMethod:DotEnvironment.kt$@Composable internal fun DotEnvironmentSelector( selected: DotEnvironment, enabled: Boolean, onSelect: (DotEnvironment) -&gt; Unit, modifier: Modifier = Modifier, runningEnvironments: Set&lt;DotEnvironment&gt; = emptySet(), onConfigure: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:DotPickerSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DotPickerSheet(onDismiss: () -&gt; Unit, onOpenChat: (String) -&gt; Unit)</ID>
+    <ID>LongMethod:DotRemoteConnectionDialog.kt$@Composable internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: () -&gt; Unit, onSaved: () -&gt; Unit)</ID>
+    <ID>LongMethod:DotScreenSheet.kt$@Composable fun content(full: Boolean)</ID>
+    <ID>LongMethod:EchoNavigationDrawer.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun EchoNavigationDrawer( sessions: List&lt;SessionStore.SessionMeta&gt;, currentId: String, isRunning: Boolean, onNewChat: () -&gt; Unit, onSwitch: (String) -&gt; Unit, onClose: () -&gt; Unit, onOpenSettings: () -&gt; Unit, unreadCounts: Map&lt;String, Int&gt; = emptyMap(), onOpenDesktopConversations: (() -&gt; Unit)? = null, )</ID>
     <ID>LongMethod:EchoUniverseTools.kt$EchoUniverseTools.ObserveTool$override fun execute(params: Map&lt;String, Any&gt;): ToolResult</ID>
     <ID>LongMethod:EditFileTool.kt$EditFileTool$@Suppress("ReturnCount") // 多个前置守卫:path 安全/文件存在/大小/old_text 唯一性,guard clause 比嵌套 if 更清晰 override fun execute(params: Map&lt;String, Any&gt;): ToolResult</ID>
     <ID>LongMethod:ErrorClassifier.kt$ErrorClassifier$fun classifyMessage( msg: String, statusCode: Int? = null, provider: String = "", ): ErrorClassification</ID>
@@ -253,6 +276,7 @@
     <ID>LongMethod:PostDetailScreen.kt$@Composable fun PostDetailScreen( postId: String, onBack: () -&gt; Unit, onOpenAuthor: (String) -&gt; Unit = {}, onMessage: (String) -&gt; Unit = {}, )</ID>
     <ID>LongMethod:PostDetailScreen.kt$@Composable private fun PostBody(post: AgentPost, onOpenAuthor: (String) -&gt; Unit)</ID>
     <ID>LongMethod:ProactiveRuleEngine.kt$ProactiveRuleEngine$private fun executeRule(rule: ProactiveRule, paramOverrides: Map&lt;String, Any&gt;? = null): TriggerResult</ID>
+    <ID>LongMethod:RemoteArtifactCard.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun RemoteArtifactCard(artifact: ChatMessage.Artifact)</ID>
     <ID>LongMethod:RemoteWorkspaceActivity.kt$@Composable private fun AddMountDialog( onDismiss: () -&gt; Unit, onMount: (RemoteWorkspaceMounts.Mount, String, String) -&gt; Unit, )</ID>
     <ID>LongMethod:RemoteWorkspaceActivity.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun RemoteWorkspaceScreen(onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:RuntimeConfigActivity.kt$RuntimeConfigActivity$private fun buildLayout()</ID>
@@ -300,6 +324,7 @@
     <ID>LongParameterList:CodeIndex.kt$CodeIndex$( db: SQLiteDatabase, filePath: String, startLine: Int, endLine: Int, content: String, tokenCount: Int, )</ID>
     <ID>LongParameterList:ConfirmDialog.kt$ConfirmDialog.Companion$( context: Context, title: String, message: CharSequence = "", actionTitle: String = context.getString(R.string.common_confirm), cancelTitle: String = context.getString(R.string.common_cancel), checkboxLabel: String? = null, checkboxHint: String? = null, checkboxDefault: Boolean = false, isDismissible: Boolean = true, onAction: ((isChecked: Boolean) -&gt; Unit)? = null, onCancel: (() -&gt; Unit)? = null )</ID>
     <ID>LongParameterList:ConfirmDialog.kt$ConfirmDialog.Companion$( context: Context, title: String, message: CharSequence = "", actionTitle: String = context.getString(R.string.common_confirm), cancelTitle: String? = null, checkboxLabel: String? = null, checkboxHint: String? = null, checkboxDefault: Boolean = false, isDismissible: Boolean = true, onAction: ((isChecked: Boolean) -&gt; Unit)? = null, onCancel: (() -&gt; Unit)? = null )</ID>
+    <ID>LongParameterList:DeviceExecutionStore.kt$DeviceExecutionStore$(state: DeviceExecutionState, id: String, text: String, success: Boolean, artifacts: List&lt;DotRepository.TaskArtifact&gt; = emptyList(), omitted: Int = 0)</ID>
     <ID>LongParameterList:DeviceRemoteControl.kt$DeviceRemoteControl$( device: DeviceInfo, x1: Int, y1: Int, x2: Int, y2: Int, durationMs: Long = 300 )</ID>
     <ID>LongParameterList:DownloadHelper.kt$DownloadHelper$( context: Context, url: String, mimeType: String, suggestedFilename: String? = null, contentDisposition: String? = null, userAgent: String? = null, )</ID>
     <ID>LongParameterList:GenerateAppTool.kt$GenerateAppTool$( appId: String, appName: String, html: String, actions: List&lt;com.apk.claw.android.plugin.PluginActionDef&gt;, allowTools: List&lt;String&gt;, extraFiles: List&lt;ExtraFile&gt; = emptyList(), )</ID>
@@ -316,7 +341,6 @@
     <ID>LongParameterList:MenuGroup.kt$MenuGroup$( leadingIcon: Int, title: String, onClick: () -&gt; Unit, trailingText: String? = null, trailingIcon: Int? = null, showTrailingIcon: Boolean = true, showDivider: Boolean = true )</ID>
     <ID>LongParameterList:MnnJni.kt$MnnJni$( modelPtr: Long, prompt: String, maxTokens: Int, temperature: Float, topP: Float, stopStr: String, )</ID>
     <ID>LongParameterList:MobileActionTimeline.kt$MobileActionTimeline$( toolName: String, params: Map&lt;String, Any&gt;, success: Boolean, resultText: String?, blockedBy: String?, durationMs: Long, source: String, hasImage: Boolean = false, hasHtml: Boolean = false, )</ID>
-    <ID>LongParameterList:MultiPersonaOrchestrator.kt$MultiPersonaOrchestrator$( topic: String, priorTurns: List&lt;Pair&lt;Boolean, String&gt;&gt;, onTurnStart: (persona: com.apk.claw.android.octopus_mobile.persona.Persona) -&gt; Unit, onTurnDone: (persona: com.apk.claw.android.octopus_mobile.persona.Persona, reply: String) -&gt; Unit, onAllDone: () -&gt; Unit, onTool: (icon: String, name: String, args: String, result: String?) -&gt; Unit, onText: (String) -&gt; Unit, onError: (String) -&gt; Unit, )</ID>
     <ID>LongParameterList:OctopusMobileClient.kt$OctopusMobileClient$( callId: String, success: Boolean, data: String? = null, error: String? = null, errorCode: Int? = null, durationMs: Int = 0, screenHashAfter: String? = null, )</ID>
     <ID>LongParameterList:PcRemoteActivity.kt$(client: OctopusMobileClient?, size: IntSize, x: Float, y: Float, action: String, clamp: Boolean = false)</ID>
     <ID>LongParameterList:Protocol.kt$EnvelopeFactory$( callId: String, success: Boolean, data: Any? = null, errorCode: Int? = null, errorMessage: String? = null, durationMs: Int = 0, screenHashAfter: String? = null )</ID>
@@ -336,6 +360,7 @@
     <ID>LoopWithTooManyJumpStatements:CodeIndex.kt$CodeIndex$for</ID>
     <ID>LoopWithTooManyJumpStatements:CodeTokenizer.kt$DefaultCodeTokenizer$for</ID>
     <ID>LoopWithTooManyJumpStatements:DeviceDiscoveryManager.kt$DeviceDiscoveryManager$while</ID>
+    <ID>LoopWithTooManyJumpStatements:DeviceExecutionStore.kt$DeviceExecutionStore$while</ID>
     <ID>LoopWithTooManyJumpStatements:DiffParser.kt$DiffParser$while</ID>
     <ID>LoopWithTooManyJumpStatements:GenerateAppTool.kt$GenerateAppTool$while</ID>
     <ID>LoopWithTooManyJumpStatements:GithubCreatePrTool.kt$GithubCreatePrTool$for</ID>
@@ -462,19 +487,18 @@
     <ID>MagicNumber:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$120</ID>
     <ID>MagicNumber:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$20</ID>
     <ID>MagicNumber:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$48</ID>
+    <ID>MagicNumber:ChatScreen.kt$.14f</ID>
     <ID>MagicNumber:ChatScreen.kt$0.42f</ID>
     <ID>MagicNumber:ChatScreen.kt$0.78f</ID>
     <ID>MagicNumber:ChatScreen.kt$0.82f</ID>
-    <ID>MagicNumber:ChatScreen.kt$1.35f</ID>
     <ID>MagicNumber:ChatScreen.kt$1000L</ID>
     <ID>MagicNumber:ChatScreen.kt$120</ID>
-    <ID>MagicNumber:ChatScreen.kt$15f</ID>
+    <ID>MagicNumber:ChatScreen.kt$128</ID>
     <ID>MagicNumber:ChatScreen.kt$18</ID>
     <ID>MagicNumber:ChatScreen.kt$180</ID>
     <ID>MagicNumber:ChatScreen.kt$20</ID>
     <ID>MagicNumber:ChatScreen.kt$24L</ID>
     <ID>MagicNumber:ChatScreen.kt$3</ID>
-    <ID>MagicNumber:ChatScreen.kt$600</ID>
     <ID>MagicNumber:ChatScreen.kt$60L</ID>
     <ID>MagicNumber:ChatScreen.kt$6L</ID>
     <ID>MagicNumber:ChatScreen.kt$80</ID>
@@ -565,6 +589,13 @@
     <ID>MagicNumber:DesktopActivity.kt$1000</ID>
     <ID>MagicNumber:DesktopActivity.kt$16</ID>
     <ID>MagicNumber:DesktopActivity.kt$99</ID>
+    <ID>MagicNumber:DesktopConversations.kt$401</ID>
+    <ID>MagicNumber:DesktopConversations.kt$403</ID>
+    <ID>MagicNumber:DesktopConversations.kt$404</ID>
+    <ID>MagicNumber:DesktopConversations.kt$DesktopConversations$1024</ID>
+    <ID>MagicNumber:DesktopConversations.kt$DesktopConversations$4</ID>
+    <ID>MagicNumber:DesktopConversations.kt$DesktopConversations$401</ID>
+    <ID>MagicNumber:DesktopConversations.kt$DesktopConversations$8</ID>
     <ID>MagicNumber:DesktopHolo.kt$0.006f</ID>
     <ID>MagicNumber:DesktopHolo.kt$0.05f</ID>
     <ID>MagicNumber:DesktopHolo.kt$0.10f</ID>
@@ -611,6 +642,16 @@
     <ID>MagicNumber:DeviceDetailActivity.kt$DeviceDetailActivity$8</ID>
     <ID>MagicNumber:DeviceDiscoveryManager.kt$DeviceDiscoveryManager$3000</ID>
     <ID>MagicNumber:DeviceDiscoveryManager.kt$DeviceDiscoveryManager$500</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$1500</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$3000</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$400</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$401</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$403</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$404</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$409</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$413</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$422</ID>
+    <ID>MagicNumber:DeviceExecutionStore.kt$DeviceExecutionStore$5000</ID>
     <ID>MagicNumber:DeviceListActivity.kt$DeviceListActivity$12</ID>
     <ID>MagicNumber:DeviceListActivity.kt$DeviceListActivity$14f</ID>
     <ID>MagicNumber:DeviceListActivity.kt$DeviceListActivity$16</ID>
@@ -619,6 +660,8 @@
     <ID>MagicNumber:DeviceRegistry.kt$DeviceRegistry$500</ID>
     <ID>MagicNumber:DeviceRouteHandler.kt$DeviceRouteHandler$300L</ID>
     <ID>MagicNumber:DeviceRouteHandler.kt$DeviceRouteHandler$600L</ID>
+    <ID>MagicNumber:DeviceTaskSuggestion.kt$DeviceTaskSuggestion$127</ID>
+    <ID>MagicNumber:DeviceTaskSuggestion.kt$DeviceTaskSuggestion$4</ID>
     <ID>MagicNumber:DiffParser.kt$DiffParser$3</ID>
     <ID>MagicNumber:DiffParser.kt$DiffParser$4</ID>
     <ID>MagicNumber:DingTalkChannelHandler.kt$DingTalkChannelHandler$1000</ID>
@@ -631,6 +674,44 @@
     <ID>MagicNumber:DiscordGatewayClient.kt$DiscordGatewayClient$5000</ID>
     <ID>MagicNumber:DiscordGatewayClient.kt$DiscordGatewayClient.&lt;no name provided&gt;$1000</ID>
     <ID>MagicNumber:DiscordGatewayClient.kt$DiscordGatewayClient.&lt;no name provided&gt;$5000</ID>
+    <ID>MagicNumber:DotDeviceSheet.kt$20000</ID>
+    <ID>MagicNumber:DotDeviceSheet.kt$401</ID>
+    <ID>MagicNumber:DotDeviceSheet.kt$403</ID>
+    <ID>MagicNumber:DotDeviceSheet.kt$404</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$1000</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$12</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$32</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$401</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$403</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$4096</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$60</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$65536</ID>
+    <ID>MagicNumber:DotPairingRepository.kt$DotPairingRepository$80</ID>
+    <ID>MagicNumber:DotPickerSheet.kt$.82f</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$16384</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$2048f</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$400</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$401</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$403</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$404</ID>
+    <ID>MagicNumber:DotRemoteConnectionDialog.kt$429</ID>
+    <ID>MagicNumber:DotRepository.kt$DotRepository$24</ID>
+    <ID>MagicNumber:DotRepository.kt$DotRepository$401</ID>
+    <ID>MagicNumber:DotRepository.kt$DotRepository$8</ID>
+    <ID>MagicNumber:DotRepository.kt$DotRepository$96</ID>
+    <ID>MagicNumber:DotScreenRepository.kt$DotScreenRepository$2048</ID>
+    <ID>MagicNumber:DotScreenRepository.kt$DotScreenRepository.&lt;no name provided&gt;$1024</ID>
+    <ID>MagicNumber:DotScreenRepository.kt$DotScreenRepository.&lt;no name provided&gt;$32</ID>
+    <ID>MagicNumber:DotScreenRepository.kt$DotScreenRepository.&lt;no name provided&gt;$8</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$3000</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$401</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$403</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$404</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$4f</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$503</ID>
+    <ID>MagicNumber:DotScreenSheet.kt$8000</ID>
+    <ID>MagicNumber:EchoNavigationDrawer.kt$.4f</ID>
+    <ID>MagicNumber:EchoNavigationDrawer.kt$.84f</ID>
     <ID>MagicNumber:EchoUniverseTools.kt$EchoUniverseTools.ObserveTool$10</ID>
     <ID>MagicNumber:EchoUniverseTools.kt$EchoUniverseTools.ObserveTool$120</ID>
     <ID>MagicNumber:EchoUniverseTools.kt$EchoUniverseTools.ObserveTool$200</ID>
@@ -898,8 +979,6 @@
     <ID>MagicNumber:OctopusMobileClient.kt$OctopusMobileClient$60_000</ID>
     <ID>MagicNumber:OctopusMobileClient.kt$OctopusMobileClient$8</ID>
     <ID>MagicNumber:OctopusMobileClient.kt$OctopusMobileClient.&lt;no name provided&gt;$1000</ID>
-    <ID>MagicNumber:OctopusMobileClient.kt$OctopusMobileClient.Companion$10</ID>
-    <ID>MagicNumber:OctopusMobileClient.kt$OctopusMobileClient.Companion$30</ID>
     <ID>MagicNumber:PathFinder.kt$PathFinder$10000</ID>
     <ID>MagicNumber:PathFinder.kt$PathFinder$5</ID>
     <ID>MagicNumber:PcRemoteActivity.kt$0xCC000000</ID>
@@ -960,6 +1039,12 @@
     <ID>MagicNumber:ReflexRouter.kt$ReflexRouter.CacheMatcher$1_000_000.0</ID>
     <ID>MagicNumber:ReflexRouter.kt$ReflexRouter.CacheMatcher.Companion$16</ID>
     <ID>MagicNumber:ReflexRouter.kt$ReflexRouter.RegexMatcher$1_000_000.0</ID>
+    <ID>MagicNumber:RemoteArtifactCard.kt$1024</ID>
+    <ID>MagicNumber:RemoteArtifactCard.kt$128</ID>
+    <ID>MagicNumber:RemoteArtifactCard.kt$1600f</ID>
+    <ID>MagicNumber:RemoteArtifactTransfer.kt$RemoteArtifactTransfer$1024</ID>
+    <ID>MagicNumber:RemoteArtifactTransfer.kt$RemoteArtifactTransfer$160</ID>
+    <ID>MagicNumber:RemoteArtifactTransfer.kt$RemoteArtifactTransfer$64</ID>
     <ID>MagicNumber:RemoteConsoleGateway.kt$RemoteConsoleGateway$0.3</ID>
     <ID>MagicNumber:RemoteConsoleGateway.kt$RemoteConsoleGateway$1000</ID>
     <ID>MagicNumber:RemoteConsoleGateway.kt$RemoteConsoleGateway$16</ID>
@@ -1115,7 +1200,6 @@
     <ID>MagicNumber:ToolCallGuardrail.kt$ToolCallSignature.Companion$8</ID>
     <ID>MagicNumber:ToolResult.kt$ToolResult$30</ID>
     <ID>MagicNumber:ToolRiskPolicy.kt$ToolRiskPolicy$1000</ID>
-    <ID>MagicNumber:ToolsDetailPane.kt$ToolsDetailPane$80</ID>
     <ID>MagicNumber:TrustCenterActivity.kt$100</ID>
     <ID>MagicNumber:TurnScorer.kt$TurnScorer$0.1</ID>
     <ID>MagicNumber:TurnScorer.kt$TurnScorer$0.3</ID>
@@ -1287,60 +1371,81 @@
     <ID>MaxLineLength:ChannelsActivity.kt$val dingtalkOk = remember(rev) { KVUtils.getDingtalkAppKey().isNotEmpty() &amp;&amp; KVUtils.getDingtalkAppSecret().isNotEmpty() }</ID>
     <ID>MaxLineLength:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$LiveControlOverlay.finish(false, ClawApplication.instance.getString(R.string.chat_agent_bridge_manual_required))</ID>
     <ID>MaxLineLength:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$LiveControlOverlay.finish(false, error.message?.take(20) ?: ClawApplication.instance.getString(R.string.chat_agent_bridge_error))</ID>
-    <ID>MaxLineLength:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$LiveControlOverlay.finish(true, ClawApplication.instance.getString(R.string.floating_circle_success_state))</ID>
     <ID>MaxLineLength:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$finalize("error", error.message ?: ClawApplication.instance.getString(R.string.chat_agent_bridge_call_failed))</ID>
     <ID>MaxLineLength:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$main.post { onError(ClawApplication.instance.getString(R.string.chat_agent_bridge_dialog_detected_full)) }</ID>
     <ID>MaxLineLength:ChatAgentBridge.kt$ChatAgentBridge.&lt;no name provided&gt;$main.post { onError(error.message ?: ClawApplication.instance.getString(R.string.chat_agent_bridge_call_failed)) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$.</ID>
+    <ID>MaxLineLength:ChatScreen.kt$AlertDialog</ID>
     <ID>MaxLineLength:ChatScreen.kt$Box</ID>
     <ID>MaxLineLength:ChatScreen.kt$ChatRow$ToolGroup : ChatRow</ID>
     <ID>MaxLineLength:ChatScreen.kt$ChatRow.ToolBatch$data</ID>
     <ID>MaxLineLength:ChatScreen.kt$Column</ID>
+    <ID>MaxLineLength:ChatScreen.kt$EchoDrawerLink</ID>
+    <ID>MaxLineLength:ChatScreen.kt$EchoDrawerLink(Icons.Filled.Edit, stringResource(R.string.echo_rename_chat)) { moreMenuOpen = false; renameChatOpen = true }</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Add, contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(OctopusIconSize.medium))</ID>
+    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.chat_input_actions), tint = TextMuted)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.feature_close), tint = OnPrimaryColor, modifier = Modifier.size(OctopusIconSize.small))</ID>
+    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Close, stringResource(R.string.common_close), tint = TextMuted, modifier = Modifier.size(16.dp))</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Devices, contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(OctopusIconSize.small))</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = TextMuted, modifier = Modifier.size(OctopusIconSize.small))</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Keyboard, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(OctopusIconSize.medium))</ID>
+    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Keyboard, contentDescription = stringResource(R.string.chat_text_mode), tint = TextMuted)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = TextMuted, modifier = Modifier.size(OctopusIconSize.small))</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.KeyboardVoice, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(OctopusIconSize.medium))</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.chat_sessions), tint = TextSecondary)</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.Mic, contentDescription = null, tint = if (isRunning || listening) OnPrimaryColor else TextSecondary, modifier = Modifier.size(OctopusIconSize.small))</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more), tint = TextPrimary)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(Icons.Filled.SmartToy, contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(OctopusIconSize.medium))</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(firstIcon, contentDescription = null, tint = firstTint, modifier = Modifier.size(OctopusIconSize.small))</ID>
     <ID>MaxLineLength:ChatScreen.kt$Icon(icon, contentDescription = null, tint = if (ok) SuccessColor else TextMuted, modifier = Modifier.size(OctopusIconSize.small))</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(OctopusIconSize.small))</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Icon(prompt.icon, contentDescription = null, tint = prompt.color, modifier = Modifier.padding(OctopusSpacing.sm).size(OctopusIconSize.small))</ID>
+    <ID>MaxLineLength:ChatScreen.kt$IconButton</ID>
+    <ID>MaxLineLength:ChatScreen.kt$R.plurals.chat_new_results</ID>
     <ID>MaxLineLength:ChatScreen.kt$Row</ID>
+    <ID>MaxLineLength:ChatScreen.kt$Text</ID>
     <ID>MaxLineLength:ChatScreen.kt$Text(device.deviceName, color = OnPrimaryColor, fontSize = OctopusType.caption, fontWeight = FontWeight.Medium, maxLines = 1)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Text(deviceCount.toString(), color = if (deviceCount &gt; 0) SuccessColor else TextMuted, fontSize = OctopusType.label, fontWeight = FontWeight.SemiBold)</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Text(prompt.label, color = TextPrimary, fontSize = OctopusType.bodyStrong, fontWeight = FontWeight.SemiBold, maxLines = 1)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$Text(stringResource(R.string.app_name), color = TextPrimary, fontSize = OctopusType.headlineSm, fontWeight = FontWeight.Bold)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Text(stringResource(R.string.chat_home_status_title), color = TextPrimary, fontSize = OctopusType.bodyStrong, fontWeight = FontWeight.SemiBold)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Text(stringResource(R.string.chat_metric_devices), modifier = Modifier.weight(1f), color = TextSecondary, fontSize = OctopusType.label)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Text(stringResource(R.string.chat_new), color = TextPrimary, fontSize = OctopusType.bodyStrong, fontWeight = FontWeight.SemiBold)</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Text(t.args, modifier = Modifier.weight(1f), fontSize = OctopusType.tag, color = TextMuted, fontFamily = FontFamily.Monospace, maxLines = 1, overflow = TextOverflow.Ellipsis)</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Text(t.result, modifier = Modifier.widthIn(max = 120.dp), fontSize = OctopusType.tag, color = SuccessColor, maxLines = 1, overflow = TextOverflow.Ellipsis)</ID>
-    <ID>MaxLineLength:ChatScreen.kt$Text(t.toolName, fontSize = OctopusType.caption, color = PrimaryColor, fontFamily = FontFamily.Monospace, maxLines = 1)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Text(value, color = if (ok) TextPrimary else WarningColor, fontSize = OctopusType.label, fontWeight = FontWeight.SemiBold, maxLines = 1)</ID>
     <ID>MaxLineLength:ChatScreen.kt$Toast.makeText(context, context.getString(R.string.chat_routine_saved_toast), Toast.LENGTH_SHORT).show()</ID>
+    <ID>MaxLineLength:ChatScreen.kt$confirmButton</ID>
+    <ID>MaxLineLength:ChatScreen.kt$dismissButton = { TextButton(onClick = { clearChatOpen = false; deleteChatOpen = false }) { Text(stringResource(R.string.common_cancel)) } }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$dismissButton = { TextButton(onClick = { renameChatOpen = false }) { Text(stringResource(R.string.common_cancel)) } }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$else</ID>
     <ID>MaxLineLength:ChatScreen.kt$if</ID>
     <ID>MaxLineLength:ChatScreen.kt$if (!done) Text(stringResource(R.string.setup_go), fontSize = OctopusType.caption, color = PrimaryColor, fontWeight = FontWeight.SemiBold)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$if (deleteChatOpen) deleteSession(currentId) else { messages.clear(); ChatStore.clear(taskState.storageId) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$if (dot != null) stringResource(R.string.dot_home_title, dot.name) else stringResource(R.string.chat_empty_title)</ID>
     <ID>MaxLineLength:ChatScreen.kt$if (granted) context.getString(R.string.chat_mic_permission_granted) else context.getString(R.string.chat_mic_permission_denied)</ID>
-    <ID>MaxLineLength:ChatScreen.kt$if (t == tier) Icon(Icons.Filled.Check, contentDescription = null, tint = PrimaryColor, modifier = Modifier.size(OctopusIconSize.small))</ID>
+    <ID>MaxLineLength:ChatScreen.kt$if (i &gt;= 0) sessions[i] = sessions[i].copy(title = if (sessions[i].manuallyNamed) sessions[i].title else title, updatedAt = now)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$if (isRunning) Icons.Filled.Stop else if (showSend) Icons.AutoMirrored.Filled.Send else Icons.Filled.Mic</ID>
+    <ID>MaxLineLength:ChatScreen.kt$if (onClick != null) Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = TextMuted, modifier = Modifier.size(14.dp))</ID>
+    <ID>MaxLineLength:ChatScreen.kt$is ChatMessage.AgentMessage -&gt; AgentBubble(msg.text, msg.streaming, pauseChatFollowing)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$is ChatMessage.UserMessage -&gt; if (it.includeInHistory()) GhostChatMessage("user", it.text) else null</ID>
     <ID>MaxLineLength:ChatScreen.kt$leadingIcon = { Icon(Icons.Filled.DesktopWindows, contentDescription = null, modifier = Modifier.size(OctopusIconSize.small)) }</ID>
     <ID>MaxLineLength:ChatScreen.kt$leadingIcon = { Icon(Icons.Filled.Monitor, contentDescription = null, modifier = Modifier.size(OctopusIconSize.small)) }</ID>
     <ID>MaxLineLength:ChatScreen.kt$leadingIcon = { Icon(Icons.Filled.PhoneAndroid, contentDescription = null, modifier = Modifier.size(OctopusIconSize.small)) }</ID>
     <ID>MaxLineLength:ChatScreen.kt$leadingIcon = { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.size(OctopusIconSize.small)) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(horizontal = 14.dp, vertical = 12.dp)</ID>
     <ID>MaxLineLength:ChatScreen.kt$modifier = Modifier.fillMaxWidth().clickable(enabled = !done, onClick = onClick).padding(vertical = OctopusSpacing.sm)</ID>
     <ID>MaxLineLength:ChatScreen.kt$modifier = Modifier.padding(horizontal = OctopusSpacing.md, vertical = OctopusSpacing.sm)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$onClickLabel = stringResource(if (currentDot != null) R.string.dot_devices else R.string.dot_screen_switch_role)</ID>
     <ID>MaxLineLength:ChatScreen.kt$onConfigLlm = { runCatching { context.startActivity(android.content.Intent(context, LlmConfigActivity::class.java)) } }</ID>
     <ID>MaxLineLength:ChatScreen.kt$onEnableA11y = { runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) } }</ID>
     <ID>MaxLineLength:ChatScreen.kt$onEnter = { runCatching { com.apk.claw.android.ui.device.RemoteControlActivity.start(context, dev.deviceId) } }</ID>
     <ID>MaxLineLength:ChatScreen.kt$private</ID>
+    <ID>MaxLineLength:ChatScreen.kt$runCatching { context.startActivity(Intent(context, VoiceCallActivity::class.java)) }</ID>
     <ID>MaxLineLength:ChatScreen.kt$runCatching { context.startActivity(android.content.Intent(context, com.apk.claw.android.ui.desktop.DesktopActivity::class.java)) }</ID>
     <ID>MaxLineLength:ChatScreen.kt$runCatching { context.startActivity(android.content.Intent(context, com.apk.claw.android.ui.featurescreens.PcRemoteWebrtcActivity::class.java)) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$stringResource(R.string.echo_conversation_tools)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$stringResource(if (agentRecording) R.string.browser_menu_stop_recording else R.string.browser_menu_record_agent)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$text = { Text(stringResource(R.string.dot_delegate_menu, stringResource(target.tabLabel))) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$title = { Text(stringResource(if (deleteChatOpen) R.string.echo_delete_chat else R.string.chat_clear_current)) }</ID>
     <ID>MaxLineLength:ChatScreen.kt$trailingIcon = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextMuted) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$trailingIcon = { if (t == tier) Icon(Icons.Filled.Check, contentDescription = null, tint = PrimaryColor) }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$val</ID>
     <ID>MaxLineLength:ChatScreen.kt$val hasMic = { ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED }</ID>
+    <ID>MaxLineLength:ChatScreen.kt$val inputHint = if (composerDot != null) stringResource(R.string.dot_env_input_hint, stringResource(executionEnvironment.tabLabel)) else stringResource(R.string.chat_input_hint)</ID>
     <ID>MaxLineLength:ChatScreen.kt$value = if (a11yOk) stringResource(R.string.status_online) else stringResource(R.string.chat_agent_setup_needed)</ID>
+    <ID>MaxLineLength:ChatScreen.kt$var title by remember(currentId) { mutableStateOf(sessions.firstOrNull { it.id == currentId }?.title.orEmpty()) }</ID>
     <ID>MaxLineLength:ClawApplication.kt$ClawApplication$XLog.e(TAG, "ClawApplication initialized | device=${DeviceUtils.getDeviceDescription(this)} | tools=${ToolRegistry.getInstance().getAllTools().size}")</ID>
     <ID>MaxLineLength:ClawApplication.kt$ClawApplication$XLog.i(TAG, "ApprovalGate installed (mode=${com.apk.claw.android.agent.AgentConfig.currentPermissionMode()})")</ID>
     <ID>MaxLineLength:ClawVpnService.kt$ClawVpnService$XLog.d(TAG, "TCP SYN+ACK sent for ${ipIntToStr(key.srcIp)}:${key.srcPort} -&gt; ${ipBytesToStr(dstIp)}:$dstPort")</ID>
@@ -1364,7 +1469,6 @@
     <ID>MaxLineLength:ConfigServerTest.kt$ConfigServerTest$setLateinitField(app, "deviceDiscoveryManager", com.apk.claw.android.octopus_mobile.DeviceDiscoveryManager(app, app.deviceRegistry))</ID>
     <ID>MaxLineLength:ContextCompressor.kt$ContextCompressor$return if (full.length &gt; config.summaryMaxChars) full.take(config.summaryMaxChars) + "\n...[truncated]" else full</ID>
     <ID>MaxLineLength:ContextCompressor.kt$ContextCompressor$return if (llm.length &gt; config.summaryMaxChars) llm.take(config.summaryMaxChars) + "\n...[truncated]" else llm</ID>
-    <ID>MaxLineLength:CreatePostScreen.kt$Text(stringResource(R.string.create_post_publishing), color = Color.White, fontSize = OctopusType.body)</ID>
     <ID>MaxLineLength:DebugRouteHandler.kt$DebugRouteHandler$return ctx.corsResponse(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, result.toString()))</ID>
     <ID>MaxLineLength:DebugRouteHandler.kt$DebugRouteHandler$return ctx.corsResponse(NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, mime, file.inputStream(), file.length()))</ID>
     <ID>MaxLineLength:DebugRouteHandler.kt$DebugRouteHandler$session.uri == "/api/debug/execute" &amp;&amp; session.method == NanoHTTPD.Method.POST -&gt; handleExecuteTool(session, ctx)</ID>
@@ -1373,9 +1477,6 @@
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$XLog.i(TAG, "Agent initialized: provider=${config.provider}, model=${config.modelName}, streaming=${config.streaming}, poolEnabled=${ApiKeyPool.isEnabled()}")</ID>
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$XLog.i(TAG, "上下文压缩: ${charsBefore}→${charsAfter}字符, 节省${saved}字符(${saved * 100 / charsBefore}%), 轮数=${aiIndices.size}")</ID>
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$callback.onComplete(iterations, ClawApplication.instance.getString(R.string.agent_task_cancel), totalTokens)</ID>
-    <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$callback.onComplete(iterations, llmResponse.text ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)</ID>
-    <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$callback.onComplete(iterations, rawResult.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)</ID>
-    <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$callback.onComplete(iterations, result.data ?: ClawApplication.instance.getString(R.string.agent_task_completed), totalTokens)</ID>
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$callback.onComplete(state.iterations, ClawApplication.instance.getString(R.string.agent_task_cancel), state.totalTokens)</ID>
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$if (cancelToken.isCancelled()) throw RuntimeException(ClawApplication.instance.getString(R.string.agent_task_cancelled))</ID>
     <ID>MaxLineLength:DefaultAgentService.kt$DefaultAgentService$is AiMessage -&gt; (msg.text()?.length ?: 0) + (msg.toolExecutionRequests()?.sumOf { it.arguments()?.length ?: 0 } ?: 0)</ID>
@@ -1402,6 +1503,25 @@
     <ID>MaxLineLength:DesktopActivity.kt$listOf(TvLauncherItem("ma_empty", "去广场安装", "暂无小程序", icon = Icons.Filled.Apps, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }))</ID>
     <ID>MaxLineLength:DesktopActivity.kt$placeholder = { Text(pageTitle.ifBlank { stringResource(R.string.desktop_address_placeholder) }, fontSize = 13.sp, maxLines = 1, color = Holo.TextSecondary) }</ID>
     <ID>MaxLineLength:DesktopActivity.kt$var marked by remember(currentUrl) { mutableStateOf(com.apk.claw.android.ui.browser.BookmarkManager.isBookmarked(currentUrl)) }</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$DesktopConversations$data.get("thread_id").asString to data.getAsJsonObject("values")?.get("title")?.takeUnless { it.isJsonNull }?.asString.orEmpty()</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$DesktopConversations$private suspend</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$DesktopConversations$return Page(messages, turns.firstOrNull()?.asJsonObject?.get("id")?.asString, result.get("hasMore")?.asBoolean == true)</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$DesktopConversations$val result = JsonParser.parseString(fetch(environment, "/api/mobile/conversations?limit=30&amp;offset=$offset")).asJsonObject</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$FilterChip</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$LazyColumn</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$ModalBottomSheet</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$Text</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$Text(entry.title, modifier = Modifier.fillMaxWidth(), maxLines = 2, overflow = TextOverflow.Ellipsis)</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$Text(stringResource(if (message.user) R.string.dot_history_user else R.string.dot_history_assistant), style = MaterialTheme.typography.labelSmall)</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$TextButton</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$TextButton(onClick = { revision++ }, enabled = !busy) { Text(stringResource(R.string.browser_refresh_page)) }</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(vertical = 12.dp)) }</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$if</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$if (entries.isEmpty() &amp;&amp; !busy &amp;&amp; error == null) item { Text(stringResource(R.string.dot_history_empty)) }</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$page = older.copy(messages = (older.messages + previous.messages).distinctBy { it.id })</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$try</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$var environment by remember { mutableStateOf(initialEnvironment.takeUnless { it == DotEnvironment.PHONE } ?: DotEnvironment.COMPUTER) }</ID>
+    <ID>MaxLineLength:DesktopConversations.kt$}</ID>
     <ID>MaxLineLength:DesktopHolo.kt$Modifier.align(Alignment.BottomCenter).fillMaxHeight(0.94f).aspectRatio(0.46f, matchHeightConstraintsFirst = true)</ID>
     <ID>MaxLineLength:DesktopHolo.kt$Row</ID>
     <ID>MaxLineLength:DesktopHolo.kt$Text("${c.faction} ${c.rank}级 ${c.role}", color = Holo.AccentDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
@@ -1425,6 +1545,20 @@
     <ID>MaxLineLength:DeviceDetailActivity.kt$DeviceDetailActivity$infoCard.addMenuItem(R.drawable.ic_settings, getString(R.string.device_detail_last_seen_label), {}, showDivider = false)</ID>
     <ID>MaxLineLength:DeviceDetailActivity.kt$DeviceDetailActivity$text = if (device?.online == true) getString(R.string.device_detail_status_online) else getString(R.string.device_detail_status_offline)</ID>
     <ID>MaxLineLength:DeviceDetailActivity.kt$DeviceDetailActivity$tvStatus.text = if (d.online) getString(R.string.device_detail_status_online) else getString(R.string.device_detail_status_offline)</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionState$internal</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$ClawApplication.instance</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$DotEnvironment.entries.first { it.id == ref.get("environment").asString }</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$addProperty("character", state.character)</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$catch (_: Exception) { state.connectionIssue.value = message(R.string.echo_task_reconnecting); delay(5000) }</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$delivery(state, id, if (cancelledBeforeSubmit) MessageDeliveryStatus.CANCELLED else MessageDeliveryStatus.SENT)</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$if</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$it.environment == DotEnvironment.PHONE || it.host == DotEnvironmentStore.address(it.environment).trim().trimEnd('/')</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$private</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$val</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$val loaded = ChatStore.load(storage) ?: if (storageOverride == null &amp;&amp; remote &amp;&amp; environment == DotEnvironment.HOME &amp;&amp; !ChatStore.hasSaved(storage)) ChatStore.load(session) else null</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$val refs = runCatching { JsonParser.parseString(KVUtils.getString("device_task_refs", "[]")).asJsonArray }.getOrNull() ?: return</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$val storage = storageOverride ?: if (remote) "${session}_${environment.id}_${UUID.nameUUIDFromBytes(host.toByteArray())}" else if (DotRoster.find(character) != null) "${session}_phone" else session</ID>
+    <ID>MaxLineLength:DeviceExecutionStore.kt$DeviceExecutionStore$}</ID>
     <ID>MaxLineLength:DeviceListActivity.kt$DeviceListActivity$batchGroup.addMenuItem(R.drawable.ic_back, getString(R.string.device_batch_back), { batchAction("back") }, showDivider = true)</ID>
     <ID>MaxLineLength:DeviceListActivity.kt$DeviceListActivity$batchGroup.addMenuItem(R.drawable.ic_settings, getString(R.string.device_batch_home), { batchAction("home") }, showDivider = true)</ID>
     <ID>MaxLineLength:DeviceListActivity.kt$DeviceListActivity$batchGroup.addMenuItem(R.drawable.ic_settings, getString(R.string.device_batch_input_text), { showBatchTextDialog() }, showDivider = true)</ID>
@@ -1443,6 +1577,90 @@
     <ID>MaxLineLength:DiscoverScreen.kt$Text(selectedOption.label, color = TextSecondary, fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold, maxLines = 1)</ID>
     <ID>MaxLineLength:DiscoverScreen.kt$Toast.makeText(context, context.getString(R.string.browser_home_removed_toast), Toast.LENGTH_SHORT).show()</ID>
     <ID>MaxLineLength:DiscoverScreen.kt$option.mode == SearchMode.Ai -&gt; Icon(Icons.Filled.Psychology, contentDescription = null, tint = PrimaryColor, modifier = modifier)</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$!configured || issue in listOf(R.string.dot_pair_revoked, R.string.dot_auth_needed, R.string.dot_screen_update_required) -&gt; configure = environment</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$401, 403 -&gt; if (DotPairingRepository.paired(environment)) R.string.dot_pair_revoked else R.string.dot_auth_needed</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Column</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Icon(Icons.Filled.Refresh, stringResource(R.string.browser_refresh_page), Modifier.size(18.dp))</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Icon(Icons.Filled.Settings, stringResource(R.string.dot_env_configure), tint = Style.muted)</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Text</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Text(health?.hostName ?: DotPairingRepository.hostName(environment) ?: stringResource(environment.title), color = Style.text, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Text(stringResource(R.string.dot_devices), color = Style.muted, style = MaterialTheme.typography.bodySmall)</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$Text(stringResource(R.string.dot_devices_hint), color = Style.muted, style = MaterialTheme.typography.bodySmall)</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$else</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$enabled = execution.taskStatus.value != "cancelling"</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$health != null -&gt; if (DotPairingRepository.paired(environment)) R.string.dot_device_paired else R.string.dot_device_online</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$if</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$issue in listOf(R.string.dot_auth_needed, R.string.dot_screen_update_required) -&gt; R.string.dot_env_configure</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$maxLines = 1</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$val</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$val observer = LifecycleEventObserver { _, _ -&gt; foreground = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) }</ID>
+    <ID>MaxLineLength:DotDeviceSheet.kt$val tasks = DeviceExecutionStore.active().filter { it.environment == environment &amp;&amp; it.host == address.trimEnd('/') }</ID>
+    <ID>MaxLineLength:DotEnvironment.kt$DotEnvironment$COMPUTER : DotEnvironment</ID>
+    <ID>MaxLineLength:DotEnvironment.kt$DotEnvironment$PHONE : DotEnvironment</ID>
+    <ID>MaxLineLength:DotEnvironment.kt$Row</ID>
+    <ID>MaxLineLength:DotEnvironment.kt$if (environment in runningEnvironments) Box(Modifier.size(6.dp).background(Style.accent, CircleShape))</ID>
+    <ID>MaxLineLength:DotPairingRepository.kt$DotPairingRepository$suspend</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Column</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$ModalBottomSheet</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Row</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Surface</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(dotSpecialty(member), color = Style.muted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(selected.name, color = Style.text, fontSize = 26.sp, fontWeight = FontWeight.SemiBold)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(stringResource(R.string.dot_chat_with, selected.name), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(stringResource(R.string.dot_description), color = Style.muted, fontSize = 14.sp, lineHeight = 21.sp)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(stringResource(R.string.dot_member_count, DotRoster.members.size), color = Style.muted, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(stringResource(R.string.dot_members), color = Style.text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(stringResource(R.string.dot_yours), color = Style.accent, fontSize = 12.sp, fontWeight = FontWeight.Medium)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$Text(stringResource(if (loading) R.string.dot_connecting else connectionIssue ?: R.string.dot_connected), color = Style.muted, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$connectionIssue = if (error.message == "HTTP 401" || error.message == "HTTP 403") R.string.dot_auth_needed else R.string.dot_offline</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$context.startActivity(android.content.Intent(context, com.apk.claw.android.ui.settings.LlmConfigActivity::class.java))</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$else</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$if</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$if (active) Icon(Icons.Filled.Check, stringResource(R.string.dot_selected), Modifier.size(18.dp), tint = Style.accent)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$if (androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language == "zh") member.specialty else member.specialtyEn</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$if (installed?.contains(member.agentId) == false) Text(stringResource(R.string.dot_not_installed), color = Style.muted, fontSize = 10.sp)</ID>
+    <ID>MaxLineLength:DotPickerSheet.kt$if (showConnection) DotConnectionDialog(environment, onDismiss = { showConnection = false }, onSaved = { showConnection = false; refresh++ })</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$OutlinedTextField</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$camera.launch(androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file))</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$dismissButton = { TextButton(enabled = !binding, onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } }</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$modifier = Modifier.fillMaxWidth()</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$val raw = clipboard.primaryClip?.takeIf { it.itemCount &gt; 0 }?.getItemAt(0)?.coerceToText(context)?.toString()</ID>
+    <ID>MaxLineLength:DotRemoteConnectionDialog.kt$}</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$"context" to mapOf("agent" to member.agentId, "page_agent_memory_mode" to "write_allowed", "interaction_mode" to "chat")</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$DotEnvironmentStore.address(environment).trim().trimEnd('/')</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$TaskArtifact</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$answer.replace(Regex("&lt;details&gt;.*?&lt;/details&gt;", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)), "").trim()</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$content.replace(Regex("&lt;details&gt;.*?&lt;/details&gt;", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)), "")</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$fun</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$if</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$private</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$private suspend</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$result?.getAsJsonArray("choices")?.firstOrNull()?.asJsonObject?.get("finish_reason")?.asString == "failed"</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$suspend</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$suspend fun cancelTask(id: String, connection: Connection)</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$suspend fun submitTask(body: com.google.gson.JsonObject, connection: Connection)</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$val</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$val conversationId = KVUtils.getString(key, "").ifBlank { UUID.randomUUID().toString().also { KVUtils.putString(key, it) } }</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository$val response = JsonParser.parseString(execute(request("/api/agents?include_visuals=false", environment).get().build(), roster = true))</ID>
+    <ID>MaxLineLength:DotRepository.kt$DotRepository.TaskResult$val artifacts: List&lt;TaskArtifact&gt; = emptyList()</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$Box</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$Column</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$leadingIcon = { Icon(target.icon, null) }</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$stringResource(if (automatic) R.string.dot_screen_pause else R.string.dot_screen_resume)</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$val fit = minOf(viewport.width.toFloat() / image.width, viewport.height.toFloat() / image.height)</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$val observer = LifecycleEventObserver { _, _ -&gt; foreground = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) }</ID>
+    <ID>MaxLineLength:DotScreenSheet.kt$}</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$.</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$LazyColumn</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$Row</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$Text</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$item { EchoDrawerLink(Icons.Filled.Schedule, stringResource(R.string.routines_title)) { launch(RoutinesActivity::class.java) } }</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$item { HorizontalDivider(Modifier.padding(horizontal = 12.dp, vertical = 14.dp), color = OctopusColors.Border.copy(alpha = .18f)) }</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$items(pinned, key = { it.id }) { EchoSessionLink(it, it.id == currentId, !isRunning, unreadCounts[it.id] ?: 0, onSwitch) }</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$items(recent, key = { it.id }) { EchoSessionLink(it, it.id == currentId, !isRunning, unreadCounts[it.id] ?: 0, onSwitch) }</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$style = MaterialTheme.typography.bodyMedium</ID>
+    <ID>MaxLineLength:EchoNavigationDrawer.kt$trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, stringResource(R.string.echo_clear_search)) } }</ID>
     <ID>MaxLineLength:EvolutionActivity.kt$Text(c.skillName, color = FText, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, modifier = Modifier.weight(1f))</ID>
     <ID>MaxLineLength:EvolutionActivity.kt$Text(stringResource(R.string.evolution_canary_stats, c.sampleCount, c.successCount, c.failureCount), color = FMuted, fontSize = 10.sp)</ID>
     <ID>MaxLineLength:EvolutionActivity.kt$Text(stringResource(R.string.evolution_hit_count, l.hitCount), color = FMuted, fontSize = 10.sp)</ID>
@@ -1502,7 +1720,6 @@
     <ID>MaxLineLength:McpClientTest.kt$McpClientTest$val</ID>
     <ID>MaxLineLength:McpClientTest.kt$McpClientTest$val schema = JsonParser.parseString("""{"type":"object","properties":{"path":{"type":"string"}}}""").asJsonObject</ID>
     <ID>MaxLineLength:McpRouteHandler.kt$McpRouteHandler$private</ID>
-    <ID>MaxLineLength:McpServerBootstrap.kt$McpServerBootstrap$XLog.i(TAG, "MCP server started on port $port (path=${McpServer.MCP_PATH}, bearerTokenLength=${authToken.length})")</ID>
     <ID>MaxLineLength:MediaTools.kt$MediaTools$"Action: 'play', 'pause', 'resume', 'stop', 'seek', 'seek_relative', 'subtitle', 'audio_track', 'volume', 'info', 'scan', 'find_subtitle', 'mount_cloud', 'list_cloud', 'play_cloud', 'cloud_status'."</ID>
     <ID>MaxLineLength:MediaTools.kt$MediaTools$"Media file path or URL for 'play', directory path for 'scan', or cloud drive name for 'list_cloud'/'play_cloud'."</ID>
     <ID>MaxLineLength:MediaTools.kt$MediaTools$"Value for seek (ms), volume (0-150), subtitle track, audio track, subtitle size, seek_relative offset, or cloud file path for 'play_cloud'."</ID>
@@ -1549,18 +1766,12 @@
     <ID>MaxLineLength:NavigationExecutor.kt$NavigationExecutor$XLog.w(TAG, "Checkpoint mismatch at step $executedSteps: expected=${expectedNode.label}, similarity=$similarity")</ID>
     <ID>MaxLineLength:NavigationExecutor.kt$NavigationExecutor$return ExecutionResult(false, executedSteps, replanCount, "Action execution failed: ${edge.action.type}")</ID>
     <ID>MaxLineLength:NavigationGraph.kt$NavigationGraph$weight = computeWeight(existing.successCount + 1, existing.failCount, (existing.avgDurationMs + durationMs) / 2)</ID>
-    <ID>MaxLineLength:NavigationGraph.kt$if (selectedBottomRoute == screen.route &amp;&amp; currentDestination?.route == screen.route) return@CompactBottomBar</ID>
     <ID>MaxLineLength:NavigationRecorder.kt$NavigationRecorder$KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -&gt; RemoteAction.dpadCenter()</ID>
     <ID>MaxLineLength:OctopusBridge.kt$OctopusBridge$if</ID>
     <ID>MaxLineLength:OctopusComponents.kt$if</ID>
-    <ID>MaxLineLength:OctopusMobileClient.kt$OctopusMobileClient$XLog.w(tag, "⚠️ connecting to runtime over plaintext ws:// — auth token is exposed to network MITM. Use wss:// in production.")</ID>
-    <ID>MaxLineLength:PcRemoteActivity.kt$Text("Esc", color = Color.White, fontSize = 13.sp, modifier = Modifier.pointerInput(Unit) { detectTapGestures { client?.sendRemoteInput("key", text = "esc") } })</ID>
     <ID>MaxLineLength:PcRemoteActivity.kt$Text("⌨", color = Color.White, fontSize = 18.sp, modifier = Modifier.pointerInput(Unit) { detectTapGestures { showKeyboard = true } })</ID>
-    <ID>MaxLineLength:PcRemoteActivity.kt$Text("⌫", color = Color.White, fontSize = 16.sp, modifier = Modifier.pointerInput(Unit) { detectTapGestures { client?.sendRemoteInput("key", text = "backspace") } })</ID>
     <ID>MaxLineLength:PcRemoteActivity.kt$Text(if (frames &gt; 0) stringResource(R.string.pcremote_frame_count, frames) else if (connected) stringResource(R.string.pcremote_status_connected) else stringResource(R.string.pcremote_status_disconnected), color = Color(0xFF8AB4F8), fontSize = 11.sp)</ID>
     <ID>MaxLineLength:PcRemoteActivity.kt$Text(stringResource(R.string.pcremote_back_button), color = Color.White, fontSize = 14.sp, modifier = Modifier.pointerInput(Unit) { detectTapGestures { onBack() } })</ID>
-    <ID>MaxLineLength:PcRemoteActivity.kt$TextButton(onClick = { client?.sendRemoteInput("key", text = "enter"); showKeyboard = false }) { Text(stringResource(R.string.pcremote_enter_button)) }</ID>
-    <ID>MaxLineLength:PcRemoteActivity.kt$if (!dragEmitted) { sendN(client, size, first.position.x, first.position.y, "down", clamp = true); dragEmitted = true }</ID>
     <ID>MaxLineLength:PcRemoteActivity.kt$modifier = Modifier.align(Alignment.TopStart).fillMaxWidth().background(Color(0xCC000000)).padding(horizontal = 12.dp, vertical = 8.dp)</ID>
     <ID>MaxLineLength:PcRemoteActivity.kt$private</ID>
     <ID>MaxLineLength:PcRemoteWebrtcActivity.kt$PcRemoteWebrtcActivity$android.widget.Toast.makeText(this, getString(R.string.pc_remote_webrtc_webview_unavailable), android.widget.Toast.LENGTH_LONG).show()</ID>
@@ -1605,10 +1816,22 @@
     <ID>MaxLineLength:ReflexRouter.kt$ReflexRouter.Companion$response = mapOf("tool" to "browser_install_extension", "source" to "cws:cjpalhdlnbpafiamejdnhcphjbkeiagm")</ID>
     <ID>MaxLineLength:RegistryClient.kt$RegistrySkillStore$name = asset.name.ifBlank { data.name }</ID>
     <ID>MaxLineLength:RemoteAccessLogTest.kt$RemoteAccessLogTest$val payload = "${e.id}|${e.ts}|${e.method}|${e.uri}|${e.source}|${e.action}|${e.success}|${e.summary}|${e.durationMs}"</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$Text(Formatter.formatShortFileSize(context, source.size), color = EchoChatStyle.muted, fontSize = 11.sp)</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$TextButton(onClick = { fetch(false) }, enabled = !busy) { Text(stringResource(R.string.dot_delivery_save)) }</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$TextButton(onClick = { fetch(true) }, enabled = !busy) { Text(stringResource(R.string.chat_artifact_preview)) }</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$TextButton(onClick = { pageIndex++ }, enabled = pageIndex + 1 &lt; count) { Text(stringResource(R.string.dot_delivery_next)) }</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$TextButton(onClick = { pageIndex-- }, enabled = pageIndex &gt; 0) { Text(stringResource(R.string.dot_delivery_previous)) }</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$TextButton(onClick = { previewFile = null; fetch(false) }) { Text(stringResource(R.string.dot_delivery_save)) }</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$else</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$error = if (e is RemoteArtifactTransfer.DeliveryException) context.getString(e.resource) else fetchFailed</ID>
+    <ID>MaxLineLength:RemoteArtifactCard.kt$}</ID>
+    <ID>MaxLineLength:RemoteArtifactTransfer.kt$RemoteArtifactTransfer$.</ID>
+    <ID>MaxLineLength:RemoteArtifactTransfer.kt$RemoteArtifactTransfer$if (!response.isSuccessful) error(ClawApplication.instance.getString(R.string.dot_delivery_fetch_failed))</ID>
     <ID>MaxLineLength:RemoteControlActivity.kt$RemoteControlActivity$else -&gt; act { remote.swipe(device, s.first, s.second, t.first, t.second, dur.coerceIn(80L, 1200L)) }</ID>
     <ID>MaxLineLength:RemoteControlActivity.kt$RemoteControlActivity$layoutParams</ID>
     <ID>MaxLineLength:RemoteControlActivity.kt$RemoteControlActivity$private fun lp(gap: Int)</ID>
     <ID>MaxLineLength:RemoteControlIndicator.kt$RemoteControlIndicator$private val isControlActive get() = controllers.values.any { System.currentTimeMillis() - it &lt; CONTROL_ACTIVE_TIMEOUT_MS }</ID>
+    <ID>MaxLineLength:RemoteTaskProgress.kt$Text</ID>
     <ID>MaxLineLength:RemoteWebDAVOps.kt$RemoteWebDAVOps$private</ID>
     <ID>MaxLineLength:RemoteWorkspaceCache.kt$RemoteWorkspaceCache$XLog.w(TAG, "pushFile conflict: $remotePath remote mtime $currentRemoteMtime &gt; pulled ${meta.remoteMtime}")</ID>
     <ID>MaxLineLength:RemoteWorkspaceCache.kt$RemoteWorkspaceCache$getMetaMap(mountId)[remotePath] = FileMeta(remotePath, newMtime, System.currentTimeMillis(), localFile.length())</ID>
@@ -1670,20 +1893,16 @@
     <ID>MaxLineLength:SettingsScreen.kt$SettingsCard</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(if (pairBusy) stringResource(R.string.status_loading) else stringResource(R.string.remote_console_pair_confirm))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(it, color = if (it == stringResource(R.string.status_not_configured)) WarningColor else SuccessColor, fontSize = OctopusType.caption, fontWeight = FontWeight.SemiBold, maxLines = 1)</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$Text(name, fontSize = OctopusType.tag, color = if (connected) TextPrimary else TextMuted, maxLines = 1)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(stringResource(R.string.remote_console_pair_desc), color = TextMuted, fontSize = OctopusType.caption, lineHeight = 16.sp)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(stringResource(R.string.settings_advanced_hint), color = TextMuted, fontSize = OctopusType.caption, lineHeight = 15.sp, modifier = Modifier.weight(1f))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(stringResource(R.string.settings_subtitle), color = TextMuted, fontSize = OctopusType.label, lineHeight = 16.sp, maxLines = 2)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(stringResource(R.string.settings_workspace_desc), color = TextMuted, fontSize = OctopusType.caption, lineHeight = 16.sp)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(title, fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold, color = TextPrimary, lineHeight = 17.sp, maxLines = 2)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(title, fontSize = OctopusType.label, fontWeight = FontWeight.SemiBold, color = TextSecondary, letterSpacing = 0.sp, lineHeight = 16.sp)</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$border = BorderStroke(1.dp, if (connected) SuccessColor.copy(alpha = 0.20f) else BorderColor.copy(alpha = 0.6f))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.ChannelsActivity::class.java))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.LinuxSandboxSettingsActivity::class.java))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.PcRemoteActivity::class.java))</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$if (readyCount &gt;= 5) stringResource(R.string.settings_status_ok) else stringResource(R.string.settings_status_set)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).tvFocusable().padding(vertical = OctopusSpacing.xs)</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$modifier = Modifier.padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.xs)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$stringResource(R.string.account_credits_label) + ": " + credits + (if (isMember) " · VIP" else "")</ID>
     <ID>MaxLineLength:SettingsScreen.kt$trailing = if (cfg.any { it }) stringResource(R.string.status_connected) else stringResource(R.string.status_not_configured)</ID>
     <ID>MaxLineLength:SettingsScreen.kt$val keyMasked = if (apiKey.length &gt;= 8) apiKey.take(5) + "••••" + apiKey.takeLast(4) else if (apiKey.isBlank()) notConfiguredText else configuredText</ID>
@@ -1811,7 +2030,6 @@
     <ID>MaxLineLength:WeChatLoginActivity.kt$Text(stringResource(R.string.wechat_login_failed), color = FWarning, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 19.sp)</ID>
     <ID>MaxLineLength:WeChatLoginActivity.kt$Text(stringResource(R.string.wechat_login_linked), color = FSuccess, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)</ID>
     <ID>MaxLineLength:WeChatLoginActivity.kt$Text(stringResource(R.string.wechat_login_success), color = FSuccess, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)</ID>
-    <ID>MaxLineLength:WeChatLoginActivity.kt$Text(text, color = androidx.compose.ui.graphics.Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 28.dp, vertical = 12.dp))</ID>
     <ID>MaxLineLength:WorkflowStore.kt$WorkflowStore$val newWf = wf.copy(id = UUID.randomUUID().toString(), createdAt = System.currentTimeMillis(), lastRunAt = 0L, runCount = 0)</ID>
     <ID>MaxLineLength:WorkflowsActivity.kt$Icon(Icons.Filled.Delete, contentDescription = "删除", tint = FWarning, modifier = Modifier.size(16.dp))</ID>
     <ID>MaxLineLength:WorkflowsActivity.kt$Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(14.dp), tint = FWarning)</ID>
@@ -1826,7 +2044,7 @@
     <ID>MaxLineLength:WorkspacePushTool.kt$WorkspacePushTool$ToolResult.error("Conflict: ${r.message} (remote mtime=${r.remoteMtime}). Pull first or set force=true.")</ID>
     <ID>MayBeConst:GmApiBridge.kt$GmApiBridge.Companion$val JS_BRIDGE_NAME = INTERFACE_NAME</ID>
     <ID>NestedBlockDepth:BaseActivity.kt$BaseActivity$override fun dispatchKeyEvent(event: KeyEvent): Boolean</ID>
-    <ID>NestedBlockDepth:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ChatScreen()</ID>
+    <ID>NestedBlockDepth:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable fun ChatScreen(onOpenSettings: () -&gt; Unit = {})</ID>
     <ID>NestedBlockDepth:ChatScreen.kt$private fun turnRows(turn: List&lt;ChatMessage&gt;): List&lt;ChatRow&gt;</ID>
     <ID>NestedBlockDepth:ClawAccessibilityService.kt$ClawAccessibilityService$private fun buildNodeTree(node: AccessibilityNodeInfo, sb: StringBuilder, depth: Int)</ID>
     <ID>NestedBlockDepth:CodeIndex.kt$CodeIndex$@Synchronized fun indexDirectory(rootPath: String, incremental: Boolean = true): IndexStats</ID>
@@ -1893,7 +2111,6 @@
     <ID>ReturnCount:CastApprovalManager.kt$CastApprovalManager$private fun createChannel(context: Context)</ID>
     <ID>ReturnCount:CastRouteHandler.kt$CastRouteHandler$private fun handleCastLaunch(session: NanoHTTPD.IHTTPSession, ctx: RouteContext): NanoHTTPD.Response</ID>
     <ID>ReturnCount:ChannelAccessControl.kt$ChannelAccessControl$fun authorize(channel: Channel, senderId: String?): Decision</ID>
-    <ID>ReturnCount:ChatAgentBridge.kt$ChatAgentBridge$fun resumePendingTask( onTool: (icon: String, name: String, args: String, result: String?) -&gt; Unit, onText: (String) -&gt; Unit, onDone: (String) -&gt; Unit, onError: (String) -&gt; Unit, ): Boolean</ID>
     <ID>ReturnCount:CircuitBreaker.kt$CircuitBreaker$private fun evaluateThresholds(): String?</ID>
     <ID>ReturnCount:ClawAccessibilityService.kt$ClawAccessibilityService$fun clickNode(node: AccessibilityNodeInfo?): Boolean</ID>
     <ID>ReturnCount:ClawAccessibilityService.kt$ClawAccessibilityService$fun takeScreenshot(timeoutMs: Long): Bitmap?</ID>
@@ -1932,6 +2149,7 @@
     <ID>ReturnCount:DemoRecorder.kt$DemoRecorder$fun ingest(event: AccessibilityEvent)</ID>
     <ID>ReturnCount:DemoRecorder.kt$DemoRecorder$private fun capture(event: AccessibilityEvent, tool: String)</ID>
     <ID>ReturnCount:DeviceDiscoveryManager.kt$DeviceDiscoveryManager$private fun processBeacon(json: String, sourceIp: String)</ID>
+    <ID>ReturnCount:DeviceTaskSuggestion.kt$DeviceTaskSuggestion$fun suggest(text: String): Suggestion?</ID>
     <ID>ReturnCount:DiffParser.kt$DiffParser$fun applyHunks( originalContent: String, hunks: List&lt;Hunk&gt;, acceptedIndices: Set&lt;Int&gt;, ): String</ID>
     <ID>ReturnCount:DiffParser.kt$DiffParser$private fun stripPathPrefix(path: String): String</ID>
     <ID>ReturnCount:DiffViewActivity.kt$DiffViewActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
@@ -1973,8 +2191,6 @@
     <ID>ReturnCount:KVUtils.kt$KVUtils$fun getString(key: String, defaultValue: String = ""): String</ID>
     <ID>ReturnCount:KVUtils.kt$KVUtils$fun getThemeMode(): Boolean?</ID>
     <ID>ReturnCount:KVUtils.kt$KVUtils$fun putString(key: String, value: String?): Boolean</ID>
-    <ID>ReturnCount:KVUtils.kt$KVUtils$private fun getSecureString(key: String, defaultValue: String = ""): String</ID>
-    <ID>ReturnCount:KVUtils.kt$KVUtils$private fun putSecureString(key: String, value: String?): Boolean</ID>
     <ID>ReturnCount:LaunchFreeformTool.kt$LaunchFreeformTool$override fun execute(params: Map&lt;String, Any&gt;): ToolResult</ID>
     <ID>ReturnCount:LightweightReAct.kt$LightweightReAct$suspend fun run( task: String, skills: List&lt;SkillSpec&gt;, systemPrompt: String = DEFAULT_SYSTEM_PROMPT, onStep: ((ReActStep) -&gt; Unit)? = null, // 可选:返回当前屏幕,供 VLM 目标自校验。null → 不校验(向后兼容)。 captureScreen: (suspend () -&gt; android.graphics.Bitmap?)? = null, // 可选:额外系统上下文(如技能商城已安装技能的指令注入)。空 → 行为不变。 extraSystemContext: String = "", ): TaskResult</ID>
     <ID>ReturnCount:LinuxSandbox.kt$LinuxSandbox$fun isUbuntuRootfsDownloaded(): Boolean</ID>
@@ -2016,7 +2232,6 @@
     <ID>ReturnCount:OctopusMobileClient.kt$OctopusMobileClient$internal fun handleIncomingMessage(text: String)</ID>
     <ID>ReturnCount:OctopusMobileClient.kt$OctopusMobileClient$private fun handleHelloAck(root: JsonObject): Boolean</ID>
     <ID>ReturnCount:OctopusMobileClient.kt$OctopusMobileClient$private fun handleHelloError(root: JsonObject): Boolean</ID>
-    <ID>ReturnCount:OctopusMobileClient.kt$OctopusMobileClient$private fun handleToolExecute(root: JsonObject)</ID>
     <ID>ReturnCount:OctopusMobileClient.kt$OctopusMobileClient$private fun handleWorkspaceSync(root: JsonObject)</ID>
     <ID>ReturnCount:PathFinder.kt$PathFinder$fun findPath( graph: NavigationGraph, startNodeId: String, goalNodeId: String ): NavigationPath?</ID>
     <ID>ReturnCount:PathGuard.kt$PathGuard$fun check( path: String, sandboxDir: String? = null, allowSensitive: Boolean = false, mustExist: Boolean = false, ): PathVerdict</ID>
@@ -2201,7 +2416,6 @@
     <ID>SwallowedException:SemanticSkillRanker.kt$SemanticSkillRanker$e: Exception</ID>
     <ID>SwallowedException:SftpBackend.kt$SftpBackend$e: Exception</ID>
     <ID>SwallowedException:ShizukuManager.kt$ShizukuManager$e: PackageManager.NameNotFoundException</ID>
-    <ID>SwallowedException:ShizukuShellService.kt$ShizukuShellService$e: Exception</ID>
     <ID>SwallowedException:SkillManifest.kt$SkillManifest$e: Exception</ID>
     <ID>SwallowedException:SkillManifest.kt$SkillManifest$e: IOException</ID>
     <ID>SwallowedException:SshClient.kt$SshClient$e: Exception</ID>
@@ -2220,6 +2434,7 @@
     <ID>SwallowedException:WorkspaceMountTool.kt$WorkspaceMountTool$e: Exception</ID>
     <ID>ThrowsCount:DefaultAgentService.kt$DefaultAgentService$@Suppress("TooGenericExceptionCaught", "ReturnCount") private fun chatWithCancellation(messages: List&lt;ChatMessage&gt;): LlmResponse</ID>
     <ID>ThrowsCount:DefaultAgentService.kt$DefaultAgentService$private fun chatWithRetry(messages: List&lt;ChatMessage&gt;, callback: AgentCallback, iteration: Int): LlmResponse</ID>
+    <ID>ThrowsCount:DesktopConversations.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun DesktopConversationsSheet(initialEnvironment: DotEnvironment, onDismiss: () -&gt; Unit)</ID>
     <ID>ThrowsCount:DiffParser.kt$DiffParser$fun parse(diffText: String): List&lt;FileChange&gt;</ID>
     <ID>ThrowsCount:SkillMdLoader.kt$SkillMdLoader$fun parse(content: String): SkillDefinition</ID>
     <ID>ThrowsCount:SshClient.kt$SshClient$fun &lt;T&gt; withSftp(connId: String, block: (ChannelSftp) -&gt; T): T</ID>
@@ -2243,7 +2458,6 @@
     <ID>TooGenericExceptionCaught:BrowserTools.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:CanaryManager.kt$CanaryManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ChannelManager.kt$ChannelManager$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:ChatScreen.kt$error: Throwable</ID>
     <ID>TooGenericExceptionCaught:ClawAccessibilityService.kt$ClawAccessibilityService$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ClawVpnService.kt$ClawVpnService$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ClawVpnService.kt$ClawVpnService.Companion$e: Exception</ID>
@@ -2258,12 +2472,18 @@
     <ID>TooGenericExceptionCaught:DeclarativePluginTool.kt$DeclarativePluginTool$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DefaultAgentService.kt$DefaultAgentService$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DefaultAgentService.kt$DefaultAgentService.Companion$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DesktopConversations.kt$exception: Exception</ID>
     <ID>TooGenericExceptionCaught:DeviceDiscoveryManager.kt$DeviceDiscoveryManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DeviceRegistry.kt$DeviceRegistry$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DeviceRemoteControl.kt$DeviceRemoteControl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DingTalkChannelHandler.kt$DingTalkChannelHandler$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DiscordChannelHandler.kt$DiscordChannelHandler$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DiscordGatewayClient.kt$DiscordGatewayClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DotDeviceSheet.kt$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:DotPickerSheet.kt$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:DotRemoteConnectionDialog.kt$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:DotScreenRepository.kt$DotScreenRepository.&lt;no name provided&gt;$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DotScreenSheet.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DualConfigWriter.kt$DualConfigWriter$e: Exception</ID>
     <ID>TooGenericExceptionCaught:EchoUniverseTools.kt$EchoUniverseTools.ActTool$e: Exception</ID>
     <ID>TooGenericExceptionCaught:EchoUniverseTools.kt$EchoUniverseTools.BindTool$e: Exception</ID>
@@ -2276,13 +2496,11 @@
     <ID>TooGenericExceptionCaught:FeiShuChannelHandler.kt$FeiShuChannelHandler.&lt;no name provided&gt;$e: Exception</ID>
     <ID>TooGenericExceptionCaught:FileRouteHandler.kt$FileRouteHandler$e: Exception</ID>
     <ID>TooGenericExceptionCaught:GmApiBridge.kt$GmApiBridge$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:GoalVerifier.kt$GoalVerifier$e: Exception</ID>
     <ID>TooGenericExceptionCaught:H264Decoder.kt$H264Decoder$e: Exception</ID>
     <ID>TooGenericExceptionCaught:HeartbeatReporter.kt$HeartbeatReporter$e: Exception</ID>
     <ID>TooGenericExceptionCaught:HistoryStore.kt$HistoryStore$e: Exception</ID>
     <ID>TooGenericExceptionCaught:HtmlLinter.kt$HtmlLinter$e: Throwable</ID>
     <ID>TooGenericExceptionCaught:JsonRpcDispatcher.kt$JsonRpcDispatcher$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:KVUtils.kt$KVUtils$e: Exception</ID>
     <ID>TooGenericExceptionCaught:KVUtils.kt$KVUtils$e: Throwable</ID>
     <ID>TooGenericExceptionCaught:LessonStore.kt$LessonStore$e: Exception</ID>
     <ID>TooGenericExceptionCaught:LightweightLlmClient.kt$LightweightLlmClient$e: Exception</ID>
@@ -2315,7 +2533,6 @@
     <ID>TooGenericExceptionCaught:OctopusBridge.kt$OctopusBridge$e: Exception</ID>
     <ID>TooGenericExceptionCaught:OctopusLifecycleManager.kt$OctopusLifecycleManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:OctopusMobileClient.kt$OctopusMobileClient$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:OctopusMobileClient.kt$OctopusMobileClient.&lt;no name provided&gt;$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PathGuard.kt$PathGuard$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PcRemoteWebrtcActivity.kt$PcRemoteWebrtcActivity$e: Throwable</ID>
     <ID>TooGenericExceptionCaught:PluginActivity.kt$PluginActivity$e: Exception</ID>
@@ -2328,6 +2545,7 @@
     <ID>TooGenericExceptionCaught:PostDetailScreen.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ProactiveRuleEngine.kt$ProactiveRuleEngine$e: Exception</ID>
     <ID>TooGenericExceptionCaught:QQChannelHandler.kt$QQChannelHandler$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RemoteArtifactCard.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:RemoteWebDAVOps.kt$RemoteWebDAVOps$e: Exception</ID>
     <ID>TooGenericExceptionCaught:RemoteWorkspaceCache.kt$RemoteWorkspaceCache$e: Exception</ID>
     <ID>TooGenericExceptionCaught:RemoteWorkspaceManager.kt$RemoteWorkspaceManager$e: Exception</ID>
@@ -2415,6 +2633,7 @@
     <ID>TooManyFunctions:ChannelManager.kt$ChannelManager</ID>
     <ID>TooManyFunctions:ChatAgentBridge.kt$ChatAgentBridge</ID>
     <ID>TooManyFunctions:ChatScreen.kt$com.apk.claw.android.ui.compose.screen.ChatScreen.kt</ID>
+    <ID>TooManyFunctions:ChatStore.kt$ChatStore</ID>
     <ID>TooManyFunctions:ClawAccessibilityService.kt$ClawAccessibilityService : AccessibilityService</ID>
     <ID>TooManyFunctions:ClawVpnService.kt$ClawVpnService : VpnService</ID>
     <ID>TooManyFunctions:CloudDriveManager.kt$CloudDriveManager</ID>
@@ -2425,12 +2644,15 @@
     <ID>TooManyFunctions:DefaultAgentService.kt$DefaultAgentService : AgentService</ID>
     <ID>TooManyFunctions:DesktopActivity.kt$com.apk.claw.android.ui.desktop.DesktopActivity.kt</ID>
     <ID>TooManyFunctions:DesktopHolo.kt$com.apk.claw.android.ui.desktop.DesktopHolo.kt</ID>
+    <ID>TooManyFunctions:DeviceExecutionStore.kt$DeviceExecutionStore</ID>
     <ID>TooManyFunctions:DeviceListActivity.kt$DeviceListActivity : BaseActivity</ID>
     <ID>TooManyFunctions:DeviceRegistry.kt$DeviceRegistry</ID>
     <ID>TooManyFunctions:DeviceRemoteControl.kt$DeviceRemoteControl</ID>
     <ID>TooManyFunctions:DingTalkChannelHandler.kt$DingTalkChannelHandler : ChannelHandler</ID>
     <ID>TooManyFunctions:DiscordGatewayClient.kt$DiscordGatewayClient</ID>
     <ID>TooManyFunctions:DiscoverScreen.kt$com.apk.claw.android.ui.compose.screen.DiscoverScreen.kt</ID>
+    <ID>TooManyFunctions:DotPairingRepository.kt$DotPairingRepository</ID>
+    <ID>TooManyFunctions:DotRepository.kt$DotRepository</ID>
     <ID>TooManyFunctions:DualConfigWriter.kt$DualConfigWriter</ID>
     <ID>TooManyFunctions:FeatureHubScreen.kt$com.apk.claw.android.ui.compose.screen.FeatureHubScreen.kt</ID>
     <ID>TooManyFunctions:FeiShuChannelHandler.kt$FeiShuChannelHandler : ChannelHandler</ID>
@@ -2510,7 +2732,6 @@
     <ID>UnusedParameter:GmApiBridge.kt$GmApiBridge$active: Boolean</ID>
     <ID>UnusedParameter:GmApiBridge.kt$GmApiBridge$callbackId: String</ID>
     <ID>UnusedParameter:GmApiBridge.kt$GmApiBridge$mimeType: String</ID>
-    <ID>UnusedParameter:McpServerBootstrap.kt$McpServerBootstrap$context: Context</ID>
     <ID>UnusedParameter:MiniAppHost.kt$MiniAppHost$wv: WebView?</ID>
     <ID>UnusedParameter:MpvController.kt$MpvController$configDir: String? = null</ID>
     <ID>UnusedParameter:MpvController.kt$MpvController$context: Context</ID>
@@ -2538,6 +2759,9 @@
     <ID>UnusedParameter:WorkflowStore.kt$WorkflowStore$context: Context</ID>
     <ID>UnusedPrivateMember:AppViewModel.kt$AppViewModel$private fun trySendScreenshot(channel: Channel, filePath: String, messageID: String)</ID>
     <ID>UnusedPrivateMember:BrowserScreen.kt$private fun isPageCommand(context: Context, s: String): Boolean</ID>
+    <ID>UnusedPrivateMember:ChatScreen.kt$@Composable private fun AgentHomeStatusCard( llmOk: Boolean, a11yOk: Boolean, isRunning: Boolean, target: String, deviceCount: Int, )</ID>
+    <ID>UnusedPrivateMember:ChatScreen.kt$@Composable private fun ChatSessionDrawer( sessions: List&lt;SessionStore.SessionMeta&gt;, currentId: String, isRunning: Boolean, llmOk: Boolean, a11yOk: Boolean, deviceCount: Int, onNewChat: () -&gt; Unit, onSwitch: (String) -&gt; Unit, onDelete: (String) -&gt; Unit, )</ID>
+    <ID>UnusedPrivateMember:ChatScreen.kt$@Composable private fun MoreMenuLink( icon: androidx.compose.ui.graphics.vector.ImageVector, titleRes: Int, target: Class&lt;*&gt;, onDismiss: () -&gt; Unit, )</ID>
     <ID>UnusedPrivateMember:FeatureHubScreen.kt$@Composable private fun CircleCard( circle: CirclePreview, index: Int, onOpenActivity: (Class&lt;*&gt;) -&gt; Unit, )</ID>
     <ID>UnusedPrivateMember:GenerateBrowserPluginTool.kt$GenerateBrowserPluginTool$@Deprecated("legacy inline-JSON persistence; use persistAsUserscript") private fun persist(name: String, hostPattern: String, js: String): Boolean</ID>
     <ID>UnusedPrivateMember:HomeActivity.kt$HomeActivity$private fun checkAllPermissionsGranted(): Boolean</ID>
@@ -2546,6 +2770,7 @@
     <ID>UnusedPrivateMember:WorkflowsActivity.kt$private fun List&lt;WorkflowStep&gt;.allIdsHint(): String</ID>
     <ID>UnusedPrivateProperty:AgentPresentation.kt$AgentPresentation$/** 当前在外接屏上运行的 App 列表 */ private val runningApps = mutableListOf&lt;RunningAppInfo&gt;()</ID>
     <ID>UnusedPrivateProperty:BitReader.kt$BitReader$i</ID>
+    <ID>UnusedPrivateProperty:ChatScreen.kt$val newChat = { // 不直接建会话 —— 先弹工作空间选择对话框(可跳过用全局默认),类似 Codex 启动时选项目目录。 closeDetailForSwitch() showNewChatWorkspaceDialog = true }</ID>
     <ID>UnusedPrivateProperty:ClawVpnService.kt$ClawVpnService.Companion$private const val IP_ADDR_LEN = 4</ID>
     <ID>UnusedPrivateProperty:DefaultAgentService.kt$DefaultAgentService$val msgCountBefore = messages.size</ID>
     <ID>UnusedPrivateProperty:DeviceListActivity.kt$DeviceListActivity.Companion$private const val TAG = "DeviceListActivity"</ID>
@@ -2643,18 +2868,44 @@
     <ID>WildcardImport:CloudDriveActivity.kt$import androidx.compose.runtime.*</ID>
     <ID>WildcardImport:CodeDetailPane.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:ConfigServer.kt$import com.apk.claw.android.server.routes.*</ID>
+    <ID>WildcardImport:DesktopConversations.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DesktopConversations.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DesktopConversations.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DesktopConversations.kt$import kotlinx.coroutines.*</ID>
     <ID>WildcardImport:DetailDrawer.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:DetailDrawer.kt$import androidx.compose.material3.*</ID>
     <ID>WildcardImport:DetailDrawer.kt$import androidx.compose.runtime.*</ID>
     <ID>WildcardImport:DeviceDetailActivity.kt$import android.widget.*</ID>
     <ID>WildcardImport:DeviceDiscoveryManager.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:DeviceExecutionStore.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DeviceExecutionStore.kt$import kotlinx.coroutines.*</ID>
     <ID>WildcardImport:DiffDetailPane.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:DiffViewActivity.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:DiffViewActivity.kt$import androidx.compose.runtime.*</ID>
     <ID>WildcardImport:DiscoverScreen.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:DiscoverScreen.kt$import androidx.compose.material3.*</ID>
     <ID>WildcardImport:DiscoverScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DotDeviceSheet.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DotDeviceSheet.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DotDeviceSheet.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DotEnvironment.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DotEnvironment.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DotEnvironment.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DotPickerSheet.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DotPickerSheet.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DotPickerSheet.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DotRemoteConnectionDialog.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DotRemoteConnectionDialog.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DotRemoteConnectionDialog.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DotScreenSheet.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DotScreenSheet.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DotScreenSheet.kt$import androidx.compose.runtime.*</ID>
     <ID>WildcardImport:DualConfigWriter.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:EchoNavigationDrawer.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:EchoNavigationDrawer.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:EchoNavigationDrawer.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:EchoNavigationDrawer.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:EchoNavigationDrawer.kt$import com.apk.claw.android.ui.featurescreens.*</ID>
     <ID>WildcardImport:ErrorClassifierTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:EventBusTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:EvolutionActivity.kt$import androidx.compose.foundation.layout.*</ID>
@@ -2698,6 +2949,11 @@
     <ID>WildcardImport:PlanDetailPane.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:PrivacyScannerTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:ReflexRouterTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:RemoteArtifactCard.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:RemoteArtifactCard.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:RemoteArtifactCard.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:RemoteTaskProgress.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:RemoteTaskProgress.kt$import androidx.compose.runtime.*</ID>
     <ID>WildcardImport:RemoteWorkspaceActivity.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:RemoteWorkspaceActivity.kt$import androidx.compose.material3.*</ID>
     <ID>WildcardImport:RemoteWorkspaceActivity.kt$import androidx.compose.runtime.*</ID>
