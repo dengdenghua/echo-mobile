@@ -302,7 +302,7 @@ private const val CHAT_STREAM_UI_THROTTLE_MS = 80L
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(onOpenSettings: () -> Unit = {}) {
     // 多会话:会话索引 + 当前会话 + 当前会话的消息
     val sessions = remember { mutableStateListOf<SessionStore.SessionMeta>() }
     var currentId by remember { mutableStateOf("") }
@@ -992,7 +992,7 @@ fun ChatScreen() {
                 onNewChat = { createNewChatWithWorkspace(null); closeDrawer() },
                 onSwitch = { switchTo(it); closeDrawer() },
                 onClose = closeDrawer,
-                onOpenPersonas = { closeDrawer(); charMenuOpen = true },
+                onOpenSettings = onOpenSettings,
                 onOpenDesktopConversations = { closeDrawer(); showDesktopConversations = true },
             )
         },

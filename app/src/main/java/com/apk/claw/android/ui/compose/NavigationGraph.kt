@@ -255,7 +255,10 @@ fun OctopusNavHost(
                 embedded = true,
             )
         }
-        composable(Screen.Chat.route) { ChatScreen() }
+        composable(Screen.Chat.route) {
+            // 抽屉齿轮进入设置 Tab(与底部 Dock 的「设置」是同一页)
+            ChatScreen(onOpenSettings = { navController.navigateToTab(Screen.Settings) })
+        }
         composable(Screen.Features.route) {
             FeatureHubScreen(
                 // 灵感 tab 即广场:search→广场搜索,publish/+→发帖(合并原独立「灵感广场」的搜索/发帖入口)

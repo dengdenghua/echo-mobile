@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.AccountTree
@@ -71,6 +73,7 @@ import com.apk.claw.android.ui.compose.theme.OctopusSpacing
 import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.ui.compose.theme.tvFocusable
 import com.apk.claw.android.ui.compose.theme.tvOverscan
+import com.apk.claw.android.ui.featurescreens.ActivityActivity
 import com.apk.claw.android.ui.featurescreens.EvolutionActivity
 import com.apk.claw.android.ui.featurescreens.FileManagerActivity
 import com.apk.claw.android.ui.featurescreens.MemoryActivity
@@ -79,8 +82,10 @@ import com.apk.claw.android.ui.featurescreens.PersonasActivity
 import com.apk.claw.android.ui.featurescreens.TrustCenterActivity
 import com.apk.claw.android.ui.featurescreens.WakeWordSettingsActivity
 import com.apk.claw.android.ui.featurescreens.WorkflowsActivity
+import com.apk.claw.android.ui.plugin.PluginActivity
 import com.apk.claw.android.ui.settings.LlmConfigActivity
 import com.apk.claw.android.ui.settings.RuntimeConfigActivity
+import com.apk.claw.android.ui.settings.SettingsActivity
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.account.LoginActivity
@@ -499,6 +504,22 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.PcRemoteActivity::class.java))
                     }
                     SettingsDivider()
+                    ClickableSettingsRow(
+                        Icons.Filled.Extension,
+                        stringResource(R.string.settings_plugin_mgmt),
+                        stringResource(R.string.settings_plugin_desc),
+                    ) {
+                        context.startActivity(Intent(context, PluginActivity::class.java))
+                    }
+                    SettingsDivider()
+                    ClickableSettingsRow(
+                        Icons.Filled.Tune,
+                        stringResource(R.string.settings_more_title),
+                        stringResource(R.string.settings_more_desc),
+                    ) {
+                        context.startActivity(Intent(context, SettingsActivity::class.java))
+                    }
+                    SettingsDivider()
                     // 高清屏幕采集(MediaProjection):开→系统投屏授权后,网页遥控台/远控画面走高帧率快路;
                     // 关→无感回退无障碍截图(2-5fps)。授权是异步系统框,状态回来后随 refreshTick 校正。
                     val hdActive = remember(refreshTick) { ScreenCaptureService.isActive() }
@@ -689,6 +710,14 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     stringResource(R.string.feat_trust_desc),
                 ) {
                     context.startActivity(Intent(context, TrustCenterActivity::class.java))
+                }
+                SettingsDivider()
+                ClickableSettingsRow(
+                    Icons.Filled.History,
+                    stringResource(R.string.activity_screen_title),
+                    stringResource(R.string.activity_row_desc),
+                ) {
+                    context.startActivity(Intent(context, ActivityActivity::class.java))
                 }
                 SettingsDivider()
                 ClickableSettingsRow(

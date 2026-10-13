@@ -62,6 +62,18 @@ class MiniAppListActivity : ComponentActivity() {
 
 @Composable
 private fun MiniAppListScreen(onBack: () -> Unit) {
+    FeatureScaffold(
+        title = "小程序",
+        onBack = onBack,
+        action = { MiniAppMarketAction() },
+    ) {
+        MiniAppListContent()
+    }
+}
+
+/** 已安装的应用(小程序)列表。独立页和 Hub 的「应用」标签共用。 */
+@Composable
+internal fun MiniAppListContent() {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     // 从广场小程序商城安装完返回后,刷新列表(新装的小程序才能立刻出现,不需要重启 App)
@@ -76,43 +88,31 @@ private fun MiniAppListScreen(onBack: () -> Unit) {
     var expandedId by remember { mutableStateOf<String?>(null) }
     var publishingId by remember { mutableStateOf<String?>(null) }
 
-    FeatureScaffold(
-        title = "小程序",
-        onBack = onBack,
-        action = {
-            IconButton(onClick = {
-                ctx.startActivity(android.content.Intent(ctx, MiniAppMarketplaceActivity::class.java))
-            }) {
-                Icon(Icons.Filled.Public, contentDescription = "浏览广场小程序", tint = FText)
-            }
-        },
-    ) {
-        if (apps.isEmpty()) {
-            MiniAppEmptyState(onBrowse = {
-                ctx.startActivity(android.content.Intent(ctx, MiniAppMarketplaceActivity::class.java))
-            })
-            return@FeatureScaffold
-        }
-        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-            apps.forEach { m ->
-                MiniAppCard(
-                    m = m,
-                    expanded = expandedId == m.id,
-                    onToggleExpand = { expandedId = if (expandedId == m.id) null else m.id },
-                    onLaunch = { MiniAppRegistry.launch(ctx, m.id) },
-                    publishing = publishingId == m.id,
-                    onShare = {
-                        if (publishingId == null) {
-                            publishingId = m.id
-                            scope.launch {
-                                val r = SquarePublisher.publish(m)
-                                publishingId = null
-                                android.widget.Toast.makeText(ctx, r.message, android.widget.Toast.LENGTH_LONG).show()
-                            }
+    if (apps.isEmpty()) {
+        MiniAppEmptyState(onBrowse = {
+            ctx.startActivity(android.content.Intent(ctx, MiniAppMarketplaceActivity::class.java))
+        })
+        return
+    }
+    Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
+        apps.forEach { m ->
+            MiniAppCard(
+                m = m,
+                expanded = expandedId == m.id,
+                onToggleExpand = { expandedId = if (expandedId == m.id) null else m.id },
+                onLaunch = { MiniAppRegistry.launch(ctx, m.id) },
+                publishing = publishingId == m.id,
+                onShare = {
+                    if (publishingId == null) {
+                        publishingId = m.id
+                        scope.launch {
+                            val r = SquarePublisher.publish(m)
+                            publishingId = null
+                            android.widget.Toast.makeText(ctx, r.message, android.widget.Toast.LENGTH_LONG).show()
                         }
-                    },
-                )
-            }
+                    }
+                },
+            )
         }
     }
 }

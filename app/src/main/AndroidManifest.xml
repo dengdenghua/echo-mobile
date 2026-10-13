@@ -213,6 +213,7 @@
         <activity android:name=".ui.featurescreens.MiniAppListActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.MiniAppMarketplaceActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.SkillsActivity" android:exported="false" />
+        <activity android:name=".ui.featurescreens.HubActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.McpServersActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.PersonasActivity" android:exported="false" />
         <activity android:name=".ui.featurescreens.WorkflowsActivity" android:exported="false" />

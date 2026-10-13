@@ -140,6 +140,14 @@ private fun SkillGroupHeader(emoji: String, title: String, count: Int, subtitle:
 
 @Composable
 private fun SkillsScreen(onBack: () -> Unit) {
+    FeatureScaffold(title = stringResource(R.string.skills_screen_title), onBack = onBack) {
+        SkillsContent()
+    }
+}
+
+/** 技能列表(提示词技能 + 可调用工具)。独立页和 Hub 的「技能」标签共用。 */
+@Composable
+internal fun ColumnScope.SkillsContent() {
     val tools = remember {
         ToolRegistry.getInstance().getAllTools().sortedWith(
             compareBy({ it.getName() !in CORE }, { it.getName() })   // 核心在前
@@ -151,45 +159,43 @@ private fun SkillsScreen(onBack: () -> Unit) {
     var skillRev by remember { mutableStateOf(0) }
     val promptSkills = remember(skillRev) { PromptSkillStore.all() }
 
-    FeatureScaffold(title = stringResource(R.string.skills_screen_title), onBack = onBack) {
-        LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(bottom = 12.dp)) {
-            if (promptSkills.isNotEmpty()) {
-                item(key = "__skills_header__") {
-                    SkillGroupHeader("✨", "提示词技能", promptSkills.size, "相关任务时自动注入,让 Agent 更懂这件事")
-                }
-                itemsIndexed(promptSkills, key = { _, sk -> sk.id }) { index, s ->
-                    PromptSkillCard(
-                        emoji = emojiForSkill(s.name, s.description),
-                        accent = accentAt(index),
-                        name = s.name,
-                        desc = s.description,
-                        enabled = s.enabled,
-                        onToggle = { PromptSkillStore.setEnabled(s.id, it); skillRev++ },
-                        onDelete = { PromptSkillStore.delete(s.id); skillRev++ },
-                    )
-                }
+    LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(bottom = 12.dp)) {
+        if (promptSkills.isNotEmpty()) {
+            item(key = "__skills_header__") {
+                SkillGroupHeader("✨", "提示词技能", promptSkills.size, "相关任务时自动注入,让 Agent 更懂这件事")
             }
-            item(key = "__tools_header__") {
-                SkillGroupHeader(
-                    "🧩", "可调用工具", tools.size,
-                    "核心控制/感知工具锁定;其余可按需停用,降低误操作与隐私面",
-                )
-            }
-            itemsIndexed(tools, key = { _, tl -> tl.getName() }) { index, t ->
-                val name = t.getName()
-                val core = name in CORE
-                val enabled = remember(rev, name) { ToolRegistry.getInstance().isToolEnabled(name) }
-                ToolCard(
-                    emoji = emojiForTool(name),
+            itemsIndexed(promptSkills, key = { _, sk -> sk.id }) { index, s ->
+                PromptSkillCard(
+                    emoji = emojiForSkill(s.name, s.description),
                     accent = accentAt(index),
-                    display = runCatching { t.getDisplayName() }.getOrDefault(name),
-                    rawName = name,
-                    desc = runCatching { t.getDescription() }.getOrDefault(""),
-                    core = core,
-                    enabled = enabled,
-                    onToggle = { KVUtils.setToolDisabled(name, !it); rev++ },
+                    name = s.name,
+                    desc = s.description,
+                    enabled = s.enabled,
+                    onToggle = { PromptSkillStore.setEnabled(s.id, it); skillRev++ },
+                    onDelete = { PromptSkillStore.delete(s.id); skillRev++ },
                 )
             }
+        }
+        item(key = "__tools_header__") {
+            SkillGroupHeader(
+                "🧩", "可调用工具", tools.size,
+                "核心控制/感知工具锁定;其余可按需停用,降低误操作与隐私面",
+            )
+        }
+        itemsIndexed(tools, key = { _, tl -> tl.getName() }) { index, t ->
+            val name = t.getName()
+            val core = name in CORE
+            val enabled = remember(rev, name) { ToolRegistry.getInstance().isToolEnabled(name) }
+            ToolCard(
+                emoji = emojiForTool(name),
+                accent = accentAt(index),
+                display = runCatching { t.getDisplayName() }.getOrDefault(name),
+                rawName = name,
+                desc = runCatching { t.getDescription() }.getOrDefault(""),
+                core = core,
+                enabled = enabled,
+                onToggle = { KVUtils.setToolDisabled(name, !it); rev++ },
+            )
         }
     }
 }

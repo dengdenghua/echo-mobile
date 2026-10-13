@@ -35,8 +35,6 @@ import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.featurescreens.*
-import com.apk.claw.android.ui.plugin.PluginActivity
-import com.apk.claw.android.ui.settings.SettingsActivity
 
 /** Global destinations live here; the overflow menu belongs to the current conversation. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,13 +42,12 @@ import com.apk.claw.android.ui.settings.SettingsActivity
 internal fun EchoNavigationDrawer(
     sessions: List<SessionStore.SessionMeta>, currentId: String, isRunning: Boolean,
     onNewChat: () -> Unit, onSwitch: (String) -> Unit, onClose: () -> Unit,
-    onOpenPersonas: () -> Unit,
+    onOpenSettings: () -> Unit,
     unreadCounts: Map<String, Int> = emptyMap(),
     onOpenDesktopConversations: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var query by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     val matches = sessions.filter { it.title.contains(query.trim(), ignoreCase = true) }
         .sortedByDescending { it.updatedAt }
     val launch: (Class<*>) -> Unit = { destination ->
@@ -84,17 +81,26 @@ internal fun EchoNavigationDrawer(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp))
         LazyColumn(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
             if (query.isBlank()) {
-                if (onOpenDesktopConversations != null) item { EchoDrawerLink(Icons.Filled.Sync, stringResource(R.string.dot_history_title), onClick = onOpenDesktopConversations) }
-                item { EchoDrawerLink(Icons.Filled.Extension, stringResource(R.string.settings_plugin_mgmt)) { launch(PluginActivity::class.java) } }
-                item { EchoDrawerLink(Icons.Filled.Bolt, stringResource(R.string.feat_skills)) { launch(SkillsActivity::class.java) } }
+                // 与桌面端侧栏对齐:Hub(智能体 · 应用 · 技能)、自动化;记忆、活动、信任中心、插件管理在设置里
+                item {
+                    EchoDrawerLink(
+                        Icons.Filled.Hub,
+                        stringResource(R.string.hub_title),
+                        hint = stringResource(R.string.hub_drawer_hint),
+                    ) {
+                        onClose()
+                        HubActivity.start(context)
+                    }
+                }
                 item { EchoDrawerLink(Icons.Filled.Schedule, stringResource(R.string.routines_title)) { launch(RoutinesActivity::class.java) } }
-                item { EchoDrawerLink(Icons.Filled.Apps, stringResource(R.string.feat_miniapps)) { launch(MiniAppListActivity::class.java) } }
-                item { EchoDrawerLink(if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, stringResource(R.string.common_more)) { expanded = !expanded } }
-                if (expanded) {
-                    item { EchoDrawerLink(Icons.Filled.Psychology, stringResource(R.string.feat_memory)) { launch(MemoryActivity::class.java) } }
-                    item { EchoDrawerLink(Icons.Filled.History, stringResource(R.string.activity_screen_title)) { launch(ActivityActivity::class.java) } }
-                    item { EchoDrawerLink(Icons.Filled.Shield, stringResource(R.string.trustcenter_title)) { launch(TrustCenterActivity::class.java) } }
-                    item { EchoDrawerLink(Icons.Filled.People, stringResource(R.string.dot_local_personas), onClick = onOpenPersonas) }
+                if (onOpenDesktopConversations != null) {
+                    item {
+                        EchoDrawerLink(
+                            Icons.Filled.Sync,
+                            stringResource(R.string.dot_history_title),
+                            onClick = onOpenDesktopConversations,
+                        )
+                    }
                 }
                 item { HorizontalDivider(Modifier.padding(horizontal = 12.dp, vertical = 14.dp), color = OctopusColors.Border.copy(alpha = .18f)) }
             }
@@ -115,26 +121,43 @@ internal fun EchoNavigationDrawer(
         }
         HorizontalDivider(color = OctopusColors.Border.copy(alpha = .18f))
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            EchoDrawerLink(Icons.Filled.Star, stringResource(R.string.echo_subscription)) { launch(AccountActivity::class.java) }
+            // 账户一行(与桌面端底部账户菜单一致):昵称 + 会员与订阅,齿轮进入设置
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f).clickable { launch(AccountActivity::class.java) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.AccountCircle, null, Modifier.size(28.dp), tint = OctopusColors.TextMuted)
                     Spacer(Modifier.width(12.dp))
-                    Text(AccountStore.nickname.takeIf { it.isNotBlank() } ?: stringResource(R.string.account_title),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                    Column(Modifier.weight(1f)) {
+                        Text(AccountStore.nickname.takeIf { it.isNotBlank() } ?: stringResource(R.string.account_title),
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.echo_subscription), color = OctopusColors.TextMuted,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
+                    }
                 }
-                IconButton(onClick = { launch(SettingsActivity::class.java) }) { Icon(Icons.Filled.Settings, stringResource(R.string.settings_title)) }
+                IconButton(onClick = { onClose(); onOpenSettings() }) {
+                    Icon(Icons.Filled.Settings, stringResource(R.string.settings_title))
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun EchoDrawerLink(icon: ImageVector, label: String, enabled: Boolean = true, onClick: () -> Unit) {
+internal fun EchoDrawerLink(
+    icon: ImageVector,
+    label: String,
+    hint: String? = null,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
     Row(Modifier.fillMaxWidth().alpha(if (enabled) 1f else .4f).clickable(enabled = enabled, onClick = onClick).padding(horizontal = 12.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(icon, null, Modifier.size(20.dp), tint = OctopusColors.TextSecondary)
         Spacer(Modifier.width(14.dp))
         Text(label, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (hint != null) {
+            Spacer(Modifier.width(8.dp))
+            Text(hint, color = OctopusColors.TextMuted, style = MaterialTheme.typography.labelSmall,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        }
     }
 }
 

@@ -771,7 +771,7 @@
     <string name="pcremote_input_dialog_title">Input text to PC</string>
     <string name="pcremote_enter_button">Enter</string>
     <string name="pc_remote_webrtc_webview_unavailable">System WebView unavailable, cannot start remote desktop.</string>
-    <string name="routines_title">Routines</string>
+    <string name="routines_title">Automation</string>
     <string name="routines_empty_state">No routines yet.\n\nLong-press a command in chat to save it, or clone a template from Inspiration Square to replay, schedule, or refine here.</string>
     <string name="routines_count_summary">%1$d total · learned fast paths run faster; otherwise the agent re-plans from screen on execution</string>
     <string name="routines_item_target_and_count">Target %1$s · ran %2$d times</string>
@@ -870,7 +870,7 @@
     <string name="feat_section_advanced">Advanced</string>
     <string name="feat_skills">Skills</string>
     <string name="feat_extensions">Browser Plugins</string>
-    <string name="feat_routines">Routines</string>
+    <string name="feat_routines">Automation</string>
     <string name="feat_miniapps">Mini Apps</string>
     <string name="feat_clouddrive">Cloud Drive</string>
     <string name="feat_memory">Memory</string>
@@ -1613,8 +1613,17 @@
     <string name="market_load_failed_desc">Check your network connection and try again.</string>
     <string name="post_detail_load_failed">Couldn\'t load this post</string>
     <string name="post_detail_load_failed_desc">It may have been removed, or the network is unavailable. Try again.</string>
-    <string name="miniapp_empty">No mini apps yet. Mini apps you add from the Square appear here.</string>
+    <string name="miniapp_empty">No apps yet. Apps you add from the Square appear here.</string>
     <string name="miniapp_browse_square">Browse the Square</string>
     <string name="channel_acl_no_code">No pairing code yet. Generate one, then send it to the bot to pair.</string>
     <string name="channel_acl_generate_code">Generate pairing code</string>
+    <string name="hub_title">Hub</string>
+    <string name="hub_drawer_hint">Agents · Apps · Skills</string>
+    <string name="hub_tab_agents">Agents</string>
+    <string name="hub_tab_apps">Apps</string>
+    <string name="hub_tab_skills">Skills</string>
+    <string name="hub_local_characters">Local characters</string>
+    <string name="settings_more_title">More settings</string>
+    <string name="settings_more_desc">Language, permission mode, channels, LAN and devices</string>
+    <string name="activity_row_desc">A record of every task the agent ran</string>
 </resources>
