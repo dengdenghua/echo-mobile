@@ -35,6 +35,9 @@ val FBg get() = OctopusColors.Background
 val FSurface get() = OctopusColors.Surface
 val FSurface2 get() = OctopusColors.SurfaceVariant
 val FPrimary get() = OctopusColors.Primary
+
+/** Thumb/glyph colour on a filled Primary, Success (core) or Warning surface: legible in Snow and Graphite. */
+val FOnPrimary get() = OctopusColors.OnPrimary
 val FText get() = OctopusColors.TextPrimary
 val FSub get() = OctopusColors.TextSecondary
 val FMuted get() = OctopusColors.TextMuted

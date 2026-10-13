@@ -119,6 +119,17 @@ internal data class SquareFeedDto(
     @com.google.gson.annotations.SerializedName("has_more") val hasMore: Boolean = false,
 )
 
+/**
+ * Placeholder covers for posts and mini-apps without an image. ECHO surfaces are graphite and
+ * categories are never told apart by colour, so covers only vary in lightness (no rainbow gradients).
+ */
+internal val EchoCoverGradients: List<List<Color>> = listOf(
+    listOf(Color(0xFF2E333B), Color(0xFF171A1F)),
+    listOf(Color(0xFF262A31), Color(0xFF101216)),
+    listOf(Color(0xFF3A4049), Color(0xFF1E2228)),
+    listOf(Color(0xFF1E2228), Color(0xFF090A0C)),
+)
+
 private fun parseColor(hex: String, fallback: Color): Color =
     runCatching { Color(android.graphics.Color.parseColor(hex.trim())) }.getOrDefault(fallback)
 
@@ -132,7 +143,7 @@ private val WindowTint get() = OctopusTints.Window
 internal fun SquarePostDto.toAgentPost(): AgentPost {
     val grad = coverGradient
         .mapNotNull { runCatching { Color(android.graphics.Color.parseColor(it.trim())) }.getOrNull() }
-        .ifEmpty { listOf(Color(0xFF667EEA), Color(0xFF764BA2)) }
+        .ifEmpty { EchoCoverGradients[0] }
     return AgentPost(
         id = id.ifBlank { title.hashCode().toString() },
         title = title,
@@ -185,7 +196,7 @@ internal object LocalSkillRegistry {
                 id = "local.notify", title = "通知巡检 · 重要消息汇总给我",
                 author = "本地技能", authorInitial = "本", authorColor = OctopusTints.Skill,
                 likes = "", tag = "本地", tagColor = OctopusTints.Window,
-                coverHeightDp = 140, coverGradient = listOf(Color(0xFF11998E), Color(0xFF38EF7D)),
+                coverHeightDp = 140, coverGradient = EchoCoverGradients[1],
             )
         )
         register(
@@ -193,7 +204,7 @@ internal object LocalSkillRegistry {
                 id = "local.files", title = "文件整理 · 截图自动归档到文件夹",
                 author = "本地技能", authorInitial = "本", authorColor = OctopusTints.Cloud,
                 likes = "", tag = "本地", tagColor = OctopusTints.Window,
-                coverHeightDp = 150, coverGradient = listOf(Color(0xFF667EEA), Color(0xFF764BA2)),
+                coverHeightDp = 150, coverGradient = EchoCoverGradients[2],
             )
         )
     }
@@ -262,14 +273,14 @@ internal object SquareRepository {
 
     /** 离线兜底种子：服务端与缓存都不可用时仍有内容可展示。 */
     private val SEED: List<AgentPost> = listOf(
-        AgentPost("seed.1", "让 AI 每天自动整理手机相册，生成回忆视频", "影像助手", "影", OctopusTints.Video, "1.2k", "自动化", OctopusTints.Routine, 180, listOf(Color(0xFF667EEA), Color(0xFF764BA2))),
-        AgentPost("seed.2", "3 步搭一个会订外卖的助手", "效率玩家", "效", OctopusTints.Skill, "856", "教程", OctopusTints.Browser, 140, listOf(Color(0xFF11998E), Color(0xFF38EF7D))),
-        AgentPost("seed.3", "自动写一周周报，老板直呼专业", "打工侠", "打", OctopusTints.Window, "2.3k", "职场", OctopusTints.Memory, 200, listOf(Color(0xFFFC466B), Color(0xFF3F5EFB))),
-        AgentPost("seed.4", "用语音唤醒助手，开车时也能回消息", "车载达人", "车", OctopusTints.Plugin, "634", "语音", OctopusTints.Trust, 160, listOf(Color(0xFFF2994A), Color(0xFFF2C94C))),
-        AgentPost("seed.5", "自动比价，618 我省了 2000+", "省钱 Bot", "省", OctopusTints.Cloud, "3.1k", "购物", OctopusTints.Hot, 170, listOf(Color(0xFF00C6FF), Color(0xFF0072FF))),
-        AgentPost("seed.6", "接入智能家居，一句话控制全屋", "极客居", "极", OctopusTints.Evolve, "1.5k", "IoT", OctopusTints.Plugin, 150, listOf(Color(0xFF8E2DE2), Color(0xFF4A00E0))),
-        AgentPost("seed.7", "生成旅行攻略，细到每天照着走", "旅行灵感", "旅", OctopusTints.Browser, "987", "生活", OctopusTints.Routine, 190, listOf(Color(0xFFEE9CA7), Color(0xFFFFDDE1))),
-        AgentPost("seed.8", "让助手帮你读论文，10 分钟抓重点", "学术喵", "学", OctopusTints.Memory, "742", "学习", OctopusTints.Skill, 145, listOf(Color(0xFF134E5E), Color(0xFF71B280))),
+        AgentPost("seed.1", "让 AI 每天自动整理手机相册，生成回忆视频", "影像助手", "影", OctopusTints.Video, "1.2k", "自动化", OctopusTints.Routine, 180, EchoCoverGradients[3]),
+        AgentPost("seed.2", "3 步搭一个会订外卖的助手", "效率玩家", "效", OctopusTints.Skill, "856", "教程", OctopusTints.Browser, 140, EchoCoverGradients[0]),
+        AgentPost("seed.3", "自动写一周周报，老板直呼专业", "打工侠", "打", OctopusTints.Window, "2.3k", "职场", OctopusTints.Memory, 200, EchoCoverGradients[1]),
+        AgentPost("seed.4", "用语音唤醒助手，开车时也能回消息", "车载达人", "车", OctopusTints.Plugin, "634", "语音", OctopusTints.Trust, 160, EchoCoverGradients[2]),
+        AgentPost("seed.5", "自动比价，618 我省了 2000+", "省钱 Bot", "省", OctopusTints.Cloud, "3.1k", "购物", OctopusTints.Hot, 170, EchoCoverGradients[3]),
+        AgentPost("seed.6", "接入智能家居，一句话控制全屋", "极客居", "极", OctopusTints.Evolve, "1.5k", "IoT", OctopusTints.Plugin, 150, EchoCoverGradients[0]),
+        AgentPost("seed.7", "生成旅行攻略，细到每天照着走", "旅行灵感", "旅", OctopusTints.Browser, "987", "生活", OctopusTints.Routine, 190, EchoCoverGradients[1]),
+        AgentPost("seed.8", "让助手帮你读论文，10 分钟抓重点", "学术喵", "学", OctopusTints.Memory, "742", "学习", OctopusTints.Skill, 145, EchoCoverGradients[2]),
     )
 }
 
@@ -394,7 +405,7 @@ private fun topicKeyToRes(key: String): Int = when (key.trim().lowercase()) {
 private fun DiscoveryPostDto.toPost(): AgentDiscoveryPost {
     val cov = cover
         .mapNotNull { runCatching { Color(android.graphics.Color.parseColor(it.trim())) }.getOrNull() }
-        .ifEmpty { listOf(Color(0xFF667EEA), Color(0xFF764BA2)) }
+        .ifEmpty { EchoCoverGradients.last() }
     return AgentDiscoveryPost(
         id = id.ifBlank { title.hashCode().toString() },
         title = title, desc = desc, author = author,
@@ -498,12 +509,12 @@ internal object DiscoveryRepository {
             DiscoveryTopic("device", "", OctopusTints.Window),
         ),
         posts = listOf(
-            AgentDiscoveryPost("agent-travel", "旅行规划:一键搞定航班到行程", "输入目的地和预算,自动搜索景点、规划路线,并生成可分享的清单。", "旅行灵感", "旅", "3.2k", R.string.agent_topic_life, "life", "生活", OctopusTints.Routine, 168, listOf(Color(0xFFFFB199), Color(0xFFFF0844)), "18.6k", "92%", "约 4 分钟", listOf("浏览器", "定位", "截图")),
-            AgentDiscoveryPost("agent-weekly", "周报自动归档模板", "汇总聊天记录、任务清单和日程,自动写出老板点赞的周报。", "效率玩家", "效", "2.8k", R.string.agent_topic_efficiency, "efficiency", "效率", OctopusTints.Skill, 138, listOf(Color(0xFF667EEA), Color(0xFF764BA2)), "12.4k", "95%", "约 2 分钟", listOf("日历", "剪贴板", "文档")),
-            AgentDiscoveryPost("agent-phone", "旧手机变 7×24 执行器", "让备用机代收消息、截图、转发和定时任务,主力机保持安静。", "极客据点", "极", "1.7k", R.string.agent_topic_device, "device", "设备", OctopusTints.Window, 190, listOf(Color(0xFF134E5E), Color(0xFF71B280)), "8.1k", "89%", "约 6 分钟", listOf("无障碍", "通知", "后台")),
-            AgentDiscoveryPost("agent-shopping", "比价助手帮我省了 2000+", "监控历史价格、优惠券和平台活动,降价即提醒。", "省钱 Bot", "省", "4.6k", R.string.agent_topic_automation, "automation", "自动化", OctopusTints.Hot, 156, listOf(Color(0xFFFFD194), Color(0xFFD1913C)), "23.9k", "91%", "约 3 分钟", listOf("浏览器", "通知", "定时器")),
-            AgentDiscoveryPost("agent-paper", "论文阅读器:10 分钟抓重点", "读取 PDF、网页和截图,自动抽取结论与可引用的观点。", "学术助手", "学", "986", R.string.agent_topic_learning, "learning", "学习", OctopusTints.Memory, 176, listOf(Color(0xFF00C6FF), Color(0xFF0072FF)), "6.5k", "94%", "约 5 分钟", listOf("文件", "浏览器", "剪贴板")),
-            AgentDiscoveryPost("agent-voice", "语音助手:开车时替你回消息", "按下说话,自动识别收件人、调整语气并发送。", "车载达人", "车", "742", R.string.agent_topic_automation, "automation", "语音", OctopusTints.Trust, 146, listOf(Color(0xFFF2994A), Color(0xFFF2C94C)), "5.7k", "88%", "约 2 分钟", listOf("麦克风", "通知", "无障碍")),
+            AgentDiscoveryPost("agent-travel", "旅行规划:一键搞定航班到行程", "输入目的地和预算,自动搜索景点、规划路线,并生成可分享的清单。", "旅行灵感", "旅", "3.2k", R.string.agent_topic_life, "life", "生活", OctopusTints.Routine, 168, EchoCoverGradients[0], "18.6k", "92%", "约 4 分钟", listOf("浏览器", "定位", "截图")),
+            AgentDiscoveryPost("agent-weekly", "周报自动归档模板", "汇总聊天记录、任务清单和日程,自动写出老板点赞的周报。", "效率玩家", "效", "2.8k", R.string.agent_topic_efficiency, "efficiency", "效率", OctopusTints.Skill, 138, EchoCoverGradients[1], "12.4k", "95%", "约 2 分钟", listOf("日历", "剪贴板", "文档")),
+            AgentDiscoveryPost("agent-phone", "旧手机变 7×24 执行器", "让备用机代收消息、截图、转发和定时任务,主力机保持安静。", "极客据点", "极", "1.7k", R.string.agent_topic_device, "device", "设备", OctopusTints.Window, 190, EchoCoverGradients[2], "8.1k", "89%", "约 6 分钟", listOf("无障碍", "通知", "后台")),
+            AgentDiscoveryPost("agent-shopping", "比价助手帮我省了 2000+", "监控历史价格、优惠券和平台活动,降价即提醒。", "省钱 Bot", "省", "4.6k", R.string.agent_topic_automation, "automation", "自动化", OctopusTints.Hot, 156, EchoCoverGradients[3], "23.9k", "91%", "约 3 分钟", listOf("浏览器", "通知", "定时器")),
+            AgentDiscoveryPost("agent-paper", "论文阅读器:10 分钟抓重点", "读取 PDF、网页和截图,自动抽取结论与可引用的观点。", "学术助手", "学", "986", R.string.agent_topic_learning, "learning", "学习", OctopusTints.Memory, 176, EchoCoverGradients[0], "6.5k", "94%", "约 5 分钟", listOf("文件", "浏览器", "剪贴板")),
+            AgentDiscoveryPost("agent-voice", "语音助手:开车时替你回消息", "按下说话,自动识别收件人、调整语气并发送。", "车载达人", "车", "742", R.string.agent_topic_automation, "automation", "语音", OctopusTints.Trust, 146, EchoCoverGradients[1], "5.7k", "88%", "约 2 分钟", listOf("麦克风", "通知", "无障碍")),
         ),
     )
 }

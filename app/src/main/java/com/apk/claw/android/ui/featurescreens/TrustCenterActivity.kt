@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -197,7 +196,7 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                     Switch(
                         checked = lanOn,
                         onCheckedChange = { lanOn = it; KVUtils.setLanControlEnabled(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FSuccess, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FSuccess, checkedThumbColor = FOnPrimary),
                     )
                 }
             }
@@ -234,7 +233,7 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                     Switch(
                         checked = !advOn,
                         onCheckedChange = { if (it) { PermissionModeManager.switchMode(PermissionMode.APPROVAL, "user_switch_trustcenter"); advOn = false } },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FSuccess, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FSuccess, checkedThumbColor = FOnPrimary),
                     )
                 }
             }
@@ -255,7 +254,7 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                     Switch(
                         checked = advOn,
                         onCheckedChange = { if (it) { PermissionModeManager.switchMode(PermissionMode.FULL_POWER, "user_switch_trustcenter"); advOn = true } },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FWarning, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FWarning, checkedThumbColor = FOnPrimary),
                     )
                 }
             }
@@ -299,7 +298,7 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                             // 高影响开关:写审计,留可追溯痕迹(与 ChannelAclActivity 一致)。
                             ToolAuditLog.recordSecuritySetting("允许远程来源执行高危工具", it)
                         },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FWarning, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FWarning, checkedThumbColor = FOnPrimary),
                     )
                 }
             }
@@ -330,7 +329,7 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                                 ProactiveRuleEngine.setGloballyEnabled(false); smsOtpOn = false
                             }
                         },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FPrimary, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FPrimary, checkedThumbColor = FOnPrimary),
                     )
                 }
             }

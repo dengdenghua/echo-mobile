@@ -1,6 +1,5 @@
 package com.apk.claw.android.ui.settings
 
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.InputType
@@ -9,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -53,7 +54,7 @@ class RuntimeConfigActivity : BaseActivity() {
     private fun buildLayout() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(0xFFF5F5F5.toInt())
+            setBackgroundColor(c(R.color.colorBgPrimary))
         }
 
         // Toolbar
@@ -80,7 +81,9 @@ class RuntimeConfigActivity : BaseActivity() {
             hint = "ws://192.168.1.10:8765"
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
             setSingleLine()
-            setBackgroundColor(Color.WHITE)
+            setTextColor(c(R.color.colorTextPrimary))
+            setHintTextColor(c(R.color.colorTextSecondary))
+            setBackgroundColor(c(R.color.colorContainerBrighten))
             setPadding(dp(16), dp(12), dp(16), dp(12))
         }
         content.addView(etRuntimeUrl, makeFieldParams())
@@ -91,7 +94,9 @@ class RuntimeConfigActivity : BaseActivity() {
             hint = getString(R.string.runtime_config_auth_hint)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             setSingleLine()
-            setBackgroundColor(Color.WHITE)
+            setTextColor(c(R.color.colorTextPrimary))
+            setHintTextColor(c(R.color.colorTextSecondary))
+            setBackgroundColor(c(R.color.colorContainerBrighten))
             setPadding(dp(16), dp(12), dp(16), dp(12))
         }
         content.addView(etAuthToken, makeFieldParams())
@@ -100,7 +105,7 @@ class RuntimeConfigActivity : BaseActivity() {
         content.addView(makeLabel(getString(R.string.runtime_config_launch_mode_label)))
         rgBrainMode = RadioGroup(this).apply {
             orientation = RadioGroup.VERTICAL
-            setBackgroundColor(Color.WHITE)
+            setBackgroundColor(c(R.color.colorContainerBrighten))
             setPadding(dp(16), dp(8), dp(16), dp(8))
         }
         rbLocal = RadioButton(this).apply { text = getString(R.string.runtime_config_mode_local_only) }
@@ -109,6 +114,7 @@ class RuntimeConfigActivity : BaseActivity() {
         rbLocal.id = View.generateViewId()
         rbRemote.id = View.generateViewId()
         rbDual.id = View.generateViewId()
+        listOf(rbLocal, rbRemote, rbDual).forEach { it.setTextColor(c(R.color.colorTextPrimary)) }
         rgBrainMode.addView(rbLocal)
         rgBrainMode.addView(rbRemote)
         rgBrainMode.addView(rbDual)
@@ -117,7 +123,8 @@ class RuntimeConfigActivity : BaseActivity() {
         // ── Auto Connect ──
         cbAutoConnect = CheckBox(this).apply {
             text = getString(R.string.runtime_config_auto_connect)
-            setBackgroundColor(Color.WHITE)
+            setTextColor(c(R.color.colorTextPrimary))
+            setBackgroundColor(c(R.color.colorContainerBrighten))
             setPadding(dp(16), dp(8), dp(16), dp(8))
         }
         content.addView(cbAutoConnect, makeFieldParams())
@@ -128,8 +135,8 @@ class RuntimeConfigActivity : BaseActivity() {
             text = "DISCONNECTED"
             textSize = 16f
             typeface = Typeface.MONOSPACE
-            setTextColor(0xFF888888.toInt())
-            setBackgroundColor(Color.WHITE)
+            setTextColor(c(R.color.colorTextSecondary))
+            setBackgroundColor(c(R.color.colorContainerBrighten))
             setPadding(dp(16), dp(16), dp(16), dp(16))
             gravity = Gravity.CENTER
         }
@@ -143,13 +150,13 @@ class RuntimeConfigActivity : BaseActivity() {
         }
         btnConnect = KButton(this).apply {
             text = getString(R.string.runtime_config_connect_button)
-            setBackgroundColor(0xFF1F6FEB.toInt())
-            setTextColor(Color.WHITE)
+            setBackgroundColor(c(R.color.colorBrandLowButtonBg))
+            setTextColor(c(R.color.colorTextPrimary))
         }
         btnDisconnect = KButton(this).apply {
             text = getString(R.string.runtime_config_disconnect_button)
-            setBackgroundColor(0xFFDA3633.toInt())
-            setTextColor(Color.WHITE)
+            setBackgroundColor(c(R.color.colorBrandLowButtonBg))
+            setTextColor(c(R.color.colorTextPrimary))
         }
         val halfParams = LinearLayout.LayoutParams(0, dp(44), 1f).apply {
             setMargins(dp(8), dp(4), dp(8), dp(4))
@@ -161,8 +168,8 @@ class RuntimeConfigActivity : BaseActivity() {
         // ── Save ──
         btnSave = KButton(this).apply {
             text = getString(R.string.runtime_config_save_button)
-            setBackgroundColor(0xFF238636.toInt())
-            setTextColor(Color.WHITE)
+            setBackgroundColor(c(R.color.colorBrandPrimary))
+            setTextColor(c(R.color.colorBrandOnPrimary))
         }
         content.addView(btnSave, LinearLayout.LayoutParams(MATCH_PARENT, dp(44)).apply {
             setMargins(0, dp(16), 0, dp(16))
@@ -180,11 +187,14 @@ class RuntimeConfigActivity : BaseActivity() {
         return TextView(this).apply {
             this.text = text
             textSize = 13f
-            setTextColor(0xFF666666.toInt())
+            setTextColor(c(R.color.colorTextSecondary))
             setPadding(0, (24 * resources.displayMetrics.density).toInt(), 0,
                 (8 * resources.displayMetrics.density).toInt())
         }
     }
+
+    /** Theme colour (Snow / Graphite follow the system night mode via values-night). */
+    private fun c(@ColorRes id: Int): Int = ContextCompat.getColor(this, id)
 
     private fun makeFieldParams(): LinearLayout.LayoutParams {
         return LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
@@ -216,13 +226,13 @@ class RuntimeConfigActivity : BaseActivity() {
 
     private fun updateStatusUI(state: ConnectionState) {
         val (text, color) = when (state) {
-            ConnectionState.DISCONNECTED -> "DISCONNECTED" to 0xFF888888.toInt()
-            ConnectionState.CONNECTING -> "CONNECTING..." to 0xFFFFA000.toInt()
-            ConnectionState.CONNECTED -> "CONNECTED (waiting hello ack)" to 0xFFFFA000.toInt()
-            ConnectionState.HELLO_SENT -> "HELLO_SENT (handshaking)" to 0xFFFFA000.toInt()
-            ConnectionState.ONLINE -> "ONLINE ✓" to 0xFF2EA043.toInt()
-            ConnectionState.RECONNECTING -> "RECONNECTING..." to 0xFFFFA000.toInt()
-            ConnectionState.OFFLINE -> "OFFLINE" to 0xFFDA3633.toInt()
+            ConnectionState.DISCONNECTED -> "DISCONNECTED" to c(R.color.colorTextSecondary)
+            ConnectionState.CONNECTING -> "CONNECTING..." to c(R.color.colorWarningPrimary)
+            ConnectionState.CONNECTED -> "CONNECTED (waiting hello ack)" to c(R.color.colorWarningPrimary)
+            ConnectionState.HELLO_SENT -> "HELLO_SENT (handshaking)" to c(R.color.colorWarningPrimary)
+            ConnectionState.ONLINE -> "ONLINE ✓" to c(R.color.colorSuccessPrimary)
+            ConnectionState.RECONNECTING -> "RECONNECTING..." to c(R.color.colorWarningPrimary)
+            ConnectionState.OFFLINE -> "OFFLINE" to c(R.color.colorErrorPrimary)
         }
         tvStatus.text = text
         tvStatus.setTextColor(color)

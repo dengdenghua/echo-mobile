@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,7 +76,7 @@ fun ChannelAclScreen(onBack: () -> Unit) {
                     Switch(
                         checked = aclOn,
                         onCheckedChange = { aclOn = it; KVUtils.setChannelAclEnabled(it) },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FSuccess, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FSuccess, checkedThumbColor = FOnPrimary),
                     )
                 }
             }
@@ -100,7 +99,7 @@ fun ChannelAclScreen(onBack: () -> Unit) {
                             // 高影响开关:写入审计日志,留可追溯、防篡改的开/关痕迹。
                             ToolAuditLog.recordSecuritySetting("允许远程来源执行高危工具", it)
                         },
-                        colors = SwitchDefaults.colors(checkedTrackColor = FWarning, checkedThumbColor = Color.White),
+                        colors = SwitchDefaults.colors(checkedTrackColor = FWarning, checkedThumbColor = FOnPrimary),
                     )
                 }
             }

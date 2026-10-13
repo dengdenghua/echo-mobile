@@ -417,8 +417,6 @@
     <ID>MagicNumber:BrowserScreen.kt$0xFF6236FF</ID>
     <ID>MagicNumber:BrowserScreen.kt$0xFF7B61FF</ID>
     <ID>MagicNumber:BrowserScreen.kt$0xFFDE5833</ID>
-    <ID>MagicNumber:BrowserScreen.kt$0xFFEAF2FF</ID>
-    <ID>MagicNumber:BrowserScreen.kt$0xFFFDECE0</ID>
     <ID>MagicNumber:BrowserScreen.kt$10</ID>
     <ID>MagicNumber:BrowserScreen.kt$100</ID>
     <ID>MagicNumber:BrowserScreen.kt$3</ID>
@@ -1069,14 +1067,8 @@
     <ID>MagicNumber:SkillExporter.kt$SkillExporter$200</ID>
     <ID>MagicNumber:SkillManifest.kt$SkillManifest$200</ID>
     <ID>MagicNumber:SkillManifest.kt$SkillManifest$3</ID>
-    <ID>MagicNumber:SquareCatalog.kt$0xFF667EEA</ID>
-    <ID>MagicNumber:SquareCatalog.kt$0xFF764BA2</ID>
     <ID>MagicNumber:SquareCatalog.kt$120</ID>
     <ID>MagicNumber:SquareCatalog.kt$240</ID>
-    <ID>MagicNumber:SquareCatalog.kt$LocalSkillRegistry$0xFF11998E</ID>
-    <ID>MagicNumber:SquareCatalog.kt$LocalSkillRegistry$0xFF38EF7D</ID>
-    <ID>MagicNumber:SquareCatalog.kt$LocalSkillRegistry$0xFF667EEA</ID>
-    <ID>MagicNumber:SquareCatalog.kt$LocalSkillRegistry$0xFF764BA2</ID>
     <ID>MagicNumber:SshClient.kt$SshClient$50</ID>
     <ID>MagicNumber:SshClient.kt$SshClient.ExecResult$2000</ID>
     <ID>MagicNumber:SshClient.kt$SshClient.ExecResult$4000</ID>
@@ -1675,7 +1667,6 @@
     <ID>MaxLineLength:SettingsScreen.kt$ClickableSettingsRow</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = TextMuted, modifier = Modifier.size(OctopusIconSize.small))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Icon(Icons.Filled.ExpandMore, contentDescription = null, tint = TextMuted, modifier = Modifier.size(OctopusIconSize.small))</ID>
-    <ID>MaxLineLength:SettingsScreen.kt$Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.padding(6.dp).size(OctopusIconSize.small))</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Row</ID>
     <ID>MaxLineLength:SettingsScreen.kt$SettingsCard</ID>
     <ID>MaxLineLength:SettingsScreen.kt$Text(if (pairBusy) stringResource(R.string.status_loading) else stringResource(R.string.remote_console_pair_confirm))</ID>
@@ -1721,20 +1712,20 @@
     <ID>MaxLineLength:SkillMarketplaceScreen.kt$Text(stringResource(R.string.skill_search_hint), color = OctopusColors.TextMuted, fontSize = OctopusType.body)</ID>
     <ID>MaxLineLength:SkillMarketplaceScreen.kt$Toast.makeText(ctx, ctx.getString(R.string.skill_uninstalled_toast, asset.name), Toast.LENGTH_SHORT).show()</ID>
     <ID>MaxLineLength:SkillMarketplaceScreen.kt$textStyle = androidx.compose.ui.text.TextStyle(color = OctopusColors.TextPrimary, fontSize = OctopusType.body)</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-paper", "论文阅读器:10 分钟抓重点", "读取 PDF、网页和截图,自动抽取结论与可引用的观点。", "学术助手", "学", "986", R.string.agent_topic_learning, "learning", "学习", OctopusTints.Memory, 176, listOf(Color(0xFF00C6FF), Color(0xFF0072FF)), "6.5k", "94%", "约 5 分钟", listOf("文件", "浏览器", "剪贴板"))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-phone", "旧手机变 7×24 执行器", "让备用机代收消息、截图、转发和定时任务,主力机保持安静。", "极客据点", "极", "1.7k", R.string.agent_topic_device, "device", "设备", OctopusTints.Window, 190, listOf(Color(0xFF134E5E), Color(0xFF71B280)), "8.1k", "89%", "约 6 分钟", listOf("无障碍", "通知", "后台"))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-shopping", "比价助手帮我省了 2000+", "监控历史价格、优惠券和平台活动,降价即提醒。", "省钱 Bot", "省", "4.6k", R.string.agent_topic_automation, "automation", "自动化", OctopusTints.Hot, 156, listOf(Color(0xFFFFD194), Color(0xFFD1913C)), "23.9k", "91%", "约 3 分钟", listOf("浏览器", "通知", "定时器"))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-travel", "旅行规划:一键搞定航班到行程", "输入目的地和预算,自动搜索景点、规划路线,并生成可分享的清单。", "旅行灵感", "旅", "3.2k", R.string.agent_topic_life, "life", "生活", OctopusTints.Routine, 168, listOf(Color(0xFFFFB199), Color(0xFFFF0844)), "18.6k", "92%", "约 4 分钟", listOf("浏览器", "定位", "截图"))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-voice", "语音助手:开车时替你回消息", "按下说话,自动识别收件人、调整语气并发送。", "车载达人", "车", "742", R.string.agent_topic_automation, "automation", "语音", OctopusTints.Trust, 146, listOf(Color(0xFFF2994A), Color(0xFFF2C94C)), "5.7k", "88%", "约 2 分钟", listOf("麦克风", "通知", "无障碍"))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-weekly", "周报自动归档模板", "汇总聊天记录、任务清单和日程,自动写出老板点赞的周报。", "效率玩家", "效", "2.8k", R.string.agent_topic_efficiency, "efficiency", "效率", OctopusTints.Skill, 138, listOf(Color(0xFF667EEA), Color(0xFF764BA2)), "12.4k", "95%", "约 2 分钟", listOf("日历", "剪贴板", "文档"))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.1", "让 AI 每天自动整理手机相册，生成回忆视频", "影像助手", "影", OctopusTints.Video, "1.2k", "自动化", OctopusTints.Routine, 180, listOf(Color(0xFF667EEA), Color(0xFF764BA2)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.2", "3 步搭一个会订外卖的助手", "效率玩家", "效", OctopusTints.Skill, "856", "教程", OctopusTints.Browser, 140, listOf(Color(0xFF11998E), Color(0xFF38EF7D)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.3", "自动写一周周报，老板直呼专业", "打工侠", "打", OctopusTints.Window, "2.3k", "职场", OctopusTints.Memory, 200, listOf(Color(0xFFFC466B), Color(0xFF3F5EFB)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.4", "用语音唤醒助手，开车时也能回消息", "车载达人", "车", OctopusTints.Plugin, "634", "语音", OctopusTints.Trust, 160, listOf(Color(0xFFF2994A), Color(0xFFF2C94C)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.5", "自动比价，618 我省了 2000+", "省钱 Bot", "省", OctopusTints.Cloud, "3.1k", "购物", OctopusTints.Hot, 170, listOf(Color(0xFF00C6FF), Color(0xFF0072FF)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.6", "接入智能家居，一句话控制全屋", "极客居", "极", OctopusTints.Evolve, "1.5k", "IoT", OctopusTints.Plugin, 150, listOf(Color(0xFF8E2DE2), Color(0xFF4A00E0)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.7", "生成旅行攻略，细到每天照着走", "旅行灵感", "旅", OctopusTints.Browser, "987", "生活", OctopusTints.Routine, 190, listOf(Color(0xFFEE9CA7), Color(0xFFFFDDE1)))</ID>
-    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.8", "让助手帮你读论文，10 分钟抓重点", "学术喵", "学", OctopusTints.Memory, "742", "学习", OctopusTints.Skill, 145, listOf(Color(0xFF134E5E), Color(0xFF71B280)))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-paper", "论文阅读器:10 分钟抓重点", "读取 PDF、网页和截图,自动抽取结论与可引用的观点。", "学术助手", "学", "986", R.string.agent_topic_learning, "learning", "学习", OctopusTints.Memory, 176, EchoCoverGradients[0], "6.5k", "94%", "约 5 分钟", listOf("文件", "浏览器", "剪贴板"))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-phone", "旧手机变 7×24 执行器", "让备用机代收消息、截图、转发和定时任务,主力机保持安静。", "极客据点", "极", "1.7k", R.string.agent_topic_device, "device", "设备", OctopusTints.Window, 190, EchoCoverGradients[2], "8.1k", "89%", "约 6 分钟", listOf("无障碍", "通知", "后台"))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-shopping", "比价助手帮我省了 2000+", "监控历史价格、优惠券和平台活动,降价即提醒。", "省钱 Bot", "省", "4.6k", R.string.agent_topic_automation, "automation", "自动化", OctopusTints.Hot, 156, EchoCoverGradients[3], "23.9k", "91%", "约 3 分钟", listOf("浏览器", "通知", "定时器"))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-travel", "旅行规划:一键搞定航班到行程", "输入目的地和预算,自动搜索景点、规划路线,并生成可分享的清单。", "旅行灵感", "旅", "3.2k", R.string.agent_topic_life, "life", "生活", OctopusTints.Routine, 168, EchoCoverGradients[0], "18.6k", "92%", "约 4 分钟", listOf("浏览器", "定位", "截图"))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-voice", "语音助手:开车时替你回消息", "按下说话,自动识别收件人、调整语气并发送。", "车载达人", "车", "742", R.string.agent_topic_automation, "automation", "语音", OctopusTints.Trust, 146, EchoCoverGradients[1], "5.7k", "88%", "约 2 分钟", listOf("麦克风", "通知", "无障碍"))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$DiscoveryRepository$AgentDiscoveryPost("agent-weekly", "周报自动归档模板", "汇总聊天记录、任务清单和日程,自动写出老板点赞的周报。", "效率玩家", "效", "2.8k", R.string.agent_topic_efficiency, "efficiency", "效率", OctopusTints.Skill, 138, EchoCoverGradients[1], "12.4k", "95%", "约 2 分钟", listOf("日历", "剪贴板", "文档"))</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.1", "让 AI 每天自动整理手机相册，生成回忆视频", "影像助手", "影", OctopusTints.Video, "1.2k", "自动化", OctopusTints.Routine, 180, EchoCoverGradients[3])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.2", "3 步搭一个会订外卖的助手", "效率玩家", "效", OctopusTints.Skill, "856", "教程", OctopusTints.Browser, 140, EchoCoverGradients[0])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.3", "自动写一周周报，老板直呼专业", "打工侠", "打", OctopusTints.Window, "2.3k", "职场", OctopusTints.Memory, 200, EchoCoverGradients[1])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.4", "用语音唤醒助手，开车时也能回消息", "车载达人", "车", OctopusTints.Plugin, "634", "语音", OctopusTints.Trust, 160, EchoCoverGradients[2])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.5", "自动比价，618 我省了 2000+", "省钱 Bot", "省", OctopusTints.Cloud, "3.1k", "购物", OctopusTints.Hot, 170, EchoCoverGradients[3])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.6", "接入智能家居，一句话控制全屋", "极客居", "极", OctopusTints.Evolve, "1.5k", "IoT", OctopusTints.Plugin, 150, EchoCoverGradients[0])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.7", "生成旅行攻略，细到每天照着走", "旅行灵感", "旅", OctopusTints.Browser, "987", "生活", OctopusTints.Routine, 190, EchoCoverGradients[1])</ID>
+    <ID>MaxLineLength:SquareCatalog.kt$SquareRepository$AgentPost("seed.8", "让助手帮你读论文，10 分钟抓重点", "学术喵", "学", OctopusTints.Memory, "742", "学习", OctopusTints.Skill, 145, EchoCoverGradients[2])</ID>
     <ID>MaxLineLength:SquarePostApi.kt$SquarePostApi$ForkResult(ok = root.optBoolean("ok"), postId = root.optString("postId"), message = root.optString("message", ""))</ID>
     <ID>MaxLineLength:SshConnectionTools.kt$SshConnectTool$"Returns a conn_id to reference in subsequent ssh_exec / sftp_* calls. Connection is reused until ssh_disconnect."</ID>
     <ID>MaxLineLength:TaskCheckpoint.kt$TaskCheckpoint$XLog.i(TAG, "Checkpoint saved: goal='${goal.take(40)}...', iterations=$iterations, messages=${messages.size}")</ID>

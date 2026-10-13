@@ -337,16 +337,7 @@ private fun SiteLogo(host: String, title: String, key: String) {
 }
 
 /** 小程序图标配色:每个按 name+id 哈希取一组渐变 + 首字母,像真·App 图标一样彩色可区分。 */
-private val MINI_APP_GRADS = listOf(
-    listOf(Color(0xFF667EEA), Color(0xFF764BA2)),
-    listOf(Color(0xFFFF9A9E), Color(0xFFFF6A88)),
-    listOf(Color(0xFF43E97B), Color(0xFF38F9D7)),
-    listOf(Color(0xFFFFB199), Color(0xFFFF6A5B)),
-    listOf(Color(0xFF4FACFE), Color(0xFF00F2FE)),
-    listOf(Color(0xFFA18CD1), Color(0xFFFBC2EB)),
-    listOf(Color(0xFFF6D365), Color(0xFFFDA085)),
-    listOf(Color(0xFF30CFD0), Color(0xFF330867)),
-)
+private val MINI_APP_GRADS = EchoCoverGradients
 
 /** 彩色小程序图标:渐变底 + 白色首字母,填满 [HomeTile] 的 32dp 图标位。 */
 @Composable

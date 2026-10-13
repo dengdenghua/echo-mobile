@@ -735,12 +735,12 @@ private fun BrowserHomeOverlay(
             ) {
                 Canvas(modifier = Modifier.size(180.dp)) {
                     drawCircle(
-                        color = Color(0xFFEAF2FF),
+                        color = OctopusColors.ContainerBase,
                         radius = 78.dp.toPx(),
                         center = center,
                     )
                     drawArc(
-                        color = Color(0xFFFDECE0),
+                        color = OctopusColors.BorderHigh,
                         startAngle = -30f,
                         sweepAngle = 120f,
                         useCenter = false,
@@ -981,7 +981,7 @@ private fun BrowserSearchOverlay(
             Text(
                 text = "搜索",
                 fontSize = 16.sp,
-                color = Color(0xFF3B82F6),
+                color = OctopusColors.Accent,
                 modifier = Modifier
                     .clickable(enabled = text.trim().isNotEmpty()) { onSubmit(text.trim()) }
                     .padding(horizontal = 6.dp, vertical = 10.dp),
@@ -1109,7 +1109,7 @@ private fun SearchEngineSheet(
                         Icon(
                             Icons.Default.Check,
                             contentDescription = null,
-                            tint = Color(0xFF3B82F6),
+                            tint = OctopusColors.Accent,
                             modifier = Modifier.size(20.dp),
                         )
                     }

@@ -1027,7 +1027,14 @@ private fun ClickableSettingsRow(icon: ImageVector, title: String, subtitle: Str
 @Composable
 private fun IconBubble(icon: ImageVector, tint: Color) {
     Surface(shape = OctopusShape.small, color = tint) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.padding(6.dp).size(OctopusIconSize.small))
+        // OnPrimary (white in Snow, graphite in Graphite) keeps the glyph legible on the
+        // Primary / Success / Warning bubble in both themes; plain white vanished on Graphite.
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = OctopusColors.OnPrimary,
+            modifier = Modifier.padding(6.dp).size(OctopusIconSize.small),
+        )
     }
 }
 

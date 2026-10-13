@@ -7,6 +7,15 @@
         <item name="colorPrimaryContainer">@color/colorBrandContainer</item>
         <item name="colorOnPrimaryContainer">@color/colorBrandOnContainer</item>
 
+        <!-- Secondary = Echo Core (selection, checked controls), tertiary = warning. Unset, framework
+             CheckBox / RadioButton / Switch fall back to the Material baseline purple (#625B71). -->
+        <item name="colorSecondary">@color/colorSuccessPrimary</item>
+        <item name="colorOnSecondary">@color/colorSuccessOnPrimary</item>
+        <item name="colorSecondaryContainer">@color/colorSuccessContainer</item>
+        <item name="colorOnSecondaryContainer">@color/colorSuccessOnContainer</item>
+        <item name="colorTertiary">@color/colorWarningPrimary</item>
+        <item name="colorOnTertiary">@color/colorWarningOnPrimary</item>
+
         <!-- Background colors -->
         <item name="android:colorBackground">@color/colorBgPrimary</item>
         <item name="colorOnBackground">@color/colorTextPrimary</item>

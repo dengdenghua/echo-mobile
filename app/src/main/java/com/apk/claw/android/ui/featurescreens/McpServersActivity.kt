@@ -176,7 +176,7 @@ private fun McpServerCard(
                 checked = connected,
                 onCheckedChange = { onToggleConnect() },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
+                    checkedThumbColor = FOnPrimary,
                     checkedTrackColor = FPrimary,
                     uncheckedThumbColor = Color.White,
                     uncheckedTrackColor = FMuted.copy(alpha = 0.35f),

@@ -111,7 +111,7 @@ private fun SkillSwitch(checked: Boolean, onToggle: (Boolean) -> Unit) {
         checked = checked,
         onCheckedChange = onToggle,
         colors = SwitchDefaults.colors(
-            checkedThumbColor = Color.White,
+            checkedThumbColor = FOnPrimary,
             checkedTrackColor = FPrimary,
             uncheckedThumbColor = Color.White,
             uncheckedTrackColor = FMuted.copy(alpha = 0.35f),
