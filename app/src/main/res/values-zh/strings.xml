@@ -1649,4 +1649,6 @@
     <string name="settings_update_checking">检查更新中…</string>
     <string name="settings_update_tap">%1$s · 点此检查更新</string>
     <string name="settings_update_latest">已是最新版本</string>
+    <string name="dot_env_not_connected">未连接 · 选择后去连接</string>
+    <string name="dot_host_update_required">这台设备上的 Echo 还不支持手机配对，请更新后再试。</string>
 </resources>

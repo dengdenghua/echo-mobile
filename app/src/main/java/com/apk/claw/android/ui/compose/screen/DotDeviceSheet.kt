@@ -27,6 +27,14 @@ import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 
+/** Issues that need the connection dialog: pairing gone, auth missing, or a host too old to pair. */
+private val ReconnectIssues = setOf(
+    R.string.dot_pair_revoked,
+    R.string.dot_auth_needed,
+    R.string.dot_host_update_required,
+)
+private val ConfigureIssues = setOf(R.string.dot_auth_needed, R.string.dot_host_update_required)
+
 /** Viewing a device never changes the conversation's execution environment. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +88,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
                             health = null
                             issue = when ((error as? DotRepository.TaskHttpException)?.code) {
                                 401, 403 -> if (DotPairingRepository.paired(environment)) R.string.dot_pair_revoked else R.string.dot_auth_needed
-                                404 -> R.string.dot_screen_update_required
+                                404 -> R.string.dot_host_update_required
                                 else -> R.string.dot_device_offline
                             }
                         } finally { checking = false }
@@ -116,7 +124,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = {
                                 when {
-                                    !configured || issue in listOf(R.string.dot_pair_revoked, R.string.dot_auth_needed, R.string.dot_screen_update_required) -> configure = environment
+                                    !configured || issue in ReconnectIssues -> configure = environment
                                     health?.desktop == true -> screen = environment
                                     health != null -> configure = environment
                                     else -> refresh++
@@ -126,7 +134,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
                                 Text(stringResource(when {
                                     !configured -> R.string.dot_pair_bind
                                     issue == R.string.dot_pair_revoked -> R.string.dot_pair_bind
-                                    issue in listOf(R.string.dot_auth_needed, R.string.dot_screen_update_required) -> R.string.dot_env_configure
+                                    issue in ConfigureIssues -> R.string.dot_env_configure
                                     checking -> R.string.dot_device_checking
                                     health?.desktop == true -> R.string.dot_screen_open
                                     health != null -> R.string.dot_env_configure

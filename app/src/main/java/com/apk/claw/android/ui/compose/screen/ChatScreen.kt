@@ -466,6 +466,10 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
         DotEnvironmentStore.select(environment)
         if (environment == DotEnvironment.PHONE) {
             ControlTarget.setLocal(); previewDevice = null
+        } else if (!DotEnvironmentStore.configured(environment)) {
+            // 没连过的电脑/NAS:选中就去连接,不要等到发出任务才发现连不上
+            connectionEnvironment = environment
+            showEnvironmentConnection = true
         }
     }
     LaunchedEffect(dotEnvironment) {

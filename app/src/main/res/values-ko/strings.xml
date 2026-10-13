@@ -1651,4 +1651,6 @@
     <string name="settings_update_checking">업데이트 확인 중…</string>
     <string name="settings_update_tap">%1$s · 눌러서 업데이트 확인</string>
     <string name="settings_update_latest">최신 버전입니다</string>
+    <string name="dot_env_not_connected">연결 안 됨 · 선택하면 연결</string>
+    <string name="dot_host_update_required">이 기기의 Echo는 아직 휴대폰 페어링을 지원하지 않습니다. 업데이트한 후 다시 시도하세요.</string>
 </resources>

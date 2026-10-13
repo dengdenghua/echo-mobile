@@ -1652,4 +1652,6 @@
     <string name="settings_update_checking">Procurando atualizações…</string>
     <string name="settings_update_tap">%1$s · Toque para procurar atualizações</string>
     <string name="settings_update_latest">Você já tem a versão mais recente</string>
+    <string name="dot_env_not_connected">Não conectado · Escolha para conectar</string>
+    <string name="dot_host_update_required">O Echo deste dispositivo ainda não aceita pareamento com o celular. Atualize-o e tente novamente.</string>
 </resources>

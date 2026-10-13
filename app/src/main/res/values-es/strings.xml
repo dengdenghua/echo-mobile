@@ -1652,4 +1652,6 @@
     <string name="settings_update_checking">Buscando actualizaciones…</string>
     <string name="settings_update_tap">%1$s · Toca para buscar actualizaciones</string>
     <string name="settings_update_latest">Ya tienes la última versión</string>
+    <string name="dot_env_not_connected">Sin conectar · Elígelo para conectar</string>
+    <string name="dot_host_update_required">El Echo de este dispositivo aún no admite emparejar el teléfono. Actualízalo y vuelve a intentarlo.</string>
 </resources>

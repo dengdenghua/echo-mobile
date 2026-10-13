@@ -1657,4 +1657,6 @@
     <string name="settings_update_checking">アップデートを確認中…</string>
     <string name="settings_update_tap">%1$s · タップしてアップデートを確認</string>
     <string name="settings_update_latest">最新バージョンです</string>
+    <string name="dot_env_not_connected">未接続 · 選ぶと接続へ</string>
+    <string name="dot_host_update_required">このデバイスの Echo はまだスマホとのペアリングに対応していません。更新してからもう一度お試しください。</string>
 </resources>

@@ -157,8 +157,9 @@ internal fun DotEnvironmentSelector(
                     text = {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(stringResource(environment.title))
-                            Text(stringResource(environment.description),
-                                style = MaterialTheme.typography.bodySmall, color = Style.muted)
+                            val hint = if (DotEnvironmentStore.configured(environment)) environment.description
+                                else R.string.dot_env_not_connected
+                            Text(stringResource(hint), style = MaterialTheme.typography.bodySmall, color = Style.muted)
                         }
                     },
                     leadingIcon = { Icon(environment.icon, null, tint = Style.muted) },

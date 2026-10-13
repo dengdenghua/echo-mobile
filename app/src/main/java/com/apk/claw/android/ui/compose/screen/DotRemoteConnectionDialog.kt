@@ -29,7 +29,11 @@ import kotlinx.coroutines.withContext
 internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: () -> Unit, onSaved: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var address by remember(environment) { mutableStateOf(DotEnvironmentStore.address(environment)) }
+    // 没连过的环境不预填:NAS 的内置默认地址只通向模拟器的宿主机,对用户没有意义
+    var address by remember(environment) {
+        val known = DotEnvironmentStore.configured(environment)
+        mutableStateOf(if (known) DotEnvironmentStore.address(environment) else "")
+    }
     var token by remember(environment) { mutableStateOf(DotEnvironmentStore.token(environment)) }
     var invitation by remember { mutableStateOf("") }
     var showInvitation by remember { mutableStateOf(false) }
@@ -44,7 +48,7 @@ internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: (
     fun bindingError(error: Exception): Int = when ((error as? DotRepository.TaskHttpException)?.code) {
         400 -> R.string.dot_pair_code_invalid
         401, 403 -> R.string.dot_pair_revoked
-        404 -> R.string.dot_screen_update_required
+        404 -> R.string.dot_host_update_required
         429 -> R.string.dot_pair_rate_limited
         else -> R.string.dot_screen_offline
     }
@@ -116,6 +120,7 @@ internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: (
     }
     DisposableEffect(Unit) { onDispose { cameraFile?.delete() } }
     AlertDialog(onDismissRequest = { if (!binding) onDismiss() },
+        properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = false),
         title = { Text(stringResource(R.string.dot_pair_title, stringResource(environment.tabLabel))) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
