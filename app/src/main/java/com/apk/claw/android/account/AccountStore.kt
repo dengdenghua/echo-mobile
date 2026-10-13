@@ -19,6 +19,7 @@ object AccountStore {
     private const val K_PAID_CREDITS = "ACCOUNT_PAID_CREDITS"
     private const val K_GIFT_CREDITS = "ACCOUNT_GIFT_CREDITS"
     private const val K_MEMBER_EXPIRE = "ACCOUNT_MEMBER_EXPIRE_AT"
+    private const val K_LOCAL_MODE = "ACCOUNT_LOCAL_MODE"
 
     var token: String
         get() = KVUtils.getString(K_TOKEN, "")
@@ -64,10 +65,20 @@ object AccountStore {
 
     val isLoggedIn: Boolean get() = token.isNotEmpty()
 
+    /**
+     * The user chose 「不登录使用」 at the sign-in gate, so the app opens in local mode on every
+     * start until they sign in. Signing in clears it; signing out does not set it again (the
+     * sign-in gate offers the choice once more).
+     */
+    var localMode: Boolean
+        get() = KVUtils.getBoolean(K_LOCAL_MODE, false)
+        set(v) = run { KVUtils.putBoolean(K_LOCAL_MODE, v) }
+
     /** Whether the user may use a BYO own-model (active monthly membership). */
     val byoUnlocked: Boolean get() = memberExpireAt > System.currentTimeMillis()
 
     fun saveLogin(r: LoginResult) {
+        localMode = false
         token = r.token
         userId = r.userId
         mobile = r.mobile

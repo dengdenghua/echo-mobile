@@ -68,7 +68,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
-import com.apk.claw.android.account.AccountStore
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.plugin.SubscriptionGate
 import com.apk.claw.android.registry.CommunityMiniAppInstaller
 import com.apk.claw.android.registry.CommunitySquareApi
@@ -261,8 +262,7 @@ fun PostDetailScreen(
                                     post = p,
                                     subscribing = subscribing,
                                     onSubscribe = {
-                                        if (!AccountStore.isLoggedIn) onMessage("请先登录")
-                                        else showSubConfirm = true
+                                        if (SignInPrompt.ensure(ctx, AccountFeature.COMMUNITY)) showSubConfirm = true
                                     },
                                 )
                             } else {
@@ -271,7 +271,7 @@ fun PostDetailScreen(
                                     acquiring = acquiring,
                                     onAcquire = {
                                         when {
-                                            !AccountStore.isLoggedIn -> onMessage("请先登录")
+                                            !SignInPrompt.ensure(ctx, AccountFeature.COMMUNITY) -> Unit
                                             p.priceCredits > 0 && !p.owned -> showPayConfirm = true
                                             else -> doAcquire()
                                         }
@@ -368,7 +368,7 @@ fun PostDetailScreen(
                         InteractionBar(
                             post = p,
                             onLike = {
-                                scope.launch {
+                                if (SignInPrompt.ensure(ctx, AccountFeature.COMMUNITY)) scope.launch {
                                     try {
                                         val r = if (p.liked) SquarePostApi.unlike(p.id) else SquarePostApi.like(p.id)
                                         post = p.copy(liked = r.liked, likesCount = r.likesCount)
@@ -378,7 +378,7 @@ fun PostDetailScreen(
                                 }
                             },
                             onFavorite = {
-                                scope.launch {
+                                if (SignInPrompt.ensure(ctx, AccountFeature.COMMUNITY)) scope.launch {
                                     try {
                                         val r = if (p.favorited) SquarePostApi.unfavorite(p.id) else SquarePostApi.favorite(p.id)
                                         post = p.copy(favorited = r.favorited, favoritesCount = r.favoritesCount)
@@ -446,10 +446,7 @@ fun PostDetailScreen(
                     onSend = {
                         val text = newComment.trim()
                         if (text.isEmpty()) return@CommentInputBar
-                        if (!AccountStore.isLoggedIn) {
-                            onMessage("请先登录")
-                            return@CommentInputBar
-                        }
+                        if (!SignInPrompt.ensure(ctx, AccountFeature.COMMUNITY)) return@CommentInputBar
                         scope.launch {
                             try {
                                 val parentId = replyingTo ?: ""

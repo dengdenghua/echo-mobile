@@ -401,8 +401,11 @@ class SettingsActivity : BaseActivity() {
                                 }
                             }
                             SettingsViewModel.MenuAction.LLM_CONFIG -> {
-                                // 接自己的大模型 = 会员特权:中转已配置且非会员时上锁,引导充值
-                                if (AccountConfig.relayConfigured && !AccountStore.byoUnlocked) {
+                                // 接自己的大模型 = 已登录用户的会员特权:中转已配置且非会员时上锁,引导充值。
+                                // 本地模式(未登录)没有平台模型可用,自己的模型就是唯一的模型,不上锁。
+                                val byoLocked = AccountConfig.relayConfigured &&
+                                    AccountStore.isLoggedIn && !AccountStore.byoUnlocked
+                                if (byoLocked) {
                                     AlertDialog.showWarm(
                                         context = this@SettingsActivity,
                                         title = getString(R.string.account_byo_locked_title),

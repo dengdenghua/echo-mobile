@@ -1085,7 +1085,6 @@
     <string name="remote_console_pair_code_label">ペアリングコード</string>
     <string name="remote_console_pair_confirm">ペアリング開始</string>
     <string name="remote_console_pair_failed">ペアリング失敗</string>
-    <string name="remote_console_login_required">先にログインしてからコンソールとペアリングしてください</string>
     <string name="remote_console_status_unpaired">公式サイトのペアリングコードを入力すると、ネットワーク越しからリモート操作可能</string>
     <string name="remote_console_status_paired">ペアリング済み · 接続待ち</string>
     <string name="remote_console_status_connected">ペアリング済み · オンライン</string>
@@ -1668,4 +1667,21 @@
     <string name="settings_update_latest">最新バージョンです</string>
     <string name="dot_env_not_connected">未接続 · 選ぶと接続へ</string>
     <string name="dot_host_update_required">このデバイスの Echo はまだスマホとのペアリングに対応していません。更新してからもう一度お試しください。</string>
+
+    <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
+    <string name="account_local_mode_use">アカウントなしで使う</string>
+    <string name="account_local_mode_hint">アカウントなしでも、自分で設定したモデルとのチャット、モデル設定、自分の Echo との接続が使えます。クレジット、コミュニティ、クラウド機能にはアカウントが必要です。</string>
+    <string name="account_local_mode_title">ローカルモード · 未ログイン</string>
+    <string name="account_local_mode_desc">ログインするとクレジットと会員、コミュニティ、音声通話、クラウド同期が使えます</string>
+    <string name="account_local_mode_short">ローカルモード</string>
+    <string name="account_local_mode_drawer_hint">未ログイン · タップしてログイン</string>
+    <string name="account_gate_title">ログインすると使えます</string>
+    <string name="account_gate_sign_in">ログインする</string>
+    <string name="account_gate_not_now">今はしない</string>
+    <string name="account_gate_wallet">クレジット、会員、チャージはアカウントに紐づいています。ログインすると使えます。</string>
+    <string name="account_gate_community">投稿、コメント、いいね、フォロー、アプリの入手には Echo アカウントが必要です。閲覧はログインなしでできます。</string>
+    <string name="account_gate_remote_console">Web コンソールはアカウント経由でこのスマホをペアリングします。echo:// 招待で自分の Echo に接続するのはログインなしでできます。</string>
+    <string name="account_gate_voice_call">リアルタイム音声通話はアカウントの音声サービスを使います。テキストチャットはログインなしで使えます。</string>
+    <string name="account_gate_media">画像と動画の生成にはアカウントのクレジットを使います。ログインすると使えます。</string>
+    <string name="account_gate_cloud_sync">ブックマーク、履歴、タブのクラウド同期はアカウント経由です。ログインすると使えます。</string>
 </resources>

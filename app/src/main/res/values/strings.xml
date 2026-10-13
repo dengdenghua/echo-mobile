@@ -1157,7 +1157,6 @@
     <string name="remote_console_status_connected">Paired · web online</string>
     <string name="remote_console_status_paired">Paired · waiting for connection</string>
     <string name="remote_console_status_unpaired">Enter the web pairing code to remotely control this device across networks</string>
-    <string name="remote_console_login_required">Please log in before pairing the web console</string>
     <string name="remote_console_pair_title">Pair web console</string>
     <string name="remote_console_pair_desc">Generate a pairing code on the web console, then enter it here. After pairing, this device will actively connect to the web; no public IP needed.</string>
     <string name="remote_console_pair_code_label">Pairing code</string>
@@ -1673,4 +1672,21 @@
     <string name="settings_update_latest">You have the latest version</string>
     <string name="dot_env_not_connected">Not connected · Choose to connect</string>
     <string name="dot_host_update_required">The Echo on this device does not support phone pairing yet. Update it, then try again.</string>
+
+    <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
+    <string name="account_local_mode_use">Use without an account</string>
+    <string name="account_local_mode_hint">Without an account you can still chat with a model you set up yourself, change model settings and connect your own Echo. Credits, the community and cloud features need an account.</string>
+    <string name="account_local_mode_title">Local mode · not signed in</string>
+    <string name="account_local_mode_desc">Sign in for credits and membership, the community, voice calls and cloud sync</string>
+    <string name="account_local_mode_short">Local mode</string>
+    <string name="account_local_mode_drawer_hint">Not signed in · tap to sign in</string>
+    <string name="account_gate_title">Sign in to use this</string>
+    <string name="account_gate_sign_in">Sign in</string>
+    <string name="account_gate_not_now">Not now</string>
+    <string name="account_gate_wallet">Credits, membership and top-ups belong to your account. Sign in to use them.</string>
+    <string name="account_gate_community">Posting, commenting, liking, following and getting apps need an Echo account. You can browse without one.</string>
+    <string name="account_gate_remote_console">The web console pairs this phone through your account. Connecting your own Echo with an echo:// invitation works without one.</string>
+    <string name="account_gate_voice_call">Live voice calls run on the account voice service. Text chat works without an account.</string>
+    <string name="account_gate_media">Image and video generation uses account credits. Sign in to use it.</string>
+    <string name="account_gate_cloud_sync">Syncing bookmarks, history and tabs goes through your account. Sign in to use it.</string>
 </resources>

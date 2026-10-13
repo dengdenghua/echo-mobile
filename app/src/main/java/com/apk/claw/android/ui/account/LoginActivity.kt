@@ -7,17 +7,28 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.apk.claw.android.R
-import com.apk.claw.android.account.AccountErrorText
-import com.apk.claw.android.account.AccountRepository
-import com.apk.claw.android.base.BaseActivity
+import android.content.Context
+import android.view.View
+import android.widget.TextView
 import androidx.activity.addCallback
+import com.apk.claw.android.account.AccountErrorText
+import com.apk.claw.android.account.AccountGate
+import com.apk.claw.android.account.AccountRepository
+import com.apk.claw.android.account.Landing
+import com.apk.claw.android.base.BaseActivity
 import com.apk.claw.android.ui.compose.MainActivity
+import com.apk.claw.android.ui.desktop.DesktopActivity
+import com.apk.claw.android.utils.KVUtils
 import com.apk.claw.android.widget.KButton
 import kotlinx.coroutines.launch
 
 /**
- * Phone + SMS-code sign-in / sign-up. Talks only to [AccountRepository], which
- * runs against the mock backend by default (the code is auto-filled in mock).
+ * Email-code sign-in / sign-up. Talks only to [AccountRepository].
+ *
+ * Three ways in:
+ *  - [gateIntent]: the start-up gate (signed out, no local mode yet). No back; offers 「不登录使用」.
+ *  - [signInIntent]: 去登录 from a 「登录后可用」 prompt. Returns to that screen once signed in.
+ *  - plain intent (Settings account row): opens the wallet once signed in.
  */
 class LoginActivity : BaseActivity() {
 
@@ -25,8 +36,21 @@ class LoginActivity : BaseActivity() {
     private var mode = "email" // 先只用邮箱登录;手机号 tab 暂隐藏("phone" 仍可用,服务端端点保留)
 
     companion object {
-        /** true=从启动闸进入(未登录强制登录),登录成功后进主界面;否则进钱包页。 */
+        /** true=从启动闸进入:隐藏返回、提供「不登录使用」,登录成功后进主界面。 */
         const val EXTRA_GATE = "gate"
+
+        /** true=从「登录后可用」的「去登录」进入:登录成功后直接回到原页面。 */
+        const val EXTRA_RETURN = "return_after_sign_in"
+
+        /** The start-up gate. Callers add their own task flags. */
+        fun gateIntent(context: Context): Intent =
+            Intent(context, LoginActivity::class.java).putExtra(EXTRA_GATE, true)
+
+        /** 去登录 from a feature that needs an account; finishes back to the caller after sign-in. */
+        fun signInIntent(context: Context): Intent =
+            Intent(context, LoginActivity::class.java).putExtra(EXTRA_RETURN, true).apply {
+                if (context !is android.app.Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +64,16 @@ class LoginActivity : BaseActivity() {
             setOnClickListener { finish() }
         }
         onBackPressedDispatcher.addCallback(this) { if (!gated) finish() }
+
+        // 「不登录使用」:只在启动闸上出现。选择会持久化,下次启动直接进本地模式,之后可在设置里登录。
+        findViewById<TextView>(R.id.btnUseLocal).apply {
+            visibility = if (gated) View.VISIBLE else View.GONE
+            setOnClickListener {
+                AccountGate.chooseLocalMode()
+                openApp()
+            }
+        }
+        findViewById<TextView>(R.id.tvLocalHint).visibility = if (gated) View.VISIBLE else View.GONE
 
         val etAccount = findViewById<EditText>(R.id.etMobile)
         val etCode = findViewById<EditText>(R.id.etCode)
@@ -115,19 +149,31 @@ class LoginActivity : BaseActivity() {
                 btnLogin.isEnabled = true
                 r.onSuccess {
                     toast(getString(R.string.account_login_success))
-                    if (intent.getBooleanExtra(EXTRA_GATE, false)) {
-                        val i = Intent(this@LoginActivity, MainActivity::class.java)
-                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(i)
-                    } else {
-                        startActivity(Intent(this@LoginActivity, AccountActivity::class.java))
+                    when {
+                        intent.getBooleanExtra(EXTRA_GATE, false) -> openApp()
+                        intent.getBooleanExtra(EXTRA_RETURN, false) -> finish()
+                        else -> {
+                            startActivity(Intent(this@LoginActivity, AccountActivity::class.java))
+                            finish()
+                        }
                     }
-                    finish()
                 }.onFailure {
                     toast(errorText(it, R.string.account_login_failed))
                 }
             }
         }
+    }
+
+    /** Leave the gate for the app: the TV desktop if the user made it the default, otherwise chat. */
+    private fun openApp() {
+        val target = when (AccountGate.landing(desktopDefault = KVUtils.isDesktopModeDefault())) {
+            Landing.DESKTOP -> DesktopActivity::class.java
+            Landing.MAIN, Landing.LOGIN -> MainActivity::class.java
+        }
+        val i = Intent(this, target)
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(i)
+        finish()
     }
 
     private fun isValidAccount(s: String): Boolean =

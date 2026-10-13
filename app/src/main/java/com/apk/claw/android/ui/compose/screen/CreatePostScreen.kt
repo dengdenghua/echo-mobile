@@ -60,7 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
-import com.apk.claw.android.account.AccountStore
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.ui.compose.component.OctopusTextPill
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -151,10 +152,7 @@ fun CreatePostScreen(
             onMessage("请填写标题")
             return
         }
-        if (!AccountStore.isLoggedIn) {
-            onMessage("请先登录")
-            return
-        }
+        if (!SignInPrompt.ensure(context, AccountFeature.COMMUNITY)) return
         scope.launch {
             publishing = true
             try {

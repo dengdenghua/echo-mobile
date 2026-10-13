@@ -1157,7 +1157,6 @@
     <string name="remote_console_status_connected">페어링됨 · 웹 온라인</string>
     <string name="remote_console_status_paired">페어링됨 · 연결 대기 중</string>
     <string name="remote_console_status_unpaired">웹 페어링 코드를 입력하여 이 기기를 크로스 네트워크로 원격 제어하세요</string>
-    <string name="remote_console_login_required">웹 콘솔을 페어링하기 전에 로그인하세요</string>
     <string name="remote_console_pair_title">웹 콘솔 페어링</string>
     <string name="remote_console_pair_desc">웹 콘솔에서 페어링 코드를 생성한 후 여기에 입력하세요. 페어링 후 이 기기가 웹에 능동적으로 연결됩니다. 공인 IP가 필요 없습니다.</string>
     <string name="remote_console_pair_code_label">페어링 코드</string>
@@ -1662,4 +1661,21 @@
     <string name="settings_update_latest">최신 버전입니다</string>
     <string name="dot_env_not_connected">연결 안 됨 · 선택하면 연결</string>
     <string name="dot_host_update_required">이 기기의 Echo는 아직 휴대폰 페어링을 지원하지 않습니다. 업데이트한 후 다시 시도하세요.</string>
+
+    <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
+    <string name="account_local_mode_use">계정 없이 사용</string>
+    <string name="account_local_mode_hint">계정 없이도 직접 설정한 모델로 대화하고, 모델 설정을 바꾸고, 내 Echo에 연결할 수 있습니다. 크레딧, 커뮤니티, 클라우드 기능은 계정이 필요합니다.</string>
+    <string name="account_local_mode_title">로컬 모드 · 로그인 안 함</string>
+    <string name="account_local_mode_desc">로그인하면 크레딧과 멤버십, 커뮤니티, 음성 통화, 클라우드 동기화를 쓸 수 있습니다</string>
+    <string name="account_local_mode_short">로컬 모드</string>
+    <string name="account_local_mode_drawer_hint">로그인 안 함 · 눌러서 로그인</string>
+    <string name="account_gate_title">로그인 후 사용할 수 있습니다</string>
+    <string name="account_gate_sign_in">로그인하기</string>
+    <string name="account_gate_not_now">나중에</string>
+    <string name="account_gate_wallet">크레딧, 멤버십, 충전은 계정에 묶여 있습니다. 로그인하면 쓸 수 있습니다.</string>
+    <string name="account_gate_community">글쓰기, 댓글, 좋아요, 팔로우, 앱 받기는 Echo 계정이 필요합니다. 둘러보기는 로그인 없이 할 수 있습니다.</string>
+    <string name="account_gate_remote_console">웹 콘솔은 계정을 통해 이 휴대폰을 페어링합니다. echo:// 초대로 내 Echo에 연결하는 것은 로그인 없이 됩니다.</string>
+    <string name="account_gate_voice_call">실시간 음성 통화는 계정의 음성 서비스를 사용합니다. 텍스트 대화는 로그인 없이 됩니다.</string>
+    <string name="account_gate_media">이미지와 동영상 생성에는 계정 크레딧이 사용됩니다. 로그인하면 쓸 수 있습니다.</string>
+    <string name="account_gate_cloud_sync">북마크, 기록, 탭 동기화는 계정을 통해 이루어집니다. 로그인하면 쓸 수 있습니다.</string>
 </resources>

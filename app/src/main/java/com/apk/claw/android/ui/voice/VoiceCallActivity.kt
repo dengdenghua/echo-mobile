@@ -61,6 +61,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.apk.claw.android.R
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.account.AccountGate
+import com.apk.claw.android.ui.account.LoginActivity
+import com.apk.claw.android.ui.account.SignInRequiredPanel
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -87,7 +91,24 @@ class VoiceCallActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             OctopusTheme {
-                VoiceCallScreen(onClose = { finish() })
+                // 本地模式(未登录):语音走账号的语音服务 —— 显示「登录后可用」,不去连、不申请麦克风。
+                if (AccountGate.isAvailable(AccountFeature.VOICE_CALL)) {
+                    VoiceCallScreen(onClose = { finish() })
+                } else {
+                    SignInRequiredPanel(
+                        feature = AccountFeature.VOICE_CALL,
+                        onSignIn = {
+                            startActivity(LoginActivity.signInIntent(this))
+                            finish()
+                        },
+                        onClose = { finish() },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(OctopusBackground.pageBrush())
+                            .statusBarsPadding()
+                            .navigationBarsPadding(),
+                    )
+                }
             }
         }
     }

@@ -1157,7 +1157,6 @@
     <string name="remote_console_status_connected">Pareado · web online</string>
     <string name="remote_console_status_paired">Pareado · aguardando conexão</string>
     <string name="remote_console_status_unpaired">Digite o código de pareamento web para controlar este dispositivo remotamente entre redes</string>
-    <string name="remote_console_login_required">Faça login antes de parear o console web</string>
     <string name="remote_console_pair_title">Parear console web</string>
     <string name="remote_console_pair_desc">Gere um código de pareamento no console web e insira-o aqui. Após o pareamento, este dispositivo se conectará ativamente à web; não é necessário IP público.</string>
     <string name="remote_console_pair_code_label">Código de pareamento</string>
@@ -1663,4 +1662,21 @@
     <string name="settings_update_latest">Você já tem a versão mais recente</string>
     <string name="dot_env_not_connected">Não conectado · Escolha para conectar</string>
     <string name="dot_host_update_required">O Echo deste dispositivo ainda não aceita pareamento com o celular. Atualize-o e tente novamente.</string>
+
+    <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
+    <string name="account_local_mode_use">Usar sem conta</string>
+    <string name="account_local_mode_hint">Sem conta você ainda pode conversar com um modelo configurado por você, mudar as configurações do modelo e conectar seu próprio Echo. Créditos, comunidade e recursos na nuvem precisam de uma conta.</string>
+    <string name="account_local_mode_title">Modo local · sem login</string>
+    <string name="account_local_mode_desc">Entre para créditos e assinatura, comunidade, chamadas de voz e sincronização na nuvem</string>
+    <string name="account_local_mode_short">Modo local</string>
+    <string name="account_local_mode_drawer_hint">Sem login · toque para entrar</string>
+    <string name="account_gate_title">Entre para usar isto</string>
+    <string name="account_gate_sign_in">Entrar</string>
+    <string name="account_gate_not_now">Agora não</string>
+    <string name="account_gate_wallet">Créditos, assinatura e recargas ficam na sua conta. Entre para usá-los.</string>
+    <string name="account_gate_community">Publicar, comentar, curtir, seguir e obter apps precisam de uma conta Echo. Você pode navegar sem ela.</string>
+    <string name="account_gate_remote_console">O console web pareia este telefone pela sua conta. Conectar seu próprio Echo com um convite echo:// funciona sem conta.</string>
+    <string name="account_gate_voice_call">Chamadas de voz ao vivo usam o serviço de voz da conta. O chat de texto funciona sem conta.</string>
+    <string name="account_gate_media">Gerar imagens e vídeos usa créditos da conta. Entre para usar.</string>
+    <string name="account_gate_cloud_sync">A sincronização de favoritos, histórico e abas passa pela sua conta. Entre para usar.</string>
 </resources>

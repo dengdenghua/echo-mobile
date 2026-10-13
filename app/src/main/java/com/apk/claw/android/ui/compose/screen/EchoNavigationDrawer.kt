@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.ui.account.AccountActivity
+import com.apk.claw.android.ui.account.LoginActivity
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.featurescreens.*
@@ -123,15 +124,32 @@ internal fun EchoNavigationDrawer(
         }
         HorizontalDivider(color = OctopusColors.Border.copy(alpha = .18f))
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            // 账户一行(与桌面端底部账户菜单一致):昵称 + 会员与订阅,齿轮进入设置
+            // 账户一行(与桌面端底部账户菜单一致):昵称 + 会员与订阅,齿轮进入设置。
+            // 未登录(本地模式):显示「本地模式 · 点此登录」,点了直接去登录页。
+            val signedIn = AccountStore.isLoggedIn
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f).clickable { launch(AccountActivity::class.java) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier
+                        .weight(1f)
+                        .clickable { launch(if (signedIn) AccountActivity::class.java else LoginActivity::class.java) }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Icon(Icons.Filled.AccountCircle, null, Modifier.size(28.dp), tint = OctopusColors.TextMuted)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
-                        Text(AccountStore.nickname.takeIf { it.isNotBlank() } ?: stringResource(R.string.account_title),
+                        val nickname = AccountStore.nickname
+                        val name = when {
+                            !signedIn -> stringResource(R.string.account_local_mode_short)
+                            nickname.isNotBlank() -> nickname
+                            else -> stringResource(R.string.account_title)
+                        }
+                        val hint = stringResource(
+                            if (signedIn) R.string.echo_subscription else R.string.account_local_mode_drawer_hint,
+                        )
+                        Text(name,
                             maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
-                        Text(stringResource(R.string.echo_subscription), color = OctopusColors.TextMuted,
+                        Text(hint, color = OctopusColors.TextMuted,
                             maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
                     }
                 }

@@ -25,6 +25,8 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.account.AccountRepository
 import com.apk.claw.android.octopus_mobile.safety.SsrfSafeHttp
 import com.apk.claw.android.tool.ToolRegistry
@@ -189,6 +191,10 @@ class OctopusBridge(
         mainHandler.post {
             if (activity.isFinishing || activity.isDestroyed) {
                 postCallback(callbackId, err("activity unavailable")); return@post
+            }
+            // 积分支付要账号:本地模式下先说「登录后可用」,不弹扣积分确认框。
+            if (!SignInPrompt.ensure(activity, AccountFeature.WALLET)) {
+                postCallback(callbackId, err("not signed in")); return@post
             }
             AlertDialog.Builder(activity)
                 .setTitle("${manifest.name} 请求支付")

@@ -1,5 +1,7 @@
 package com.apk.claw.android.media
 
+import com.apk.claw.android.R
+import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.account.AccountConfig
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.utils.OctoHttp
@@ -134,10 +136,10 @@ object MediaRepository {
 
     // ── HTTP(镜像 HttpAccountGateway:Bearer token + FastAPI detail/error.message 错误透传)──
     private fun reqBuilder(path: String): Request.Builder {
-        val b = Request.Builder().url(base() + path)
+        // 生图/生视频按账号积分计费:本地模式(未登录)不发请求,直接给工具一句看得懂的原因。
         val token = AccountStore.token
-        if (token.isNotEmpty()) b.header("Authorization", "Bearer $token")
-        return b
+        check(token.isNotEmpty()) { ClawApplication.instance.getString(R.string.account_gate_media) }
+        return Request.Builder().url(base() + path).header("Authorization", "Bearer $token")
     }
 
     private suspend fun postJson(path: String, body: Any): JsonObject = withContext(Dispatchers.IO) {

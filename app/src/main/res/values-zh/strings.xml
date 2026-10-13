@@ -1093,7 +1093,6 @@
     <string name="remote_console_status_connected">已配对 · 官网在线</string>
     <string name="remote_console_status_paired">已配对 · 等待连接</string>
     <string name="remote_console_status_unpaired">输入官网配对码后，可跨网络远程控制本机</string>
-    <string name="remote_console_login_required">请先登录账号后再配对官网控制台</string>
     <string name="remote_console_pair_title">配对官网控制台</string>
     <string name="remote_console_pair_desc">在官网远程控制台生成配对码，然后在这里输入。配对成功后，本机会主动连接官网，不需要公网 IP。</string>
     <string name="remote_console_pair_code_label">配对码</string>
@@ -1660,4 +1659,21 @@
     <string name="settings_update_latest">已是最新版本</string>
     <string name="dot_env_not_connected">未连接 · 选择后去连接</string>
     <string name="dot_host_update_required">这台设备上的 Echo 还不支持手机配对，请更新后再试。</string>
+
+    <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
+    <string name="account_local_mode_use">不登录使用</string>
+    <string name="account_local_mode_hint">不登录也能用：对话（用你自己配置的模型）、模型设置、连接你自己的 Echo。积分、社区和云端功能登录后可用。</string>
+    <string name="account_local_mode_title">本地模式 · 未登录</string>
+    <string name="account_local_mode_desc">登录后可用：积分与会员、社区互动、语音通话、云同步</string>
+    <string name="account_local_mode_short">本地模式</string>
+    <string name="account_local_mode_drawer_hint">未登录 · 点此登录</string>
+    <string name="account_gate_title">登录后可用</string>
+    <string name="account_gate_sign_in">去登录</string>
+    <string name="account_gate_not_now">暂不</string>
+    <string name="account_gate_wallet">积分、会员和充值跟着账号走，登录后就能用。</string>
+    <string name="account_gate_community">发帖、评论、点赞、关注和获取应用需要 Echo 账号。不登录也可以浏览。</string>
+    <string name="account_gate_remote_console">官网远程控制台要通过账号配对这台手机。连接你自己的 Echo（echo:// 邀请）不需要登录。</string>
+    <string name="account_gate_voice_call">实时语音通话用的是账号的语音服务。文字对话不需要登录。</string>
+    <string name="account_gate_media">生成图片和视频会用到账号积分，登录后就能用。</string>
+    <string name="account_gate_cloud_sync">书签、历史和标签页的云同步跟着账号走，登录后就能用。</string>
 </resources>

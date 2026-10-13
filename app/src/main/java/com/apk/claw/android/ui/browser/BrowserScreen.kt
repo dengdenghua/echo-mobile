@@ -66,6 +66,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.repeatOnLifecycle
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.R
 import com.apk.claw.android.agent.AgentActionRecorder
 import com.apk.claw.android.octopus_mobile.browser.BrowserEngine
@@ -514,13 +516,13 @@ fun BrowserScreen(
                 },
                 onCloudSync = {
                     if (!BrowserSync.isReady()) {
-                        Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                        SignInPrompt.show(context, AccountFeature.CLOUD_SYNC)
                     } else {
                         Toast.makeText(context, "正在同步…", Toast.LENGTH_SHORT).show()
                         syncScope.launch {
                             val r = BrowserSync.syncAll(context)
                             val msg = if (r.notLoggedIn) {
-                                "请先登录"
+                                context.getString(R.string.account_gate_cloud_sync)
                             } else {
                                 "已同步 ${r.bookmarks} 个书签 / ${r.history} 条历史 / ${r.tabs} 个标签"
                             }

@@ -169,6 +169,35 @@
                         android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- 「不登录使用」:仅启动闸显示。本地模式:对话(自配模型)、模型设置、连接自己的 Echo。 -->
+            <TextView
+                android:id="@+id/btnUseLocal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:background="?attr/selectableItemBackground"
+                android:minHeight="48dp"
+                android:gravity="center"
+                android:paddingHorizontal="20dp"
+                android:text="@string/account_local_mode_use"
+                android:textColor="@color/colorBrandPrimary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvLocalHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:lineSpacingExtra="3dp"
+                android:paddingHorizontal="8dp"
+                android:text="@string/account_local_mode_hint"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="12sp"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 

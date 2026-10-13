@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -64,6 +65,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.ui.compose.screen.ChatScreen
 import com.apk.claw.android.ui.compose.screen.FeatureHubScreen
 import com.apk.claw.android.ui.compose.screen.GhostChatSessionStore
@@ -260,10 +263,16 @@ fun OctopusNavHost(
             ChatScreen(onOpenSettings = { navController.navigateToTab(Screen.Settings) })
         }
         composable(Screen.Features.route) {
+            val context = LocalContext.current
             FeatureHubScreen(
                 // 灵感 tab 即广场:search→广场搜索,publish/+→发帖(合并原独立「灵感广场」的搜索/发帖入口)
                 onOpenSearch = { navController.navigate("square_search") },
-                onCreatePost = { navController.navigate("square_create_post") },
+                // 发帖要账号:本地模式先说「登录后可用」,别让人写完才被拦。
+                onCreatePost = {
+                    if (SignInPrompt.ensure(context, AccountFeature.COMMUNITY)) {
+                        navController.navigate("square_create_post")
+                    }
+                },
                 onNavigateToUniverse = { navController.navigate(Screen.Universe.route) },
                 onNavigateToSkillMarketplace = { navController.navigate(Screen.SkillMarketplace.route) },
                 onNavigateToPluginMarketplace = { navController.navigate(Screen.PluginMarketplace.route) },

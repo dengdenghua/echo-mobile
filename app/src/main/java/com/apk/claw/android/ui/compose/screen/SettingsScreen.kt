@@ -86,9 +86,12 @@ import com.apk.claw.android.ui.plugin.PluginActivity
 import com.apk.claw.android.ui.settings.LlmConfigActivity
 import com.apk.claw.android.ui.settings.RuntimeConfigActivity
 import com.apk.claw.android.ui.settings.SettingsActivity
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.account.AccountGate
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.ui.account.AccountActivity
 import com.apk.claw.android.ui.account.LoginActivity
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.utils.KVUtils
 import com.apk.claw.android.update.AppUpdater
 import android.widget.Toast
@@ -167,6 +170,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
     val readiness = remember(refreshTick) { SetupReadiness.check(context) }
     val lanAddr = remember(refreshTick) { runCatching { ConfigServerManager.getAddress() }.getOrNull() }
     val loggedIn = remember(refreshTick) { AccountStore.isLoggedIn }
+    val localMode = remember(refreshTick) { AccountGate.isLocalMode }
     val credits = remember(refreshTick) { AccountStore.credits }
     val isMember = remember(refreshTick) { AccountStore.byoUnlocked }
     val remotePaired = remember(refreshTick) { RemoteConsoleGateway.isPaired }
@@ -341,6 +345,21 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         acct,
                         stringResource(R.string.account_credits_label) + ": " + credits + (if (isMember) " · VIP" else ""),
                     )
+                } else if (localMode) {
+                    // 本地模式:说清楚哪些要登录,并给一个明确的「去登录」(登录不清本机数据)。
+                    SettingsRow(
+                        Icons.Filled.AccountCircle,
+                        stringResource(R.string.account_local_mode_title),
+                        stringResource(R.string.account_local_mode_desc),
+                    )
+                    Text(
+                        stringResource(R.string.account_gate_sign_in),
+                        color = PrimaryColor,
+                        fontSize = OctopusType.caption,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth().padding(top = OctopusSpacing.xs),
+                    )
                 } else {
                     SettingsRow(
                         Icons.Filled.AccountCircle,
@@ -451,16 +470,13 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     Icons.Filled.Hub,
                     stringResource(R.string.remote_console_title),
                     when {
+                        !loggedIn -> stringResource(R.string.account_gate_title)
                         remoteConnected -> stringResource(R.string.remote_console_status_connected)
                         remotePaired -> stringResource(R.string.remote_console_status_paired)
                         else -> stringResource(R.string.remote_console_status_unpaired)
                     },
                 ) {
-                    if (!AccountStore.isLoggedIn) {
-                        onMessage(context.getString(R.string.remote_console_login_required))
-                    } else {
-                        showRemotePairDialog = true
-                    }
+                    if (SignInPrompt.ensure(context, AccountFeature.REMOTE_CONSOLE)) showRemotePairDialog = true
                 }
                 SettingsDivider()
                 val streamSharp = remember(refreshTick) { RemoteStreamPrefs.isSharp() }

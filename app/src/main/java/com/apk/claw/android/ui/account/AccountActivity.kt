@@ -95,7 +95,11 @@ class AccountActivity : BaseActivity() {
         findViewById<KButton>(R.id.btnRedeem).setOnClickListener { redeemInvite() }
         findViewById<KButton>(R.id.btnLogout).setOnClickListener {
             AccountRepository.logout()
-            startActivity(Intent(this, LoginActivity::class.java))
+            // 退出后回到启动闸(可重新登录,或再选「不登录使用」);清掉任务栈,不留已登录的页面。
+            startActivity(
+                LoginActivity.gateIntent(this)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
+            )
             finish()
         }
 

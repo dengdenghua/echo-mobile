@@ -155,7 +155,8 @@ object RemoteConsoleGateway {
     }
 
     fun connect() {
-        if (!isPaired || socket != null) return
+        // 官网控制台是账号功能:未登录(本地模式或已退出)不连、不重试,避免离线时每分钟一条连接失败日志。
+        if (!isPaired || socket != null || !AccountStore.isLoggedIn) return
         manualStop = false
         val req = Request.Builder().url(wsUrl()).build()
         http.newWebSocket(req, object : WebSocketListener() {
@@ -305,7 +306,7 @@ object RemoteConsoleGateway {
     }
 
     private fun scheduleReconnect() {
-        if (manualStop || !isPaired) return
+        if (manualStop || !isPaired || !AccountStore.isLoggedIn) return
         val base = retryMs.coerceAtMost(60_000L)
         // 0-30% 的 jitter:避免大量设备同时断线后集中重连(thundering herd)
         val jitter = (Math.random() * 0.3 * base).toLong()

@@ -44,6 +44,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.apk.claw.android.account.AccountFeature
+import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.R
 import com.apk.claw.android.plugin.MiniAppRegistry
 import com.apk.claw.android.plugin.PermissionGate
@@ -103,7 +105,7 @@ internal fun MiniAppListContent() {
                 onLaunch = { MiniAppRegistry.launch(ctx, m.id) },
                 publishing = publishingId == m.id,
                 onShare = {
-                    if (publishingId == null) {
+                    if (publishingId == null && SignInPrompt.ensure(ctx, AccountFeature.COMMUNITY)) {
                         publishingId = m.id
                         scope.launch {
                             val r = SquarePublisher.publish(m)
