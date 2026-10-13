@@ -137,7 +137,8 @@ cp OctopusMobile_v1.1.0_vc15_universal.apk /home/ubuntu/octopus-server/downloads
 APP_UPDATE_APK_PATH=/home/ubuntu/octopus-server/downloads/octopus-app.apk
 APP_UPDATE_VERSION_CODE=15
 APP_UPDATE_VERSION_NAME=1.1.0
-APP_UPDATE_NOTES_FILE=/home/ubuntu/octopus-server/downloads/notes.txt      # 多行说明,每次请求现读
+# 多行说明放文件里,每次请求现读(改文案不用重启)
+APP_UPDATE_NOTES_FILE=/home/ubuntu/octopus-server/downloads/notes.txt
 APP_UPDATE_SIGNING_CERT_SHA256=<Release 说明里的签名证书 SHA-256>
 APP_UPDATE_KEY_CHANGE_NOTES_FILE=/home/ubuntu/octopus-server/downloads/key-change-notes.txt
 ```
@@ -146,7 +147,7 @@ APP_UPDATE_KEY_CHANGE_NOTES_FILE=/home/ubuntu/octopus-server/downloads/key-chang
 不同签名的包覆盖安装到旧版上,旧版点「立即更新」只会得到「应用未安装」。配了
 `APP_UPDATE_KEY_CHANGE_NOTES(_FILE)` 后,签名对不上的客户端(1.0.0 不带 `cert` 参数;1.1.0 起带自身签名指纹)
 拿到的是这段换签名说明而不是常规说明,且 `force` 恒为 false。说明文案见仓库
-`docs/release-notes/ota/`。1.0.0 的更新弹窗不能滚动,说明控制在 12 行以内。
+`docs/release-notes/ota/`。1.0.0 的更新弹窗不能滚动:1.1.0 那段说明在 1080×2400 屏上占 18 行,刚好放得下,别再加长。
 
 ## 在你的服务器上跑(已实测该机:2 vCPU / 1GB / Python 3.12)
 
