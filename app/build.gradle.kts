@@ -114,8 +114,10 @@ android {
         // vc12 = 1.0.0 实时语音发布:全屏语音通话(两入口)+ 工具接管 + 语音个性化/声音克隆 + LLM 备用模型。
         // vc13 = 语音通话免提外放修复(强制 MODE_IN_COMMUNICATION + 扬声器,原走听筒声音小)。
         // vc14 = 语音↔文字记忆打通(L2):语音挂同一会话,注入历史续上下文 + 每轮转录存回 ChatStore。
-        versionCode = 14
-        versionName = "1.0.0"
+        // vc15 = 1.1.0:首个经 release.yml 发布的版本(tag v1.1.0)—— ECHO 品牌、Dot 设备与跨端任务、HUB。
+        //        1.0.0 已被 vc9–14 的 OTA 包占用,故不再复用这个名字。
+        versionCode = 15
+        versionName = "1.1.0"
         buildConfigField("String", "VERSION_INFO", getVersionGit())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

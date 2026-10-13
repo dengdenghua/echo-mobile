@@ -1,38 +1,105 @@
 # Changelog
 
-All notable changes to Octopus Mobile are documented here.
+All notable changes to the Echo Android app (formerly Octopus Mobile) are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.1.0] — not yet tagged
+
+`versionCode 15`, tag `v1.1.0`. The first release built, signed and published by
+`release.yml` (split APKs, universal APK, AAB, SHA-256 list, SBOM, build provenance).
+It covers everything since the last 1.0.0 OTA build (`versionCode 14`, 2026-07-07).
+Upgrades in place over any 1.0.0 build signed with the same key.
+
 ### Added
-- **Real logout / session revocation** (server): `users.token_version` column;
-  new JWTs carry a `tv` claim and `actor`/WebSocket auth (incl. the per-message
-  console re-check) reject a mismatch. `POST /auth/logout` bumps the version
-  (revokes every session of that user) and closes their live remote links.
-  Tokens issued before this change lack `tv`, count as version 0, and keep
-  working until the first logout or ban. Admin ban/unban also bumps the version.
+- **Echo identity**: the app is now Echo, with the ECHO mark, notification icon and the
+  Graphite (dark) / Snow (light) themes. Colours, radii, focus outlines and status colours
+  follow one palette across chat, settings, Square and the TV desktop.
+- **Dot devices and cross-device tasks**: pair the phone once with an Echo computer or NAS
+  (pairing code, or scan / import an `echo://pair` invitation), send a task to it, and
+  follow its recorded phases and execution steps. Remote tasks reconnect on their own.
+- **Remote conversation history**: browse the desktop's and NAS's conversations from the
+  drawer; reading positions are restored and unread results are marked.
+- **HUB and a drawer that matches the desktop sidebar**: HUB has 智能体 / 应用 / 技能 tabs;
+  routines live under 自动化; memory, activity, trust center and plugins moved to Settings.
+- **Live tool logs** in chat: tool calls stream into an expandable live log with direct
+  access to each step's details.
+- **Phone mirroring, file exchange (Echo 文件收发) and a shared device task workspace**
+  between paired devices, with outcome checks and staged hand-offs.
+- **Trust center**: teach the agent a rule (and switch rules off without deleting them),
+  see and delete what it remembers about you, see what this device has learned, export /
+  import / LAN-pull knowledge, and per-task usage statistics.
+- **Safety**: an undo window for irreversible actions, and a dry-run (demo / read-only) mode.
+- **On-device and more models**: llama.cpp and MNN local inference with an offline chat
+  mode, 14 LLM providers in the model settings, and six UI languages (中文, English, 日本語,
+  한국어, Español, Português).
+- **Agent tools**: an MCP client for external MCP servers, a PRoot Alpine Linux container
+  (`run_shell`), personas with persona-to-persona chat, and workflows with scheduled runs.
+- **Browser**: a minimal agent browser (one box, one answer), userscript store, AI
+  multi-turn search results and bottom toolbar.
+- **TV desktop**: launcher-style rows, banners and reliable D-pad focus.
 
 ### Changed
-- **Revoke/ban closes live links**: revoking a device or banning a user now
-  drops the live device and console WebSockets immediately, not just future requests.
-- **Video ownership**: video submissions are recorded per user (`video_tasks`);
-  polling another user's video id returns 404 without touching the upstream.
-- **Encrypted credential storage** (mobile): WebDAV mount passwords and LAN device
-  tokens now live in the encrypted store, keyed per mount/device; legacy plaintext is
-  migrated on read and cleared only after the encrypted write succeeds. A credential-less
-  discovery beacon no longer wipes a verified LAN token for the same device and address.
+- **Chat starts on this phone** until a remote Echo is set up; NAS / computer targets
+  say 未连接 until they are connected, and connecting explains a too-old host plainly.
+- **Settings are fully localized** (about 30 labels were hard-coded Chinese); status chips
+  read 待设置 / 已就绪.
+- **Encrypted credential storage**: WebDAV mount passwords and LAN device tokens now live in
+  the encrypted store, keyed per mount/device; legacy plaintext is migrated on read and
+  cleared only after the encrypted write succeeds. A credential-less discovery beacon no
+  longer wipes a verified LAN token for the same device and address.
 - **Bearer-token cleartext guard**: the remote client refuses to send its bearer token
   over `ws://` unless the host is loopback, the emulator host, or a private/link-local/`.local`
   address.
 - **Legacy tentacle client removed**: the old tentacle client code path is gone.
 - **LAN console and MCP lockout**: 10 bad tokens in 60 s from one IP locks that IP out for
   5 minutes (429) on the 9527 control server and the 9528 MCP server; MCP now binds the
-  WiFi IP only when LAN mode is on, otherwise loopback. The console screen stream uses
-  30-second single-use tickets instead of a token in the URL.
+  WiFi IP only when LAN mode is on, otherwise loopback, and rebinds when that changes. The
+  console screen stream uses 30-second single-use tickets instead of a token in the URL.
 - **Shizuku fallback flagging**: when Shizuku cannot start a process, privileged commands
   now fail with a clear error; file commands still run as the app but are flagged
   `privileged=false`. Root shell dump paths are restricted and arguments quoted.
+- **Tool timeouts**: media and MCP tools time out and can be cancelled.
+
+### Fixed
+- **Sending with no model configured** now says why nothing runs and offers the model
+  settings, instead of "正在设备上执行…" and silence.
+- **TV desktop** no longer crashes when it is reopened or the theme or language changes.
+- **Layout**: the composer no longer floats above the keyboard; toolbars and titles on the
+  older screens no longer sit under the status bar; landscape keeps clear of the navigation
+  bar; the Square search field is no longer clipped.
+- **Text**: numbered setup steps keep their line breaks and quoted words keep their quotes;
+  network failures in Square show a retry instead of an empty list; setup counts agree
+  between Trust center, Settings and the guide.
+- **Sign-in without a network** says 连不上账号服务器，请检查网络后重试 instead of the raw
+  `Unable to resolve host …` text; server errors without a message name the status code.
+- **Echo Runtime settings** keep the auth token masked (a token imported from an
+  `echo://join` invite was shown in clear text) and show the connection state in your
+  language; the model settings page, its Settings row and the no-model dialog all use the
+  same name (模型设置).
+- **Bundled plugins** load again (manifests without optional fields were dropped).
+- **Root check** no longer waits forever on a rooted phone's grant prompt.
+- The update check runs once per launch instead of on every rotation.
+
+### Build
+- A release build without signing configured stops at once and names the missing
+  `KEYSTORE_FILE` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`; `release.yml` checks
+  the four signing secrets before its test gates and opens the keystore before building.
+- `build-native.yml` parses again (it failed in 0 s on every push) and CodeQL compiles only
+  the debug sources instead of packaging an unsigned release.
+
+### Server (`server/`)
+- **Real logout / session revocation**: `users.token_version` column;
+  new JWTs carry a `tv` claim and `actor`/WebSocket auth (incl. the per-message
+  console re-check) reject a mismatch. `POST /auth/logout` bumps the version
+  (revokes every session of that user) and closes their live remote links.
+  Tokens issued before this change lack `tv`, count as version 0, and keep
+  working until the first logout or ban. Admin ban/unban also bumps the version.
+- **Revoke/ban closes live links**: revoking a device or banning a user now
+  drops the live device and console WebSockets immediately, not just future requests.
+- **Video ownership**: video submissions are recorded per user (`video_tasks`);
+  polling another user's video id returns 404 without touching the upstream.
 
 ### Known limitations
 - **Legacy stream auth**: `/api/screen/stream` still accepts a bearer header
@@ -44,6 +111,19 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   no ownership record and now 404 on poll. They cannot be backfilled (no
   video-to-user data was ever stored), so no admin/CLI backfill exists; users must
   resubmit the generation.
+
+## 1.0.0 OTA builds — 2026-07-05 to 2026-07-07
+
+These were shipped over the in-app update channel under the same name, 1.0.0
+(`versionCode 10–14`), and were never tagged.
+
+- vc10: the new brand icon.
+- vc11: history and image fixes, the glass theme removed, the TV desktop, sandbox security fixes.
+- vc12: full-screen realtime voice calls (from chat and the TV desktop) that can use device
+  tools, per-user voice and persona, voice cloning, and an optional backup LLM.
+- vc13: voice calls use the loudspeaker instead of the earpiece.
+- vc14: voice and text share one conversation: calls continue the chat history and their
+  transcripts are saved back to it.
 
 ## [1.0.0] — 2026-07-05
 
