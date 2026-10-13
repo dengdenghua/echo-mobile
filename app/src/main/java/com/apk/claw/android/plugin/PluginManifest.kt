@@ -62,27 +62,50 @@ data class PluginManifest(
 
         fun fromJson(json: String): PluginManifest? {
             return try {
-                gson.fromJson(json, PluginManifest::class.java)?.let(::sanitizeNullLists)
+                gson.fromJson(json, PluginManifest::class.java)?.let(::sanitizeNulls)
             } catch (e: Exception) {
                 null
             }
         }
 
-        @Suppress("USELESS_ELVIS")
-        private fun sanitizeNullLists(m: PluginManifest): PluginManifest = m.copy(
-            permissions = m.permissions ?: emptyList(),
-            blockRules = m.blockRules ?: emptyList(),
-            toolParams = m.toolParams ?: emptyList(),
-            allowHosts = m.allowHosts ?: emptyList(),
-            allowTools = m.allowTools ?: emptyList(),
-            allowDevice = m.allowDevice ?: emptyList(),
-            actions = (m.actions ?: emptyList()).map { it.copy(params = it.params ?: emptyList()) },
-            match = m.match ?: emptyList(),
-            exclude = m.exclude ?: emptyList(),
-            grants = m.grants ?: emptyList(),
-            requires = m.requires ?: emptyList(),
-            resources = m.resources ?: emptyMap(),
+        /**
+         * Gson ignores Kotlin defaults: a field missing from the JSON arrives as null even when it is
+         * declared non-null, and copy() then throws. Every non-null reference field must be restored
+         * in this one copy, strings included, or a manifest that leaves one out (all bundled demos do)
+         * is dropped.
+         */
+        private fun sanitizeNulls(m: PluginManifest): PluginManifest = m.copy(
+            type = str(m.type, "dex"),
+            entryClass = str(m.entryClass),
+            dexFile = str(m.dexFile, "plugin.dex"),
+            description = str(m.description),
+            author = str(m.author),
+            js = str(m.js),
+            hostPattern = str(m.hostPattern, "*"),
+            runAt = str(m.runAt, "document-idle"),
+            css = str(m.css),
+            script = str(m.script),
+            toolName = str(m.toolName),
+            page = str(m.page),
+            permissions = list(m.permissions),
+            blockRules = list(m.blockRules),
+            toolParams = list(m.toolParams),
+            allowHosts = list(m.allowHosts),
+            allowTools = list(m.allowTools),
+            allowDevice = list(m.allowDevice),
+            actions = list(m.actions).map { it.copy(params = list(it.params)) },
+            match = list(m.match),
+            exclude = list(m.exclude),
+            grants = list(m.grants),
+            requires = list(m.requires),
+            resources = m.resources.orEmptyMap(),
         )
+
+        private fun str(value: String?, default: String = ""): String = value ?: default
+
+        private fun <T> list(value: List<T>?): List<T> = value ?: emptyList()
+
+        private fun Map<String, String>?.orEmptyMap(): Map<String, String> = this ?: emptyMap()
 
         fun fromStream(stream: java.io.InputStream): PluginManifest? {
             return try {
