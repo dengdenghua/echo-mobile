@@ -308,7 +308,9 @@ class SystemWebViewEngine : BrowserEngine {
         activeWebView = null
         idleRunnable?.let { Handler(Looper.getMainLooper()).removeCallbacks(it) }
         idleRunnable = null
-        gmBridge.detach()
+        // destroy() can run before the WebView was ever created (e.g. DesktopActivity relaunched
+        // for orientation/uiMode right after onCreate), when gmBridge is still uninitialized.
+        if (::gmBridge.isInitialized) gmBridge.detach()
         if (wv != null) {
             val mainHandler = Handler(Looper.getMainLooper())
             mainHandler.post {
