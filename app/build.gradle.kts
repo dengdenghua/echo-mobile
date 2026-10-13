@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.konan.properties.hasProperty
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.time.Duration
 import java.util.Properties
 
 plugins {
@@ -434,4 +435,15 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     executionData.setFrom(
         fileTree("${project.layout.buildDirectory.get()}/outputs/unit_test_code_coverage").include("**/*.exec")
     )
+}
+
+// Unit tests: the CI job sat in testDebugUnitTest for 6 hours on every push from 2026-10-08 on,
+// with nothing in the log to say which test hung (it passes in ~3 minutes on Windows). Cap the task
+// so CI fails fast, and on CI print each test as it starts so the last STARTED line names the culprit.
+tasks.withType<Test>().configureEach {
+    timeout.set(Duration.ofMinutes(20))
+    testLogging {
+        if (System.getenv("CI") != null) events("started", "skipped", "failed") else events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
