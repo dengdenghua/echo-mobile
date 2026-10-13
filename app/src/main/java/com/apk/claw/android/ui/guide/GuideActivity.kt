@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.apk.claw.android.R
 import com.apk.claw.android.base.BaseActivity
@@ -125,7 +126,7 @@ class GuideActivity : BaseActivity() {
 
     private fun checkPermission(type: PermissionType): Boolean = when (type) {
         PermissionType.ACCESSIBILITY -> ClawAccessibilityService.isRunning()
-        PermissionType.NOTIFICATION -> ForegroundService.isRunning()
+        PermissionType.NOTIFICATION -> ForegroundService.isPersistentNotificationShown(this)
         PermissionType.OVERLAY -> DeviceUtils.isTvDevice(this) || Settings.canDrawOverlays(this)
         PermissionType.BATTERY -> (getSystemService(POWER_SERVICE) as PowerManager)
             .isIgnoringBatteryOptimizations(packageName)
@@ -150,6 +151,16 @@ class GuideActivity : BaseActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != android.content.pm.PackageManager.PERMISSION_GRANTED) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            return
+        }
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+            // 权限在，但应用通知被用户关了：去系统的应用通知设置页打开
+            runCatching {
+                startActivity(
+                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
+                )
+            }
             return
         }
         Toast.makeText(this, R.string.guide_status_done, Toast.LENGTH_SHORT).show()

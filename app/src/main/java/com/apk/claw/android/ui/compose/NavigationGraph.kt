@@ -1,7 +1,9 @@
 package com.apk.claw.android.ui.compose
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Column
@@ -9,17 +11,25 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,11 +43,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -88,34 +101,54 @@ fun OctopusApp() {
         }
     }
 
+    // 对话页抽屉打开时收起 Dock,见 LocalBottomBarHidden
+    val bottomBarHidden = remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = EchoChatStyle.background,
         contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            if (!keyboardVisible) {
-            CompactBottomBar(
-                currentRoute = selectedBottomRoute,
-                onSelect = { screen ->
-                    if (selectedBottomRoute == screen.route && currentDestination?.route == screen.route) return@CompactBottomBar
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+            // 键盘弹出或对话页抽屉打开时收起 Dock
+            AnimatedVisibility(
+                visible = !bottomBarHidden.value && !keyboardVisible,
+                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+            ) {
+                CompactBottomBar(
+                    currentRoute = selectedBottomRoute,
+                    onSelect = { screen ->
+                        if (selectedBottomRoute == screen.route && currentDestination?.route == screen.route) {
+                            return@CompactBottomBar
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-            )
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
             }
         }
     ) { innerPadding ->
-        OctopusNavHost(
-            navController = navController,
-            showMessage = showMessage,
-            modifier = Modifier.padding(innerPadding)
-        )
+        CompositionLocalProvider(LocalBottomBarHidden provides bottomBarHidden) {
+            OctopusNavHost(
+                navController = navController,
+                showMessage = showMessage,
+                // consumeWindowInsets:Dock 已经占掉的底部(含导航栏)算作已消费,页面里的 imePadding()
+                // 只补「键盘高出 Dock 的那部分」,输入框不会悬在键盘上方一个 Dock 高的位置。
+                // 横屏时三键导航栏/挖孔在侧边,内容区左右让开(Dock 自己也让开,见 CompactBottomBar)。
+                // clipToBounds:收起的会话抽屉在内容区左侧外面,不裁剪会露在让出来的挖孔边条里。
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                    .clipToBounds(),
+            )
+        }
     }
 }
 
@@ -130,7 +163,10 @@ private fun CompactBottomBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
+            .windowInsetsPadding(
+                WindowInsets.navigationBars.union(WindowInsets.displayCutout)
+                    .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+            )
             .padding(horizontal = 28.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {

@@ -11,6 +11,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.home.HomeActivity
 import com.apk.claw.android.utils.XLog
@@ -40,6 +41,16 @@ class ForegroundService : Service() {
             if (ClawAccessibilityService.isConnected()) return true
             return _isRunning
         }
+
+        /**
+         * 「常驻通知」是否真的在状态栏可见：保活在运行，且用户没有关掉本应用的通知。
+         * 引导页和旧首页的「常驻通知」卡片用它；只看 [isRunning] 会在通知权限未授予时误报「已开启」，
+         * 与信任中心的「未授权」矛盾。
+         */
+        fun isPersistentNotificationShown(context: Context): Boolean =
+            isRunning() && runCatching {
+                NotificationManagerCompat.from(context).areNotificationsEnabled()
+            }.getOrDefault(false)
 
         /**
          * 启动前台服务

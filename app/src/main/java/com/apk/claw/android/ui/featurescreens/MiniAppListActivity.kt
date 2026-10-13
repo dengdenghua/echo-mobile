@@ -19,7 +19,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,10 +44,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.apk.claw.android.R
 import com.apk.claw.android.plugin.MiniAppRegistry
 import com.apk.claw.android.plugin.PermissionGate
 import com.apk.claw.android.plugin.PluginManifest
 import com.apk.claw.android.plugin.SquarePublisher
+import com.apk.claw.android.ui.compose.theme.OctopusColors
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import kotlinx.coroutines.launch
 
 class MiniAppListActivity : ComponentActivity() {
@@ -82,11 +88,9 @@ private fun MiniAppListScreen(onBack: () -> Unit) {
         },
     ) {
         if (apps.isEmpty()) {
-            Text(
-                "还没有安装小程序。安装 type=mini-app 的插件后会出现在这里。",
-                color = FMuted, fontSize = 14.sp,
-                modifier = Modifier.padding(20.dp)
-            )
+            MiniAppEmptyState(onBrowse = {
+                ctx.startActivity(android.content.Intent(ctx, MiniAppMarketplaceActivity::class.java))
+            })
             return@FeatureScaffold
         }
         Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
@@ -110,6 +114,24 @@ private fun MiniAppListScreen(onBack: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+/** 空状态:用用户能懂的话说明,并给出去广场挑小程序的入口(不再出现 type=mini-app 这类开发术语)。 */
+@Composable
+private fun MiniAppEmptyState(onBrowse: () -> Unit) {
+    Text(
+        stringResource(R.string.miniapp_empty),
+        color = FMuted, fontSize = 14.sp, lineHeight = 20.sp,
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 12.dp),
+    )
+    OutlinedButton(
+        onClick = onBrowse,
+        shape = OctopusShape.small,
+        border = BorderStroke(1.dp, OctopusColors.BorderHigh),
+        modifier = Modifier.padding(horizontal = 20.dp),
+    ) {
+        Text(stringResource(R.string.miniapp_browse_square), color = FText)
     }
 }
 

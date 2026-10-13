@@ -15,7 +15,7 @@ import com.apk.claw.android.R
  * 权限卡片组件
  *
  * 未开启时显示 SwitchCompat（unchecked），开启后隐藏 Switch 显示 "已开启" 文字。
- * 卡片背景色随状态切换（成功/错误容器色）。
+ * 卡片背景色随状态切换：已开启用 core 容器色，未开启用 warning 容器色（「待设置」是提醒，不是错误）。
  */
 class PermissionCardView @JvmOverloads constructor(
     context: Context,
@@ -70,7 +70,7 @@ class PermissionCardView @JvmOverloads constructor(
             switchStatus.visibility = View.VISIBLE
             switchStatus.isChecked = false
             tvEnabled.visibility = View.INVISIBLE
-            setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorErrorContainer))
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorWarningContainer))
         }
     }
 

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -123,9 +125,10 @@ private fun SearchTopBar(
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
+            // M3 输入框最小高度 56dp；强行压到 48dp 会把占位文字切掉一半
             modifier = Modifier
                 .weight(1f)
-                .height(48.dp),
+                .heightIn(min = 56.dp),
             placeholder = { Text(stringResource(R.string.square_search_hint)) },
             leadingIcon = {
                 Icon(
@@ -145,13 +148,14 @@ private fun SearchTopBar(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
         )
-        Spacer(Modifier.width(OctopusSpacing.sm))
-        Text(
-            stringResource(R.string.create_post_publish),
-            color = OctopusColors.Primary,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable(onClick = onSubmit),
-        )
+        // 这是搜索提交，不是发布；给足触控区并与右缘留出间距
+        TextButton(onClick = onSubmit, modifier = Modifier.padding(start = OctopusSpacing.xs)) {
+            Text(
+                stringResource(R.string.square_search_title),
+                color = OctopusColors.Primary,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     }
 }
 

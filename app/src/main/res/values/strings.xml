@@ -444,7 +444,6 @@
     <string name="chat_remote">Remote</string>
     <string name="chat_local">Local</string>
     <string name="chat_input_hint">Message Echo…</string>
-    <string name="chat_ack">Got it, running on the device…</string>
     <string name="chat_thinking">Thinking</string>
     <string name="chat_empty_hint">A little less to do. A little more time for you.</string>
     <string name="chat_empty_title">What can I help you with?</string>
@@ -1595,4 +1594,27 @@
     <string name="dot_history_earlier">Earlier messages</string>
     <string name="dot_history_user">You</string>
     <string name="dot_history_assistant">Assistant</string>
+    <string name="transfer_title">Echo File Transfer</string>
+    <string name="transfer_intro">Files sent from your computer appear here automatically. You can also pick a file in another app → Share → Echo File Transfer, then download it on your paired computer. Up to 100 MiB per file.</string>
+    <string name="transfer_add">Add a file from this phone</string>
+    <string name="transfer_refresh">Refresh</string>
+    <string name="transfer_files_section">Files</string>
+    <string name="transfer_empty">No files yet. Files from your computer and files you add will appear here.</string>
+    <string name="transfer_open">Open</string>
+    <string name="transfer_share">Share</string>
+    <string name="transfer_save">Save to phone</string>
+    <string name="chat_no_model_reply">I can\'t run this yet: no model is set up on this phone. Set one up and send the message again.</string>
+    <string name="chat_no_model_title">Set up a model first</string>
+    <string name="chat_no_model_desc">Echo needs a language model to understand and carry out your requests. Add a model and its API key in Model settings.</string>
+    <string name="chat_no_model_configure">Set up model</string>
+    <string name="chat_no_model_later">Later</string>
+    <string name="common_retry">Retry</string>
+    <string name="market_load_failed">Couldn\'t load this list</string>
+    <string name="market_load_failed_desc">Check your network connection and try again.</string>
+    <string name="post_detail_load_failed">Couldn\'t load this post</string>
+    <string name="post_detail_load_failed_desc">It may have been removed, or the network is unavailable. Try again.</string>
+    <string name="miniapp_empty">No mini apps yet. Mini apps you add from the Square appear here.</string>
+    <string name="miniapp_browse_square">Browse the Square</string>
+    <string name="channel_acl_no_code">No pairing code yet. Generate one, then send it to the bot to pair.</string>
+    <string name="channel_acl_generate_code">Generate pairing code</string>
 </resources>

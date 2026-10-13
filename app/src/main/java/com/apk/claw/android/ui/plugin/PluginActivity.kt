@@ -114,7 +114,7 @@ class PluginActivity : BaseActivity() {
 
             // Toolbar
             addView(CommonToolbar(this@PluginActivity).apply {
-                setTitle(getString(R.string.discover_shortcut_plugin))
+                setTitle(getString(R.string.settings_plugin_mgmt))
                 showBackButton(true) { finish() }
             })
 

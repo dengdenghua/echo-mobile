@@ -315,7 +315,7 @@ fun CreatePostScreen(
                     )
                 }
                 if (imageUris.size < 9) {
-                    item { AddImageButton(remaining = 9 - imageUris.size, onClick = { pickImages() }) }
+                    item { AddImageButton(added = imageUris.size, onClick = { pickImages() }) }
                 }
             }
 
@@ -430,7 +430,7 @@ private fun ImageThumb(uri: Uri, isCover: Boolean, onSetCover: () -> Unit, onRem
 }
 
 @Composable
-private fun AddImageButton(remaining: Int, onClick: () -> Unit) {
+private fun AddImageButton(added: Int, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(96.dp)
@@ -445,7 +445,8 @@ private fun AddImageButton(remaining: Int, onClick: () -> Unit) {
             Icon(Icons.Filled.Add, contentDescription = null, tint = OctopusColors.TextSecondary)
             Spacer(Modifier.height(4.dp))
             Text(
-                "$remaining/9",
+                // 已添加张数 / 上限（不是剩余张数：一张没加时显示 0/9）
+                "$added/9",
                 color = OctopusColors.TextMuted,
                 fontSize = OctopusType.tag,
             )

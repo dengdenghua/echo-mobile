@@ -166,7 +166,7 @@ class HomeActivity : BaseActivity() {
     }
 
     private fun updateNotificationStatus() {
-        cardNotification.setPermissionEnabled(ForegroundService.isRunning())
+        cardNotification.setPermissionEnabled(ForegroundService.isPersistentNotificationShown(this))
     }
 
     private fun updateSystemWindowStatus() {
@@ -243,7 +243,7 @@ class HomeActivity : BaseActivity() {
     private fun startNotificationService() {
         ForegroundService.start(this)
         runCatching { KeepAliveJobService.schedule(applicationContext) }
-        cardNotification.setPermissionEnabled(ForegroundService.isRunning())
+        cardNotification.setPermissionEnabled(ForegroundService.isPersistentNotificationShown(this))
     }
 
     private fun requestSystemWindowPermission() {

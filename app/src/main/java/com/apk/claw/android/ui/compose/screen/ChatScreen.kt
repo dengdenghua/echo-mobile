@@ -69,6 +69,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Call
@@ -143,6 +144,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.ContextCompat
+import com.apk.claw.android.ui.compose.LocalBottomBarHidden
 import com.apk.claw.android.ui.compose.screen.detail.CodeDetailPane
 import com.apk.claw.android.ui.compose.screen.detail.DetailDrawer
 import com.apk.claw.android.ui.compose.screen.detail.DetailPane
@@ -387,7 +389,8 @@ fun ChatScreen() {
     val scope = rememberCoroutineScope()
     var ghostChatJob by taskState.job
     var dotRequestGeneration by taskState.generation
-    val ackText = stringResource(R.string.chat_ack)
+    val noModelText = stringResource(R.string.chat_no_model_reply)
+    var showNoModelDialog by remember { mutableStateOf(false) }
     val thinkingText = stringResource(R.string.chat_thinking)
     val newChatTitle = stringResource(R.string.chat_new)
     val dotSendFailed = stringResource(R.string.dot_send_failed)
@@ -921,13 +924,20 @@ fun ChatScreen() {
                 )
                 }  // 关闭单 Agent 分支的 else
             } else {
-                messages.add(ChatMessage.AgentMessage(ackText))
+                // 没配模型时不能回「正在执行」然后没下文:说清原因,并弹出去配置模型的入口。
+                messages.add(ChatMessage.AgentMessage(noModelText))
+                showNoModelDialog = true
                 scrollEnd(); persist()
             }
         }
     }
     val closeDrawer = { scope.launch { drawerState.close() }; Unit }
     BackHandler(enabled = drawerState.isOpen) { closeDrawer() }
+    // 抽屉打开时收起底部 Dock:Dock 画在 NavHost 之外,不收起会压在抽屉遮罩上面。
+    val bottomBarHidden = LocalBottomBarHidden.current
+    val drawerShown = drawerState.targetValue == DrawerValue.Open || drawerState.currentValue == DrawerValue.Open
+    LaunchedEffect(drawerShown) { bottomBarHidden.value = drawerShown }
+    DisposableEffect(Unit) { onDispose { bottomBarHidden.value = false } }
 
     // 文本默认展开；语音模式仍支持按住说话、松手发送。
     var voiceMode by remember { mutableStateOf(false) }
@@ -1600,6 +1610,15 @@ fun ChatScreen() {
             },
         )
     }
+    if (showNoModelDialog) {
+        NoModelDialog(
+            onConfigure = {
+                showNoModelDialog = false
+                runCatching { context.startActivity(android.content.Intent(context, LlmConfigActivity::class.java)) }
+            },
+            onDismiss = { showNoModelDialog = false },
+        )
+    }
     // refine-chat-interaction Task 3:右侧详情抽屉。
     // currentDetail = null 时 DetailDrawer 直接 return,消息流可独立浏览(INV-U4)。
     // 占位接入:具体 DetailPane 实例化由 ArtifactCard.onClick 触发,Task 4 子代理实现。
@@ -2160,6 +2179,18 @@ private fun TargetSelector(onPreview: (DeviceInfo?) -> Unit = {}) {
     var label by remember { mutableStateOf(ControlTarget.label()) }
     val remote = remember(label) { ControlTarget.isRemote() }
     val loopbackName = stringResource(R.string.chat_loopback_device)  // 提前取,onClick 内不能调 @Composable
+    // 当前目标打勾(本机 id = "local"),一眼看出 Agent 现在控制的是哪台设备
+    val currentTargetId = remember(label) { ControlTarget.id() }
+    val currentMark: @Composable (String) -> Unit = { id ->
+        if (id == currentTargetId) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = AccentColor,
+                modifier = Modifier.size(OctopusIconSize.small),
+            )
+        }
+    }
     Box {
         // 只一个「手机/电脑」复合图标;点击才弹出设备列表。远程时高亮 + 右上角小圆点提示。
         IconButton(onClick = { menu = true }) {
@@ -2177,12 +2208,14 @@ private fun TargetSelector(onPreview: (DeviceInfo?) -> Unit = {}) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.chat_target_local_device)) },
                 leadingIcon = { Icon(Icons.Filled.PhoneAndroid, contentDescription = null, modifier = Modifier.size(OctopusIconSize.small)) },
+                trailingIcon = { currentMark("local") },
                 onClick = { ControlTarget.setLocal(); label = ControlTarget.label(); menu = false; onPreview(null) },
             )
             devices.forEach { d ->
                 DropdownMenuItem(
                     text = { Text(d.deviceName) },
                     leadingIcon = { Icon(Icons.Filled.PhoneAndroid, contentDescription = null, modifier = Modifier.size(OctopusIconSize.small)) },
+                    trailingIcon = { currentMark(d.deviceId) },
                     onClick = { ControlTarget.setRemote(d); label = ControlTarget.label(); menu = false; onPreview(d) },
                 )
             }
@@ -2208,6 +2241,15 @@ private fun TargetSelector(onPreview: (DeviceInfo?) -> Unit = {}) {
             if (BuildConfig.DEBUG) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.chat_loopback)) },
+                    // 和其他目标一样有图标,文字才对齐
+                    leadingIcon = {
+                        Icon(
+                            Icons.Filled.Loop,
+                            contentDescription = null,
+                            modifier = Modifier.size(OctopusIconSize.small),
+                        )
+                    },
+                    trailingIcon = { currentMark("loopback") },
                     onClick = {
                         val token = runCatching { ConfigServerManager.getAuthToken() }.getOrNull() ?: ""
                         // ConfigServer 绑定在本机 WiFi IP（非 127.0.0.1），用其真实地址回环

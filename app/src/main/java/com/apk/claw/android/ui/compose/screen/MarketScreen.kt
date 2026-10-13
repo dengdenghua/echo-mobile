@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +47,7 @@ import com.apk.claw.android.R
 import com.apk.claw.android.registry.CommunitySquareApi
 import com.apk.claw.android.registry.RegistryClient
 import com.apk.claw.android.registry.mobileFit
+import com.apk.claw.android.ui.compose.component.LoadFailedState
 import com.apk.claw.android.ui.compose.component.OctopusCard
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusSpacing
@@ -109,13 +111,17 @@ fun MarketTab(
     var category by remember { mutableStateOf<String?>(null) }
     var sort by remember { mutableStateOf(MarketSort.LATEST) }
     var loading by remember { mutableStateOf(true) }
+    var failed by remember { mutableStateOf(false) }
+    var reloadKey by remember { mutableIntStateOf(0) }
     var items by remember { mutableStateOf<List<MarketItem>>(emptyList()) }
 
     // 排序在服务端做(小程序按 sort=downloads/trending;趋势=下载速度需 created_at,客户端拿不到),
     // 故切换 sort 需重新拉取。切 kind 时的 category 复位放在 MarketKindTabs 的回调里。
-    LaunchedEffect(kind, sort) {
+    LaunchedEffect(kind, sort, reloadKey) {
         loading = true
-        items = loadMarket(kind, sort)
+        val result = loadMarket(kind, sort)
+        items = result.getOrDefault(emptyList())
+        failed = result.isFailure
         loading = false
     }
 
@@ -140,33 +146,50 @@ fun MarketTab(
         if (categories.isNotEmpty()) {
             MarketCategoryRow(categories, category) { category = it }
         }
-        MarketContent(loading, shown, kind, openStore)
+        MarketContent(
+            MarketLoadState(loading, failed),
+            shown,
+            kind,
+            onOpenStore = openStore,
+            onRetry = { reloadKey++ },
+        )
     }
 }
 
-/** 三类加载归一;应用类 Result 失败退空列表(UI 显示空态)。
+/** 三类加载归一。失败(网络不通且没有缓存)返回 failure:界面显示失败状态 + 重试,不当成「没有内容」。
  *  小程序(APP)把 sort 透传服务端拿真实排序 + 下载量;技能/插件走 enterprise registry
  *  无 sort/无下载埋点,恒按其默认序(最新)返回,sort 对它们是无害的空操作。 */
-private suspend fun loadMarket(kind: MarketKind, sort: MarketSort): List<MarketItem> = when (kind) {
-    MarketKind.SKILL -> RegistryClient.listSkills().filter { it.mobileFit }
-        .map { MarketItem(it.id, it.name, it.description, it.category, it.version) }
-    MarketKind.PLUGIN -> RegistryClient.listPlugins().filter { it.mobileFit }
-        .map { MarketItem(it.id, it.name, it.description, it.category, it.version) }
-    MarketKind.APP -> CommunitySquareApi.list(sort.apiValue).getOrDefault(emptyList())
-        .map { MarketItem(it.effectiveSlug, it.name, it.description, it.category, it.version, it.downloadCount) }
+private suspend fun loadMarket(kind: MarketKind, sort: MarketSort): Result<List<MarketItem>> = when (kind) {
+    MarketKind.SKILL -> RegistryClient.listSkillsResult().map { list ->
+        list.filter { it.mobileFit }.map { MarketItem(it.id, it.name, it.description, it.category, it.version) }
+    }
+    MarketKind.PLUGIN -> RegistryClient.listPluginsResult().map { list ->
+        list.filter { it.mobileFit }.map { MarketItem(it.id, it.name, it.description, it.category, it.version) }
+    }
+    MarketKind.APP -> CommunitySquareApi.list(sort.apiValue).map { list ->
+        list.map { MarketItem(it.effectiveSlug, it.name, it.description, it.category, it.version, it.downloadCount) }
+    }
 }
+
+private data class MarketLoadState(val loading: Boolean, val failed: Boolean)
 
 @Composable
 private fun MarketContent(
-    loading: Boolean,
+    state: MarketLoadState,
     shown: List<MarketItem>,
     kind: MarketKind,
     onOpenStore: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     when {
-        loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+        state.loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             CircularProgressIndicator(color = kind.tint)
         }
+        state.failed -> LoadFailedState(
+            title = stringResource(R.string.market_load_failed),
+            message = stringResource(R.string.market_load_failed_desc),
+            onRetry = onRetry,
+        )
         shown.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             Text(stringResource(R.string.market_empty), color = OctopusColors.TextMuted, fontSize = OctopusType.body)
         }

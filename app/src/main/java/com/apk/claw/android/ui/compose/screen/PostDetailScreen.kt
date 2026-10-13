@@ -72,6 +72,7 @@ import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.plugin.SubscriptionGate
 import com.apk.claw.android.registry.CommunityMiniAppInstaller
 import com.apk.claw.android.registry.CommunitySquareApi
+import com.apk.claw.android.ui.compose.component.LoadFailedState
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -79,6 +80,7 @@ import com.apk.claw.android.ui.compose.theme.OctopusSpacing
 import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.ui.compose.theme.tvFocusable
 import com.apk.claw.android.ui.compose.theme.tvOverscan
+import com.apk.claw.android.utils.XLog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -127,8 +129,9 @@ fun PostDetailScreen(
                 val cmts = SquarePostApi.listComments(postId)
                 comments = cmts.comments
             } catch (e: Exception) {
+                // 原始异常（如 connection closed）只进日志；页面上给本地化的失败状态和重试
+                XLog.w("PostDetail", "load post $postId failed", e)
                 loadFailed = true
-                onMessage("加载失败:${e.message ?: e::class.simpleName}")
             }
             loading = false
         }
@@ -229,9 +232,11 @@ fun PostDetailScreen(
             loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = OctopusColors.Primary)
             }
-            loadFailed || post == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("加载失败", color = OctopusColors.TextMuted)
-            }
+            loadFailed || post == null -> LoadFailedState(
+                title = stringResource(R.string.post_detail_load_failed),
+                message = stringResource(R.string.post_detail_load_failed_desc),
+                onRetry = { reload() },
+            )
             else -> {
                 val p = post!!
                 LazyColumn(

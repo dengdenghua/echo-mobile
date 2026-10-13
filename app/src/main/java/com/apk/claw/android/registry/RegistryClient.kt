@@ -124,32 +124,45 @@ internal object RegistryClient {
     fun base(): String = KVUtils.getString(BASE_KEY, DEFAULT_BASE).trim().trimEnd('/').ifBlank { DEFAULT_BASE }
 
     /** 列技能目录:服务端 → 缓存回退(永不空屏)。 */
-    suspend fun listSkills(): List<RegistryAsset> = withContext(Dispatchers.IO) {
-        runCatching {
-            val req = Request.Builder().url("${base()}$API?type=skill").get().build()
-            http.newCall(req).execute().use { resp ->
-                val body = resp.body?.string().orEmpty()
-                if (resp.isSuccessful && body.isNotBlank()) {
-                    val parsed = gson.fromJson(body, RegistryListResponse::class.java)
-                    if (parsed?.data?.isNotEmpty() == true) {
-                        KVUtils.putString(CACHE_KEY, body)
-                        return@withContext parsed.data
+    suspend fun listSkills(): List<RegistryAsset> = listSkillsResult().getOrDefault(emptyList())
+
+    /** 同 [listSkills],但网络失败且没有缓存时返回 failure,界面据此显示「加载失败 + 重试」而不是空状态。 */
+    suspend fun listSkillsResult(): Result<List<RegistryAsset>> = listResult("skill", CACHE_KEY)
+
+    /**
+     * 列目录:服务端有数据用服务端(并刷新缓存);否则回退缓存;网络失败又没有缓存时返回 failure。
+     * 服务端正常返回但为空、且没有缓存时是 success(空列表):那是真的没有内容。
+     */
+    private suspend fun listResult(type: String, cacheKey: String): Result<List<RegistryAsset>> =
+        withContext(Dispatchers.IO) {
+            val fetched = runCatching {
+                val req = Request.Builder().url("${base()}$API?type=$type").get().build()
+                http.newCall(req).execute().use { resp ->
+                    val body = resp.body?.string().orEmpty()
+                    check(resp.isSuccessful) { "HTTP ${resp.code}" }
+                    val data = if (body.isBlank()) {
+                        emptyList()
+                    } else {
+                        gson.fromJson(body, RegistryListResponse::class.java)?.data.orEmpty()
                     }
+                    if (data.isNotEmpty()) KVUtils.putString(cacheKey, body)
+                    data
                 }
             }
-        }
-        cachedSkills()
-    }
-
-    private fun cachedSkills(): List<RegistryAsset> {
-        val cached = KVUtils.getString(CACHE_KEY, "")
-        if (cached.isNotBlank()) {
-            runCatching {
-                val parsed = gson.fromJson(cached, RegistryListResponse::class.java)
-                if (parsed?.data?.isNotEmpty() == true) return parsed.data
+            val cached = cachedList(cacheKey)
+            when {
+                fetched.getOrNull()?.isNotEmpty() == true -> fetched
+                cached.isNotEmpty() -> Result.success(cached)
+                else -> fetched
             }
         }
-        return emptyList()
+
+    private fun cachedList(cacheKey: String): List<RegistryAsset> {
+        val cached = KVUtils.getString(cacheKey, "")
+        if (cached.isBlank()) return emptyList()
+        return runCatching {
+            gson.fromJson(cached, RegistryListResponse::class.java)?.data.orEmpty()
+        }.getOrDefault(emptyList())
     }
 
     /** 取单技能 payload(信封 + body)。失败返回 null。 */
@@ -171,30 +184,10 @@ internal object RegistryClient {
     private const val PLUGIN_CACHE_KEY = "PLUGIN_MARKETPLACE_FEED_JSON"
 
     /** 列插件目录:服务端 → 缓存回退(永不空屏)。 */
-    suspend fun listPlugins(): List<RegistryAsset> = withContext(Dispatchers.IO) {
-        runCatching {
-            val req = Request.Builder().url("${base()}$API?type=plugin").get().build()
-            http.newCall(req).execute().use { resp ->
-                val body = resp.body?.string().orEmpty()
-                if (resp.isSuccessful && body.isNotBlank()) {
-                    val parsed = gson.fromJson(body, RegistryListResponse::class.java)
-                    if (parsed?.data?.isNotEmpty() == true) {
-                        KVUtils.putString(PLUGIN_CACHE_KEY, body)
-                        return@withContext parsed.data
-                    }
-                }
-            }
-        }
-        // 缓存兜底
-        val cached = KVUtils.getString(PLUGIN_CACHE_KEY, "")
-        if (cached.isNotBlank()) {
-            runCatching {
-                val parsed = gson.fromJson(cached, RegistryListResponse::class.java)
-                if (parsed?.data?.isNotEmpty() == true) return@withContext parsed.data
-            }
-        }
-        emptyList()
-    }
+    suspend fun listPlugins(): List<RegistryAsset> = listPluginsResult().getOrDefault(emptyList())
+
+    /** 同 [listPlugins],但网络失败且没有缓存时返回 failure。 */
+    suspend fun listPluginsResult(): Result<List<RegistryAsset>> = listResult("plugin", PLUGIN_CACHE_KEY)
 
     /** 下载单个插件完整 payload(含 base64 ZIP body)。失败返回 null。 */
     suspend fun downloadPlugin(id: String): RegistryDownloadData? = download(id)

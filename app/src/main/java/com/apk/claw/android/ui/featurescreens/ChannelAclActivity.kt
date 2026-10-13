@@ -9,19 +9,25 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import com.apk.claw.android.channel.Channel
 import com.apk.claw.android.channel.ChannelAccessControl
 import com.apk.claw.android.octopus_mobile.ToolAuditLog
+import com.apk.claw.android.ui.compose.theme.OctopusColors
+import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.utils.KVUtils
 
 /**
@@ -40,6 +46,13 @@ class ChannelAclActivity : ComponentActivity() {
         setFeatureContent { ChannelAclScreen(onBack = { finish() }) }
     }
 }
+
+/**
+ * 「给机器人发送 /pair <码>」的操作提示。还没有配对码时返回 null:界面改为显示「生成配对码」按钮,
+ * 不再出现 "/pair null" 这种无法照做的指令。
+ */
+internal fun pairCommandHint(channelLabel: String, pairingCode: String?): String? =
+    pairingCode?.takeIf { it.isNotBlank() }?.let { "在 $channelLabel 给机器人发送:/pair $it" }
 
 /** 脱敏发送者标识,避免把用户 id 明文展示。与 ChannelAccessControl.mask 一致。 */
 private fun maskSender(id: String): String =
@@ -189,8 +202,8 @@ private fun UnpairedSection(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                if (pairingCode != null) "配对码(10 分钟内有效)" else "无配对码,点击刷新生成",
-                color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                if (pairingCode != null) "配对码(10 分钟内有效)" else stringResource(R.string.channel_acl_no_code),
+                color = FMuted, fontSize = 12.sp, lineHeight = 16.sp,
             )
             if (pairingCode != null) {
                 Text(
@@ -200,18 +213,34 @@ private fun UnpairedSection(
                 )
             }
         }
-        Icon(
-            Icons.Filled.Refresh,
-            contentDescription = "刷新配对码",
-            tint = FPrimary,
-            modifier = Modifier.size(22.dp).clickable { onRefreshCode() },
-        )
+        if (pairingCode != null) {
+            Icon(
+                Icons.Filled.Refresh,
+                contentDescription = "刷新配对码",
+                tint = FPrimary,
+                modifier = Modifier.size(22.dp).clickable { onRefreshCode() },
+            )
+        }
     }
-    Text(
-        "在 $channelLabel 给机器人发送:/pair $pairingCode",
-        color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
-        modifier = Modifier.padding(top = 6.dp),
-    )
+    val hint = pairCommandHint(channelLabel, pairingCode)
+    if (hint != null) {
+        Text(
+            hint,
+            color = FMuted, fontSize = 12.sp, lineHeight = 16.sp,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    } else {
+        OutlinedButton(
+            onClick = onRefreshCode,
+            shape = OctopusShape.small,
+            border = BorderStroke(1.dp, OctopusColors.BorderHigh),
+            modifier = Modifier.padding(top = 8.dp),
+        ) {
+            Icon(Icons.Filled.Refresh, contentDescription = null, tint = FText, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.channel_acl_generate_code), color = FText, fontSize = 13.sp)
+        }
+    }
 }
 
 @Composable

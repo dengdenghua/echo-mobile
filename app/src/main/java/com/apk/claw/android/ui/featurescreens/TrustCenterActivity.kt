@@ -182,8 +182,16 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             CapabilityRow(Icons.Filled.Bolt, stringResource(R.string.trustcenter_capability_shizuku), stringResource(R.string.trustcenter_capability_shizuku_desc), shizuku) {
                 runCatching { ShizukuManager.requestPermission() }
             }
-            CapabilityRow(Icons.Filled.Storage, stringResource(R.string.perm_storage), stringResource(R.string.trustcenter_capability_storage_desc), storage) {
-                openIntent(ctx, Settings.ACTION_APPLICATION_DETAILS_SETTINGS, withPkg = true)
+            // Android 10 起分区存储无需授权，不列出（与就绪度、设置页的计数口径一致）
+            if (SetupReadiness.storageNeedsGrant()) {
+                CapabilityRow(
+                    Icons.Filled.Storage,
+                    stringResource(R.string.perm_storage),
+                    stringResource(R.string.trustcenter_capability_storage_desc),
+                    storage,
+                ) {
+                    openIntent(ctx, Settings.ACTION_APPLICATION_DETAILS_SETTINGS, withPkg = true)
+                }
             }
 
             FSectionTitle(stringResource(R.string.trustcenter_section_lannetwork))

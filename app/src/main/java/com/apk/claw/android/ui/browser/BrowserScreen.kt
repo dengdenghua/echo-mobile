@@ -48,6 +48,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -661,8 +662,11 @@ private fun BrowserCapsuleButton(
 
 @Composable
 private fun BrowserWebViewContainer(engine: BrowserEngine) {
+    // WebView 自己的默认底色是纯白/纯黑,会露在状态栏那一条和 Dock 两侧;铺成 ground,与页面底色一致。
+    val ground = OctopusColors.Background.toArgb()
     AndroidView(
         factory = { ctx -> engine.createView(ctx) },
+        update = { it.setBackgroundColor(ground) },
         modifier = Modifier.fillMaxSize(),
     )
 }

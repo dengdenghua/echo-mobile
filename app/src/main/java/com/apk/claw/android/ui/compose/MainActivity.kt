@@ -39,8 +39,9 @@ class MainActivity : ComponentActivity() {
                 OctopusTheme {
                     OctopusApp()
                     // 在线更新:根部挂弹窗宿主 + 启动静默查一次(有新版才弹,已最新无感)。
+                    // 每个进程只查一次:Activity 重建(旋转/换主题/换语言)不再重复请求。
                     AppUpdateHost()
-                    LaunchedEffect(Unit) { runCatching { AppUpdater.check() } }
+                    LaunchedEffect(Unit) { runCatching { AppUpdater.checkOncePerProcess() } }
                 }
             }
         }

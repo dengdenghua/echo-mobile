@@ -444,7 +444,6 @@
     <string name="chat_remote">Remoto</string>
     <string name="chat_local">Local</string>
     <string name="chat_input_hint">Dime qué hacer en tu teléfono...</string>
-    <string name="chat_ack">Entendido, ejecutando en el dispositivo…</string>
     <string name="chat_thinking">Pensando</string>
     <string name="chat_empty_hint">Una línea para programar revisión de notificaciones, acciones de apps, organización de archivos y tareas entre dispositivos.</string>
     <string name="chat_empty_title">¿Qué debería hacer el teléfono por ti hoy?</string>
@@ -1399,4 +1398,27 @@
         <item quantity="one">%d resultado nuevo</item>
         <item quantity="other">%d resultados nuevos</item>
     </plurals>
+    <string name="transfer_title">Transferencia de archivos de Echo</string>
+    <string name="transfer_intro">Los archivos enviados desde tu ordenador aparecen aquí automáticamente. También puedes elegir un archivo en otra app → Compartir → Transferencia de archivos de Echo y descargarlo en tu ordenador emparejado. Hasta 100 MiB por archivo.</string>
+    <string name="transfer_add">Añadir un archivo del teléfono</string>
+    <string name="transfer_refresh">Actualizar</string>
+    <string name="transfer_files_section">Archivos</string>
+    <string name="transfer_empty">Aún no hay archivos. Aquí aparecerán los archivos de tu ordenador y los que añadas.</string>
+    <string name="transfer_open">Abrir</string>
+    <string name="transfer_share">Compartir</string>
+    <string name="transfer_save">Guardar en el teléfono</string>
+    <string name="chat_no_model_reply">Aún no puedo hacerlo: no hay ningún modelo configurado en este teléfono. Configura uno y vuelve a enviar el mensaje.</string>
+    <string name="chat_no_model_title">Primero configura un modelo</string>
+    <string name="chat_no_model_desc">Echo necesita un modelo de lenguaje para entender y ejecutar tus peticiones. Añade un modelo y su clave de API en Ajustes del modelo.</string>
+    <string name="chat_no_model_configure">Configurar modelo</string>
+    <string name="chat_no_model_later">Más tarde</string>
+    <string name="common_retry">Reintentar</string>
+    <string name="market_load_failed">No se pudo cargar la lista</string>
+    <string name="market_load_failed_desc">Comprueba tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="post_detail_load_failed">No se pudo cargar la publicación</string>
+    <string name="post_detail_load_failed_desc">Puede que se haya eliminado o que no haya conexión. Inténtalo de nuevo.</string>
+    <string name="miniapp_empty">Aún no tienes miniapps. Las que añadas desde la Plaza aparecerán aquí.</string>
+    <string name="miniapp_browse_square">Explorar la Plaza</string>
+    <string name="channel_acl_no_code">Aún no hay código de emparejamiento. Genera uno y envíaselo al bot para emparejar.</string>
+    <string name="channel_acl_generate_code">Generar código</string>
 </resources>

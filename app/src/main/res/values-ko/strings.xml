@@ -444,7 +444,6 @@
     <string name="chat_remote">원격</string>
     <string name="chat_local">로컬</string>
     <string name="chat_input_hint">휴대폰에서 할 일을 알려주세요...</string>
-    <string name="chat_ack">알겠습니다. 기기에서 실행 중…</string>
     <string name="chat_thinking">생각 중</string>
     <string name="chat_empty_hint">한 줄로 알림 확인, 앱 작업, 파일 정리 및 교차 기기 작업을 예약하세요.</string>
     <string name="chat_empty_title">오늘 휴대폰이 무엇을 해주길 원하시나요?</string>
@@ -1398,4 +1397,27 @@
     <plurals name="chat_new_results">
         <item quantity="other">새 결과 %d개</item>
     </plurals>
+    <string name="transfer_title">Echo 파일 전송</string>
+    <string name="transfer_intro">컴퓨터에서 보낸 파일은 여기에 자동으로 표시됩니다. 다른 앱에서 파일을 선택하고 공유 → Echo 파일 전송을 누르면 페어링된 컴퓨터에서 내려받을 수 있습니다. 파일당 최대 100MiB.</string>
+    <string name="transfer_add">휴대폰 파일 추가</string>
+    <string name="transfer_refresh">새로고침</string>
+    <string name="transfer_files_section">파일</string>
+    <string name="transfer_empty">아직 파일이 없습니다. 컴퓨터에서 받은 파일과 추가한 파일이 여기에 표시됩니다.</string>
+    <string name="transfer_open">열기</string>
+    <string name="transfer_share">공유</string>
+    <string name="transfer_save">휴대폰에 저장</string>
+    <string name="chat_no_model_reply">아직 실행할 수 없어요. 이 휴대폰에 설정된 모델이 없습니다. 모델을 설정한 뒤 다시 보내 주세요.</string>
+    <string name="chat_no_model_title">먼저 모델을 설정하세요</string>
+    <string name="chat_no_model_desc">Echo가 요청을 이해하고 실행하려면 언어 모델이 필요합니다. 모델 설정에서 모델과 API 키를 추가하세요.</string>
+    <string name="chat_no_model_configure">모델 설정</string>
+    <string name="chat_no_model_later">나중에</string>
+    <string name="common_retry">다시 시도</string>
+    <string name="market_load_failed">목록을 불러오지 못했습니다</string>
+    <string name="market_load_failed_desc">네트워크 연결을 확인한 뒤 다시 시도하세요.</string>
+    <string name="post_detail_load_failed">게시물을 불러오지 못했습니다</string>
+    <string name="post_detail_load_failed_desc">삭제되었거나 네트워크를 사용할 수 없습니다. 다시 시도하세요.</string>
+    <string name="miniapp_empty">아직 미니 앱이 없습니다. 광장에서 추가한 미니 앱이 여기에 표시됩니다.</string>
+    <string name="miniapp_browse_square">광장 둘러보기</string>
+    <string name="channel_acl_no_code">아직 페어링 코드가 없습니다. 코드를 생성해 봇에게 보내면 페어링됩니다.</string>
+    <string name="channel_acl_generate_code">페어링 코드 생성</string>
 </resources>

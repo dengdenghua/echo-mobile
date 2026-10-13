@@ -18,6 +18,7 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 在线更新(OTA)—— 侧载分发没有商店自动更新,这里补一条:比对服务端最新 versionCode,
@@ -59,6 +60,21 @@ object AppUpdater {
     val available: StateFlow<UpdateInfo?> = _available
 
     fun dismiss() { _available.value = null }
+
+    /** 启动自动检查是否已在本进程发起过（MainActivity 重建不重复请求）。 */
+    private val autoCheckStarted = AtomicBoolean(false)
+
+    /**
+     * 启动时的静默自动检查：每个进程只查一次。MainActivity 在旋转、换主题、换语言时会重建，
+     * 之前每次重建都重新请求一遍（离线时每次都多一条 SSL 失败日志）。手动「检查更新」仍走 [check]。
+     * 已查过时返回 null。
+     */
+    suspend fun checkOncePerProcess(runCheck: suspend () -> CheckResult = { check() }): CheckResult? =
+        if (autoCheckStarted.compareAndSet(false, true)) runCheck() else null
+
+    /** 仅测试用：把「本进程已自动检查过」复位。 */
+    @androidx.annotation.VisibleForTesting
+    internal fun resetAutoCheckForTest() = autoCheckStarted.set(false)
 
     /** 查一次最新版本。新版 → 置 available 并返回 Available;已最新 → UpToDate;失败 → Error。 */
     suspend fun check(): CheckResult = withContext(Dispatchers.IO) {

@@ -46,15 +46,12 @@ import androidx.compose.ui.draw.clip
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -62,9 +59,8 @@ import com.apk.claw.android.BuildConfig
 import com.apk.claw.android.capture.ScreenCaptureService
 import com.apk.claw.android.server.ConfigServerManager
 import com.apk.claw.android.octopus_mobile.RemoteStreamPrefs
+import com.apk.claw.android.octopus_mobile.SetupReadiness
 import com.apk.claw.android.server.RemoteConsoleGateway
-import com.apk.claw.android.service.ClawAccessibilityService
-import com.apk.claw.android.shizuku.ShizukuManager
 import com.apk.claw.android.widget.AdvancedPermissionDialog
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -97,43 +93,33 @@ import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
 import kotlinx.coroutines.launch
 
-// ── 真实权限/状态探测 ──────────────────────────────────
+// ── 准备状态：计数和清单都取自 SetupReadiness，与信任中心的就绪度一致 ──────────
 
-private fun isNotifEnabled(c: Context): Boolean =
-    runCatching { NotificationManagerCompat.from(c).areNotificationsEnabled() }.getOrDefault(false)
-
-private fun isOverlayGranted(c: Context): Boolean =
-    runCatching { Settings.canDrawOverlays(c) }.getOrDefault(false)
-
-private fun isBatteryUnrestricted(c: Context): Boolean = runCatching {
-    val pm = c.getSystemService(Context.POWER_SERVICE) as? PowerManager
-    pm?.isIgnoringBatteryOptimizations(c.packageName) ?: false
-}.getOrDefault(false)
-
-private fun isStorageGranted(c: Context): Boolean {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) return true
-    return androidx.core.content.ContextCompat.checkSelfPermission(
-        c, android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+private fun readinessIcon(kind: SetupReadiness.Kind): ImageVector = when (kind) {
+    SetupReadiness.Kind.ACCESSIBILITY -> Icons.Filled.SettingsAccessibility
+    SetupReadiness.Kind.MODEL -> Icons.Filled.Memory
+    SetupReadiness.Kind.NOTIFICATIONS -> Icons.Filled.Notifications
+    SetupReadiness.Kind.OVERLAY -> Icons.Filled.PhoneAndroid
+    SetupReadiness.Kind.BATTERY -> Icons.Filled.BatteryChargingFull
+    SetupReadiness.Kind.SHIZUKU -> Icons.Filled.Security
+    SetupReadiness.Kind.STORAGE -> Icons.Filled.Storage
 }
 
-private fun isShizukuReady(): Boolean = runCatching { ShizukuManager.isAvailable() }.getOrDefault(false)
-
-/** 未授权权限的跳转 Intent */
-private fun permissionIntent(index: Int, context: Context): Intent? = when (index) {
-    0 -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)           // 无障碍
-    1 -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {  // 通知
+/** 未就绪项的跳转 Intent；Shizuku 没有系统设置页，走单独的引导弹窗（返回 null）。 */
+private fun readinessIntent(kind: SetupReadiness.Kind, context: Context): Intent? = when (kind) {
+    SetupReadiness.Kind.ACCESSIBILITY -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+    SetupReadiness.Kind.MODEL -> Intent(context, LlmConfigActivity::class.java)
+    SetupReadiness.Kind.NOTIFICATIONS -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
     }
-    2 -> Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply { // 悬浮窗
+    SetupReadiness.Kind.OVERLAY -> Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
         data = Uri.parse("package:${context.packageName}")
     }
-    3 -> Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS) // 电池
-    4 -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { // 存储
+    SetupReadiness.Kind.BATTERY -> Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+    SetupReadiness.Kind.STORAGE -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
         data = Uri.parse("package:${context.packageName}")
     }
-    5 -> null // Shizuku 需要单独 App，无法直接跳转
-    else -> null
+    SetupReadiness.Kind.SHIZUKU -> null
 }
 
 private const val SHOW_BYO_MODEL_CONFIG = false
@@ -172,17 +158,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
         lifecycleOwner.lifecycle.addObserver(obs)
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
-    val permissionStates = remember(refreshTick) {
-        listOf(
-            ClawAccessibilityService.isRunning(),
-            isNotifEnabled(context),
-            isOverlayGranted(context),
-            isBatteryUnrestricted(context),
-            isStorageGranted(context),
-            isShizukuReady(),
-        )
-    }
-    val readyCount = permissionStates.count { it }
+    val readiness = remember(refreshTick) { SetupReadiness.check(context) }
     val lanAddr = remember(refreshTick) { runCatching { ConfigServerManager.getAddress() }.getOrNull() }
     val loggedIn = remember(refreshTick) { AccountStore.isLoggedIn }
     val credits = remember(refreshTick) { AccountStore.credits }
@@ -332,7 +308,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
     ) {
         item {
             SettingsHeader(
-                readyCount = readyCount,
+                readiness = readiness,
                 lanAddr = lanAddr,
             )
         }
@@ -376,41 +352,24 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
 
         // ── 权限：可点击跳转系统设置 ──
         item {
-            val permNames = listOf(
-                stringResource(R.string.perm_accessibility),
-                stringResource(R.string.perm_notification),
-                stringResource(R.string.perm_overlay),
-                stringResource(R.string.perm_battery),
-                stringResource(R.string.perm_storage),
-                "Shizuku",
-            )
-            val permIcons = listOf(
-                Icons.Filled.SettingsAccessibility,
-                Icons.Filled.Notifications,
-                Icons.Filled.PhoneAndroid,
-                Icons.Filled.BatteryChargingFull,
-                Icons.Filled.Storage,
-                Icons.Filled.Security,
-            )
             SettingsCard(stringResource(R.string.settings_section_permissions), Icons.Filled.Shield, compact = true) {
                 // 摘要行
-                val perms = permNames.mapIndexed { i, name -> PermissionUi(permIcons[i], name, permissionStates[i]) }
-                PermissionSummaryRow(readyCount, perms)
+                val perms = readiness.items.map { PermissionUi(readinessIcon(it.kind), it.label, it.ready) }
+                PermissionSummaryRow(readiness, perms)
                 Spacer(Modifier.height(OctopusSpacing.sm))
-                // 逐项权限（未授权可点击跳转）
-                perms.forEachIndexed { i, perm ->
+                // 逐项（未就绪可点击跳转）
+                readiness.items.forEachIndexed { i, item ->
                     PermissionItemRow(
-                        permission = perm,
+                        permission = perms[i],
                         onClick = {
-                            if (!perm.ok) {
-                                if (i == 5) {
+                            if (!item.ready) {
+                                val intent = readinessIntent(item.kind, context)
+                                if (intent == null) {
                                     // Shizuku 没有系统设置页可跳，走专门的安装/授权引导弹窗
                                     AdvancedPermissionDialog.show(context)
                                 } else {
-                                    permissionIntent(i, context)?.let {
-                                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        context.startActivity(it)
-                                    }
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    runCatching { context.startActivity(intent) }
                                 }
                             }
                         },
@@ -655,30 +614,15 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     trailing = if (cfg.any { it }) stringResource(R.string.status_connected) else stringResource(R.string.status_not_configured),
                 )
                 Spacer(Modifier.height(OctopusSpacing.sm))
-                // 各渠道状态点
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
-                ) {
-                    channelNames.forEachIndexed { i, name ->
-                        val connected = cfg[i]
-                        Surface(
-                            shape = OctopusShape.small,
-                            color = if (connected) SuccessColor.copy(alpha = 0.10f) else SurfaceVariantColor,
-                            border = BorderStroke(1.dp, if (connected) SuccessColor.copy(alpha = 0.20f) else BorderColor.copy(alpha = 0.6f)),
-                            modifier = Modifier.weight(1f),
+                // 各渠道状态点：每行 3 个。6 个挤一行时 Discord / Telegram 会被截成 Disco / Teleg。
+                Column(verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm)) {
+                    channelNames.indices.chunked(CHANNEL_CHIPS_PER_ROW).forEach { rowIndices ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.xs),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                Box(modifier = Modifier.size(5.dp).background(
-                                    if (connected) SuccessColor else TextMuted,
-                                    CircleShape,
-                                ))
-                                Spacer(Modifier.width(OctopusSpacing.xs))
-                                Text(name, fontSize = OctopusType.tag, color = if (connected) TextPrimary else TextMuted, maxLines = 1)
+                            rowIndices.forEach { i ->
+                                ChannelStatusChip(channelNames[i], connected = cfg[i], modifier = Modifier.weight(1f))
                             }
                         }
                     }
@@ -896,10 +840,35 @@ private fun PermissionItemRow(permission: PermissionUi, onClick: () -> Unit) {
     }
 }
 
+private const val CHANNEL_CHIPS_PER_ROW = 3
+
+@Composable
+private fun ChannelStatusChip(name: String, connected: Boolean, modifier: Modifier = Modifier) {
+    Surface(
+        shape = OctopusShape.small,
+        color = if (connected) SuccessColor.copy(alpha = 0.10f) else SurfaceVariantColor,
+        border = BorderStroke(
+            1.dp,
+            if (connected) SuccessColor.copy(alpha = 0.20f) else BorderColor.copy(alpha = 0.6f),
+        ),
+        modifier = modifier,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Box(modifier = Modifier.size(5.dp).background(if (connected) SuccessColor else TextMuted, CircleShape))
+            Spacer(Modifier.width(OctopusSpacing.xs))
+            Text(name, fontSize = OctopusType.caption, color = if (connected) TextPrimary else TextMuted, maxLines = 1)
+        }
+    }
+}
+
 // ── Header / Summary ──────────────────────────────────
 
 @Composable
-private fun SettingsHeader(readyCount: Int, lanAddr: String?) {
+private fun SettingsHeader(readiness: SetupReadiness.Result, lanAddr: String?) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             stringResource(R.string.settings_title),
@@ -914,8 +883,8 @@ private fun SettingsHeader(readyCount: Int, lanAddr: String?) {
         Row(horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm), modifier = Modifier.fillMaxWidth()) {
             HeroMetric(
                 label = stringResource(R.string.settings_metric_permissions),
-                value = "$readyCount/6",
-                ok = readyCount >= 5,
+                value = "${readiness.readyCount}/${readiness.total}",
+                ok = readiness.isReady,
                 modifier = Modifier.weight(1f),
             )
             HeroMetric(
@@ -929,13 +898,19 @@ private fun SettingsHeader(readyCount: Int, lanAddr: String?) {
 }
 
 @Composable
-private fun PermissionSummaryRow(readyCount: Int, perms: List<PermissionUi>) {
+private fun PermissionSummaryRow(readiness: SetupReadiness.Result, perms: List<PermissionUi>) {
     val missing = perms.filterNot { it.ok }.take(3).joinToString(" · ") { it.name }
+    val ok = readiness.isReady
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        IconBubble(Icons.Filled.Shield, if (readyCount >= 5) SuccessColor else WarningColor)
+        IconBubble(Icons.Filled.Shield, if (ok) SuccessColor else WarningColor)
         Spacer(Modifier.width(OctopusSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
-            Text("$readyCount/6", color = TextPrimary, fontSize = OctopusType.title, fontWeight = FontWeight.Bold)
+            Text(
+                "${readiness.readyCount}/${readiness.total}",
+                color = TextPrimary,
+                fontSize = OctopusType.title,
+                fontWeight = FontWeight.Bold,
+            )
             Text(
                 if (missing.isBlank()) stringResource(R.string.status_online) else missing,
                 color = TextMuted,
@@ -946,12 +921,12 @@ private fun PermissionSummaryRow(readyCount: Int, perms: List<PermissionUi>) {
         }
         Surface(
             shape = OctopusShape.medium,
-            color = if (readyCount >= 5) SuccessColor.copy(alpha = 0.12f) else WarningColor.copy(alpha = 0.11f),
+            color = if (ok) SuccessColor.copy(alpha = 0.12f) else WarningColor.copy(alpha = 0.11f),
         ) {
             Text(
-                if (readyCount >= 5) stringResource(R.string.settings_status_ok) else stringResource(R.string.settings_status_set),
+                if (ok) stringResource(R.string.settings_status_ok) else stringResource(R.string.settings_status_set),
                 modifier = Modifier.padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.xs),
-                color = if (readyCount >= 5) SuccessColor else WarningColor,
+                color = if (ok) SuccessColor else WarningColor,
                 fontSize = OctopusType.tag,
                 fontWeight = FontWeight.Bold,
             )

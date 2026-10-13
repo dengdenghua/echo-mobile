@@ -26,6 +26,13 @@ class KButton @JvmOverloads constructor(
         }
         isClickable = true
         isFocusable = true
+        // 代码里 WRAP_CONTENT 创建的按钮没有内边距，会被压成一条文字高的细条（插件管理「从文件安装」、
+        // 投屏「开始投屏」）。给一个触控高度下限和左右内边距；XML 里写死高度/内边距的用法不受影响。
+        minHeight = dp(MIN_HEIGHT_DP).toInt()
+        if (paddingStart == 0 && paddingEnd == 0) {
+            val horizontal = dp(H_PADDING_DP).toInt()
+            setPaddingRelative(horizontal, paddingTop, horizontal, paddingBottom)
+        }
 
         attrs?.let {
             context.withStyledAttributes(it, R.styleable.KButton) {
@@ -68,4 +75,9 @@ class KButton @JvmOverloads constructor(
         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, resources.displayMetrics)
 
     private fun px2dp(px: Float): Float = px / resources.displayMetrics.density
+
+    private companion object {
+        const val MIN_HEIGHT_DP = 44f
+        const val H_PADDING_DP = 16f
+    }
 }

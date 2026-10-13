@@ -340,7 +340,6 @@
     <string name="chat_remote">リモート</string>
     <string name="chat_local">ローカル</string>
     <string name="chat_input_hint">コマンドを入力…</string>
-    <string name="chat_ack">受け付けました。デバイスで実行中…</string>
     <string name="chat_thinking">考え中</string>
     <string name="chat_empty_hint">まだ会話がありません。コマンドを入力して開始</string>
     <string name="chat_tool_steps">%1$d 個のツールステップ</string>
@@ -1404,4 +1403,27 @@
     <plurals name="chat_new_results">
         <item quantity="other">新しい結果 %d 件</item>
     </plurals>
+    <string name="transfer_title">Echo ファイル転送</string>
+    <string name="transfer_intro">パソコンから送られたファイルはここに自動で表示されます。ほかのアプリでファイルを選び、共有 → Echo ファイル転送 を選ぶと、ペアリング済みのパソコンでダウンロードできます。1 ファイルあたり最大 100 MiB。</string>
+    <string name="transfer_add">スマホのファイルを追加</string>
+    <string name="transfer_refresh">更新</string>
+    <string name="transfer_files_section">ファイル</string>
+    <string name="transfer_empty">まだファイルはありません。パソコンから届いたファイルや追加したファイルがここに表示されます。</string>
+    <string name="transfer_open">開く</string>
+    <string name="transfer_share">共有</string>
+    <string name="transfer_save">スマホに保存</string>
+    <string name="chat_no_model_reply">まだ実行できません。このスマホにモデルが設定されていません。設定してからもう一度送信してください。</string>
+    <string name="chat_no_model_title">先にモデルを設定してください</string>
+    <string name="chat_no_model_desc">Echo が指示を理解して実行するには言語モデルが必要です。モデル設定でモデルと API キーを追加してください。</string>
+    <string name="chat_no_model_configure">設定する</string>
+    <string name="chat_no_model_later">あとで</string>
+    <string name="common_retry">再試行</string>
+    <string name="market_load_failed">一覧を読み込めませんでした</string>
+    <string name="market_load_failed_desc">ネットワーク接続を確認して、もう一度お試しください。</string>
+    <string name="post_detail_load_failed">投稿を読み込めませんでした</string>
+    <string name="post_detail_load_failed_desc">削除されたか、ネットワークに接続できません。もう一度お試しください。</string>
+    <string name="miniapp_empty">ミニアプリはまだありません。広場から追加したミニアプリがここに表示されます。</string>
+    <string name="miniapp_browse_square">広場を見る</string>
+    <string name="channel_acl_no_code">ペアリングコードがまだありません。生成してボットに送るとペアリングできます。</string>
+    <string name="channel_acl_generate_code">ペアリングコードを生成</string>
 </resources>
