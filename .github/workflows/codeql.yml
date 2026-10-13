@@ -10,6 +10,7 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       actions: read
       contents: read
@@ -18,25 +19,42 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [java-kotlin, python]
+        include:
+          # Autobuild ran `./gradlew assemble`, which also packages the release variant and
+          # fails without the signing keystore. CodeQL only needs the debug sources compiled.
+          - language: java-kotlin
+            build-mode: manual
+          - language: python
+            build-mode: none
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
+      - if: matrix.language == 'java-kotlin'
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      # A fresh, traced compile: no Gradle daemon, no build cache, Kotlin compiled in the traced
+      # process, so the extractor sees every Kotlin and Java source.
+      - name: Compile debug sources
+        if: matrix.build-mode == 'manual'
+        run: >-
+          ./gradlew --no-daemon --no-build-cache
+          -Pkotlin.compiler.execution.strategy=in-process
+          :app:compileDebugSources
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"

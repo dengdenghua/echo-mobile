@@ -33,15 +33,46 @@ on:
         default: 'arm64-v8a,x86_64'
 
 jobs:
+  # The ABI list comes from the dispatch input as "a,b". Expressions have no replace(), so the
+  # JSON matrix is built in a shell step. (An invalid expression makes GitHub reject the whole
+  # file, which showed up as a 0-second failure on every push, whatever the paths filter said.)
+  plan:
+    name: Plan ABIs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      abis: ${{ steps.abis.outputs.json }}
+    steps:
+      - id: abis
+        env:
+          ABIS: ${{ github.event.inputs.abis || 'arm64-v8a,x86_64' }}
+        run: |
+          set -euo pipefail
+          json=""
+          IFS=',' read -ra items <<< "${ABIS}"
+          for raw in "${items[@]}"; do
+            abi="$(printf '%s' "${raw}" | tr -d '[:space:]')"
+            [ -n "${abi}" ] || continue
+            case "${abi}" in
+              arm64-v8a|armeabi-v7a|x86_64|x86) ;;
+              *) echo "::error::Unsupported ABI '${abi}' (use arm64-v8a, armeabi-v7a, x86_64 or x86)"; exit 1 ;;
+            esac
+            json="${json:+${json},}\"${abi}\""
+          done
+          [ -n "${json}" ] || { echo "::error::No ABI selected"; exit 1; }
+          echo "json=[${json}]" >> "$GITHUB_OUTPUT"
+          echo "ABIs: [${json}]"
+
   build:
     name: Build ${{ matrix.abi }}
+    needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     strategy:
       fail-fast: false
       matrix:
-        abi: ${{ fromJSON(format('["{0}"]', replace(github.event.inputs.abis || 'arm64-v8a,x86_64', ',', '","'))) }}
+        abi: ${{ fromJSON(needs.plan.outputs.abis) }}
 
     steps:
       - uses: actions/checkout@v4
