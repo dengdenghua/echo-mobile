@@ -43,10 +43,26 @@ internal enum class DotEnvironment(
 /** The two remote environments have independent addresses and credentials. */
 internal object DotEnvironmentStore {
     private const val SELECTED_KEY = "dot_execution_environment"
-    var selected by mutableStateOf(DotEnvironment.entries.firstOrNull {
-        it.id == KVUtils.getString(SELECTED_KEY, "home")
-    } ?: DotEnvironment.HOME)
+    var selected by mutableStateOf(initialSelection())
         private set
+
+    /**
+     * The user's last choice; before any choice, the first remote environment they set up, else this phone.
+     * A fresh install must not default to NAS: its built-in address only reaches an emulator's host.
+     */
+    private fun initialSelection(): DotEnvironment {
+        val stored = KVUtils.getString(SELECTED_KEY, "")
+        DotEnvironment.entries.firstOrNull { it.id == stored }?.let { return it }
+        return DotEnvironment.entries.firstOrNull { it != DotEnvironment.PHONE && configured(it) }
+            ?: DotEnvironment.PHONE
+    }
+
+    /** Whether a remote environment was paired or given an address by the user. The phone always is. */
+    fun configured(environment: DotEnvironment): Boolean = when (environment) {
+        DotEnvironment.PHONE -> true
+        DotEnvironment.HOME -> DotPairingRepository.paired(environment) || AccountConfig.hasOctopusRuntimeBaseUrl
+        DotEnvironment.COMPUTER -> DotPairingRepository.paired(environment) || address(environment).isNotEmpty()
+    }
 
     fun select(environment: DotEnvironment) {
         selected = environment

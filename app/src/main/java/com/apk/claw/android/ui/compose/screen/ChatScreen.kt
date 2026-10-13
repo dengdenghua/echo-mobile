@@ -298,6 +298,9 @@ internal fun reserveMessageIds(maximum: Long) { chatIdCounter.updateAndGet { max
 private const val CHAT_MESSAGES_LIMIT = 240
 private const val CHAT_STREAM_UI_THROTTLE_MS = 80L
 
+/** 浮动顶栏占用的高度:上下 8dp 外边距 + 4dp 内边距 + 56dp 头像。 */
+private val ChatHeaderClearance = 80.dp
+
 /** 对话页当前角色的持久化键(与 TV 模式的选择互不影响)。 */
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -999,6 +1002,10 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
     ) {
     Box(modifier = Modifier.fillMaxSize().background(BackgroundColor).tvOverscan()) {
     Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+        val showSetupGuide = (DotRoster.find(currentCharacter) == null || dotEnvironment == DotEnvironment.PHONE) &&
+            (!llmOk || !a11yOk)
+        // 顶栏浮在内容上方:置顶的预览面板和设置指引要先让出它的高度,否则被头像胶囊盖住
+        if (previewDevice != null || showSetupGuide) Spacer(Modifier.height(ChatHeaderClearance))
         // 设备实时预览(选了远程设备后出现在上半屏);「进入控制」开横屏全控页
         previewDevice?.let { dev ->
             key(dev.deviceId) {
@@ -1011,7 +1018,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
         }
 
         // 设置指引:未配置完成时显示,配齐后自动隐藏
-        if ((DotRoster.find(currentCharacter) == null || dotEnvironment == DotEnvironment.PHONE) && (!llmOk || !a11yOk)) {
+        if (showSetupGuide) {
             SetupGuideCard(
                 llmOk = llmOk,
                 a11yOk = a11yOk,

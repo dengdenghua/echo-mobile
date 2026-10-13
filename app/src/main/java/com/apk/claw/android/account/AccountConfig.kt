@@ -90,6 +90,10 @@ object AccountConfig {
             KVUtils.putString(KEY_OCTOPUS_RUNTIME_BASE_URL, v.trim())
         }
 
+    /** True once the user saved a runtime address; the default above only reaches the emulator's host. */
+    val hasOctopusRuntimeBaseUrl: Boolean
+        get() = KVUtils.contains(KEY_OCTOPUS_RUNTIME_BASE_URL)
+
     /** "platform" (relay + MiMo + credits, default) or "byo" (user's own model). */
     var modelSource: String
         get() = KVUtils.getString(KEY_MODEL_SOURCE, "platform")
