@@ -138,7 +138,7 @@
     <string name="channel_config_lan_copied">アドレスをコピーしました</string>
 
     <!-- LLM設定 -->
-    <string name="llm_config_title">LLM設定</string>
+    <string name="llm_config_title">モデル設定</string>
     <string name="llm_config_tip">LLM API Key、Base URL、モデル名を入力してください。データはローカルにのみ保存されます。</string>
     <string name="llm_config_api_key">API Key</string>
     <string name="llm_config_api_key_hint">例: sk-xxx（OpenAI）またはプロバイダーのKey</string>
@@ -672,6 +672,13 @@
     <string name="runtime_config_mode_dual">DUAL — リモート優先、オフラインフォールバック</string>
     <string name="runtime_config_auto_connect">起動時に自動接続</string>
     <string name="runtime_config_status_label">接続状態</string>
+    <string name="runtime_status_disconnected">未接続</string>
+    <string name="runtime_status_connecting">接続中…</string>
+    <string name="runtime_status_connected">接続済み、ハンドシェイク待ち</string>
+    <string name="runtime_status_hello_sent">ハンドシェイク中…</string>
+    <string name="runtime_status_online">オンライン ✓</string>
+    <string name="runtime_status_reconnecting">再接続中…</string>
+    <string name="runtime_status_offline">オフライン</string>
     <string name="runtime_config_connect_button">接続</string>
     <string name="runtime_config_disconnect_button">切断</string>
     <string name="runtime_config_save_button">設定を保存</string>
@@ -801,6 +808,8 @@
     <string name="account_login_button">ログイン / 登録</string>
     <string name="account_login_success">ログインしました</string>
     <string name="account_login_failed">ログインに失敗</string>
+    <string name="account_error_network">アカウントサーバーに接続できません。ネットワークを確認して、もう一度お試しください。</string>
+    <string name="account_error_server">アカウントサーバーでエラーが発生しました（HTTP %1$d）。しばらくしてからお試しください。</string>
     <string name="account_invalid_mobile">正しい電話番号を入力してください</string>
     <string name="account_invalid_code">認証コードを入力してください</string>
     <string name="account_credits_label">クレジット残高</string>

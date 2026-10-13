@@ -92,8 +92,7 @@ class RuntimeConfigActivity : BaseActivity() {
         content.addView(makeLabel(getString(R.string.runtime_config_auth_token_label)))
         etAuthToken = EditText(this).apply {
             hint = getString(R.string.runtime_config_auth_hint)
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-            setSingleLine()
+            makeSecretSingleLine()
             setTextColor(c(R.color.colorTextPrimary))
             setHintTextColor(c(R.color.colorTextSecondary))
             setBackgroundColor(c(R.color.colorContainerBrighten))
@@ -132,7 +131,7 @@ class RuntimeConfigActivity : BaseActivity() {
         // ── 连接状态 ──
         content.addView(makeLabel(getString(R.string.runtime_config_status_label)))
         tvStatus = TextView(this).apply {
-            text = "DISCONNECTED"
+            text = getString(R.string.runtime_status_disconnected)
             textSize = 16f
             typeface = Typeface.MONOSPACE
             setTextColor(c(R.color.colorTextSecondary))
@@ -225,16 +224,16 @@ class RuntimeConfigActivity : BaseActivity() {
     }
 
     private fun updateStatusUI(state: ConnectionState) {
-        val (text, color) = when (state) {
-            ConnectionState.DISCONNECTED -> "DISCONNECTED" to c(R.color.colorTextSecondary)
-            ConnectionState.CONNECTING -> "CONNECTING..." to c(R.color.colorWarningPrimary)
-            ConnectionState.CONNECTED -> "CONNECTED (waiting hello ack)" to c(R.color.colorWarningPrimary)
-            ConnectionState.HELLO_SENT -> "HELLO_SENT (handshaking)" to c(R.color.colorWarningPrimary)
-            ConnectionState.ONLINE -> "ONLINE ✓" to c(R.color.colorSuccessPrimary)
-            ConnectionState.RECONNECTING -> "RECONNECTING..." to c(R.color.colorWarningPrimary)
-            ConnectionState.OFFLINE -> "OFFLINE" to c(R.color.colorErrorPrimary)
+        val color = when (state) {
+            ConnectionState.DISCONNECTED -> c(R.color.colorTextSecondary)
+            ConnectionState.CONNECTING,
+            ConnectionState.CONNECTED,
+            ConnectionState.HELLO_SENT,
+            ConnectionState.RECONNECTING -> c(R.color.colorWarningPrimary)
+            ConnectionState.ONLINE -> c(R.color.colorSuccessPrimary)
+            ConnectionState.OFFLINE -> c(R.color.colorErrorPrimary)
         }
-        tvStatus.text = text
+        tvStatus.text = getString(runtimeStatusLabel(state))
         tvStatus.setTextColor(color)
     }
 

@@ -842,6 +842,13 @@
     <string name="runtime_config_mode_dual">DUAL — 원격 우선, 오프라인 폴백</string>
     <string name="runtime_config_auto_connect">실행 시 자동 연결</string>
     <string name="runtime_config_status_label">연결 상태</string>
+    <string name="runtime_status_disconnected">연결 안 됨</string>
+    <string name="runtime_status_connecting">연결 중…</string>
+    <string name="runtime_status_connected">연결됨, 핸드셰이크 대기 중</string>
+    <string name="runtime_status_hello_sent">핸드셰이크 중…</string>
+    <string name="runtime_status_online">온라인 ✓</string>
+    <string name="runtime_status_reconnecting">다시 연결 중…</string>
+    <string name="runtime_status_offline">오프라인</string>
     <string name="runtime_config_connect_button">연결</string>
     <string name="runtime_config_disconnect_button">연결 해제</string>
     <string name="runtime_config_save_button">구성 저장</string>
@@ -982,6 +989,8 @@
     <string name="account_login_button">로그인 / 가입</string>
     <string name="account_login_success">로그인됨</string>
     <string name="account_login_failed">로그인 실패</string>
+    <string name="account_error_network">계정 서버에 연결할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.</string>
+    <string name="account_error_server">계정 서버에 문제가 발생했습니다(HTTP %1$d). 잠시 후 다시 시도하세요.</string>
     <string name="account_invalid_mobile">유효한 전화번호를 입력하세요</string>
     <string name="account_invalid_code">인증 코드를 입력하세요</string>
     <string name="account_credits_label">크레딧 잔액</string>

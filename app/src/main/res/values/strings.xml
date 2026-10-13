@@ -842,6 +842,13 @@
     <string name="runtime_config_mode_dual">DUAL — Remote first, offline fallback</string>
     <string name="runtime_config_auto_connect">Auto-connect on launch</string>
     <string name="runtime_config_status_label">Connection status</string>
+    <string name="runtime_status_disconnected">Disconnected</string>
+    <string name="runtime_status_connecting">Connecting…</string>
+    <string name="runtime_status_connected">Connected, waiting for handshake</string>
+    <string name="runtime_status_hello_sent">Handshaking…</string>
+    <string name="runtime_status_online">Online ✓</string>
+    <string name="runtime_status_reconnecting">Reconnecting…</string>
+    <string name="runtime_status_offline">Offline</string>
     <string name="runtime_config_connect_button">Connect</string>
     <string name="runtime_config_disconnect_button">Disconnect</string>
     <string name="runtime_config_save_button">Save config</string>
@@ -982,6 +989,8 @@
     <string name="account_login_button">Log in / Sign up</string>
     <string name="account_login_success">Logged in</string>
     <string name="account_login_failed">Login failed</string>
+    <string name="account_error_network">Can\'t reach the account server. Check your connection and try again.</string>
+    <string name="account_error_server">The account server had a problem (HTTP %1$d). Try again later.</string>
     <string name="account_invalid_mobile">Please enter a valid phone number</string>
     <string name="account_invalid_code">Please enter the verification code</string>
     <string name="account_credits_label">Credit balance</string>

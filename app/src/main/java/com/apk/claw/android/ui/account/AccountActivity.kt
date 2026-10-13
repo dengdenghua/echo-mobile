@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.apk.claw.android.R
 import com.apk.claw.android.account.AccountConfig
+import com.apk.claw.android.account.AccountErrorText
 import com.apk.claw.android.account.AccountRepository
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.account.CreateOrderResult
@@ -226,7 +227,7 @@ class AccountActivity : BaseActivity() {
                     etInviteCode.setText("")
                     loadInvite()
                 }
-                .onFailure { toast(it.message ?: getString(R.string.account_invite_redeem_failed)) }
+                .onFailure { toast(errorText(it, R.string.account_invite_redeem_failed)) }
         }
     }
 
@@ -267,7 +268,7 @@ class AccountActivity : BaseActivity() {
                     if (it.claimed) toast(getString(R.string.account_claim_success, it.credits))
                     else toast(getString(R.string.account_claim_already))
                 }
-                .onFailure { toast(it.message ?: getString(R.string.account_claim_failed)) }
+                .onFailure { toast(errorText(it, R.string.account_claim_failed)) }
         }
     }
 
@@ -308,7 +309,7 @@ class AccountActivity : BaseActivity() {
                                 renderNickname()
                                 toast(getString(R.string.account_nickname_updated))
                             }
-                            .onFailure { toast(it.message ?: getString(R.string.account_nickname_hint)) }
+                            .onFailure { toast(errorText(it, R.string.account_nickname_hint)) }
                     }
                 }
             }
@@ -317,4 +318,11 @@ class AccountActivity : BaseActivity() {
     }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+    /** Account failures in the user's language; raw network exceptions never reach the toast. */
+    private fun errorText(error: Throwable, fallback: Int): String = AccountErrorText.of(
+        error,
+        fallback = getString(fallback),
+        network = getString(R.string.account_error_network),
+    ) { code -> getString(R.string.account_error_server, code) }
 }

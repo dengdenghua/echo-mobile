@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.apk.claw.android.R
+import com.apk.claw.android.account.AccountErrorText
 import com.apk.claw.android.account.AccountRepository
 import com.apk.claw.android.base.BaseActivity
 import androidx.activity.addCallback
@@ -91,7 +92,7 @@ class LoginActivity : BaseActivity() {
                     btnSendCode.isEnabled = true
                     btnSendCode.alpha = 1f
                     btnSendCode.text = getString(R.string.account_send_code)
-                    toast(it.message ?: getString(R.string.account_code_send_failed))
+                    toast(errorText(it, R.string.account_code_send_failed))
                 }
             }
         }
@@ -123,7 +124,7 @@ class LoginActivity : BaseActivity() {
                     }
                     finish()
                 }.onFailure {
-                    toast(it.message ?: getString(R.string.account_login_failed))
+                    toast(errorText(it, R.string.account_login_failed))
                 }
             }
         }
@@ -156,6 +157,13 @@ class LoginActivity : BaseActivity() {
     private fun isValidMobile(m: String): Boolean = m.length == 11 && m.all { it.isDigit() }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+    /** Account failures in the user's language; raw network exceptions never reach the toast. */
+    private fun errorText(error: Throwable, fallback: Int): String = AccountErrorText.of(
+        error,
+        fallback = getString(fallback),
+        network = getString(R.string.account_error_network),
+    ) { code -> getString(R.string.account_error_server, code) }
 
     override fun onDestroy() {
         countdown?.cancel()

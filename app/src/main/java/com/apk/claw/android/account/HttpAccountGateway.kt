@@ -54,7 +54,7 @@ class HttpAccountGateway(baseUrl: String) : AccountGateway {
         http.newCall(req).execute().use { resp ->
             val text = resp.body?.string().orEmpty()
             if (!resp.isSuccessful) {
-                throw RuntimeException(serverDetail(text) ?: "HTTP ${resp.code}: ${text.take(200)}")
+                throw AccountHttpException(resp.code, serverDetail(text), text)
             }
             return gson.fromJson(text, clazz)
         }

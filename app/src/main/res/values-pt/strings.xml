@@ -842,6 +842,13 @@
     <string name="runtime_config_mode_dual">DUAL — Remoto primeiro, fallback offline</string>
     <string name="runtime_config_auto_connect">Conectar automaticamente ao iniciar</string>
     <string name="runtime_config_status_label">Status da conexão</string>
+    <string name="runtime_status_disconnected">Desconectado</string>
+    <string name="runtime_status_connecting">Conectando…</string>
+    <string name="runtime_status_connected">Conectado, aguardando handshake</string>
+    <string name="runtime_status_hello_sent">Fazendo handshake…</string>
+    <string name="runtime_status_online">Online ✓</string>
+    <string name="runtime_status_reconnecting">Reconectando…</string>
+    <string name="runtime_status_offline">Offline</string>
     <string name="runtime_config_connect_button">Conectar</string>
     <string name="runtime_config_disconnect_button">Desconectar</string>
     <string name="runtime_config_save_button">Salvar configuração</string>
@@ -982,6 +989,8 @@
     <string name="account_login_button">Entrar / Cadastrar</string>
     <string name="account_login_success">Conectado</string>
     <string name="account_login_failed">Falha no login</string>
+    <string name="account_error_network">Não foi possível acessar o servidor de contas. Verifique a conexão e tente novamente.</string>
+    <string name="account_error_server">O servidor de contas teve um problema (HTTP %1$d). Tente novamente mais tarde.</string>
     <string name="account_invalid_mobile">Digite um número de telefone válido</string>
     <string name="account_invalid_code">Digite o código de verificação</string>
     <string name="account_credits_label">Saldo de créditos</string>

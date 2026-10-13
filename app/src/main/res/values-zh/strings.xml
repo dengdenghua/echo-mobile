@@ -143,7 +143,7 @@
     <string name="channel_config_lan_copied">已复制地址</string>
 
     <!-- LLM 配置 -->
-    <string name="llm_config_title">LLM 配置</string>
+    <string name="llm_config_title">模型设置</string>
     <string name="llm_config_tip">请填写你的 LLM API Key、Base URL 和模型名称，数据仅保存在本地。</string>
     <string name="llm_config_api_key">API Key</string>
     <string name="llm_config_api_key_hint">如 sk-xxx（OpenAI）或其它服务商的 Key</string>
@@ -151,7 +151,7 @@
     <string name="llm_config_base_url_hint">如 https://api.deepseek.com/v1（留空则使用 DeepSeek 默认）</string>
     <string name="llm_config_model_name">模型名称</string>
     <string name="llm_config_model_name_hint">如 gpt-4o、gpt-4o-mini、claude-3-5-sonnet</string>
-    <string name="llm_config_saved">LLM 配置已保存</string>
+    <string name="llm_config_saved">模型设置已保存</string>
     <string name="llm_config_api_key_required">请填写 API Key</string>
     <!-- API Key 池 -->
     <string name="key_pool_section">API Key 池（多 Key 自动切换）</string>
@@ -177,7 +177,7 @@
     <string name="vision_config_tip">look_at_screen 工具在无障碍信息不够用时（游戏、Canvas、图片）会用它。三项全留空则复用上面的主模型（需主模型支持图片）。</string>
     <string name="vision_config_base_url_hint">如 https://dashscope.aliyuncs.com/compatible-mode/v1</string>
     <string name="vision_config_model_name_hint">如 qwen-vl-max、gpt-4o、glm-4v</string>
-    <string name="menu_llm_config">LLM 配置</string>
+    <string name="menu_llm_config">模型设置</string>
 
     <!-- 设置菜单项 -->
     <string name="menu_dingtalk">钉钉</string>
@@ -412,7 +412,7 @@
     <string name="perm_overlay">悬浮窗</string>
     <string name="perm_battery">电池</string>
     <string name="perm_storage">存储</string>
-    <string name="settings_section_model">模型配置</string>
+    <string name="settings_section_model">模型设置</string>
     <string name="settings_local_fallback">本地降级 ✓</string>
     <string name="settings_section_channels">消息渠道</string>
     <string name="status_connected">已连接</string>
@@ -616,7 +616,7 @@
     <string name="chat_routine_saved_toast">已存为例程（查看）</string>
     <string name="fast_replay_activity_log_message">快路径重放 %1$d 步</string>
     <string name="routine_runner_target_offline">（目标「%1$s」不在线，改用本机）</string>
-    <string name="routine_runner_model_not_configured">未配置模型，请到 设置 → 模型配置</string>
+    <string name="routine_runner_model_not_configured">未配置模型，请到 设置 → 模型设置</string>
     <string name="routine_runner_fast_path">快路径</string>
     <string name="routine_runner_starting_execution">开始运行</string>
     <string name="settings_llm_api_key_configured">已设置</string>
@@ -792,6 +792,13 @@
     <string name="runtime_config_mode_dual">DUAL — 远程优先，离线降级</string>
     <string name="runtime_config_auto_connect">启动时自动连接</string>
     <string name="runtime_config_status_label">连接状态</string>
+    <string name="runtime_status_disconnected">未连接</string>
+    <string name="runtime_status_connecting">连接中…</string>
+    <string name="runtime_status_connected">已连接，等待握手</string>
+    <string name="runtime_status_hello_sent">握手中…</string>
+    <string name="runtime_status_online">在线 ✓</string>
+    <string name="runtime_status_reconnecting">重连中…</string>
+    <string name="runtime_status_offline">离线</string>
     <string name="runtime_config_connect_button">连接</string>
     <string name="runtime_config_disconnect_button">断开</string>
     <string name="runtime_config_save_button">保存配置</string>
@@ -921,6 +928,8 @@
     <string name="account_login_button">登录 / 注册</string>
     <string name="account_login_success">登录成功</string>
     <string name="account_login_failed">登录失败</string>
+    <string name="account_error_network">连不上账号服务器，请检查网络后重试。</string>
+    <string name="account_error_server">账号服务器暂时出错（HTTP %1$d），请稍后再试。</string>
     <string name="account_invalid_mobile">请输入正确的手机号</string>
     <string name="account_invalid_code">请输入验证码</string>
     <string name="account_credits_label">积分余额</string>
