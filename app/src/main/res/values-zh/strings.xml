@@ -988,8 +988,8 @@
 
     <!-- 设置硬编码修复 -->
     <string name="settings_go_setup">去设置</string>
-    <string name="settings_status_ok">OK</string>
-    <string name="settings_status_set">SET</string>
+    <string name="settings_status_ok">已就绪</string>
+    <string name="settings_status_set">待设置</string>
     <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">钉钉</string>
     <string name="channel_name_feishu">飞书</string>
@@ -1279,7 +1279,7 @@
     <string name="user_profile_no_posts">还没有发布作品</string>
     <string name="user_profile_load_failed">加载用户信息失败</string>
     <string name="market_mine_skills">我的技能</string>
-    <string name="market_mine_apps">我的小程序</string>
+    <string name="market_mine_apps">我的应用</string>
 
     <!-- 油猴脚本商店 -->
     <string name="userscript_store_title">脚本商店</string>
@@ -1613,4 +1613,40 @@
     <string name="settings_more_title">更多设置</string>
     <string name="settings_more_desc">语言、权限模式、消息渠道、局域网与设备</string>
     <string name="activity_row_desc">Agent 每次任务的结果记录</string>
+    <string name="settings_pair_binding">绑定中…</string>
+    <string name="settings_pair_one_tap">一键绑定到本账号（免输码）</string>
+    <string name="settings_pair_manual">或手动输入配对码：</string>
+    <string name="settings_fallback_title">LLM 备用模型</string>
+    <string name="settings_fallback_desc">主模型限流、超载或不存在时，按顺序自动切到备用模型（与主模型同 baseUrl 和 apiKey，只换模型名）。用逗号分隔，留空即不启用。例：qwen3.5-flash,deepseek-chat</string>
+    <string name="settings_fallback_label">备用模型（逗号分隔）</string>
+    <string name="settings_fallback_none">未设置（单模型，不故障转移）</string>
+    <string name="settings_a11y_checkup">无障碍老掉线？点这里做「保活体检」</string>
+    <string name="settings_stream_quality_title">远程画质</string>
+    <string name="settings_stream_quality_desc">%1$s · 点击切换（流畅 30fps / 清晰 1080p）</string>
+    <string name="settings_stream_smooth">流畅</string>
+    <string name="settings_stream_sharp">清晰</string>
+    <string name="settings_transfer_desc">加入手机文件，接收电脑文件</string>
+    <string name="settings_device_tasks_title">跨端任务</string>
+    <string name="settings_device_tasks_desc">查看进度、确认执行计划、继续已暂停任务</string>
+    <string name="settings_hd_capture_title">高清屏幕采集</string>
+    <string name="settings_hd_capture_on">已开启 · 远控画面高帧率</string>
+    <string name="settings_hd_capture_off">关 · 远控走无障碍截图（2–5fps）</string>
+    <string name="settings_undo_title">不可逆操作 · 撤销窗口</string>
+    <string name="settings_undo_on">开 · 发短信、发帖、发文件前给 5 秒可撤销</string>
+    <string name="settings_undo_off">关 · 不可逆动作直接执行</string>
+    <string name="settings_frugal_title">省流感知模式</string>
+    <string name="settings_frugal_on">开 · 树够用时用文字替代截图，省 token</string>
+    <string name="settings_frugal_off">关 · 每轮走 vision 截图（更准）</string>
+    <string name="settings_mcp_desc">外部工具协议服务器（Model Context Protocol）</string>
+    <string name="settings_personas_title">角色卡</string>
+    <string name="settings_personas_desc">自定义 AI 人设性格、开场白和说话风格</string>
+    <string name="settings_workflows_title">工作流</string>
+    <string name="settings_workflows_desc">多步骤编排（工具、Prompt 和条件）</string>
+    <string name="settings_files_title">文件管理</string>
+    <string name="settings_files_desc">浏览 /sdcard 文件系统（需 Shizuku）</string>
+    <string name="settings_linux_title">Linux 容器</string>
+    <string name="settings_linux_desc">PRoot 沙箱（Alpine 内置，Ubuntu 需下载）</string>
+    <string name="settings_update_checking">检查更新中…</string>
+    <string name="settings_update_tap">%1$s · 点此检查更新</string>
+    <string name="settings_update_latest">已是最新版本</string>
 </resources>

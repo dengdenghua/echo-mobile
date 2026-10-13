@@ -1052,8 +1052,8 @@
 
     <!-- Correção fixa das configurações -->
     <string name="settings_go_setup">Ir para configurações</string>
-    <string name="settings_status_ok">OK</string>
-    <string name="settings_status_set">Definir</string>
+    <string name="settings_status_ok">Pronto</string>
+    <string name="settings_status_set">Configurar</string>
     <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">DingTalk</string>
     <string name="channel_name_feishu">Feishu</string>
@@ -1342,7 +1342,7 @@
     <string name="market_empty">Nada nesta categoria ainda, volte mais tarde</string>
     <string name="feat_more_title">Mais</string>
     <string name="market_mine_skills">Minhas habilidades</string>
-    <string name="market_mine_apps">Meus mini apps</string>
+    <string name="market_mine_apps">Meus apps</string>
 
     <!-- Loja de scripts Userscript -->
     <string name="userscript_store_title">Loja de Userscripts</string>
@@ -1616,4 +1616,40 @@
     <string name="dot_history_earlier">Mensagens anteriores</string>
     <string name="dot_history_user">Você</string>
     <string name="dot_history_assistant">Assistente</string>
+    <string name="settings_pair_binding">Vinculando…</string>
+    <string name="settings_pair_one_tap">Vincular a esta conta (sem código)</string>
+    <string name="settings_pair_manual">Ou digite um código de pareamento:</string>
+    <string name="settings_fallback_title">Modelos de reserva</string>
+    <string name="settings_fallback_desc">Quando o modelo principal estiver limitado, sobrecarregado ou não existir, troca para estes modelos em ordem. Eles usam a URL base e a chave de API do principal; só o nome muda. Separe com vírgulas; deixe vazio para desativar. Exemplo: qwen3.5-flash,deepseek-chat</string>
+    <string name="settings_fallback_label">Modelos de reserva (separados por vírgula)</string>
+    <string name="settings_fallback_none">Não definido (um modelo, sem reserva)</string>
+    <string name="settings_a11y_checkup">A acessibilidade para sempre? Faça uma verificação de permanência</string>
+    <string name="settings_stream_quality_title">Qualidade remota</string>
+    <string name="settings_stream_quality_desc">%1$s · Toque para alternar (Fluida 30 fps / Nítida 1080p)</string>
+    <string name="settings_stream_smooth">Fluida</string>
+    <string name="settings_stream_sharp">Nítida</string>
+    <string name="settings_transfer_desc">Adicione arquivos do celular e receba arquivos do computador</string>
+    <string name="settings_device_tasks_title">Tarefas entre dispositivos</string>
+    <string name="settings_device_tasks_desc">Veja o progresso, confirme planos e retome tarefas pausadas</string>
+    <string name="settings_hd_capture_title">Captura de tela HD</string>
+    <string name="settings_hd_capture_on">Ativada · Alta taxa de quadros na visão remota</string>
+    <string name="settings_hd_capture_off">Desativada · A visão remota usa capturas de acessibilidade (2–5 fps)</string>
+    <string name="settings_undo_title">Janela para desfazer ações irreversíveis</string>
+    <string name="settings_undo_on">Ativado · 5 segundos para desfazer antes de enviar SMS, posts ou arquivos</string>
+    <string name="settings_undo_off">Desativado · Ações irreversíveis são executadas na hora</string>
+    <string name="settings_frugal_title">Percepção com economia de dados</string>
+    <string name="settings_frugal_on">Ativado · Usa texto em vez de capturas quando a árvore da interface basta, economizando tokens</string>
+    <string name="settings_frugal_off">Desativado · Uma captura a cada turno (mais preciso)</string>
+    <string name="settings_mcp_desc">Servidores de ferramentas externas (Model Context Protocol)</string>
+    <string name="settings_personas_title">Cartões de personagem</string>
+    <string name="settings_personas_desc">Personalize a persona, a saudação e o estilo da IA</string>
+    <string name="settings_workflows_title">Fluxos de trabalho</string>
+    <string name="settings_workflows_desc">Orquestração em várias etapas (ferramentas, prompts e condições)</string>
+    <string name="settings_files_title">Gerenciador de arquivos</string>
+    <string name="settings_files_desc">Navegue pelo sistema de arquivos /sdcard (requer Shizuku)</string>
+    <string name="settings_linux_title">Contêiner Linux</string>
+    <string name="settings_linux_desc">Sandbox PRoot (Alpine incluído, Ubuntu baixado à parte)</string>
+    <string name="settings_update_checking">Procurando atualizações…</string>
+    <string name="settings_update_tap">%1$s · Toque para procurar atualizações</string>
+    <string name="settings_update_latest">Você já tem a versão mais recente</string>
 </resources>

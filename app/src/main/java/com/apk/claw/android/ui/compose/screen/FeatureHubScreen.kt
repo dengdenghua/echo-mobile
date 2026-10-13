@@ -91,7 +91,7 @@ import com.apk.claw.android.ui.featurescreens.CloudDriveActivity
 import com.apk.claw.android.ui.featurescreens.EvolutionActivity
 import com.apk.claw.android.ui.featurescreens.MemoryActivity
 import com.apk.claw.android.ui.featurescreens.MultiWindowActivity
-import com.apk.claw.android.ui.featurescreens.MiniAppListActivity
+import com.apk.claw.android.ui.featurescreens.HubActivity
 import com.apk.claw.android.ui.featurescreens.MiniAppMarketplaceActivity
 import com.apk.claw.android.ui.featurescreens.SkillsActivity
 import com.apk.claw.android.ui.featurescreens.TrustCenterActivity
@@ -165,8 +165,8 @@ fun FeatureHubScreen(
                     onOpenSkillStore = onNavigateToSkillMarketplace,
                     onOpenPluginStore = onNavigateToPluginMarketplace,
                     onOpenAppStore = { ctx.open(MiniAppMarketplaceActivity::class.java) },
-                    onOpenMySkills = { ctx.open(SkillsActivity::class.java) },
-                    onOpenMyApps = { ctx.open(MiniAppListActivity::class.java) },
+                    onOpenMySkills = { HubActivity.start(ctx, HubActivity.TAB_SKILLS) },
+                    onOpenMyApps = { HubActivity.start(ctx, HubActivity.TAB_APPS) },
                 )
             }
         }

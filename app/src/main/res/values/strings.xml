@@ -1052,8 +1052,8 @@
 
     <!-- Settings hardcoded fix -->
     <string name="settings_go_setup">Go to settings</string>
-    <string name="settings_status_ok">OK</string>
-    <string name="settings_status_set">Set</string>
+    <string name="settings_status_ok">Ready</string>
+    <string name="settings_status_set">Set up</string>
     <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">DingTalk</string>
     <string name="channel_name_feishu">Feishu</string>
@@ -1342,7 +1342,7 @@
     <string name="market_empty">Nothing in this category yet, check back later</string>
     <string name="feat_more_title">More</string>
     <string name="market_mine_skills">My skills</string>
-    <string name="market_mine_apps">My mini apps</string>
+    <string name="market_mine_apps">My apps</string>
 
     <!-- 油猴脚本商店 -->
     <string name="userscript_store_title">Userscript Store</string>
@@ -1626,4 +1626,40 @@
     <string name="settings_more_title">More settings</string>
     <string name="settings_more_desc">Language, permission mode, channels, LAN and devices</string>
     <string name="activity_row_desc">A record of every task the agent ran</string>
+    <string name="settings_pair_binding">Linking…</string>
+    <string name="settings_pair_one_tap">Link to this account (no code needed)</string>
+    <string name="settings_pair_manual">Or enter a pairing code:</string>
+    <string name="settings_fallback_title">Backup models</string>
+    <string name="settings_fallback_desc">When the main model is rate-limited, overloaded or missing, switch to these models in order. They use the main model\'s base URL and API key; only the model name changes. Separate with commas; leave empty to turn this off. Example: qwen3.5-flash,deepseek-chat</string>
+    <string name="settings_fallback_label">Backup models (comma-separated)</string>
+    <string name="settings_fallback_none">Not set (one model, no failover)</string>
+    <string name="settings_a11y_checkup">Accessibility keeps stopping? Run a keep-alive check</string>
+    <string name="settings_stream_quality_title">Remote quality</string>
+    <string name="settings_stream_quality_desc">%1$s · Tap to switch (Smooth 30 fps / Sharp 1080p)</string>
+    <string name="settings_stream_smooth">Smooth</string>
+    <string name="settings_stream_sharp">Sharp</string>
+    <string name="settings_transfer_desc">Add files from this phone and receive files from your computer</string>
+    <string name="settings_device_tasks_title">Cross-device tasks</string>
+    <string name="settings_device_tasks_desc">See progress, confirm plans and resume paused tasks</string>
+    <string name="settings_hd_capture_title">HD screen capture</string>
+    <string name="settings_hd_capture_on">On · High frame rate for the remote view</string>
+    <string name="settings_hd_capture_off">Off · The remote view uses accessibility screenshots (2–5 fps)</string>
+    <string name="settings_undo_title">Undo window for irreversible actions</string>
+    <string name="settings_undo_on">On · 5 seconds to undo before sending texts, posts or files</string>
+    <string name="settings_undo_off">Off · Irreversible actions run immediately</string>
+    <string name="settings_frugal_title">Data-saving perception</string>
+    <string name="settings_frugal_on">On · Uses text instead of screenshots when the UI tree is enough, saving tokens</string>
+    <string name="settings_frugal_off">Off · A screenshot every turn (more accurate)</string>
+    <string name="settings_mcp_desc">External tool servers (Model Context Protocol)</string>
+    <string name="settings_personas_title">Character cards</string>
+    <string name="settings_personas_desc">Customize the AI persona, greeting and speaking style</string>
+    <string name="settings_workflows_title">Workflows</string>
+    <string name="settings_workflows_desc">Multi-step orchestration (tools, prompts and conditions)</string>
+    <string name="settings_files_title">File manager</string>
+    <string name="settings_files_desc">Browse the /sdcard file system (needs Shizuku)</string>
+    <string name="settings_linux_title">Linux container</string>
+    <string name="settings_linux_desc">PRoot sandbox (Alpine built in, Ubuntu downloads separately)</string>
+    <string name="settings_update_checking">Checking for updates…</string>
+    <string name="settings_update_tap">%1$s · Tap to check for updates</string>
+    <string name="settings_update_latest">You have the latest version</string>
 </resources>

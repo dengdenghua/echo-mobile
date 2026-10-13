@@ -868,8 +868,8 @@
 
     <!-- 設定ハードコード修正 -->
     <string name="settings_go_setup">設定へ</string>
-    <string name="settings_status_ok">OK</string>
-    <string name="settings_status_set">SET</string>
+    <string name="settings_status_ok">準備完了</string>
+    <string name="settings_status_set">要設定</string>
     <string name="settings_version_template">Echo v%1$s · Apache 2.0</string>
     <string name="channel_name_dingtalk">DingTalk</string>
     <string name="channel_name_feishu">Feishu</string>
@@ -1621,4 +1621,40 @@
     <string name="dot_history_earlier">以前のメッセージ</string>
     <string name="dot_history_user">あなた</string>
     <string name="dot_history_assistant">アシスタント</string>
+    <string name="settings_pair_binding">連携中…</string>
+    <string name="settings_pair_one_tap">このアカウントに連携（コード不要）</string>
+    <string name="settings_pair_manual">またはペアリングコードを入力：</string>
+    <string name="settings_fallback_title">バックアップモデル</string>
+    <string name="settings_fallback_desc">メインモデルがレート制限・過負荷・存在しない場合、これらのモデルに順番に切り替えます。ベース URL と API キーはメインと同じで、モデル名だけが変わります。カンマ区切り、空欄で無効。例：qwen3.5-flash,deepseek-chat</string>
+    <string name="settings_fallback_label">バックアップモデル（カンマ区切り）</string>
+    <string name="settings_fallback_none">未設定（単一モデル、切り替えなし）</string>
+    <string name="settings_a11y_checkup">ユーザー補助がよく止まる？常駐チェックを実行</string>
+    <string name="settings_stream_quality_title">リモート画質</string>
+    <string name="settings_stream_quality_desc">%1$s · タップで切替（なめらか 30fps / 高精細 1080p）</string>
+    <string name="settings_stream_smooth">なめらか</string>
+    <string name="settings_stream_sharp">高精細</string>
+    <string name="settings_transfer_desc">スマホのファイルを追加し、パソコンからのファイルを受け取る</string>
+    <string name="settings_device_tasks_title">デバイス間タスク</string>
+    <string name="settings_device_tasks_desc">進捗の確認、実行計画の承認、一時停止したタスクの再開</string>
+    <string name="settings_hd_capture_title">高画質画面キャプチャ</string>
+    <string name="settings_hd_capture_on">オン · リモート画面を高フレームレートで</string>
+    <string name="settings_hd_capture_off">オフ · リモート画面はユーザー補助のスクリーンショット（2–5fps）</string>
+    <string name="settings_undo_title">取り消せない操作の取り消し猶予</string>
+    <string name="settings_undo_on">オン · SMS・投稿・ファイル送信の前に 5 秒間取り消し可能</string>
+    <string name="settings_undo_off">オフ · 取り消せない操作をすぐに実行</string>
+    <string name="settings_frugal_title">省データ認識モード</string>
+    <string name="settings_frugal_on">オン · UI ツリーで足りるときはスクリーンショットの代わりにテキストを使い、トークンを節約</string>
+    <string name="settings_frugal_off">オフ · 毎ターン スクリーンショット（より正確）</string>
+    <string name="settings_mcp_desc">外部ツールサーバー（Model Context Protocol）</string>
+    <string name="settings_personas_title">キャラクターカード</string>
+    <string name="settings_personas_desc">AI の人格、あいさつ、話し方をカスタマイズ</string>
+    <string name="settings_workflows_title">ワークフロー</string>
+    <string name="settings_workflows_desc">複数ステップの編成（ツール・プロンプト・条件）</string>
+    <string name="settings_files_title">ファイル管理</string>
+    <string name="settings_files_desc">/sdcard のファイルシステムを閲覧（Shizuku が必要）</string>
+    <string name="settings_linux_title">Linux コンテナ</string>
+    <string name="settings_linux_desc">PRoot サンドボックス（Alpine 内蔵、Ubuntu は別途ダウンロード）</string>
+    <string name="settings_update_checking">アップデートを確認中…</string>
+    <string name="settings_update_tap">%1$s · タップしてアップデートを確認</string>
+    <string name="settings_update_latest">最新バージョンです</string>
 </resources>

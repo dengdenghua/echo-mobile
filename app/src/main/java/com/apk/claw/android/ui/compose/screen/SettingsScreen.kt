@@ -197,9 +197,17 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(if (pairBusy) "绑定中…" else "一键绑定到本账号(免输码)")
+                        Text(
+                            stringResource(
+                                if (pairBusy) R.string.settings_pair_binding else R.string.settings_pair_one_tap,
+                            ),
+                        )
                     }
-                    Text("或手动输入配对码:", color = TextMuted, fontSize = OctopusType.caption)
+                    Text(
+                        stringResource(R.string.settings_pair_manual),
+                        color = TextMuted,
+                        fontSize = OctopusType.caption,
+                    )
                     OutlinedTextField(
                         value = pairCode,
                         onValueChange = { pairCode = it.filter(Char::isDigit).take(9) },
@@ -267,19 +275,18 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
     if (showFallbackDialog) {
         AlertDialog(
             onDismissRequest = { showFallbackDialog = false },
-            title = { Text("LLM 备用模型") },
+            title = { Text(stringResource(R.string.settings_fallback_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm)) {
                     Text(
-                        "主模型限流/超载/不存在时,自动按顺序切到备用模型(与主模型同 baseUrl/apiKey,只换模型名)。" +
-                            "逗号分隔,留空=不启用。例:qwen3.5-flash,deepseek-chat",
+                        stringResource(R.string.settings_fallback_desc),
                         color = TextMuted, fontSize = OctopusType.caption, lineHeight = 16.sp,
                     )
                     OutlinedTextField(
                         value = fallbackDraft,
                         onValueChange = { fallbackDraft = it },
                         singleLine = true,
-                        label = { Text("备用模型(逗号分隔)") },
+                        label = { Text(stringResource(R.string.settings_fallback_label)) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -396,7 +403,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     )
                     Spacer(Modifier.width(OctopusSpacing.sm))
                     Text(
-                        "无障碍老掉线?点这里做「保活体检」",
+                        stringResource(R.string.settings_a11y_checkup),
                         color = PrimaryColor, fontSize = OctopusType.caption,
                         fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f),
                     )
@@ -452,11 +459,16 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     }
                 }
                 SettingsDivider()
-                val streamQuality = remember(refreshTick) { RemoteStreamPrefs.label() }
+                val streamSharp = remember(refreshTick) { RemoteStreamPrefs.isSharp() }
                 ClickableSettingsRow(
                     Icons.Filled.GraphicEq,
-                    "远程画质",
-                    "$streamQuality · 点击切换(流畅 30fps / 清晰 1080p)",
+                    stringResource(R.string.settings_stream_quality_title),
+                    stringResource(
+                        R.string.settings_stream_quality_desc,
+                        stringResource(
+                            if (streamSharp) R.string.settings_stream_sharp else R.string.settings_stream_smooth,
+                        ),
+                    ),
                 ) {
                     val next = if (RemoteStreamPrefs.isSharp()) RemoteStreamPrefs.SMOOTH else RemoteStreamPrefs.SHARP
                     RemoteStreamPrefs.setMode(next)
@@ -476,10 +488,11 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         showWorkspaceDialog = true
                     }
                     SettingsDivider()
-                    val currentFallback = remember(refreshTick) {
-                        KVUtils.getLlmFallbackModels().joinToString(", ").ifEmpty { "未设置(单模型,不故障转移)" }
+                    val fallbackNone = stringResource(R.string.settings_fallback_none)
+                    val currentFallback = remember(refreshTick, fallbackNone) {
+                        KVUtils.getLlmFallbackModels().joinToString(", ").ifEmpty { fallbackNone }
                     }
-                    ClickableSettingsRow(Icons.Filled.Api, "LLM 备用模型", currentFallback) {
+                    ClickableSettingsRow(Icons.Filled.Api, stringResource(R.string.settings_fallback_title), currentFallback) {
                         fallbackDraft = KVUtils.getLlmFallbackModels().joinToString(",")
                         showFallbackDialog = true
                     }
@@ -488,13 +501,17 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         context.startActivity(Intent(context, RuntimeConfigActivity::class.java))
                     }
                     SettingsDivider()
-                    ClickableSettingsRow(Icons.Filled.Hub, "Echo 文件收发", "加入手机文件，接收电脑文件") {
+                    ClickableSettingsRow(Icons.Filled.Hub, stringResource(R.string.transfer_title), stringResource(R.string.settings_transfer_desc)) {
                         context.startActivity(
                             Intent(context, com.apk.claw.android.transfer.TransferActivity::class.java),
                         )
                     }
                     SettingsDivider()
-                    ClickableSettingsRow(Icons.Filled.Hub, "跨端任务", "查看进度、确认执行计划、继续已暂停任务") {
+                    ClickableSettingsRow(
+                        Icons.Filled.Hub,
+                        stringResource(R.string.settings_device_tasks_title),
+                        stringResource(R.string.settings_device_tasks_desc),
+                    ) {
                         context.startActivity(
                             Intent(context, com.apk.claw.android.ui.featurescreens.DeviceTasksActivity::class.java),
                         )
@@ -528,11 +545,13 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         Spacer(Modifier.width(OctopusSpacing.md))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "高清屏幕采集",
+                                stringResource(R.string.settings_hd_capture_title),
                                 color = TextPrimary, fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                if (hdActive) "已开启 · 远控画面高帧率" else "关 · 远控走无障碍截图(2-5fps)",
+                                stringResource(
+                                    if (hdActive) R.string.settings_hd_capture_on else R.string.settings_hd_capture_off,
+                                ),
                                 fontSize = OctopusType.caption, color = TextMuted,
                             )
                         }
@@ -555,11 +574,11 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         Spacer(Modifier.width(OctopusSpacing.md))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "不可逆操作 · 撤销窗口",
+                                stringResource(R.string.settings_undo_title),
                                 color = TextPrimary, fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                if (undoOn) "开 · 发短信/发帖/发文件前给 5 秒可撤销" else "关 · 不可逆动作直接执行",
+                                stringResource(if (undoOn) R.string.settings_undo_on else R.string.settings_undo_off),
                                 fontSize = OctopusType.caption, color = TextMuted,
                             )
                         }
@@ -579,11 +598,13 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                         Spacer(Modifier.width(OctopusSpacing.md))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "省流感知模式",
+                                stringResource(R.string.settings_frugal_title),
                                 color = TextPrimary, fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                if (frugalOn) "开 · 树够用时用文字替代截图,省 token" else "关 · 每轮走 vision 截图(更准)",
+                                stringResource(
+                                    if (frugalOn) R.string.settings_frugal_on else R.string.settings_frugal_off,
+                                ),
                                 fontSize = OctopusType.caption, color = TextMuted,
                             )
                         }
@@ -731,31 +752,31 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                 ClickableSettingsRow(
                     Icons.Filled.Api,
                     "MCP Server",
-                    "外部工具协议服务器(Model Context Protocol)",
+                    stringResource(R.string.settings_mcp_desc),
                 ) {
                     context.startActivity(Intent(context, McpServersActivity::class.java))
                 }
                 SettingsDivider()
                 ClickableSettingsRow(
                     Icons.Filled.Face,
-                    "角色卡",
-                    "自定义 AI 人设性格/开场白/说话风格",
+                    stringResource(R.string.settings_personas_title),
+                    stringResource(R.string.settings_personas_desc),
                 ) {
                     context.startActivity(Intent(context, PersonasActivity::class.java))
                 }
                 SettingsDivider()
                 ClickableSettingsRow(
                     Icons.Filled.AccountTree,
-                    "工作流",
-                    "多步骤编排（工具+Prompt+条件）",
+                    stringResource(R.string.settings_workflows_title),
+                    stringResource(R.string.settings_workflows_desc),
                 ) {
                     context.startActivity(Intent(context, WorkflowsActivity::class.java))
                 }
                 SettingsDivider()
                 ClickableSettingsRow(
                     Icons.Filled.Folder,
-                    "文件管理",
-                    "浏览 /sdcard 文件系统(需 Shizuku)",
+                    stringResource(R.string.settings_files_title),
+                    stringResource(R.string.settings_files_desc),
                 ) {
                     context.startActivity(Intent(context, FileManagerActivity::class.java))
                 }
@@ -770,8 +791,8 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                 SettingsDivider()
                 ClickableSettingsRow(
                     Icons.Filled.Terminal,
-                    "Linux 容器",
-                    "PRoot 沙箱(Alpine 内置 / Ubuntu 需下载)",
+                    stringResource(R.string.settings_linux_title),
+                    stringResource(R.string.settings_linux_desc),
                 ) {
                     context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.LinuxSandboxSettingsActivity::class.java))
                 }
@@ -784,9 +805,12 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
             var checking by remember { mutableStateOf(false) }
             Text(
                 if (checking) {
-                    "检查更新中…"
+                    stringResource(R.string.settings_update_checking)
                 } else {
-                    stringResource(R.string.settings_version_template, BuildConfig.VERSION_NAME) + " · 点此检查更新"
+                    stringResource(
+                        R.string.settings_update_tap,
+                        stringResource(R.string.settings_version_template, BuildConfig.VERSION_NAME),
+                    )
                 },
                 fontSize = OctopusType.caption, color = TextMuted,
                 modifier = Modifier
@@ -797,8 +821,10 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                             val r = AppUpdater.check()
                             checking = false
                             when (r) {
-                                is AppUpdater.CheckResult.UpToDate ->
-                                    Toast.makeText(updCtx, "已是最新版本", Toast.LENGTH_SHORT).show()
+                                is AppUpdater.CheckResult.UpToDate -> {
+                                    val latest = updCtx.getString(R.string.settings_update_latest)
+                                    Toast.makeText(updCtx, latest, Toast.LENGTH_SHORT).show()
+                                }
                                 is AppUpdater.CheckResult.Error ->
                                     Toast.makeText(updCtx, r.message, Toast.LENGTH_LONG).show()
                                 // 有新版:弹窗由根部 AppUpdateHost 自动弹出
