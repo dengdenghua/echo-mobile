@@ -38,36 +38,21 @@
     <string name="guide_status_done">활성화됨</string>
     <string name="guide_status_pending">활성화되지 않음</string>
     <string name="guide_title_accessibility">접근성 서비스</string>
-    <string name="guide_desc_accessibility">기기 제어를 위한 핵심 권한입니다.
-
-1. 시스템 설정 → 접근성 → 다운로드된 앱으로 이동
-2. 목록에서 "Echo"를 찾으세요
-3. 스위치를 켜세요
-4. 시스템 대화상자에서 확인하세요</string>
+    <string name="guide_desc_accessibility">기기 제어를 위한 핵심 권한입니다.\n\n1. 시스템 설정 → 접근성 → 다운로드된 앱으로 이동\n2. 목록에서 \"Echo\"를 찾으세요\n3. 스위치를 켜세요\n4. 시스템 대화상자에서 확인하세요</string>
     <string name="guide_title_notification">상태 알림</string>
     <string name="guide_desc_notification">앱이 백그라운드에서 안정적으로 실행되도록 유지하고 시스템에 의해 중단될 확률을 줄입니다.\n\n이 항목을 탭하여 활성화하세요. Android 13+는 먼저 알림 권한을 요청합니다.</string>
     <string name="guide_title_overlay">오버레이 창</string>
-    <string name="guide_desc_overlay">작업 실행 상태를 보기 위해 플로팅 패널을 표시합니다.
-
-1. 시스템 설정 → 앱 → Echo로 이동
-2. "다른 앱 위에 표시"를 찾으세요
-3. 스위치를 켜세요</string>
+    <string name="guide_desc_overlay">작업 실행 상태를 보기 위해 플로팅 패널을 표시합니다.\n\n1. 시스템 설정 → 앱 → Echo로 이동\n2. \"다른 앱 위에 표시\"를 찾으세요\n3. 스위치를 켜세요</string>
     <string name="guide_title_battery">배터리 화이트리스트</string>
-    <string name="guide_desc_battery">시스템이 백그라운드에서 앱을 중단하는 것을 방지합니다.\n\n이 항목을 탭하고 시스템 대화상자에서 "허용"을 확인하세요. 일부 기기는 "제한 없음"으로 설정해야 합니다.</string>
+    <string name="guide_desc_battery">시스템이 백그라운드에서 앱을 중단하는 것을 방지합니다.\n\n이 항목을 탭하고 시스템 대화상자에서 \"허용\"을 확인하세요. 일부 기기는 \"제한 없음\"으로 설정해야 합니다.</string>
     <string name="guide_title_storage">파일 접근</string>
-    <string name="guide_desc_storage">기기 파일 읽기 및 쓰기를 허용합니다.\n\nAndroid 11+: 시스템 설정에서 "모든 파일 접근"을 활성화하세요.\nAndroid 10 이하: 팝업에서 권한을 부여하세요.</string>
+    <string name="guide_desc_storage">기기 파일 읽기 및 쓰기를 허용합니다.\n\nAndroid 11+: 시스템 설정에서 \"모든 파일 접근\"을 활성화하세요.\nAndroid 10 이하: 팝업에서 권한을 부여하세요.</string>
 
     <!-- Advanced (Shizuku) permission card -->
     <string name="home_card_advanced_title">고급 기능 (선택 사항)</string>
     <string name="home_card_advanced_subtitle">보호된 팝업 처리 및 보안 창 캡처</string>
     <string name="advanced_dialog_title">Shizuku를 통해 고급 기능 활성화</string>
-    <string name="advanced_dialog_intro">기본적으로 Android 접근성 API가 사용되며, 대부분의 앱 작업에 충분합니다. 일부 기능은 Shizuku가 필요합니다:
-
-• 권한/시스템 팝업 탭 (FLAG_SECURE)
-• DRM 보호 화면 캡처
-• 앱 강제 종료, 시스템 설정 수정
-
-Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
+    <string name="advanced_dialog_intro">기본적으로 Android 접근성 API가 사용되며, 대부분의 앱 작업에 충분합니다. 일부 기능은 Shizuku가 필요합니다:\n\n• 권한/시스템 팝업 탭 (FLAG_SECURE)\n• DRM 보호 화면 캡처\n• 앱 강제 종료, 시스템 설정 수정\n\nShizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="advanced_dialog_steps">설정 단계:\n1. Play Store 또는 GitHub에서 Shizuku 설치\n2. 무선 디버깅(Android 11+) 또는 PC ADB를 통해 한 번 시작\n3. 여기로 돌아오면 Echo가 자동으로 감지합니다</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku가 준비되었으며, 고급 기능이 활성화되었습니다</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku가 설치되었지만 인증되지 않았습니다. 인증을 완료하려면 Shizuku를 여세요.</string>
@@ -153,7 +138,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="wechat_media_voice">음성</string>
     <string name="wechat_media_unknown">미디어</string>
     <string name="channel_config_saved">구성이 저장되었습니다</string>
-    <string name="channel_config_lan_hint">브라우저를 통해 구성하려면 설정에서 "LAN 구성"을 활성화하세요</string>
+    <string name="channel_config_lan_hint">브라우저를 통해 구성하려면 설정에서 \"LAN 구성\"을 활성화하세요</string>
     <string name="channel_config_lan_hint_running">브라우저에서 %s을(를) 열어 구성하세요</string>
     <string name="channel_config_lan_copied">주소가 복사되었습니다</string>
 
@@ -215,7 +200,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="wakeword_channel_name">웨이크 워드 수신</string>
     <string name="wakeword_channel_desc">마이크를 통해 웨이크 워드를 수신하는 백그라운드 서비스 알림</string>
     <string name="wakeword_notification_title">웨이크 워드 수신 중</string>
-    <string name="wakeword_notification_text">"%1$s"라고 말하여 비서를 호출하세요</string>
+    <string name="wakeword_notification_text">\"%1$s\"라고 말하여 비서를 호출하세요</string>
     <string name="wakeword_feature_title">웨이크 워드</string>
     <string name="wakeword_feature_desc">웨이크 워드를 말하여 비서를 호출합니다(지속적인 마이크 필요)</string>
     <string name="wakeword_privacy_title">지속적인 마이크 알림</string>
@@ -223,7 +208,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
 
     <!-- Floating -->
     <string name="floating_ai_label">AI</string>
-    <string name="floating_task_received">수신됨: "%s"</string>
+    <string name="floating_task_received">수신됨: \"%s\"</string>
 
     <!-- Foreground Service Notification -->
     <string name="notification_channel_name">Echo 상태</string>
@@ -530,10 +515,10 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="routine_alarm_running_title">루틴 실행 중</string>
     <string name="routine_alarm_running_text">%1$s\n%2$s</string>
     <string name="routine_alarm_skipped_title">루틴 건너뜀</string>
-    <string name="routine_alarm_skipped_text">"%1$s"이(가) 트리거되었지만 모델이 구성되지 않았습니다</string>
+    <string name="routine_alarm_skipped_text">\"%1$s\"이(가) 트리거되었지만 모델이 구성되지 않았습니다</string>
     <string name="routine_alarm_retry_title">루틴 대기 중</string>
-    <string name="routine_alarm_retry_text">"%1$s"이(가) 트리거되었지만 에이전트가 사용 중입니다. 재시도 %2$d/%3$d이(가) 나중에 실행됩니다.</string>
-    <string name="routine_alarm_busy_give_up_text">"%1$s"이(가) 트리거되었지만 여러 번 재시도 후에도 에이전트가 여전히 사용 중입니다</string>
+    <string name="routine_alarm_retry_text">\"%1$s\"이(가) 트리거되었지만 에이전트가 사용 중입니다. 재시도 %2$d/%3$d이(가) 나중에 실행됩니다.</string>
+    <string name="routine_alarm_busy_give_up_text">\"%1$s\"이(가) 트리거되었지만 여러 번 재시도 후에도 에이전트가 여전히 사용 중입니다</string>
     <string name="browser_loading_text">로드 중...</string>
     <string name="browser_engine_chip_description">검색 엔진 전환</string>
     <string name="browser_url_hint">검색 또는 URL 입력</string>
@@ -575,7 +560,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="browser_bookmarked">북마크됨</string>
     <string name="browser_engine_no_extensions">현재 엔진(%1$s)은 확장 프로그램을 지원하지 않습니다</string>
     <string name="browser_extension_xpi_hint">확장 프로그램 .xpi 링크(Firefox)</string>
-    <string name="browser_extension_dialog_message">권장: "AMO 스토어 탐색"을 탭하여 Firefox 부가기능 마켓을 열고, 확장 프로그램 페이지에서 "Firefox에 추가"를 탭하여 설치하세요.\n아래에 .xpi 링크를 붙여넣어 설치할 수도 있습니다.\n서명 제한으로 인해 Chrome 확장 프로그램은 Firefox 엔진에 설치할 수 없습니다.</string>
+    <string name="browser_extension_dialog_message">권장: \"AMO 스토어 탐색\"을 탭하여 Firefox 부가기능 마켓을 열고, 확장 프로그램 페이지에서 \"Firefox에 추가\"를 탭하여 설치하세요.\n아래에 .xpi 링크를 붙여넣어 설치할 수도 있습니다.\n서명 제한으로 인해 Chrome 확장 프로그램은 Firefox 엔진에 설치할 수 없습니다.</string>
     <string name="browser_install_button">설치</string>
     <string name="browser_browse_amo_button">AMO 스토어 탐색</string>
     <string name="browser_installing_extension">확장 프로그램 설치 중...</string>
@@ -674,14 +659,14 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="chat_demo_search">✓ 검색</string>
     <string name="chat_demo_xiaoming">✓ 샤오밍</string>
     <string name="chat_demo_send">✓ 전송</string>
-    <string name="chat_demo_wechat_sent">WeChat을 열고 샤오밍의 채팅을 찾아 "오늘 저녁 같이 먹을래?"라는 메시지를 보냈습니다.</string>
+    <string name="chat_demo_wechat_sent">WeChat을 열고 샤오밍의 채팅을 찾아 \"오늘 저녁 같이 먹을래?\"라는 메시지를 보냈습니다.</string>
     <string name="chat_demo_check_weather">내일 날씨 확인</string>
     <string name="chat_demo_weather_details">✓ 날씨 상세</string>
     <string name="chat_demo_weather_forecast">베이징 내일: 맑음 후 흐림, 최고 28°C, 최저 16°C, 공기질 양호.</string>
     <string name="chat_save_as_routine">루틴으로 저장</string>
     <string name="chat_routine_saved_toast">루틴으로 저장됨(보기)</string>
     <string name="fast_replay_activity_log_message">빠른 경로가 %1$d단계 재생됨</string>
-    <string name="routine_runner_target_offline">(대상 "%1$s" 오프라인, 이 기기로 전환)</string>
+    <string name="routine_runner_target_offline">(대상 \"%1$s\" 오프라인, 이 기기로 전환)</string>
     <string name="routine_runner_model_not_configured">모델이 구성되지 않았습니다. 설정 → 모델로 이동</string>
     <string name="routine_runner_fast_path">빠른 경로</string>
     <string name="routine_runner_starting_execution">실행 시작 중</string>
@@ -732,7 +717,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="clouddrive_empty_or_auth_failed">디렉토리가 비어 있거나 서버에 접근할 수 없거나 / 인증 실패</string>
     <string name="clouddrive_title">클라우드 드라이브 / NAS</string>
     <string name="clouddrive_add_button">+ 추가</string>
-    <string name="clouddrive_empty_state_hint">아직 마운트 지점이 없습니다. 오른쪽 상단의 "+ 추가"를 탭하고 NAS/클라우드 드라이브(Synology, Nextcloud, Jianguoyun, AList 등 지원)의 WebDAV 주소를 입력하여 탐색 및 재생하세요.</string>
+    <string name="clouddrive_empty_state_hint">아직 마운트 지점이 없습니다. 오른쪽 상단의 \"+ 추가\"를 탭하고 NAS/클라우드 드라이브(Synology, Nextcloud, Jianguoyun, AList 등 지원)의 WebDAV 주소를 입력하여 탐색 및 재생하세요.</string>
     <string name="clouddrive_empty_directory">디렉토리가 비어 있습니다</string>
     <string name="clouddrive_add_mount_dialog_title">WebDAV 마운트 추가</string>
     <string name="clouddrive_label_server_address">서버 주소</string>
@@ -749,10 +734,10 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="evolution_effectiveness">효과 %1$d%%</string>
     <string name="extensions_title">브라우저 확장 프로그램</string>
     <string name="extensions_install_from_amo">Firefox 스토어(AMO)에서 설치</string>
-    <string name="extensions_install_instructions">addons.mozilla.org를 열고 확장 프로그램 페이지에서 "Firefox에 추가"를 탭하세요</string>
+    <string name="extensions_install_instructions">addons.mozilla.org를 열고 확장 프로그램 페이지에서 \"Firefox에 추가\"를 탭하세요</string>
     <string name="extensions_go_install_button">설치</string>
     <string name="extensions_installed_section">설치됨</string>
-    <string name="extensions_empty_state">설치된 확장 프로그램이 없습니다.\n위의 "설치"를 탭하여 Firefox 스토어를 방문하고, 확장 프로그램을 선택한 다음 페이지에서 "Firefox에 추가"를 탭하세요.</string>
+    <string name="extensions_empty_state">설치된 확장 프로그램이 없습니다.\n위의 \"설치\"를 탭하여 Firefox 스토어를 방문하고, 확장 프로그램을 선택한 다음 페이지에서 \"Firefox에 추가\"를 탭하세요.</string>
     <string name="extensions_enabled_status">● 활성화됨</string>
     <string name="extensions_disabled_status">○ 비활성화됨</string>
     <string name="extensions_disable_button">비활성화</string>
@@ -796,7 +781,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">실행</string>
     <string name="routines_forget_fastpath_title">빠른 경로 잊기</string>
-    <string name="routines_forget_fastpath_message">"%1$s"은(는) %2$d단계 빠른 경로를 학습했습니다. 잊으면 에이전트가 화면에서 다시 계획하고 다음 실행 시 다시 기록합니다.</string>
+    <string name="routines_forget_fastpath_message">\"%1$s\"은(는) %2$d단계 빠른 경로를 학습했습니다. 잊으면 에이전트가 화면에서 다시 계획하고 다음 실행 시 다시 기록합니다.</string>
     <string name="routines_forget_button">잊기</string>
     <string name="routines_forgotten_toast">빠른 경로가 잊혀졌습니다</string>
     <string name="routines_schedule_dialog_title">%1$s 예약</string>
@@ -1368,7 +1353,7 @@ Shizuku는 안전하고 오픈 소스 로컬 도우미 도구입니다.</string>
     <string name="userscript_uninstall">제거</string>
     <string name="userscript_installed_label">설치됨</string>
     <string name="userscript_install_from_url">URL에서 설치</string>
-    <string name="userscript_empty_installed">아직 설치된 스크립트가 없습니다. "추천" 탭에서 하나를 선택하세요.</string>
+    <string name="userscript_empty_installed">아직 설치된 스크립트가 없습니다. \"추천\" 탭에서 하나를 선택하세요.</string>
     <string name="userscript_installed_toast">설치됨: %1$s</string>
     <string name="userscript_install_failed_toast">설치 실패: %1$s</string>
 

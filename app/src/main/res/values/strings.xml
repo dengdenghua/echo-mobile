@@ -38,36 +38,21 @@
     <string name="guide_status_done">Enabled</string>
     <string name="guide_status_pending">Not enabled</string>
     <string name="guide_title_accessibility">Accessibility Service</string>
-    <string name="guide_desc_accessibility">This is the core permission for controlling the device.
-
-1. Go to System Settings → Accessibility → Downloaded apps
-2. Find "Echo" in the list
-3. Turn on the switch
-4. Confirm in the system dialog</string>
+    <string name="guide_desc_accessibility">This is the core permission for controlling the device.\n\n1. Go to System Settings → Accessibility → Downloaded apps\n2. Find \"Echo\" in the list\n3. Turn on the switch\n4. Confirm in the system dialog</string>
     <string name="guide_title_notification">Persistent Notification</string>
     <string name="guide_desc_notification">Keeps the app running stably in the background and reduces the chance of being stopped by the system.\n\nTap this item to enable. Android 13+ will request notification permission first.</string>
     <string name="guide_title_overlay">Overlay Window</string>
-    <string name="guide_desc_overlay">Shows a floating panel to view task execution status.
-
-1. Go to System Settings → Apps → Echo
-2. Find "Display over other apps"
-3. Turn on the switch</string>
+    <string name="guide_desc_overlay">Shows a floating panel to view task execution status.\n\n1. Go to System Settings → Apps → Echo\n2. Find \"Display over other apps\"\n3. Turn on the switch</string>
     <string name="guide_title_battery">Battery Whitelist</string>
-    <string name="guide_desc_battery">Prevents the system from stopping the app in the background.\n\nTap this item and confirm "Allow" in the system dialog. Some devices need to be set to "Unrestricted".</string>
+    <string name="guide_desc_battery">Prevents the system from stopping the app in the background.\n\nTap this item and confirm \"Allow\" in the system dialog. Some devices need to be set to \"Unrestricted\".</string>
     <string name="guide_title_storage">File Access</string>
-    <string name="guide_desc_storage">Allows reading and writing device files.\n\nAndroid 11+: Go to System Settings and enable "All files access".\nAndroid 10 and below: Grant permission in the popup.</string>
+    <string name="guide_desc_storage">Allows reading and writing device files.\n\nAndroid 11+: Go to System Settings and enable \"All files access\".\nAndroid 10 and below: Grant permission in the popup.</string>
 
     <!-- Advanced (Shizuku) permission card -->
     <string name="home_card_advanced_title">Advanced capabilities (optional)</string>
     <string name="home_card_advanced_subtitle">Handle protected popups and capture secure windows</string>
     <string name="advanced_dialog_title">Enable advanced capabilities via Shizuku</string>
-    <string name="advanced_dialog_intro">By default, the Android Accessibility API is used, which is enough for most app operations. A few capabilities require Shizuku:
-
-• Tapping permission/system popups (FLAG_SECURE)
-• Capturing DRM-protected screens
-• Force-stopping apps, modifying system settings
-
-Shizuku is a safe, open-source local helper tool.</string>
+    <string name="advanced_dialog_intro">By default, the Android Accessibility API is used, which is enough for most app operations. A few capabilities require Shizuku:\n\n• Tapping permission/system popups (FLAG_SECURE)\n• Capturing DRM-protected screens\n• Force-stopping apps, modifying system settings\n\nShizuku is a safe, open-source local helper tool.</string>
     <string name="advanced_dialog_steps">Setup steps:\n1. Install Shizuku from Play Store or GitHub\n2. Start it once via Wireless Debugging (Android 11+) or PC ADB\n3. Return here, Echo will detect it automatically</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku is ready, advanced capabilities enabled</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku is installed but not authorized. Open Shizuku to complete authorization.</string>
@@ -153,7 +138,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="wechat_media_voice">Voice</string>
     <string name="wechat_media_unknown">Media</string>
     <string name="channel_config_saved">Configuration saved</string>
-    <string name="channel_config_lan_hint">Enable "LAN configuration" in settings to configure via a browser</string>
+    <string name="channel_config_lan_hint">Enable \"LAN configuration\" in settings to configure via a browser</string>
     <string name="channel_config_lan_hint_running">Open %s in a browser to configure</string>
     <string name="channel_config_lan_copied">Address copied</string>
 
@@ -215,7 +200,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="wakeword_channel_name">Wake Word Listening</string>
     <string name="wakeword_channel_desc">Background service notification for listening for the wake word via the microphone</string>
     <string name="wakeword_notification_title">Listening for wake word</string>
-    <string name="wakeword_notification_text">Say "%1$s" to invoke the assistant</string>
+    <string name="wakeword_notification_text">Say \"%1$s\" to invoke the assistant</string>
     <string name="wakeword_feature_title">Wake Word</string>
     <string name="wakeword_feature_desc">Say the wake word to invoke the assistant (requires persistent microphone)</string>
     <string name="wakeword_privacy_title">Persistent Microphone Notice</string>
@@ -223,7 +208,7 @@ Shizuku is a safe, open-source local helper tool.</string>
 
     <!-- Floating -->
     <string name="floating_ai_label">AI</string>
-    <string name="floating_task_received">Received: "%s"</string>
+    <string name="floating_task_received">Received: \"%s\"</string>
 
     <!-- Foreground Service Notification -->
     <string name="notification_channel_name">Echo Status</string>
@@ -530,10 +515,10 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="routine_alarm_running_title">Running routine</string>
     <string name="routine_alarm_running_text">%1$s\n%2$s</string>
     <string name="routine_alarm_skipped_title">Routine skipped</string>
-    <string name="routine_alarm_skipped_text">"%1$s" was triggered, but the model is not configured</string>
+    <string name="routine_alarm_skipped_text">\"%1$s\" was triggered, but the model is not configured</string>
     <string name="routine_alarm_retry_title">Routine queued</string>
-    <string name="routine_alarm_retry_text">"%1$s" was triggered, but the agent is busy. Retry %2$d/%3$d will run later.</string>
-    <string name="routine_alarm_busy_give_up_text">"%1$s" was triggered, but the agent is still busy after multiple retries</string>
+    <string name="routine_alarm_retry_text">\"%1$s\" was triggered, but the agent is busy. Retry %2$d/%3$d will run later.</string>
+    <string name="routine_alarm_busy_give_up_text">\"%1$s\" was triggered, but the agent is still busy after multiple retries</string>
     <string name="browser_loading_text">Loading...</string>
     <string name="browser_engine_chip_description">Switch search engine</string>
     <string name="browser_url_hint">Search or enter URL</string>
@@ -575,7 +560,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="browser_bookmarked">Bookmarked</string>
     <string name="browser_engine_no_extensions">Current engine (%1$s) does not support extensions</string>
     <string name="browser_extension_xpi_hint">Extension .xpi link (Firefox)</string>
-    <string name="browser_extension_dialog_message">Recommended: tap "Browse AMO Store" to open the Firefox add-ons market, then tap "Add to Firefox" on the extension page to install.\nYou can also paste a .xpi link below to install.\nDue to signing restrictions, Chrome extensions cannot be installed on the Firefox engine.</string>
+    <string name="browser_extension_dialog_message">Recommended: tap \"Browse AMO Store\" to open the Firefox add-ons market, then tap \"Add to Firefox\" on the extension page to install.\nYou can also paste a .xpi link below to install.\nDue to signing restrictions, Chrome extensions cannot be installed on the Firefox engine.</string>
     <string name="browser_install_button">Install</string>
     <string name="browser_browse_amo_button">Browse AMO Store</string>
     <string name="browser_installing_extension">Installing extension...</string>
@@ -674,14 +659,14 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="chat_demo_search">✓ Search</string>
     <string name="chat_demo_xiaoming">✓ Xiaoming</string>
     <string name="chat_demo_send">✓ Send</string>
-    <string name="chat_demo_wechat_sent">Opened WeChat, found Xiaoming\'s chat, and sent the message "Want to grab dinner tonight?".</string>
+    <string name="chat_demo_wechat_sent">Opened WeChat, found Xiaoming\'s chat, and sent the message \"Want to grab dinner tonight?\".</string>
     <string name="chat_demo_check_weather">Check tomorrow\'s weather</string>
     <string name="chat_demo_weather_details">✓ Weather details</string>
     <string name="chat_demo_weather_forecast">Tomorrow in Beijing: sunny turning cloudy, high 28°C, low 16°C, good air quality.</string>
     <string name="chat_save_as_routine">Save as routine</string>
     <string name="chat_routine_saved_toast">Saved as routine (view)</string>
     <string name="fast_replay_activity_log_message">Fast path replayed %1$d steps</string>
-    <string name="routine_runner_target_offline">(Target "%1$s" offline, switched to this device)</string>
+    <string name="routine_runner_target_offline">(Target \"%1$s\" offline, switched to this device)</string>
     <string name="routine_runner_model_not_configured">Model not configured, go to Settings → Model</string>
     <string name="routine_runner_fast_path">Fast path</string>
     <string name="routine_runner_starting_execution">Starting execution</string>
@@ -732,7 +717,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="clouddrive_empty_or_auth_failed">Directory empty, or server unreachable / auth failed</string>
     <string name="clouddrive_title">Cloud Drive / NAS</string>
     <string name="clouddrive_add_button">+ Add</string>
-    <string name="clouddrive_empty_state_hint">No mount points yet. Tap "+ Add" at the top right and enter the WebDAV address of your NAS/cloud drive (Synology, Nextcloud, Jianguoyun, AList, etc. supported) to browse and play.</string>
+    <string name="clouddrive_empty_state_hint">No mount points yet. Tap \"+ Add\" at the top right and enter the WebDAV address of your NAS/cloud drive (Synology, Nextcloud, Jianguoyun, AList, etc. supported) to browse and play.</string>
     <string name="clouddrive_empty_directory">Directory is empty</string>
     <string name="clouddrive_add_mount_dialog_title">Add WebDAV mount</string>
     <string name="clouddrive_label_server_address">Server address</string>
@@ -749,10 +734,10 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="evolution_effectiveness">Effectiveness %1$d%%</string>
     <string name="extensions_title">Browser Extensions</string>
     <string name="extensions_install_from_amo">Install from Firefox store (AMO)</string>
-    <string name="extensions_install_instructions">Open addons.mozilla.org, tap "Add to Firefox" on the extension page</string>
+    <string name="extensions_install_instructions">Open addons.mozilla.org, tap \"Add to Firefox\" on the extension page</string>
     <string name="extensions_go_install_button">Install</string>
     <string name="extensions_installed_section">Installed</string>
-    <string name="extensions_empty_state">No extensions installed.\nTap "Install" above to visit the Firefox store, pick an extension, then tap "Add to Firefox" on the page.</string>
+    <string name="extensions_empty_state">No extensions installed.\nTap \"Install\" above to visit the Firefox store, pick an extension, then tap \"Add to Firefox\" on the page.</string>
     <string name="extensions_enabled_status">● Enabled</string>
     <string name="extensions_disabled_status">○ Disabled</string>
     <string name="extensions_disable_button">Disable</string>
@@ -796,7 +781,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">Run</string>
     <string name="routines_forget_fastpath_title">Forget fast path</string>
-    <string name="routines_forget_fastpath_message">"%1$s" has learned a %2$d-step fast path. After forgetting, the agent will re-plan from screen and re-record next run.</string>
+    <string name="routines_forget_fastpath_message">\"%1$s\" has learned a %2$d-step fast path. After forgetting, the agent will re-plan from screen and re-record next run.</string>
     <string name="routines_forget_button">Forget</string>
     <string name="routines_forgotten_toast">Fast path forgotten</string>
     <string name="routines_schedule_dialog_title">Schedule %1$s</string>
@@ -988,7 +973,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="account_mobile_label">Phone</string>
     <string name="account_mobile_hint">Enter phone number</string>
     <string name="account_code_label">Verification code</string>
-    <string name="account_code_hint">Enter verification code</string>
+    <string name="account_code_hint">Enter code</string>
     <string name="account_send_code">Get verification code</string>
     <string name="account_sending">Sending…</string>
     <string name="account_resend_in">Resend in %1$d s</string>
@@ -1368,7 +1353,7 @@ Shizuku is a safe, open-source local helper tool.</string>
     <string name="userscript_uninstall">Uninstall</string>
     <string name="userscript_installed_label">Installed</string>
     <string name="userscript_install_from_url">Install from URL</string>
-    <string name="userscript_empty_installed">No scripts installed yet. Pick one from the "Recommend" tab.</string>
+    <string name="userscript_empty_installed">No scripts installed yet. Pick one from the \"Recommend\" tab.</string>
     <string name="userscript_installed_toast">Installed: %1$s</string>
     <string name="userscript_install_failed_toast">Install failed: %1$s</string>
 

@@ -1,7 +1,7 @@
 // ====== i18n ======
 const i18n = {
   zh: {
-    title: 'Octopus Mobile 配置',
+    title: 'Echo Mobile 配置',
     subtitle: '在此页面配置 LLM 与钉钉、飞书、QQ、Discord、Telegram 的应用凭证',
     loading: '加载中...',
     llm_title: 'LLM 配置', llm_api_key: 'API Key', llm_base_url: 'Base URL', llm_model_name: '模型名称',
@@ -28,7 +28,7 @@ const i18n = {
     open_console: '打开控制台',
   },
   en: {
-    title: 'Octopus Mobile Config',
+    title: 'Echo Mobile Config',
     subtitle: 'Configure LLM and credentials for DingTalk, Feishu, QQ, Discord, Telegram',
     loading: 'Loading...',
     llm_title: 'LLM Config', llm_api_key: 'API Key', llm_base_url: 'Base URL', llm_model_name: 'Model Name',
@@ -55,7 +55,7 @@ const i18n = {
     open_console: 'Open Console',
   },
   ja: {
-    title: 'Octopus Mobile 設定',
+    title: 'Echo Mobile 設定',
     subtitle: 'LLM と DingTalk、Feishu、QQ、Discord、Telegram の資格情報を設定',
     loading: '読み込み中...',
     llm_title: 'LLM 設定', llm_api_key: 'API Key', llm_base_url: 'Base URL', llm_model_name: 'モデル名',

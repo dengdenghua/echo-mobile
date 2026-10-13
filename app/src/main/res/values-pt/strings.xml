@@ -38,36 +38,21 @@
     <string name="guide_status_done">Ativado</string>
     <string name="guide_status_pending">Não ativado</string>
     <string name="guide_title_accessibility">Serviço de acessibilidade</string>
-    <string name="guide_desc_accessibility">Esta é a permissão principal para controlar o dispositivo.
-
-1. Vá em Configurações do sistema → Acessibilidade → Apps baixados
-2. Encontre "Echo" na lista
-3. Ligue o interruptor
-4. Confirme na caixa de diálogo do sistema</string>
+    <string name="guide_desc_accessibility">Esta é a permissão principal para controlar o dispositivo.\n\n1. Vá em Configurações do sistema → Acessibilidade → Apps baixados\n2. Encontre \"Echo\" na lista\n3. Ligue o interruptor\n4. Confirme na caixa de diálogo do sistema</string>
     <string name="guide_title_notification">Notificação persistente</string>
     <string name="guide_desc_notification">Mantém o app executando estável em segundo plano e reduz a chance de ser interrompido pelo sistema.\n\nToque neste item para ativar. Android 13+ solicitará permissão de notificação primeiro.</string>
     <string name="guide_title_overlay">Janela sobreposta</string>
-    <string name="guide_desc_overlay">Mostra um painel flutuante para visualizar o status de execução da tarefa.
-
-1. Vá em Configurações do sistema → Apps → Echo
-2. Encontre "Exibir sobre outros apps"
-3. Ligue o interruptor</string>
+    <string name="guide_desc_overlay">Mostra um painel flutuante para visualizar o status de execução da tarefa.\n\n1. Vá em Configurações do sistema → Apps → Echo\n2. Encontre \"Exibir sobre outros apps\"\n3. Ligue o interruptor</string>
     <string name="guide_title_battery">Lista branca de bateria</string>
-    <string name="guide_desc_battery">Impede que o sistema interrompa o app em segundo plano.\n\nToque neste item e confirme "Permitir" na caixa de diálogo do sistema. Alguns dispositivos precisam ser definidos como "Sem restrições".</string>
+    <string name="guide_desc_battery">Impede que o sistema interrompa o app em segundo plano.\n\nToque neste item e confirme \"Permitir\" na caixa de diálogo do sistema. Alguns dispositivos precisam ser definidos como \"Sem restrições\".</string>
     <string name="guide_title_storage">Acesso a arquivos</string>
-    <string name="guide_desc_storage">Permite ler e gravar arquivos do dispositivo.\n\nAndroid 11+: Vá em Configurações do sistema e ative "Acesso a todos os arquivos".\nAndroid 10 e anteriores: Conceda a permissão no pop-up.</string>
+    <string name="guide_desc_storage">Permite ler e gravar arquivos do dispositivo.\n\nAndroid 11+: Vá em Configurações do sistema e ative \"Acesso a todos os arquivos\".\nAndroid 10 e anteriores: Conceda a permissão no pop-up.</string>
 
     <!-- Cartão de permissão avançada (Shizuku) -->
     <string name="home_card_advanced_title">Recursos avançados (opcional)</string>
     <string name="home_card_advanced_subtitle">Lida com pop-ups protegidos e captura janelas seguras</string>
     <string name="advanced_dialog_title">Ativar recursos avançados via Shizuku</string>
-    <string name="advanced_dialog_intro">Por padrão, é usada a API de Acessibilidade do Android, que é suficiente para a maioria das operações de apps. Algumas capacidades requerem Shizuku:
-
-• Tocar em pop-ups de permissão/sistema (FLAG_SECURE)
-• Capturar telas protegidas por DRM
-• Forçar parada de apps, modificar configurações do sistema
-
-Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
+    <string name="advanced_dialog_intro">Por padrão, é usada a API de Acessibilidade do Android, que é suficiente para a maioria das operações de apps. Algumas capacidades requerem Shizuku:\n\n• Tocar em pop-ups de permissão/sistema (FLAG_SECURE)\n• Capturar telas protegidas por DRM\n• Forçar parada de apps, modificar configurações do sistema\n\nShizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="advanced_dialog_steps">Etapas de configuração:\n1. Instale o Shizuku da Play Store ou GitHub\n2. Inicie-o uma vez via Depuração sem fio (Android 11+) ou ADB no PC\n3. Volte aqui, o Echo detectará automaticamente</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku está pronto, recursos avançados ativados</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku está instalado, mas não autorizado. Abra o Shizuku para concluir a autorização.</string>
@@ -153,7 +138,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="wechat_media_voice">Áudio</string>
     <string name="wechat_media_unknown">Mídia</string>
     <string name="channel_config_saved">Configuração salva</string>
-    <string name="channel_config_lan_hint">Ative a "Configuração LAN" nas configurações para configurar via navegador</string>
+    <string name="channel_config_lan_hint">Ative a \"Configuração LAN\" nas configurações para configurar via navegador</string>
     <string name="channel_config_lan_hint_running">Abra %s em um navegador para configurar</string>
     <string name="channel_config_lan_copied">Endereço copiado</string>
 
@@ -215,7 +200,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="wakeword_channel_name">Escuta de palavra de ativação</string>
     <string name="wakeword_channel_desc">Notificação de serviço em segundo plano para escuta da palavra de ativação pelo microfone</string>
     <string name="wakeword_notification_title">Escutando palavra de ativação</string>
-    <string name="wakeword_notification_text">Diga "%1$s" para invocar o assistente</string>
+    <string name="wakeword_notification_text">Diga \"%1$s\" para invocar o assistente</string>
     <string name="wakeword_feature_title">Palavra de ativação</string>
     <string name="wakeword_feature_desc">Diga a palavra de ativação para invocar o assistente (requer microfone persistente)</string>
     <string name="wakeword_privacy_title">Aviso de microfone persistente</string>
@@ -223,7 +208,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
 
     <!-- Flutuante -->
     <string name="floating_ai_label">AI</string>
-    <string name="floating_task_received">Recebido: "%s"</string>
+    <string name="floating_task_received">Recebido: \"%s\"</string>
 
     <!-- Notificação de serviço em primeiro plano -->
     <string name="notification_channel_name">Status do Echo</string>
@@ -530,10 +515,10 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="routine_alarm_running_title">Rotina em execução</string>
     <string name="routine_alarm_running_text">%1$s\n%2$s</string>
     <string name="routine_alarm_skipped_title">Rotina ignorada</string>
-    <string name="routine_alarm_skipped_text">"%1$s" foi acionada, mas o modelo não está configurado</string>
+    <string name="routine_alarm_skipped_text">\"%1$s\" foi acionada, mas o modelo não está configurado</string>
     <string name="routine_alarm_retry_title">Rotina na fila</string>
-    <string name="routine_alarm_retry_text">"%1$s" foi acionada, mas o agente está ocupado. A tentativa %2$d/%3$d será executada mais tarde.</string>
-    <string name="routine_alarm_busy_give_up_text">"%1$s" foi acionada, mas o agente continua ocupado após várias tentativas</string>
+    <string name="routine_alarm_retry_text">\"%1$s\" foi acionada, mas o agente está ocupado. A tentativa %2$d/%3$d será executada mais tarde.</string>
+    <string name="routine_alarm_busy_give_up_text">\"%1$s\" foi acionada, mas o agente continua ocupado após várias tentativas</string>
     <string name="browser_loading_text">Carregando...</string>
     <string name="browser_engine_chip_description">Trocar mecanismo de busca</string>
     <string name="browser_url_hint">Buscar ou digitar URL</string>
@@ -575,7 +560,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="browser_bookmarked">Adicionado aos favoritos</string>
     <string name="browser_engine_no_extensions">O mecanismo atual (%1$s) não suporta extensões</string>
     <string name="browser_extension_xpi_hint">Link de extensão .xpi (Firefox)</string>
-    <string name="browser_extension_dialog_message">Recomendado: toque em "Explorar loja AMO" para abrir a loja de complementos do Firefox, depois toque em "Adicionar ao Firefox" na página da extensão para instalar.\nVocê também pode colar um link .xpi abaixo para instalar.\nDevido a restrições de assinatura, extensões do Chrome não podem ser instaladas no mecanismo Firefox.</string>
+    <string name="browser_extension_dialog_message">Recomendado: toque em \"Explorar loja AMO\" para abrir a loja de complementos do Firefox, depois toque em \"Adicionar ao Firefox\" na página da extensão para instalar.\nVocê também pode colar um link .xpi abaixo para instalar.\nDevido a restrições de assinatura, extensões do Chrome não podem ser instaladas no mecanismo Firefox.</string>
     <string name="browser_install_button">Instalar</string>
     <string name="browser_browse_amo_button">Explorar loja AMO</string>
     <string name="browser_installing_extension">Instalando extensão...</string>
@@ -674,14 +659,14 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="chat_demo_search">✓ Buscar</string>
     <string name="chat_demo_xiaoming">✓ Xiaoming</string>
     <string name="chat_demo_send">✓ Enviar</string>
-    <string name="chat_demo_wechat_sent">Abriu o WeChat, encontrou a conversa do Xiaoming e enviou a mensagem "Quer jantar hoje à noite?".</string>
+    <string name="chat_demo_wechat_sent">Abriu o WeChat, encontrou a conversa do Xiaoming e enviou a mensagem \"Quer jantar hoje à noite?\".</string>
     <string name="chat_demo_check_weather">Verificar o clima de amanhã</string>
     <string name="chat_demo_weather_details">✓ Detalhes do clima</string>
     <string name="chat_demo_weather_forecast">Amanhã em Pequim: ensolarado com nublado, máxima 28°C, mínima 16°C, boa qualidade do ar.</string>
     <string name="chat_save_as_routine">Salvar como rotina</string>
     <string name="chat_routine_saved_toast">Salvo como rotina (ver)</string>
     <string name="fast_replay_activity_log_message">Reprodução rápida refez %1$d etapas</string>
-    <string name="routine_runner_target_offline">(Destino "%1$s" offline, alternado para este dispositivo)</string>
+    <string name="routine_runner_target_offline">(Destino \"%1$s\" offline, alternado para este dispositivo)</string>
     <string name="routine_runner_model_not_configured">Modelo não configurado, vá para Configurações → Modelo</string>
     <string name="routine_runner_fast_path">Caminho rápido</string>
     <string name="routine_runner_starting_execution">Iniciando execução</string>
@@ -732,7 +717,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="clouddrive_empty_or_auth_failed">Diretório vazio, ou servidor inacessível / falha de autenticação</string>
     <string name="clouddrive_title">Armazenamento em nuvem / NAS</string>
     <string name="clouddrive_add_button">+ Adicionar</string>
-    <string name="clouddrive_empty_state_hint">Nenhum ponto de montagem ainda. Toque em "+ Adicionar" no canto superior direito e insira o endereço WebDAV do seu NAS/armazenamento em nuvem (Synology, Nextcloud, Jianguoyun, AList etc. suportados) para navegar e reproduzir.</string>
+    <string name="clouddrive_empty_state_hint">Nenhum ponto de montagem ainda. Toque em \"+ Adicionar\" no canto superior direito e insira o endereço WebDAV do seu NAS/armazenamento em nuvem (Synology, Nextcloud, Jianguoyun, AList etc. suportados) para navegar e reproduzir.</string>
     <string name="clouddrive_empty_directory">O diretório está vazio</string>
     <string name="clouddrive_add_mount_dialog_title">Adicionar montagem WebDAV</string>
     <string name="clouddrive_label_server_address">Endereço do servidor</string>
@@ -749,10 +734,10 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="evolution_effectiveness">Eficácia %1$d%%</string>
     <string name="extensions_title">Extensões do navegador</string>
     <string name="extensions_install_from_amo">Instalar da loja Firefox (AMO)</string>
-    <string name="extensions_install_instructions">Abra addons.mozilla.org, toque em "Adicionar ao Firefox" na página da extensão</string>
+    <string name="extensions_install_instructions">Abra addons.mozilla.org, toque em \"Adicionar ao Firefox\" na página da extensão</string>
     <string name="extensions_go_install_button">Instalar</string>
     <string name="extensions_installed_section">Instaladas</string>
-    <string name="extensions_empty_state">Nenhuma extensão instalada.\nToque em "Instalar" acima para visitar a loja do Firefox, escolha uma extensão e toque em "Adicionar ao Firefox" na página.</string>
+    <string name="extensions_empty_state">Nenhuma extensão instalada.\nToque em \"Instalar\" acima para visitar a loja do Firefox, escolha uma extensão e toque em \"Adicionar ao Firefox\" na página.</string>
     <string name="extensions_enabled_status">● Ativada</string>
     <string name="extensions_disabled_status">○ Desativada</string>
     <string name="extensions_disable_button">Desativar</string>
@@ -796,7 +781,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">Executar</string>
     <string name="routines_forget_fastpath_title">Esquecer caminho rápido</string>
-    <string name="routines_forget_fastpath_message">"%1$s" aprendeu um caminho rápido de %2$d etapas. Após esquecer, o agente vai replanejar a partir da tela e registrar novamente na próxima execução.</string>
+    <string name="routines_forget_fastpath_message">\"%1$s\" aprendeu um caminho rápido de %2$d etapas. Após esquecer, o agente vai replanejar a partir da tela e registrar novamente na próxima execução.</string>
     <string name="routines_forget_button">Esquecer</string>
     <string name="routines_forgotten_toast">Caminho rápido esquecido</string>
     <string name="routines_schedule_dialog_title">Agendar %1$s</string>
@@ -988,7 +973,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="account_mobile_label">Telefone</string>
     <string name="account_mobile_hint">Digite o número de telefone</string>
     <string name="account_code_label">Código de verificação</string>
-    <string name="account_code_hint">Digite o código de verificação</string>
+    <string name="account_code_hint">Digite o código</string>
     <string name="account_send_code">Obter código de verificação</string>
     <string name="account_sending">Enviando…</string>
     <string name="account_resend_in">Reenviar em %1$d s</string>
@@ -1368,7 +1353,7 @@ Shizuku é uma ferramenta auxiliar local, segura e de código aberto.</string>
     <string name="userscript_uninstall">Desinstalar</string>
     <string name="userscript_installed_label">Instalado</string>
     <string name="userscript_install_from_url">Instalar da URL</string>
-    <string name="userscript_empty_installed">Nenhum script instalado ainda. Escolha um na aba "Recomendar".</string>
+    <string name="userscript_empty_installed">Nenhum script instalado ainda. Escolha um na aba \"Recomendar\".</string>
     <string name="userscript_installed_toast">Instalado: %1$s</string>
     <string name="userscript_install_failed_toast">Falha na instalação: %1$s</string>
 

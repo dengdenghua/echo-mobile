@@ -38,22 +38,13 @@
     <string name="guide_status_done">已开启</string>
     <string name="guide_status_pending">未开启</string>
     <string name="guide_title_accessibility">无障碍服务</string>
-    <string name="guide_desc_accessibility">这是 AI 自动操控设备的核心权限。
-
-1. 前往系统设置 → 无障碍 → 已下载的应用
-2. 在列表中找到「Echo」
-3. 开启开关
-4. 在系统弹窗中确认</string>
+    <string name="guide_desc_accessibility">这是 AI 自动操控设备的核心权限。\n\n1. 前往系统设置 → 无障碍 → 已下载的应用\n2. 在列表中找到「Echo」\n3. 开启开关\n4. 在系统弹窗中确认</string>
     <string name="guide_title_notification">常驻通知</string>
     <string name="guide_desc_notification">保持应用在后台运行，防止被系统杀死。\n\n点击本项即可开启。Android 13 及以上会先请求通知权限。</string>
     <string name="guide_title_overlay">悬浮窗</string>
-    <string name="guide_desc_overlay">显示 AI 执行状态的浮动面板。
-
-1. 前往系统设置 → 应用 → Echo
-2. 找到「显示在其他应用上方」
-3. 开启开关</string>
+    <string name="guide_desc_overlay">显示 AI 执行状态的浮动面板。\n\n1. 前往系统设置 → 应用 → Echo\n2. 找到「显示在其他应用上方」\n3. 开启开关</string>
     <string name="guide_title_battery">电池白名单</string>
-    <string name="guide_desc_battery">防止系统在后台关闭应用。\n\n点击本项后，在系统弹窗中确认「允许」。(部分品牌手机需要修改为"无限制")</string>
+    <string name="guide_desc_battery">防止系统在后台关闭应用。\n\n点击本项后，在系统弹窗中确认「允许」。(部分品牌手机需要修改为「无限制」)</string>
     <string name="guide_title_storage">文件访问</string>
     <string name="guide_desc_storage">允许 AI 读写设备上的文件。\n\nAndroid 11 及以上：前往设置开启「所有文件访问」\nAndroid 10 及以下：在弹窗中授予权限</string>
 
@@ -61,13 +52,7 @@
     <string name="home_card_advanced_title">高级权限（可选）</string>
     <string name="home_card_advanced_subtitle">点系统弹窗、截安全窗口</string>
     <string name="advanced_dialog_title">通过 Shizuku 获取高级权限</string>
-    <string name="advanced_dialog_intro">默认情况下，AI 使用 Android 的无障碍 API，对绝大多数 App 已经够用。少数它做不到的事：
-
-• 点击权限/系统弹窗（FLAG_SECURE 保护）
-• 截取 DRM 保护的画面
-• 强制停止其他 App、修改系统设置
-
-这些场景需要安装 Shizuku —— 一个开源、安全的辅助工具。</string>
+    <string name="advanced_dialog_intro">默认情况下，AI 使用 Android 的无障碍 API，对绝大多数 App 已经够用。少数它做不到的事：\n\n• 点击权限/系统弹窗（FLAG_SECURE 保护）\n• 截取 DRM 保护的画面\n• 强制停止其他 App、修改系统设置\n\n这些场景需要安装 Shizuku —— 一个开源、安全的辅助工具。</string>
     <string name="advanced_dialog_steps">配置步骤：\n1. 在 Play 商店或 GitHub 安装 Shizuku\n2. 通过无线调试（Android 11+）或 PC ADB 启动一次即可\n3. 回到这里 —— Echo 会自动接入</string>
     <string name="advanced_dialog_status_ready">✓ Shizuku 已就绪 —— 高级权限已启用</string>
     <string name="advanced_dialog_status_installed_no_perm">Shizuku 已安装但未授权。打开 Shizuku 完成授权。</string>
