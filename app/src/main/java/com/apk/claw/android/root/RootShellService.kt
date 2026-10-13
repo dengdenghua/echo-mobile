@@ -40,6 +40,9 @@ object RootShellService {
     private const val TAG = "RootShell"
     private const val TIMEOUT_MS = 15_000L
 
+    /** Magisk's grant prompt auto-denies after 10 s; never wait longer than that for `su -c id`. */
+    private const val CHECK_TIMEOUT_MS = 10_000L
+
     /**
      * Root 命令白名单前缀。
      *
@@ -91,17 +94,29 @@ object RootShellService {
     @Volatile
     private var rootAvailable = false
 
-    /** 检测设备是否已 root(通过 `su -c id` 是否返回 uid=0)。 */
+    /**
+     * 检测设备是否已 root(通过 `su -c id` 是否返回 uid=0)。
+     *
+     * 关掉 su 的标准输入并限时等待:没有 root 的 Linux(含 CI)上 su 会停在密码提示,
+     * root 过的手机上会等用户在授权弹窗里点选;两种情况都不能让调用方(点击等工具)无限期卡住。
+     */
     @Suppress("TooGenericExceptionCaught")
     fun isAvailable(): Boolean {
         if (rootChecked) return rootAvailable
         rootChecked = true
         return try {
-            val proc = Runtime.getRuntime().exec(arrayOf("su", "-c", "id"))
-            val output = BufferedReader(InputStreamReader(proc.inputStream)).readText()
-            val exitCode = proc.waitFor()
-            rootAvailable = exitCode == 0 && output.contains("uid=0")
-            Log.i(TAG, "Root check: available=$rootAvailable (exit=$exitCode, out=${output.trim()})")
+            val proc = ProcessBuilder("su", "-c", "id").redirectErrorStream(true).start()
+            proc.outputStream.close()
+            rootAvailable = if (proc.waitFor(CHECK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                // `id` 的输出很短,进程结束后再读不会因管道写满而互相等待
+                val output = BufferedReader(InputStreamReader(proc.inputStream)).readText()
+                Log.i(TAG, "Root check: exit=${proc.exitValue()}, out=${output.trim()}")
+                proc.exitValue() == 0 && output.contains("uid=0")
+            } else {
+                proc.destroyForcibly()
+                Log.w(TAG, "Root check timed out after ${CHECK_TIMEOUT_MS}ms")
+                false
+            }
             rootAvailable
         } catch (e: Exception) {
             Log.w(TAG, "Root check failed: ${e.message}")

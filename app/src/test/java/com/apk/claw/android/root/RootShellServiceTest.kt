@@ -114,4 +114,26 @@ class RootShellServiceTest {
         assertFalse(isAllowed("   "))
         assertFalse(isAllowed("\t"))
     }
+
+    /**
+     * CI's Linux has a real `su` that waits for a password; the check used to read its output with no
+     * timeout and hung the whole unit-test run for 6 hours. It must give up within its own limit.
+     */
+    @Test(timeout = 20_000)
+    fun `root check returns even when su waits for input`() {
+        forgetRootCheck()
+        try {
+            RootShellService.isAvailable()
+        } finally {
+            forgetRootCheck()
+        }
+    }
+
+    /** Clear the cached result so the next isAvailable() really runs `su -c id`. */
+    private fun forgetRootCheck() {
+        RootShellService.javaClass.getDeclaredField("rootChecked").apply { isAccessible = true }
+            .setBoolean(RootShellService, false)
+        RootShellService.javaClass.getDeclaredField("rootAvailable").apply { isAccessible = true }
+            .setBoolean(RootShellService, false)
+    }
 }
