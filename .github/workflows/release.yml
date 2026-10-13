@@ -57,6 +57,29 @@ jobs:
       version-name: ${{ steps.version.outputs.version_name }}
       version-code: ${{ steps.version.outputs.version_code }}
     steps:
+      # 签名 Secrets 缺失时在几秒内失败,而不是先跑完单测/lint/detekt 再在 release job 里失败。
+      - name: Check release signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          missing=""
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [ -n "${!name:-}" ] || missing="${missing} ${name}"
+          done
+          if [ -n "${missing}" ]; then
+            echo "::error title=Release signing secrets missing::缺少仓库 Secrets:${missing}。到 Settings → Secrets and variables → Actions 添加后重跑(格式见本文件头部注释)。"
+            exit 1
+          fi
+          if ! printf '%s' "${KEYSTORE_BASE64}" | base64 -d > /dev/null 2>&1; then
+            echo "::error title=Bad KEYSTORE_BASE64::KEYSTORE_BASE64 不是合法的 base64(用 base64 -w0 release.jks 生成)"
+            exit 1
+          fi
+          echo "签名 Secrets 齐全"
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -166,6 +189,11 @@ jobs:
           KS="${RUNNER_TEMP}/echo-release.jks"
           printf '%s' "${KEYSTORE_BASE64}" | base64 -d > "${KS}"
           chmod 600 "${KS}"
+          # 密码/别名填错时 AGP 只在打包末尾报 "Failed to read key ... from store",这里提前给出明确原因。
+          if ! keytool -list -keystore "${KS}" -storepass:env KEYSTORE_PASSWORD -alias "${KEY_ALIAS}" > /dev/null 2>&1; then
+            echo "::error title=Keystore check failed::无法用 KEYSTORE_PASSWORD 打开密钥库,或其中没有别名 KEY_ALIAS"
+            exit 1
+          fi
           echo "KEYSTORE_FILE=${KS}" >> "$GITHUB_ENV"
 
       # APK 分包与 AAB 在 AGP 中互斥,必须分两次调用(见 app/build.gradle.kts 的 splits 注释):

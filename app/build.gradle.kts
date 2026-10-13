@@ -24,6 +24,50 @@ detekt {
     source.setFrom(files("src/main/java", "src/test/java"))
 }
 
+// Release signing: environment variables first (the release workflow sets them), then
+// local.properties (local builds). Read once; the signing config and the guard below share it.
+val releaseSigningKeys = listOf("KEYSTORE_FILE", "KEYSTORE_PASSWORD", "KEY_ALIAS", "KEY_PASSWORD")
+val releaseSigning: Map<String, String> = run {
+    val props = Properties().apply {
+        rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    }
+    releaseSigningKeys.associateWith { key -> System.getenv(key) ?: props.getProperty(key, "") }
+}
+val releaseKeystorePath = releaseSigning.getValue("KEYSTORE_FILE").trim()
+
+// Without a keystore AGP only fails at the very end, inside packageRelease, with
+// `SigningConfig "release" is missing required property "storeFile"` (an NPE, after R8 has run).
+// This check runs before any release work and names what is missing.
+val releaseSigningProblems: List<String> = buildList {
+    val missing = releaseSigningKeys.filter { releaseSigning.getValue(it).isBlank() }
+    if (missing.isNotEmpty()) add("missing: ${missing.joinToString(", ")}")
+    if (releaseKeystorePath.isNotEmpty() && !file(releaseKeystorePath).isFile) {
+        add("KEYSTORE_FILE points to a file that does not exist: $releaseKeystorePath")
+    }
+}
+val checkReleaseSigning = tasks.register("checkReleaseSigning") {
+    group = "verification"
+    description = "Fails early, with a clear message, when release signing is not configured."
+    val problems = releaseSigningProblems
+    doLast {
+        if (problems.isNotEmpty()) {
+            throw GradleException(
+                "Release signing is not configured (" + problems.joinToString("; ") + ").\n" +
+                    "Set KEYSTORE_FILE, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD as environment " +
+                    "variables or in local.properties. On GitHub the release workflow builds them from " +
+                    "the repository secrets KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD."
+            )
+        }
+    }
+}
+// Only tasks that sign need the key; the check must run before any other release task does work.
+tasks.named { it == "packageRelease" || it == "signReleaseBundle" }.configureEach {
+    dependsOn(checkReleaseSigning)
+}
+tasks.named { it == "preReleaseBuild" }.configureEach {
+    mustRunAfter(checkReleaseSigning)
+}
+
 
 android {
     namespace = "com.apk.claw.android"
@@ -35,22 +79,18 @@ android {
 
     signingConfigs {
         create("release") {
-            val props = Properties().apply {
-                rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
-            }
-            // 优先从环境变量读取(CI 注入),其次 local.properties(本地开发)。
+            // 优先从环境变量读取(CI 注入),其次 local.properties(本地开发),见文件顶部 releaseSigning。
             // 这样 CI 无需把密钥写进文件,本地开发者仍可用 local.properties。
             // Only configure storeFile when a keystore path is actually provided.
             // Otherwise debug builds fail at configuration time with
             //   "Cannot convert '' to File."
             // because Gradle eagerly resolves signingConfig.storeFile.
-            val keystorePath = (System.getenv("KEYSTORE_FILE") ?: props.getProperty("KEYSTORE_FILE", "")).trim()
-            if (keystorePath.isNotEmpty()) {
-                storeFile = file(keystorePath)
+            if (releaseKeystorePath.isNotEmpty()) {
+                storeFile = file(releaseKeystorePath)
             }
-            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: props.getProperty("KEYSTORE_PASSWORD", "")
-            keyAlias = System.getenv("KEY_ALIAS") ?: props.getProperty("KEY_ALIAS", "")
-            keyPassword = System.getenv("KEY_PASSWORD") ?: props.getProperty("KEY_PASSWORD", "")
+            storePassword = releaseSigning.getValue("KEYSTORE_PASSWORD")
+            keyAlias = releaseSigning.getValue("KEY_ALIAS")
+            keyPassword = releaseSigning.getValue("KEY_PASSWORD")
 
             // 同时启用 v2 + v3 签名块:v2 是 API 24+ 设备与只认 v2 的第三方渠道/校验器的兼容锚点,
             // v3 在 API 28+ 原生支持并提供签名密钥轮换(proof-of-rotation)能力;v1 关闭(minSdk=28,无需 JAR 签名),
