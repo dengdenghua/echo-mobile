@@ -17,6 +17,9 @@ import androidx.compose.ui.unit.Dp
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.persona.Persona
 
+/** An emoji avatar fills about three quarters of its tile. */
+private const val EMOJI_SCALE = 0.72f
+
 /**
  * A persona's avatar. The built-in Echo persona has no emoji avatar and shows the ECHO mark on its
  * graphite tile, the same way the chat header does; a user persona shows the emoji the user picked.
@@ -34,7 +37,7 @@ fun PersonaAvatar(persona: Persona, size: Dp, modifier: Modifier = Modifier) {
         )
     } else {
         Box(modifier.size(size), contentAlignment = Alignment.Center) {
-            val fontSize = with(LocalDensity.current) { (size * 0.72f).toSp() }
+            val fontSize = with(LocalDensity.current) { (size * EMOJI_SCALE).toSp() }
             Text(persona.avatar, fontSize = fontSize)
         }
     }

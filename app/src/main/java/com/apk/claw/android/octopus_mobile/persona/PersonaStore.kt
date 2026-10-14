@@ -58,6 +58,27 @@ data class Persona(
     }
 }
 
+/*
+ * 1.1.0 之前的内置角色叫「小 Octo」（🐙）。用户没改过的旧内置值在读取时换成 [PersonaStore.ECHO]；
+ * 用户自己改过的名字、头像或人设保留不动。
+ */
+private const val LEGACY_ECHO_NAME = "小 Octo"
+private const val LEGACY_ECHO_AVATAR = "🐙"
+private const val LEGACY_ECHO_PROMPT_PREFIX = "你是小 Octo"
+private const val LEGACY_ECHO_GREETING = "在的，有什么需要我做的？"
+
+/** 把未改动过的旧「小 Octo」内置角色迁移成 Echo；其余角色原样返回。 */
+internal fun migrateLegacyPersona(p: Persona): Persona {
+    if (p.id != PersonaStore.ECHO_ID) return p
+    val echo = PersonaStore.ECHO
+    return p.copy(
+        name = if (p.name == LEGACY_ECHO_NAME) echo.name else p.name,
+        avatar = if (p.avatar == LEGACY_ECHO_AVATAR) echo.avatar else p.avatar,
+        systemPrompt = if (p.systemPrompt.startsWith(LEGACY_ECHO_PROMPT_PREFIX)) echo.systemPrompt else p.systemPrompt,
+        greeting = if (p.greeting == LEGACY_ECHO_GREETING) echo.greeting else p.greeting,
+    )
+}
+
 /**
  * 角色卡管理：CRUD + 导入导出 + 持久化（KVUtils）。
  */
@@ -80,24 +101,6 @@ object PersonaStore {
         isBuiltin = true,
         createdAt = 0,
     )
-
-    /**
-     * 1.1.0 之前的内置角色叫「小 Octo」（🐙）。用户没改过的旧内置值在读取时换成 [ECHO]；
-     * 用户自己改过的名字、头像或人设保留不动。
-     */
-    private const val LEGACY_ECHO_NAME = "小 Octo"
-    private const val LEGACY_ECHO_AVATAR = "🐙"
-    private const val LEGACY_ECHO_PROMPT_PREFIX = "你是小 Octo"
-
-    /** 把未改动过的旧「小 Octo」内置角色迁移成 Echo；其余角色原样返回。 */
-    fun migrateLegacy(p: Persona): Persona {
-        if (p.id != ECHO_ID) return p
-        val name = if (p.name == LEGACY_ECHO_NAME) ECHO.name else p.name
-        val avatar = if (p.avatar == LEGACY_ECHO_AVATAR) ECHO.avatar else p.avatar
-        val prompt = if (p.systemPrompt.startsWith(LEGACY_ECHO_PROMPT_PREFIX)) ECHO.systemPrompt else p.systemPrompt
-        val greeting = if (p.greeting == "在的，有什么需要我做的？") ECHO.greeting else p.greeting
-        return p.copy(name = name, avatar = avatar, systemPrompt = prompt, greeting = greeting)
-    }
 
     /** 内置角色（首次启动时自动注入） */
     private val BUILTIN = listOf(
@@ -191,7 +194,9 @@ object PersonaStore {
         } else {
             try {
                 val arr = JSONArray(raw)
-                val loaded = (0 until arr.length()).map { migrateLegacy(Persona.fromJson(arr.getJSONObject(it))) }
+                val loaded = (0 until arr.length()).map {
+                    migrateLegacyPersona(Persona.fromJson(arr.getJSONObject(it)))
+                }
                 // 确保内置角色存在（升级时新增的内置角色会被补齐）
                 val missing = BUILTIN.filter { b -> loaded.none { it.id == b.id } }
                 (loaded + missing).toMutableList()

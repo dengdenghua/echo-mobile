@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.ToolStatusIcon
 import com.apk.claw.android.ui.compose.screen.ChatMessage
 import com.apk.claw.android.ui.compose.screen.toolCallSummary
 import com.apk.claw.android.ui.compose.screen.toolExecutionSummary
@@ -101,21 +102,7 @@ class ToolsDetailPane(
                 onClick = onToggle,
             ).padding(vertical = OctopusSpacing.sm),
         ) {
-            Text(
-                when (call.status) {
-                    ChatMessage.ToolCallStatus.SUCCESS -> "✓"
-                    ChatMessage.ToolCallStatus.FAILURE -> "✗"
-                    ChatMessage.ToolCallStatus.RUNNING -> "⏳"
-                    ChatMessage.ToolCallStatus.CANCELLED -> "■"
-                },
-                color = when (call.status) {
-                    ChatMessage.ToolCallStatus.SUCCESS -> OctopusColors.Success
-                    ChatMessage.ToolCallStatus.FAILURE -> OctopusColors.Error
-                    ChatMessage.ToolCallStatus.RUNNING -> OctopusColors.Primary
-                    ChatMessage.ToolCallStatus.CANCELLED -> OctopusColors.TextMuted
-                },
-                fontSize = OctopusType.caption,
-            )
+            ToolStatusIcon(call.status)
             Spacer(Modifier.width(OctopusSpacing.sm))
             Text(call.toolName, fontSize = OctopusType.caption, color = OctopusColors.TextSecondary,
                 fontFamily = FontFamily.Monospace, maxLines = 1, overflow = TextOverflow.Ellipsis,

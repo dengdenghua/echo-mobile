@@ -42,6 +42,8 @@ import com.apk.claw.android.ui.desktop.CharacterRegistry
 import com.apk.claw.android.ui.desktop.personaPrompt
 import com.apk.claw.android.utils.KVUtils
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.Launch
@@ -147,6 +149,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.ContextCompat
 import com.apk.claw.android.ui.compose.LocalBottomBarHidden
 import com.apk.claw.android.ui.compose.component.PersonaAvatar
+import com.apk.claw.android.ui.compose.component.ToolStatusIcon
 import com.apk.claw.android.ui.compose.screen.detail.CodeDetailPane
 import com.apk.claw.android.ui.compose.screen.detail.DetailDrawer
 import com.apk.claw.android.ui.compose.screen.detail.DetailPane
@@ -720,7 +723,9 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                             // 切到下一个 Persona：重置流式缓冲，重新显示思考气泡
                             finalizeStream(null)
                             hideThinking()
-                            val turnThinking = ChatMessage.Thinking(context.getString(R.string.chat_persona_thinking, persona.label()))
+                            val turnThinking = ChatMessage.Thinking(
+                                context.getString(R.string.chat_persona_thinking, persona.label()),
+                            )
                             if (!messages.contains(turnThinking)) { messages.add(turnThinking); scrollEnd() }
                         },
                         onTurnDone = { persona, reply ->
@@ -749,7 +754,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                             if (!acceptsCallback()) return@run
                             com.apk.claw.android.agent.AgentProgressBus.set(null)
                             hideThinking(); finalizeStream(null)
-                            messages.add(ChatMessage.AgentMessage("⚠️ $e"))
+                            messages.add(ChatMessage.AgentMessage(e))
                             interruptToolCalls(messages, "执行已中断")
                         isRunning = false; scrollEnd(); persist()
                         },
@@ -796,7 +801,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                         if (!acceptsCallback()) return@run
                         com.apk.claw.android.agent.AgentProgressBus.set(null)
                         hideThinking(); finalizeStream(null)
-                        messages.add(ChatMessage.AgentMessage("⚠️ $e"))
+                        messages.add(ChatMessage.AgentMessage(e))
                         interruptToolCalls(messages, "执行已中断")
                         isRunning = false; scrollEnd(); persist()
                     },
@@ -2550,7 +2555,12 @@ private fun SetupRow(label: String, done: Boolean, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth().clickable(enabled = !done, onClick = onClick).padding(vertical = OctopusSpacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(if (done) "✓" else "○", fontSize = OctopusType.body, color = if (done) SuccessColor else TextMuted)
+        Icon(
+            if (done) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+            contentDescription = null,
+            tint = if (done) SuccessColor else TextMuted,
+            modifier = Modifier.size(16.dp),
+        )
         Spacer(modifier = Modifier.width(OctopusSpacing.sm))
         Text(
             label, fontSize = OctopusType.label,
@@ -2882,21 +2892,7 @@ private fun ToolBatchCard(
                 Spacer(modifier = Modifier.height(OctopusSpacing.sm))
                 calls.forEach { call ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            when (call.status) {
-                                ChatMessage.ToolCallStatus.SUCCESS -> "✓"
-                                ChatMessage.ToolCallStatus.FAILURE -> "✗"
-                                ChatMessage.ToolCallStatus.RUNNING -> "⏳"
-                                ChatMessage.ToolCallStatus.CANCELLED -> "■"
-                            },
-                            color = when (call.status) {
-                                ChatMessage.ToolCallStatus.SUCCESS -> SuccessColor
-                                ChatMessage.ToolCallStatus.FAILURE -> ErrorColor
-                                ChatMessage.ToolCallStatus.RUNNING -> PrimaryColor
-                                ChatMessage.ToolCallStatus.CANCELLED -> TextMuted
-                            },
-                            fontSize = OctopusType.caption,
-                        )
+                        ToolStatusIcon(call.status)
                         Spacer(modifier = Modifier.width(OctopusSpacing.sm))
                         Text(
                             call.toolName,

@@ -96,11 +96,15 @@ fun ChannelAclScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("允许远程来源执行高危工具", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Text(
-                            "⚠️ 开启后,来自母体 WebSocket、局域网 HTTP、主动规则的调用可无需确认执行" +
-                                "发短信/装应用/文件读写删等高危工具。默认关闭(拦截),仅在受控环境开启。",
-                            color = if (remoteHighRisk) FWarning else FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                            stringResource(R.string.tc_remote_high_risk_title),
+                            color = FText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        FWarningNote(
+                            stringResource(R.string.tc_remote_high_risk_desc),
+                            color = if (remoteHighRisk) FWarning else FMuted,
                         )
                     }
                     Spacer(Modifier.width(8.dp))

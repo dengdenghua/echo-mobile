@@ -10,7 +10,10 @@ class WakeWordKeywordTest {
     @Test
     fun `a new install defaults to the Echo wake word`() {
         assertEquals("你好 Echo", WakeWordSettings.resolveKeyword(stored = null, usedWakeWordBefore = false))
-        assertEquals(WakeWordSettings.DEFAULT_KEYWORD, WakeWordSettings.resolveKeyword(stored = "", usedWakeWordBefore = false))
+        assertEquals(
+            WakeWordSettings.DEFAULT_KEYWORD,
+            WakeWordSettings.resolveKeyword(stored = "", usedWakeWordBefore = false),
+        )
     }
 
     @Test

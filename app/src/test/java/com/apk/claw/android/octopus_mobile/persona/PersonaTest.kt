@@ -115,7 +115,7 @@ class PersonaTest {
             greeting = "在的，有什么需要我做的？", styleHint = "保持简洁，先做事再说话。",
             isBuiltin = true, createdAt = 0,
         )
-        val migrated = PersonaStore.migrateLegacy(Persona.fromJson(legacy.toJson()))
+        val migrated = migrateLegacyPersona(Persona.fromJson(legacy.toJson()))
         assertEquals(PersonaStore.ECHO.name, migrated.name)
         assertEquals("", migrated.avatar)
         assertEquals(PersonaStore.ECHO.systemPrompt, migrated.systemPrompt)
@@ -130,9 +130,9 @@ class PersonaTest {
             systemPrompt = "你是阿章。", greeting = "嗨", styleHint = "",
             isBuiltin = true, createdAt = 0,
         )
-        assertEquals(edited, PersonaStore.migrateLegacy(edited))
+        assertEquals(edited, migrateLegacyPersona(edited))
         // 其他角色不受影响
-        assertEquals(samplePersona(), PersonaStore.migrateLegacy(samplePersona()))
+        assertEquals(samplePersona(), migrateLegacyPersona(samplePersona()))
     }
 
     @Test

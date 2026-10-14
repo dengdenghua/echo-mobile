@@ -379,7 +379,7 @@ object ChatAgentBridge {
                 val icon = iconFor(toolId)
                 val friendly = toolName
                 curSteps++
-                LiveControlOverlay.updateStep("$icon $friendly")
+                LiveControlOverlay.updateStep(friendly)
                 if (progressSink == null) main.post { onTool(icon, friendly, parameters, summary.take(48)) }
                 val img = result.imageBase64
                 if (img != null && onImage != null) {

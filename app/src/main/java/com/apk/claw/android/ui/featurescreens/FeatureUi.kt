@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -18,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -138,8 +141,49 @@ fun FPill(text: String, color: Color) {
             text = text,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             color = color,
-            fontSize = 9.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+        )
+    }
+}
+
+/**
+ * A caution line: an outlined warning icon plus text, both in [color]. Replaces the "⚠️ …" emoji prefix,
+ * so the state is carried by an icon and words, not by an emoji.
+ */
+@Composable
+fun FWarningNote(text: String, color: Color = FWarning, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.Top) {
+        Icon(
+            Icons.Outlined.WarningAmber, contentDescription = null, tint = color,
+            modifier = Modifier.padding(top = 1.dp).size(14.dp),
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(text, color = color, fontSize = 12.sp, lineHeight = 17.sp)
+    }
+}
+
+/** Trailing "opens a page" chevron for navigation rows. */
+@Composable
+fun FChevron() {
+    Icon(
+        Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null, tint = FMuted,
+        modifier = Modifier.padding(start = 4.dp).size(20.dp),
+    )
+}
+
+/** A small outlined icon in front of a label, for metric and value rows. */
+@Composable
+fun FIconLabel(icon: ImageVector, text: String, color: Color = FText, fontSize: Int = 13, bold: Boolean = true) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = FSub, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text,
+            color = color,
+            fontSize = fontSize.sp,
+            fontWeight = if (bold) FontWeight.SemiBold else FontWeight.Normal,
         )
     }
 }

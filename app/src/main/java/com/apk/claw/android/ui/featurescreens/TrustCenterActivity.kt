@@ -18,14 +18,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessibilityNew
-import androidx.compose.material.icons.filled.BatteryChargingFull
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.AccessibilityNew
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AltRoute
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.BatteryChargingFull
+import androidx.compose.material.icons.outlined.BatteryStd
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Lan
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Smartphone
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -155,38 +164,86 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             val ip = remember(tick) { lanIp() }
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Smartphone, contentDescription = null, tint = FPrimary, modifier = Modifier.size(22.dp))
+                    Icon(
+                        Icons.Outlined.Smartphone,
+                        contentDescription = null,
+                        tint = FPrimary,
+                        modifier = Modifier.size(22.dp),
+                    )
                     Spacer(Modifier.width(10.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(deviceModel(), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Android ${Build.VERSION.RELEASE}  ·  🌐 $ip", color = FMuted, fontSize = 11.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Android ${Build.VERSION.RELEASE}", color = FMuted, fontSize = 12.sp)
+                            Spacer(Modifier.width(10.dp))
+                            Icon(
+                                Icons.Outlined.Lan,
+                                contentDescription = stringResource(R.string.tc_lan_ip),
+                                tint = FMuted,
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(ip, color = FMuted, fontSize = 12.sp)
+                        }
                     }
                     if (batteryLevel in 0..100) {
-                        Text("🔋 $batteryLevel%", fontSize = 12.sp, color = if (batteryLevel <= 20) FWarning else FSub)
+                        val batteryColor = if (batteryLevel <= LOW_BATTERY_PCT) FWarning else FSub
+                        Icon(
+                            Icons.Outlined.BatteryStd,
+                            contentDescription = stringResource(R.string.tc_battery),
+                            tint = batteryColor,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Text("$batteryLevel%", fontSize = 12.sp, color = batteryColor)
                     }
                 }
             }
 
             FSectionTitle(stringResource(R.string.trustcenter_section_capabilities))
-            CapabilityRow(Icons.Filled.AccessibilityNew, stringResource(R.string.home_card_accessibility_title), stringResource(R.string.trustcenter_capability_accessibility_desc), a11y) {
+            CapabilityRow(
+                Icons.Outlined.AccessibilityNew,
+                stringResource(R.string.home_card_accessibility_title),
+                stringResource(R.string.trustcenter_capability_accessibility_desc),
+                a11y,
+            ) {
                 openIntent(ctx, Settings.ACTION_ACCESSIBILITY_SETTINGS)
             }
-            CapabilityRow(Icons.Filled.Layers, stringResource(R.string.perm_overlay), stringResource(R.string.trustcenter_capability_overlay_desc), overlay) {
+            CapabilityRow(
+                Icons.Outlined.Layers,
+                stringResource(R.string.perm_overlay),
+                stringResource(R.string.trustcenter_capability_overlay_desc),
+                overlay,
+            ) {
                 openIntent(ctx, Settings.ACTION_MANAGE_OVERLAY_PERMISSION, withPkg = true)
             }
-            CapabilityRow(Icons.Filled.BatteryChargingFull, stringResource(R.string.trustcenter_capability_battery), stringResource(R.string.trustcenter_capability_battery_desc), battery) {
+            CapabilityRow(
+                Icons.Outlined.BatteryChargingFull,
+                stringResource(R.string.trustcenter_capability_battery),
+                stringResource(R.string.trustcenter_capability_battery_desc),
+                battery,
+            ) {
                 openIntent(ctx, Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, withPkg = true)
             }
-            CapabilityRow(Icons.Filled.Notifications, stringResource(R.string.ctrl_notifications), stringResource(R.string.trustcenter_capability_notification_desc), notif) {
+            CapabilityRow(
+                Icons.Outlined.Notifications,
+                stringResource(R.string.ctrl_notifications),
+                stringResource(R.string.trustcenter_capability_notification_desc),
+                notif,
+            ) {
                 openIntent(ctx, Settings.ACTION_APPLICATION_DETAILS_SETTINGS, withPkg = true)
             }
-            CapabilityRow(Icons.Filled.Bolt, stringResource(R.string.trustcenter_capability_shizuku), stringResource(R.string.trustcenter_capability_shizuku_desc), shizuku) {
+            CapabilityRow(
+                Icons.Outlined.Bolt,
+                stringResource(R.string.trustcenter_capability_shizuku),
+                stringResource(R.string.trustcenter_capability_shizuku_desc),
+                shizuku,
+            ) {
                 runCatching { ShizukuManager.requestPermission() }
             }
             // Android 10 起分区存储无需授权，不列出（与就绪度、设置页的计数口径一致）
             if (SetupReadiness.storageNeedsGrant()) {
                 CapabilityRow(
-                    Icons.Filled.Storage,
+                    Icons.Outlined.Storage,
                     stringResource(R.string.perm_storage),
                     stringResource(R.string.trustcenter_capability_storage_desc),
                     storage,
@@ -200,7 +257,12 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(stringResource(R.string.trustcenter_lan_allow_toggle), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text(stringResource(R.string.trustcenter_lan_allow_desc), color = FMuted, fontSize = 10.sp, lineHeight = 14.sp)
+                        Text(
+                            stringResource(R.string.trustcenter_lan_allow_desc),
+                            color = FMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
+                        )
                     }
                     Switch(
                         checked = lanOn,
@@ -216,12 +278,19 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                 }
             }
 
-            FSectionTitle("权限模式 · 设备用途分层")
+            FSectionTitle(stringResource(R.string.tc_section_permission_mode))
             // 当前模式标签
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("当前模式", color = FText, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                    val modeLabel = if (advOn) "完全权限模式" else "审批模式"
+                    Text(
+                        stringResource(R.string.tc_current_mode),
+                        color = FText,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                    )
+                    val modeLabel = stringResource(
+                        if (advOn) R.string.tc_mode_full_power else R.string.tc_mode_approval,
+                    )
                     val modeColor = if (advOn) FWarning else FSuccess
                     FPill(modeLabel, modeColor)
                 }
@@ -230,12 +299,17 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("审批模式 · 日常主力机", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Text(
-                            "安全优先。高危工具（发短信/发 Intent/装应用/文件读写删/浏览器执行 JS）" +
-                                "调用时弹窗人工确认。来源闸门、路径沙箱、宪法法官全部开启。" +
-                                "适合日常主力机。",
-                            color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                            stringResource(R.string.tc_mode_approval_title),
+                            color = FText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            stringResource(R.string.tc_mode_approval_desc),
+                            color = FMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
                         )
                     }
                     Spacer(Modifier.width(8.dp))
@@ -250,14 +324,13 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("完全权限模式 · 闲置/群控机", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Text(
-                            "⚠️ 释放最大能力。母体、局域网、主动规则可无确认执行全部高危工具，" +
-                                "文件工具不再限制在 /sdcard。会显著降低安全性——" +
-                                "仅用于你完全掌控的闲置/专用自动化手机，日常主力机请勿开启。" +
-                                "隐私扫描、审计日志、断路器三项不可关闭（防失控）。",
-                            color = FWarning, fontSize = 10.sp, lineHeight = 14.sp,
+                            stringResource(R.string.tc_mode_full_title),
+                            color = FText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
                         )
+                        FWarningNote(stringResource(R.string.tc_mode_full_desc))
                     }
                     Spacer(Modifier.width(8.dp))
                     Switch(
@@ -272,11 +345,17 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("演示 / 只读模式", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Text(
-                            "开启后 Agent 能看屏、规划、走完流程,但所有会改动的操作(点按/输入/发消息/" +
-                                "装应用/跑代码…)全部跳过、只演示不执行。安全预览它会怎么做——首次上手或不放心时用。",
-                            color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                            stringResource(R.string.tc_dry_run_title),
+                            color = FText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            stringResource(R.string.tc_dry_run_desc),
+                            color = FMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
                         )
                     }
                     Spacer(Modifier.width(8.dp))
@@ -291,11 +370,15 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("允许远程来源执行高危工具", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Text(
-                            "⚠️ 开启后，母体 WebSocket / 局域网 HTTP / 主动规则可无需确认执行" +
-                                "发短信/装应用/文件读写删等高危工具。默认关闭（拦截），仅在你完全掌控的受控环境开启。",
-                            color = if (remoteHi) FWarning else FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                            stringResource(R.string.tc_remote_high_risk_title),
+                            color = FText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        FWarningNote(
+                            stringResource(R.string.tc_remote_high_risk_desc),
+                            color = if (remoteHi) FWarning else FMuted,
                         )
                     }
                     Spacer(Modifier.width(8.dp))
@@ -316,12 +399,22 @@ fun TrustCenterScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("验证码短信自动复制", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Text(
-                            "收到验证码短信时自动提取并复制到剪贴板。开启需授予「接收短信」权限，" +
-                                "并会启用主动规则引擎（内建规则仅做剪贴板/通知，高危工具在主动路径已被拦截）。" +
-                                "⚠️ 验证码会进入系统剪贴板，可能被其他应用读取——按需开启。",
-                            color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                            stringResource(R.string.tc_sms_otp_title),
+                            color = FText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            stringResource(R.string.tc_sms_otp_desc),
+                            color = FMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
+                        )
+                        FWarningNote(
+                            stringResource(R.string.tc_sms_otp_warning),
+                            color = FMuted,
+                            modifier = Modifier.padding(top = 4.dp),
                         )
                     }
                     Spacer(Modifier.width(8.dp))
@@ -343,26 +436,26 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                 }
             }
 
-            FSectionTitle("访问与审计")
+            FSectionTitle(stringResource(R.string.tc_section_access_audit))
             NavRow(
-                title = "通道访问控制（ACL）",
-                desc = "管理各聊天通道的授权发送者名单，开关访问控制与远程高危工具放行",
+                title = stringResource(R.string.tc_nav_acl_title),
+                desc = stringResource(R.string.tc_nav_acl_desc),
             ) { ctx.startActivity(Intent(ctx, ChannelAclActivity::class.java)) }
             NavRow(
-                title = "操作审计日志",
-                desc = "查看 Agent 最近的中/高危工具调用记录与拦截决策",
+                title = stringResource(R.string.tc_nav_audit_title),
+                desc = stringResource(R.string.tc_nav_audit_desc),
             ) { ctx.startActivity(Intent(ctx, AuditLogActivity::class.java)) }
 
-            FSectionTitle("自进化引擎 · 实测效果")
+            FSectionTitle(stringResource(R.string.tc_section_evolution))
             EvolutionMetricsCard(tick) { tick++ }
 
-            FSectionTitle("操作经验 · 这台设备学到的")
+            FSectionTitle(stringResource(R.string.tc_section_lessons))
             InteractionLessonsCard(tick) { tick++ }
 
-            FSectionTitle("关于你的记忆 · Agent 记住的")
+            FSectionTitle(stringResource(R.string.tc_section_memory))
             UserMemoryCard(tick) { tick++ }
 
-            FSectionTitle("知识备份 · 带走 Agent 的脑子")
+            FSectionTitle(stringResource(R.string.tc_section_backup))
             KnowledgeBackupCard { tick++ }
 
             FSectionTitle(stringResource(R.string.trustcenter_section_target))
@@ -388,17 +481,27 @@ fun TrustCenterScreen(onBack: () -> Unit) {
                         tick++
                     },
                 ) {
-                    Icon(Icons.Filled.Block, contentDescription = null, tint = FWarning, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Outlined.Block,
+                        contentDescription = null,
+                        tint = FWarning,
+                        modifier = Modifier.size(20.dp),
+                    )
                     Spacer(Modifier.width(10.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(stringResource(R.string.trustcenter_action_revoke), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text(stringResource(R.string.trustcenter_action_revoke_desc), color = FMuted, fontSize = 10.sp)
+                        Text(
+                            stringResource(R.string.trustcenter_action_revoke_desc),
+                            color = FMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
+                        )
                     }
                 }
             }
             Text(
                 stringResource(R.string.trustcenter_instruction_manual_disable),
-                color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                color = FMuted, fontSize = 12.sp, lineHeight = 17.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             )
         }
@@ -413,11 +516,11 @@ private fun CapabilityRow(icon: ImageVector, name: String, desc: String, granted
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(name, color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                Text(desc, color = FMuted, fontSize = 10.sp, lineHeight = 14.sp)
+                Text(desc, color = FMuted, fontSize = 12.sp, lineHeight = 17.sp)
             }
             Spacer(Modifier.width(8.dp))
             FPill(if (granted) stringResource(R.string.trust_center_granted) else stringResource(R.string.trust_center_not_granted), if (granted) FSuccess else FMuted)
-            Text("›", color = FMuted, fontSize = 18.sp, modifier = Modifier.padding(start = 6.dp))
+            FChevron()
         }
     }
 }
@@ -427,8 +530,17 @@ private fun ReadinessCard(r: SetupReadiness.Result) {
     FCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("准备就绪度", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                Text("${r.readyCount}/${r.total} 项已就绪", color = FMuted, fontSize = 10.sp)
+                Text(
+                    stringResource(R.string.tc_readiness_title),
+                    color = FText,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    stringResource(R.string.tc_readiness_count, r.readyCount, r.total),
+                    color = FMuted,
+                    fontSize = 12.sp,
+                )
             }
             val pctColor = when {
                 !r.isReady -> FWarning
@@ -438,16 +550,17 @@ private fun ReadinessCard(r: SetupReadiness.Result) {
             FPill("${r.percent}%", pctColor)
         }
         if (r.missingCritical.isNotEmpty()) {
-            Text(
-                "⚠️ 核心前置缺失：" + r.missingCritical.joinToString("、") { it.label } +
-                    "。补齐后 Agent 才能正常工作。",
-                color = FWarning, fontSize = 10.sp, lineHeight = 14.sp,
+            FWarningNote(
+                stringResource(
+                    R.string.tc_readiness_missing,
+                    r.missingCritical.joinToString(stringResource(R.string.tc_list_separator)) { it.label },
+                ),
                 modifier = Modifier.padding(top = 8.dp),
             )
         } else {
             Text(
-                "核心前置已齐备，可以开始使用。",
-                color = FSuccess, fontSize = 10.sp,
+                stringResource(R.string.tc_readiness_ok),
+                color = FSuccess, fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
@@ -460,17 +573,21 @@ private fun NavRow(title: String, desc: String, onClick: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(title, color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                Text(desc, color = FMuted, fontSize = 10.sp, lineHeight = 14.sp)
+                Text(desc, color = FMuted, fontSize = 12.sp, lineHeight = 17.sp)
             }
-            Text("›", color = FMuted, fontSize = 18.sp, modifier = Modifier.padding(start = 6.dp))
+            FChevron()
         }
     }
 }
 
 private const val PCT_SCALE = 100.0
 
+/** At or below this battery level the device card shows the level in warning amber. */
+private const val LOW_BATTERY_PCT = 20
+
 /** 自进化引擎(反射/免疫/经验账本)的实测效果 —— 数据来自 [EvolutionMetrics]。 */
 @Composable
+@Suppress("LongMethod")   // Compose 卡片:五行指标 + 空状态 + 重置,声明式 UI 天然偏长
 private fun EvolutionMetricsCard(tick: Int, onReset: () -> Unit) {
     val hit = remember(tick) { EvolutionMetrics.get(EvolutionMetrics.REFLEX_HIT) }
     val miss = remember(tick) { EvolutionMetrics.get(EvolutionMetrics.REFLEX_MISS) }
@@ -490,25 +607,53 @@ private fun EvolutionMetricsCard(tick: Int, onReset: () -> Unit) {
     val usageTokens = remember(tick) { UsageStats.tokens() }
     val hasData = hit + miss + immuneCall + ledgerErr + usageTasks > 0L
     FCard {
-        MetricRow("⚡ 反射快路径命中率", reflexRate, "省下 $hit 次完整 LLM（$hit/${hit + miss}）")
+        MetricRow(
+            Icons.Outlined.Bolt,
+            stringResource(R.string.tc_metric_reflex),
+            reflexRate,
+            stringResource(R.string.tc_metric_reflex_sub, hit, hit, hit + miss),
+        )
         Spacer(Modifier.height(8.dp))
-        MetricRow("🛡️ 免疫系统告警率", immuneRate, "$immuneWarn 次告警 / $immuneCall 次预检")
+        MetricRow(
+            Icons.Outlined.Shield,
+            stringResource(R.string.tc_metric_immune),
+            immuneRate,
+            stringResource(R.string.tc_metric_immune_sub, immuneWarn, immuneCall),
+        )
         Spacer(Modifier.height(8.dp))
-        MetricRow("📒 经验账本", "记 $ledgerErr", "修复 $ledgerRepair · 注入规避 $injected 次")
+        MetricRow(
+            Icons.AutoMirrored.Outlined.MenuBook,
+            stringResource(R.string.tc_metric_ledger),
+            stringResource(R.string.tc_metric_ledger_value, ledgerErr),
+            stringResource(R.string.tc_metric_ledger_sub, ledgerRepair, injected),
+        )
         Spacer(Modifier.height(8.dp))
-        MetricRow("🔀 模型故障转移", "$failover 次", "主模型失败自动切备用(需在配置里填备用模型)")
+        MetricRow(
+            Icons.Outlined.AltRoute,
+            stringResource(R.string.tc_metric_failover),
+            stringResource(R.string.tc_metric_failover_value, failover),
+            stringResource(R.string.tc_metric_failover_sub),
+        )
         Spacer(Modifier.height(8.dp))
-        MetricRow("📊 用量", "$usageTasks 个任务", "累计 $usageTokens token —— 走积分计费,心里有数")
+        MetricRow(
+            Icons.Outlined.BarChart,
+            stringResource(R.string.tc_metric_usage),
+            stringResource(R.string.tc_metric_usage_value, usageTasks),
+            stringResource(R.string.tc_metric_usage_sub, usageTokens),
+        )
         if (!hasData) {
             Text(
-                "暂无数据——跑几个任务后这里会显示反射命中率、免疫告警率等硬指标。",
-                color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                stringResource(R.string.tc_metric_empty),
+                color = FMuted, fontSize = 12.sp, lineHeight = 17.sp,
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
         Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End) {
             Text(
-                "重置统计", color = FWarning, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                stringResource(R.string.tc_metric_reset),
+                color = FWarning,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable { EvolutionMetrics.reset(); EvolutionMetrics.persist(); UsageStats.reset(); onReset() }
                     .padding(horizontal = 10.dp, vertical = 4.dp),
@@ -518,12 +663,13 @@ private fun EvolutionMetricsCard(tick: Int, onReset: () -> Unit) {
 }
 
 @Composable
-private fun MetricRow(label: String, value: String, sub: String) {
+private fun MetricRow(icon: ImageVector, label: String, value: String, sub: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(label, color = FText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            Text(sub, color = FMuted, fontSize = 10.sp, lineHeight = 14.sp)
+            FIconLabel(icon, label)
+            Text(sub, color = FMuted, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.padding(start = 22.dp))
         }
+        Spacer(Modifier.width(8.dp))
         FPill(value, FPrimary)
     }
 }
@@ -541,27 +687,28 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
     val hasLearned = lessons.any { !it.manual }
     FCard {
         if (lessons.isEmpty()) {
-            Text(
-                "还没有经验。点下方「教它一条规矩」直接告诉它怎么操作(如「打开淘宝先关弹窗」);" +
-                    "跑自动化任务遇到的坑(找不到节点/弹窗遮挡/加载超时…)也会自动沉淀在这里,下次避开。",
-                color = FMuted, fontSize = 11.sp, lineHeight = 15.sp,
-            )
+            Text(stringResource(R.string.tc_lessons_empty), color = FMuted, fontSize = 12.sp, lineHeight = 17.sp)
         } else {
             lessons.forEachIndexed { i, l ->
                 if (i > 0) Spacer(Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.Top) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            (if (l.manual) "📌 " else "") + l.title,
-                            color = if (l.manual && !l.enabled) FMuted else FText,
-                            fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                        )
+                        val titleColor = if (l.manual && !l.enabled) FMuted else FText
+                        if (l.manual) FIconLabel(Icons.Outlined.PushPin, l.title, color = titleColor)
+                        else Text(l.title, color = titleColor, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         if (l.mitigation.isNotBlank()) {
-                            Text("规避:${l.mitigation}", color = FMuted, fontSize = 10.sp, lineHeight = 14.sp)
+                            Text(
+                                stringResource(R.string.tc_lessons_mitigation, l.mitigation),
+                                color = FMuted,
+                                fontSize = 12.sp,
+                                lineHeight = 17.sp,
+                            )
                         } else if (l.manual) {
                             Text(
-                                if (l.enabled) "你定的规矩 · 优先级最高" else "已停用 · 暂不注入",
-                                color = FMuted, fontSize = 10.sp,
+                                stringResource(
+                                    if (l.enabled) R.string.tc_lessons_rule_on else R.string.tc_lessons_rule_off,
+                                ),
+                                color = FMuted, fontSize = 12.sp,
                             )
                         }
                     }
@@ -569,7 +716,11 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
                     if (l.manual) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                if (l.enabled) "停用" else "启用", color = FPrimary, fontSize = 11.sp,
+                                stringResource(
+                                    if (l.enabled) R.string.tc_action_disable else R.string.tc_action_enable,
+                                ),
+                                color = FPrimary,
+                                fontSize = 12.sp,
                                 modifier = Modifier
                                     .clickable {
                                         InteractionLedger.setManualRuleEnabled(l.title, !l.enabled)
@@ -578,7 +729,7 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
                                     .padding(4.dp),
                             )
                             Text(
-                                "删除", color = FWarning, fontSize = 11.sp,
+                                stringResource(R.string.common_delete), color = FWarning, fontSize = 12.sp,
                                 modifier = Modifier
                                     .clickable { InteractionLedger.removeManualRule(l.title); onReset() }
                                     .padding(4.dp),
@@ -594,15 +745,13 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                "＋ 教它一条规矩", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable { draft = ""; showAdd = true }
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-            )
+            FTextAction(Icons.Outlined.Add, stringResource(R.string.tc_lessons_add)) { draft = ""; showAdd = true }
             if (hasLearned) {
                 Text(
-                    "重置经验(保留规矩)", color = FWarning, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                    stringResource(R.string.tc_lessons_reset),
+                    color = FWarning,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .clickable { InteractionLedger.clearLessons(); onReset() }
                         .padding(horizontal = 6.dp, vertical = 4.dp),
@@ -613,17 +762,19 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
     if (showAdd) {
         AlertDialog(
             onDismissRequest = { showAdd = false },
-            title = { Text("教它一条操作规矩") },
+            title = { Text(stringResource(R.string.tc_lessons_dialog_title)) },
             text = {
                 Column {
                     Text(
-                        "用一句话告诉 Agent 该怎么操作,会以最高优先级注入。例:打开淘宝先关弹窗再操作;发消息前先确认对象。",
-                        color = FMuted, fontSize = 11.sp, lineHeight = 15.sp,
+                        stringResource(R.string.tc_lessons_dialog_body),
+                        color = FMuted,
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
                     )
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
                         value = draft, onValueChange = { draft = it },
-                        placeholder = { Text("输入一条规矩…") },
+                        placeholder = { Text(stringResource(R.string.tc_lessons_dialog_hint)) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = EchoFieldColors.outlined(),
                     )
@@ -632,9 +783,11 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     InteractionLedger.addManualRule(draft); showAdd = false; onReset()
-                }) { Text("保存") }
+                }) { Text(stringResource(R.string.common_save)) }
             },
-            dismissButton = { TextButton(onClick = { showAdd = false }) { Text("取消") } },
+            dismissButton = {
+                TextButton(onClick = { showAdd = false }) { Text(stringResource(R.string.common_cancel)) }
+            },
         )
     }
 }
@@ -652,27 +805,25 @@ private fun UserMemoryCard(tick: Int, onReset: () -> Unit) {
     val memories = remember(tick) { store.getMemories() }
     FCard {
         if (memories.isEmpty()) {
-            Text(
-                "Agent 还没记住关于你的事。它会在对话里留意你透露的偏好/事实(常用 App、饮食忌口、称呼、" +
-                    "住址等)记下来;你也可以「记一条」直接告诉它。这些只存在本机,随时可删。",
-                color = FMuted, fontSize = 11.sp, lineHeight = 15.sp,
-            )
+            Text(stringResource(R.string.tc_memory_empty), color = FMuted, fontSize = 12.sp, lineHeight = 17.sp)
         } else {
             memories.forEachIndexed { i, m ->
                 if (i > 0) Spacer(Modifier.height(10.dp))
-                val label = when (m.type) {
-                    MemoryStore.MemoryType.PREFERENCE -> "偏好"
-                    MemoryStore.MemoryType.FACT -> "事实"
-                    MemoryStore.MemoryType.CONTEXT -> "近期"
-                }
+                val label = stringResource(
+                    when (m.type) {
+                        MemoryStore.MemoryType.PREFERENCE -> R.string.tc_memory_type_preference
+                        MemoryStore.MemoryType.FACT -> R.string.tc_memory_type_fact
+                        MemoryStore.MemoryType.CONTEXT -> R.string.tc_memory_type_context
+                    },
+                )
                 Row(verticalAlignment = Alignment.Top) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(m.content, color = FText, fontSize = 13.sp, lineHeight = 17.sp)
-                        Text("$label · 来源 ${m.source}", color = FMuted, fontSize = 10.sp)
+                        Text(stringResource(R.string.tc_memory_meta, label, m.source), color = FMuted, fontSize = 12.sp)
                     }
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "删除", color = FWarning, fontSize = 11.sp,
+                        stringResource(R.string.common_delete), color = FWarning, fontSize = 12.sp,
                         modifier = Modifier
                             .clickable { store.removeMemory(m.id); onReset() }
                             .padding(4.dp),
@@ -684,15 +835,13 @@ private fun UserMemoryCard(tick: Int, onReset: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                "＋ 记一条", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable { draft = ""; showAdd = true }
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-            )
+            FTextAction(Icons.Outlined.Add, stringResource(R.string.tc_memory_add)) { draft = ""; showAdd = true }
             if (memories.isNotEmpty()) {
                 Text(
-                    "清空记忆", color = FWarning, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                    stringResource(R.string.tc_memory_clear),
+                    color = FWarning,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .clickable { store.clearAll(); onReset() }
                         .padding(horizontal = 6.dp, vertical = 4.dp),
@@ -703,26 +852,32 @@ private fun UserMemoryCard(tick: Int, onReset: () -> Unit) {
     if (showAdd) {
         AlertDialog(
             onDismissRequest = { showAdd = false },
-            title = { Text("记一条关于你的事") },
+            title = { Text(stringResource(R.string.tc_memory_dialog_title)) },
             text = {
                 Column {
                     Text(
-                        "告诉 Agent 一条要长期记住的偏好或事实,后续任务会据此调整。例:我用饿了么点外卖;对花生过敏;称呼我老王。",
-                        color = FMuted, fontSize = 11.sp, lineHeight = 15.sp,
+                        stringResource(R.string.tc_memory_dialog_body),
+                        color = FMuted,
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
                     )
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
                         value = draft, onValueChange = { draft = it },
-                        placeholder = { Text("输入一条…") },
+                        placeholder = { Text(stringResource(R.string.tc_memory_dialog_hint)) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = EchoFieldColors.outlined(),
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { store.addUserFact(draft); showAdd = false; onReset() }) { Text("保存") }
+                TextButton(onClick = { store.addUserFact(draft); showAdd = false; onReset() }) {
+                    Text(stringResource(R.string.common_save))
+                }
             },
-            dismissButton = { TextButton(onClick = { showAdd = false }) { Text("取消") } },
+            dismissButton = {
+                TextButton(onClick = { showAdd = false }) { Text(stringResource(R.string.common_cancel)) }
+            },
         )
     }
 }
@@ -738,34 +893,43 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
     val context = LocalContext.current
     fun toast(msg: String) = Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     FCard {
-        Text(
-            "把你教的规矩 + Agent 记住的关于你的事备份/迁移:复制到剪贴板、存成文件、或从同账号" +
-                "局域网设备拉取。只在本机/设备间流转,不上传任何服务器。",
-            color = FMuted, fontSize = 11.sp, lineHeight = 15.sp,
-        )
+        Text(stringResource(R.string.tc_backup_desc), color = FMuted, fontSize = 12.sp, lineHeight = 17.sp)
         // ── 剪贴板 ──
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                "导出到剪贴板", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                stringResource(R.string.tc_backup_export_clipboard),
+                color = FPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable {
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         cm.setPrimaryClip(ClipData.newPlainText("octopus-knowledge", KnowledgeLocal.gather()))
-                        toast("知识包已复制到剪贴板")
+                        toast(context.getString(R.string.tc_backup_copied))
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
             )
             Text(
-                "从剪贴板导入", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                stringResource(R.string.tc_backup_import_clipboard),
+                color = FPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable {
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val text = cm.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString() ?: ""
                         val r = KnowledgeLocal.restore(text)
-                        toast(if (r == null) "剪贴板里不是有效的知识包" else "已导入 ${r.first} 条规矩 + ${r.second} 条记忆")
+                        toast(
+                            if (r == null) context.getString(R.string.tc_backup_clipboard_invalid)
+                            else context.getString(
+                                R.string.tc_backup_imported,
+                                r.first,
+                                r.second,
+                            ),
+                        )
                         if (r != null) onChanged()
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
@@ -777,23 +941,38 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                "导出到文件", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                stringResource(R.string.tc_backup_export_file),
+                color = FPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable {
                         val f = java.io.File(context.getExternalFilesDir(null), "octopus-knowledge.json")
                         val ok = runCatching { f.writeText(KnowledgeLocal.gather()) }.isSuccess
-                        toast(if (ok) "已导出到文件:${f.absolutePath}" else "导出失败")
+                        toast(
+                            if (ok) context.getString(R.string.tc_backup_exported_file, f.absolutePath)
+                            else context.getString(R.string.tc_backup_export_failed),
+                        )
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
             )
             Text(
-                "从文件导入", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                stringResource(R.string.tc_backup_import_file),
+                color = FPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable {
                         val f = java.io.File(context.getExternalFilesDir(null), "octopus-knowledge.json")
                         val text = runCatching { f.readText() }.getOrDefault("")
                         val r = KnowledgeLocal.restore(text)
-                        toast(if (r == null) "未找到备份文件或格式非法" else "已从文件导入 ${r.first} 条规矩 + ${r.second} 条记忆")
+                        toast(
+                            if (r == null) context.getString(R.string.tc_backup_file_invalid) else context.getString(
+                                R.string.tc_backup_imported_file,
+                                r.first,
+                                r.second,
+                            ),
+                        )
                         if (r != null) onChanged()
                     }
                     .padding(horizontal = 6.dp, vertical = 4.dp),
@@ -801,21 +980,18 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
         }
         // ── 局域网设备拉取 ──
         Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
-            Text(
-                "⬇ 从局域网设备拉取", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable {
+            FTextAction(Icons.Outlined.Download, stringResource(R.string.tc_backup_pull_lan)) {
                         Thread {
                             val target = ClawApplication.instance.deviceRegistry.getOnlineDevices()
                                 .firstOrNull { it.authToken.isNotBlank() }
                             val msg = if (target == null) {
-                                "未发现已配对的在线局域网设备(先在设备里配对同账号设备)"
+                                context.getString(R.string.tc_backup_no_device)
                             } else {
                                 val r = KnowledgeSync.pullFrom(target.getBaseUrl(), target.authToken, OkHttpClient())
                                 if (r == null) {
-                                    "拉取失败:${target.deviceName} 无响应或数据非法"
+                                    context.getString(R.string.tc_backup_pull_failed, target.deviceName)
                                 } else {
-                                    "已从 ${target.deviceName} 拉取 ${r.first} 条规矩 + ${r.second} 条记忆"
+                                    context.getString(R.string.tc_backup_pulled, target.deviceName, r.first, r.second)
                                 }
                             }
                             android.os.Handler(android.os.Looper.getMainLooper()).post {
@@ -823,9 +999,20 @@ private fun KnowledgeBackupCard(onChanged: () -> Unit) {
                                 onChanged()
                             }
                         }.start()
-                    }
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-            )
+            }
         }
+    }
+}
+
+/** A text action with a leading outlined icon (replaces "＋ …" / "⬇ …" glyph prefixes). */
+@Composable
+private fun FTextAction(icon: ImageVector, text: String, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 4.dp),
+    ) {
+        Icon(icon, contentDescription = null, tint = FPrimary, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(text, color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 }

@@ -7,6 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -15,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.skill.PromptSkillStore
 import com.apk.claw.android.tool.ToolRegistry
+import com.apk.claw.android.ui.compose.component.ToolIcons
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.utils.KVUtils
 
@@ -53,46 +60,8 @@ private fun accentAt(index: Int): Color {
     return palette[(index % palette.size + palette.size) % palette.size]
 }
 
-/** 提示词技能配图:按关键词猜一个贴切的 emoji。 */
-@Suppress("CyclomaticComplexMethod")
-private fun emojiForSkill(name: String, desc: String): String {
-    val s = (name + " " + desc).lowercase()
-    return when {
-        "shizuku" in s || "adb" in s || "配对" in s || "调试" in s -> "⚡"
-        "自动化" in s || "编排" in s -> "🤖"
-        "风格" in s || "style" in s -> "✨"
-        "海报" in s || "视觉" in s || "design" in s || "设计" in s -> "🎨"
-        "抓取" in s || "爬" in s || "scrape" in s || "crawl" in s || "网页" in s -> "🕸️"
-        "批量" in s -> "🤖"
-        else -> "✨"
-    }
-}
-
-/** 工具配图:按工具名猜一个 emoji,认不出就给通用积木。 */
-@Suppress("CyclomaticComplexMethod")
-private fun emojiForTool(name: String): String = when (name) {
-    "tap", "long_press", "swipe", "scroll_to_find" -> "👆"
-    "input_text" -> "⌨️"
-    "take_screenshot", "look_at_screen" -> "📸"
-    "get_screen_info", "find_node_info" -> "👁️"
-    "open_app" -> "📱"
-    "system_key" -> "🎛️"
-    "wait" -> "⏳"
-    "finish", "finish_task" -> "✅"
-    else -> when {
-        "file" in name || "read" in name || "write" in name -> "📄"
-        "http" in name || "web" in name || "url" in name || "browser" in name -> "🌐"
-        "search" in name -> "🔎"
-        "image" in name || "photo" in name || "video" in name || "gen" in name -> "🖼️"
-        "sms" in name || "call" in name || "phone" in name || "contact" in name -> "📞"
-        "notify" in name || "notification" in name -> "🔔"
-        "app" in name -> "📱"
-        else -> "🧩"
-    }
-}
-
 @Composable
-private fun SkillIconTile(emoji: String, accent: Color) {
+private fun SkillIconTile(icon: ImageVector, accent: Color) {
     Box(
         modifier = Modifier
             .size(TILE_SIZE)
@@ -100,7 +69,7 @@ private fun SkillIconTile(emoji: String, accent: Color) {
             .background(accent.copy(alpha = 0.14f)),
         contentAlignment = Alignment.Center,
     ) {
-        Text(emoji, fontSize = 21.sp)
+        Icon(icon, contentDescription = null, tint = FSub, modifier = Modifier.size(22.dp))
     }
 }
 
@@ -120,12 +89,12 @@ private fun SkillSwitch(checked: Boolean, onToggle: (Boolean) -> Unit) {
 }
 
 @Composable
-private fun SkillGroupHeader(emoji: String, title: String, count: Int, subtitle: String) {
+private fun SkillGroupHeader(icon: ImageVector, title: String, count: Int, subtitle: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(emoji, fontSize = 15.sp)
+        Icon(icon, contentDescription = null, tint = FSub, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(7.dp))
         Text(title, color = FText, fontSize = 15.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.width(8.dp))
@@ -133,7 +102,7 @@ private fun SkillGroupHeader(emoji: String, title: String, count: Int, subtitle:
     }
     Text(
         subtitle,
-        color = FMuted, fontSize = 11.sp,
+        color = FMuted, fontSize = 12.sp,
         modifier = Modifier.padding(start = 18.dp, end = 18.dp, bottom = 2.dp),
     )
 }
@@ -162,11 +131,14 @@ internal fun ColumnScope.SkillsContent() {
     LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(bottom = 12.dp)) {
         if (promptSkills.isNotEmpty()) {
             item(key = "__skills_header__") {
-                SkillGroupHeader("✨", "提示词技能", promptSkills.size, "相关任务时自动注入,让 Agent 更懂这件事")
+                SkillGroupHeader(
+                    Icons.Outlined.AutoAwesome, stringResource(R.string.skills_group_prompt), promptSkills.size,
+                    stringResource(R.string.skills_group_prompt_desc),
+                )
             }
             itemsIndexed(promptSkills, key = { _, sk -> sk.id }) { index, s ->
                 PromptSkillCard(
-                    emoji = emojiForSkill(s.name, s.description),
+                    icon = ToolIcons.forSkill(s.name, s.description),
                     accent = accentAt(index),
                     name = s.name,
                     desc = s.description,
@@ -178,8 +150,8 @@ internal fun ColumnScope.SkillsContent() {
         }
         item(key = "__tools_header__") {
             SkillGroupHeader(
-                "🧩", "可调用工具", tools.size,
-                "核心控制/感知工具锁定;其余可按需停用,降低误操作与隐私面",
+                Icons.Outlined.Extension, stringResource(R.string.skills_group_tools), tools.size,
+                stringResource(R.string.skills_group_tools_desc),
             )
         }
         itemsIndexed(tools, key = { _, tl -> tl.getName() }) { index, t ->
@@ -187,7 +159,7 @@ internal fun ColumnScope.SkillsContent() {
             val core = name in CORE
             val enabled = remember(rev, name) { ToolRegistry.getInstance().isToolEnabled(name) }
             ToolCard(
-                emoji = emojiForTool(name),
+                icon = ToolIcons.forTool(name),
                 accent = accentAt(index),
                 display = runCatching { t.getDisplayName() }.getOrDefault(name),
                 rawName = name,
@@ -202,7 +174,7 @@ internal fun ColumnScope.SkillsContent() {
 
 @Composable
 private fun PromptSkillCard(
-    emoji: String,
+    icon: ImageVector,
     accent: Color,
     name: String,
     desc: String,
@@ -212,7 +184,7 @@ private fun PromptSkillCard(
 ) {
     FCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SkillIconTile(emoji, accent)
+            SkillIconTile(icon, accent)
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(name, color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
@@ -225,7 +197,7 @@ private fun PromptSkillCard(
         }
         Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
             Text(
-                "删除",
+                stringResource(R.string.common_delete),
                 color = FError, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable(onClick = onDelete).padding(horizontal = 10.dp, vertical = 4.dp),
             )
@@ -235,7 +207,7 @@ private fun PromptSkillCard(
 
 @Composable
 private fun ToolCard(
-    emoji: String,
+    icon: ImageVector,
     accent: Color,
     display: String,
     rawName: String,
@@ -246,13 +218,13 @@ private fun ToolCard(
 ) {
     FCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SkillIconTile(emoji, accent)
+            SkillIconTile(icon, accent)
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(display, color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(6.dp))
-                    Text(rawName, color = FMuted, fontSize = 10.sp)
+                    Text(rawName, color = FMuted, fontSize = 12.sp)
                 }
                 if (desc.isNotBlank()) {
                     Spacer(Modifier.height(2.dp))
@@ -261,7 +233,11 @@ private fun ToolCard(
             }
             Spacer(Modifier.width(8.dp))
             if (core) {
-                FPill("🔒 ${stringResource(R.string.skills_badge_core)}", FMuted)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.Lock, contentDescription = null, tint = FMuted, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(4.dp))
+                    FPill(stringResource(R.string.skills_badge_core), FMuted)
+                }
             } else {
                 SkillSwitch(enabled, onToggle)
             }

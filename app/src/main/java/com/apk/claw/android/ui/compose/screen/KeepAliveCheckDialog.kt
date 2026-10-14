@@ -12,10 +12,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import com.apk.claw.android.service.ClawAccessibilityService
 import com.apk.claw.android.service.ForegroundService
@@ -87,7 +93,7 @@ fun KeepAliveCheckDialog(onDismiss: () -> Unit) {
                     openAutoStartSettings(ctx)
                 }
                 Text(
-                    "再把 App 在「最近任务」里下拉锁定 🔒,保活最稳。",
+                    "再把 App 在「最近任务」里下拉锁定,保活最稳。",
                     color = OctopusColors.TextMuted, fontSize = OctopusType.tag,
                 )
             }
@@ -100,10 +106,11 @@ fun KeepAliveCheckDialog(onDismiss: () -> Unit) {
 @Composable
 private fun KeepAliveRow(label: String, ok: Boolean, action: String, onAction: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Text(
-            if (ok) "✓" else "✗",
-            color = if (ok) OctopusColors.Success else OctopusColors.Error,
-            fontWeight = FontWeight.Bold, fontSize = OctopusType.body,
+        Icon(
+            if (ok) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline,
+            contentDescription = null,
+            tint = if (ok) OctopusColors.Success else OctopusColors.Error,
+            modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(OctopusSpacing.sm))
         Text(label, color = OctopusColors.TextPrimary, fontSize = OctopusType.caption, modifier = Modifier.weight(1f))

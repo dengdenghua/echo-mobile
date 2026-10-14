@@ -11,7 +11,9 @@ import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,12 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
-import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.media.MediaScanner
 import com.apk.claw.android.media.PlayerActivity
 import com.apk.claw.android.media.WebDAVEntry
 import com.apk.claw.android.media.WebDAVScanner
 import com.apk.claw.android.media.WebDavMounts
+import com.apk.claw.android.ui.compose.theme.OctopusColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -103,8 +105,15 @@ fun CloudDriveScreen(onBack: () -> Unit) {
                                     Text(m.name, color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                                     Text(m.baseUrl, color = FMuted, fontSize = 10.sp, maxLines = 1)
                                 }
-                                Text("✕", color = FMuted, fontSize = 14.sp,
-                                    modifier = Modifier.clickable { WebDavMounts.remove(m.id); mounts = WebDavMounts.all() }.padding(6.dp))
+                                Icon(
+                                    Icons.Outlined.Close,
+                                    contentDescription = stringResource(R.string.common_delete),
+                                    tint = FMuted,
+                                    modifier = Modifier
+                                        .clickable { WebDavMounts.remove(m.id); mounts = WebDavMounts.all() }
+                                        .padding(6.dp)
+                                        .size(18.dp),
+                                )
                             }
                         }
                     }

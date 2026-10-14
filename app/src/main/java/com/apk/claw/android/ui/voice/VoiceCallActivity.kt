@@ -38,6 +38,8 @@ import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,17 +67,17 @@ import com.apk.claw.android.account.AccountFeature
 import com.apk.claw.android.account.AccountGate
 import com.apk.claw.android.ui.account.LoginActivity
 import com.apk.claw.android.ui.account.SignInRequiredPanel
+import com.apk.claw.android.ui.compose.screen.ChatMessage
+import com.apk.claw.android.ui.compose.screen.ChatStore
+import com.apk.claw.android.ui.compose.screen.SessionStore
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.compose.theme.OctopusSpacing
-import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.ui.compose.theme.OctopusTheme
-import com.apk.claw.android.voice.realtime.VoiceRealtimeClient
-import com.apk.claw.android.ui.compose.screen.ChatMessage
-import com.apk.claw.android.ui.compose.screen.ChatStore
-import com.apk.claw.android.ui.compose.screen.SessionStore
+import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.ui.desktop.CharacterRegistry
+import com.apk.claw.android.voice.realtime.VoiceRealtimeClient
 import com.apk.claw.android.voice.realtime.VoiceState
 import com.apk.claw.android.voice.realtime.VoiceStats
 import kotlinx.coroutines.delay
@@ -265,15 +267,26 @@ private fun ActiveCallView(speaking: Boolean, aiText: String, userText: String, 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         VoiceOrb(speaking = speaking)
         Spacer(Modifier.height(OctopusSpacing.xl))
-        Text(
-            when {
-                toolHint.isNotBlank() -> "🔧 $toolHint"
-                speaking -> stringResource(R.string.voice_call_speaking)
-                else -> stringResource(R.string.voice_call_listening)
-            },
-            color = if (toolHint.isNotBlank()) OctopusColors.Primary else OctopusColors.TextTertiary,
-            fontSize = OctopusType.caption,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (toolHint.isNotBlank()) {
+                Icon(
+                    Icons.Outlined.Build,
+                    contentDescription = null,
+                    tint = OctopusColors.Primary,
+                    modifier = Modifier.size(14.dp),
+                )
+                Spacer(Modifier.width(OctopusSpacing.xs))
+            }
+            Text(
+                when {
+                    toolHint.isNotBlank() -> toolHint
+                    speaking -> stringResource(R.string.voice_call_speaking)
+                    else -> stringResource(R.string.voice_call_listening)
+                },
+                color = if (toolHint.isNotBlank()) OctopusColors.Primary else OctopusColors.TextTertiary,
+                fontSize = OctopusType.caption,
+            )
+        }
         Spacer(Modifier.height(OctopusSpacing.lg))
         val scroll = rememberScrollState()
         LaunchedEffect(aiText) { scroll.animateScrollTo(scroll.maxValue) }
@@ -290,7 +303,16 @@ private fun ActiveCallView(speaking: Boolean, aiText: String, userText: String, 
         }
         if (userText.isNotBlank()) {
             Spacer(Modifier.height(OctopusSpacing.md))
-            Text("🗣️ $userText", color = OctopusColors.TextTertiary, fontSize = OctopusType.caption)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Outlined.RecordVoiceOver,
+                    contentDescription = null,
+                    tint = OctopusColors.TextTertiary,
+                    modifier = Modifier.size(14.dp),
+                )
+                Spacer(Modifier.width(OctopusSpacing.xs))
+                Text(userText, color = OctopusColors.TextTertiary, fontSize = OctopusType.caption)
+            }
         }
     }
 }

@@ -10,9 +10,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.ToolAuditLog
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -47,12 +49,12 @@ fun AuditLogScreen(onBack: () -> Unit) {
     }
 
     FeatureScaffold(
-        title = "操作审计日志",
+        title = stringResource(R.string.tc_nav_audit_title),
         onBack = onBack,
         action = {
             if (entries.isNotEmpty()) {
                 Text(
-                    "清空",
+                    stringResource(R.string.audit_clear),
                     color = FError, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { ToolAuditLog.clear(); tick++ },
                 )
@@ -60,21 +62,21 @@ fun AuditLogScreen(onBack: () -> Unit) {
         },
     ) {
         Text(
-            "记录所有中/高危工具调用（敏感参数已脱敏），最多保留最近 300 条。",
+            stringResource(R.string.audit_description),
             color = FMuted, fontSize = 12.sp, lineHeight = 17.sp,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
 
         Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-            FilterChip("全部 ${entries.size}", filter == "all") { filter = "all" }
+            FilterChip(stringResource(R.string.audit_filter_all, entries.size), filter == "all") { filter = "all" }
             Spacer(Modifier.width(8.dp))
-            FilterChip("高危", filter == "high") { filter = "high" }
+            FilterChip(stringResource(R.string.audit_risk_high), filter == "high") { filter = "high" }
             Spacer(Modifier.width(8.dp))
-            FilterChip("中危", filter == "medium") { filter = "medium" }
+            FilterChip(stringResource(R.string.audit_risk_medium), filter == "medium") { filter = "medium" }
         }
 
         if (shown.isEmpty()) {
-            FEmpty("暂无审计记录。Agent 调用高危/中危工具后会记录在此。")
+            FEmpty(stringResource(R.string.audit_empty))
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(shown) { entry -> AuditEntryCard(entry) }
@@ -95,7 +97,7 @@ private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
         Text(
             label,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-            color = color, fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
+            color = color, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
         )
     }
 }
@@ -105,7 +107,7 @@ private fun AuditEntryCard(entry: ToolAuditLog.Entry) {
     FCard {
         // 签名校验失败:HMAC 不匹配,条目可能被篡改或伪造。显著标红提醒。
         if (entry.tampered) {
-            FPill("⚠ 签名校验失败 · 可能被篡改/伪造", FError)
+            FWarningNote(stringResource(R.string.audit_tampered), color = FError)
             Spacer(Modifier.height(6.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -115,44 +117,44 @@ private fun AuditEntryCard(entry: ToolAuditLog.Entry) {
                 "medium" -> FPrimary
                 else -> FMuted
             }
-            FPill(riskLabel(entry.risk), riskColor)
+            FPill(stringResource(riskLabel(entry.risk)), riskColor)
         }
         Text(
             auditTimeFmt.format(Date(entry.ts)),
-            color = FMuted, fontSize = 10.sp,
+            color = FMuted, fontSize = 12.sp,
             modifier = Modifier.padding(top = 2.dp),
         )
         if (entry.params.isNotBlank()) {
             Text(
                 entry.params,
-                color = FSub, fontSize = 11.sp, lineHeight = 15.sp,
+                color = FSub, fontSize = 12.sp, lineHeight = 17.sp,
                 modifier = Modifier.padding(top = 6.dp),
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
             val (statusText, statusColor) = when {
-                entry.blockedBy != null -> "已拦截（${entry.blockedBy}）" to FWarning
-                entry.success -> "成功" to FSuccess
-                else -> "失败" to FError
+                entry.blockedBy != null -> stringResource(R.string.audit_status_blocked, entry.blockedBy) to FWarning
+                entry.success -> stringResource(R.string.audit_status_ok) to FSuccess
+                else -> stringResource(R.string.audit_status_failed) to FError
             }
             FPill(statusText, statusColor)
             Spacer(Modifier.weight(1f))
             if (entry.durationMs > 0) {
-                Text("${entry.durationMs}ms", color = FMuted, fontSize = 10.sp)
+                Text("${entry.durationMs}ms", color = FMuted, fontSize = 12.sp)
             }
         }
         if (entry.result.isNotBlank()) {
             Text(
                 entry.result,
-                color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                color = FMuted, fontSize = 12.sp, lineHeight = 17.sp,
                 modifier = Modifier.padding(top = 6.dp),
             )
         }
     }
 }
 
-private fun riskLabel(risk: String): String = when (risk) {
-    "high" -> "高危"
-    "medium" -> "中危"
-    else -> "低危"
+private fun riskLabel(risk: String): Int = when (risk) {
+    "high" -> R.string.audit_risk_high
+    "medium" -> R.string.audit_risk_medium
+    else -> R.string.audit_risk_low
 }

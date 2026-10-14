@@ -143,12 +143,15 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            stringResource(if (running) R.string.wakeword_state_listening else R.string.wakeword_state_off),
+                            stringResource(
+                                if (running) R.string.wakeword_state_listening else R.string.wakeword_state_off,
+                            ),
                             color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            if (running) stringResource(R.string.wakeword_notification_text, keyword) else stringResource(R.string.wakeword_state_off_hint),
+                            if (running) stringResource(R.string.wakeword_notification_text, keyword)
+                            else stringResource(R.string.wakeword_state_off_hint),
                             color = FMuted, fontSize = 12.sp,
                         )
                     }
@@ -158,9 +161,19 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
 
             // ── 引擎说明 ──
             FCard {
-                Text(stringResource(R.string.wakeword_section_engine), color = FMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.wakeword_section_engine),
+                    color = FMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 Spacer(Modifier.height(8.dp))
-                Text(stringResource(R.string.wakeword_engine_name), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.wakeword_engine_name),
+                    color = FText,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     stringResource(R.string.wakeword_engine_desc),
@@ -170,7 +183,12 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
 
             // ── 唤醒词 ──
             FCard {
-                Text(stringResource(R.string.wakeword_section_keyword), color = FMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.wakeword_section_keyword),
+                    color = FMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 Spacer(Modifier.height(8.dp))
                 KeywordChips(
                     current = keyword,
@@ -183,7 +201,12 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.Tune, contentDescription = null, tint = FSub, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(10.dp))
-                    Text(stringResource(R.string.wakeword_section_sensitivity), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.wakeword_section_sensitivity),
+                        color = FText,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
                 Spacer(Modifier.height(10.dp))
                 SensibilitySelector(current = sensitivity, onChange = onSensitivityChange)
@@ -191,7 +214,12 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
 
             // ── 省电策略 ──
             FCard {
-                Text(stringResource(R.string.wakeword_section_power), color = FMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.wakeword_section_power),
+                    color = FMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 Spacer(Modifier.height(8.dp))
                 SwitchRow(
                     icon = Icons.Outlined.BatteryChargingFull,
@@ -215,7 +243,12 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.Lock, contentDescription = null, tint = FSub, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(10.dp))
-                    Text(stringResource(R.string.wakeword_section_privacy), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.wakeword_section_privacy),
+                        color = FText,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -270,9 +303,15 @@ private fun SensibilitySelector(
     onChange: (WakeWordSettings.Sensitivity) -> Unit,
 ) {
     val options = listOf(
-        WakeWordSettings.Sensitivity.LOW to (R.string.wakeword_sensitivity_low to R.string.wakeword_sensitivity_low_desc),
-        WakeWordSettings.Sensitivity.MEDIUM to (R.string.wakeword_sensitivity_medium to R.string.wakeword_sensitivity_medium_desc),
-        WakeWordSettings.Sensitivity.HIGH to (R.string.wakeword_sensitivity_high to R.string.wakeword_sensitivity_high_desc),
+        WakeWordSettings.Sensitivity.LOW to (
+            R.string.wakeword_sensitivity_low to R.string.wakeword_sensitivity_low_desc
+        ),
+        WakeWordSettings.Sensitivity.MEDIUM to (
+            R.string.wakeword_sensitivity_medium to R.string.wakeword_sensitivity_medium_desc
+        ),
+        WakeWordSettings.Sensitivity.HIGH to (
+            R.string.wakeword_sensitivity_high to R.string.wakeword_sensitivity_high_desc
+        ),
     )
     options.forEach { (s, label) ->
         val (title, desc) = label

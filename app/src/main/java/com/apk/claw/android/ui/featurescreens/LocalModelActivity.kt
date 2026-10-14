@@ -400,12 +400,11 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                 Spacer(Modifier.height(8.dp))
                 Divider(color = FBorder, thickness = 1.dp)
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    "⚠️ 已知限制:\n" +
+                FWarningNote(
+                    "已知限制:\n" +
                         "• 不支持 function calling — 离线模式仅纯对话,无法控制设备\n" +
                         "• 不支持视觉 — 截图/图片输入会被忽略\n" +
                         "• 模型质量低于 GPT-4/Claude — 适合隐私敏感/离线场景",
-                    color = FWarning, fontSize = 11.sp, lineHeight = 16.sp,
                 )
             }
 
