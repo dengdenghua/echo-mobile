@@ -470,7 +470,7 @@
     <string name="chat_sessions_earlier">Earlier</string>
     <string name="chat_clear_current">Clear current chat</string>
     <string name="setup_title">Get Echo ready</string>
-    <string name="setup_llm">Configure LLM (API Key)</string>
+    <string name="setup_llm">Set up a model (API key)</string>
     <string name="setup_a11y">Enable accessibility service</string>
     <string name="setup_go">Go to settings ›</string>
 
@@ -1858,4 +1858,19 @@
     <string name="voice_name_sunny">Sunny</string>
     <string name="voice_name_jada">Jada</string>
     <string name="voice_cloned">My voice (cloned)</string>
+    <!-- Model settings: provider descriptions and setup wording (2026-10-14) -->
+    <string name="llm_provider_desc_openai">OpenAI\'s own API: GPT-4o, GPT-4.1, o1 and o3</string>
+    <string name="llm_provider_desc_anthropic">Anthropic\'s own API: Claude 3 and Claude 4</string>
+    <string name="llm_provider_desc_gemini">Google Gemini native API: gemini-2.0 and gemini-1.5, multimodal</string>
+    <string name="llm_provider_desc_xai">xAI Grok models, OpenAI-compatible API</string>
+    <string name="llm_provider_desc_ollama">A local Ollama server: run ollama serve on your computer first (port 11434)</string>
+    <string name="llm_provider_desc_deepseek">DeepSeek\'s own API, good value: deepseek-chat and deepseek-reasoner</string>
+    <string name="llm_provider_desc_dashscope">Alibaba Cloud DashScope: Qwen models, OpenAI-compatible mode</string>
+    <string name="llm_provider_desc_baidu">Baidu Qianfan: ERNIE models, OpenAI-compatible V2 API</string>
+    <string name="llm_provider_desc_siliconflow">SiliconFlow: many models (Qwen, DeepSeek, GLM…), OpenAI-compatible</string>
+    <string name="llm_provider_desc_novita">Novita AI: Llama, Qwen and more, OpenAI-compatible</string>
+    <string name="llm_provider_desc_nvidia">NVIDIA NIM: popular open models, OpenAI-compatible</string>
+    <string name="llm_provider_desc_openrouter">OpenRouter: 200+ models behind one OpenAI-compatible API</string>
+    <string name="llm_provider_desc_lmstudio">A local LM Studio server: start LM Studio on your computer first (port 1234)</string>
+    <string name="llm_provider_desc_local">Offline on this phone with llama.cpp: needs a .gguf model file; no tool calling</string>
 </resources>

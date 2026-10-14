@@ -1490,7 +1490,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
         ModalBottomSheet(onDismissRequest = { moreMenuOpen = false; conversationOptionsExpanded = false },
             containerColor = BackgroundColor) {
             Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
-                Text(sessions.firstOrNull { it.id == currentId }?.title ?: newChatTitle,
+                Text(sessions.firstOrNull { it.id == currentId }?.shownTitle(newChatTitle) ?: newChatTitle,
                     style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
                 val activeTasks = DeviceExecutionStore.active()
@@ -1554,7 +1554,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                 Text(stringResource(R.string.echo_background_tasks, DeviceExecutionStore.active().size),
                     style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(12.dp))
                 DeviceExecutionStore.active().forEach { execution ->
-                    val title = SessionStore.metaOf(execution.sessionId)?.title ?: newChatTitle
+                    val title = SessionStore.metaOf(execution.sessionId)?.shownTitle(newChatTitle) ?: newChatTitle
                     EchoDrawerLink(execution.environment.icon, "${stringResource(execution.environment.title)} · $title") {
                         showBackgroundTasks = false
                         val destination = DeviceExecutionStore.deliveryState(execution)
@@ -1568,7 +1568,10 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
         }
     }
     if (renameChatOpen) {
-        var title by remember(currentId) { mutableStateOf(sessions.firstOrNull { it.id == currentId }?.title.orEmpty()) }
+        var title by remember(currentId) {
+            val stored = sessions.firstOrNull { it.id == currentId }?.title
+            mutableStateOf(stored?.takeUnless { it == SessionStore.UNTITLED }.orEmpty())
+        }
         AlertDialog(onDismissRequest = { renameChatOpen = false }, title = { Text(stringResource(R.string.echo_rename_chat)) },
             text = {
                 OutlinedTextField(
@@ -2153,7 +2156,7 @@ private fun SessionDrawerRow(
             )
             Spacer(Modifier.width(OctopusSpacing.sm))
             Text(
-                session.title,
+                session.shownTitle(stringResource(R.string.chat_new)),
                 modifier = Modifier.weight(1f),
                 color = if (selected) TextPrimary else TextSecondary,
                 fontSize = OctopusType.body,

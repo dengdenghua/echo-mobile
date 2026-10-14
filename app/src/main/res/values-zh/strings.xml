@@ -1845,4 +1845,19 @@
     <string name="voice_name_sunny">阳阳</string>
     <string name="voice_name_jada">洁达</string>
     <string name="voice_cloned">我的声音（复刻）</string>
+    <!-- Model settings: provider descriptions and setup wording (2026-10-14) -->
+    <string name="llm_provider_desc_openai">OpenAI 官方 API，支持 GPT-4o / GPT-4.1 / o1 / o3 系列</string>
+    <string name="llm_provider_desc_anthropic">Anthropic 官方 API，支持 Claude 3 / Claude 4 系列</string>
+    <string name="llm_provider_desc_gemini">Google Gemini 原生 API，支持 gemini-2.0 / gemini-1.5 系列，原生多模态</string>
+    <string name="llm_provider_desc_xai">xAI Grok 系列，OpenAI 兼容 API</string>
+    <string name="llm_provider_desc_ollama">本地 Ollama 服务，需先在电脑上运行 ollama serve，默认端口 11434</string>
+    <string name="llm_provider_desc_deepseek">DeepSeek 官方 API，性价比高，支持 deepseek-chat / deepseek-reasoner</string>
+    <string name="llm_provider_desc_dashscope">阿里云 DashScope，支持通义千问 Qwen 系列，OpenAI 兼容模式</string>
+    <string name="llm_provider_desc_baidu">百度千帆平台，支持 ERNIE 系列，OpenAI 兼容 V2 接口</string>
+    <string name="llm_provider_desc_siliconflow">硅基流动，聚合多模型（Qwen / DeepSeek / GLM 等），OpenAI 兼容</string>
+    <string name="llm_provider_desc_novita">Novita AI，聚合 Llama / Qwen 等，OpenAI 兼容</string>
+    <string name="llm_provider_desc_nvidia">NVIDIA NIM，聚合主流开源模型，OpenAI 兼容</string>
+    <string name="llm_provider_desc_openrouter">OpenRouter 聚合 200+ 模型，统一 OpenAI 兼容 API</string>
+    <string name="llm_provider_desc_lmstudio">本地 LM Studio 服务，需先在电脑上运行 LM Studio，默认端口 1234</string>
+    <string name="llm_provider_desc_local">设备内置 llama.cpp 离线推理，需要 .gguf 模型文件，不支持 function calling</string>
 </resources>

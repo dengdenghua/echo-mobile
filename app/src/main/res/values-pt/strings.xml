@@ -470,7 +470,7 @@
     <string name="chat_sessions_earlier">Anteriores</string>
     <string name="chat_clear_current">Limpar conversa atual</string>
     <string name="setup_title">Conclua a configuração para iniciar</string>
-    <string name="setup_llm">Configurar LLM (API Key)</string>
+    <string name="setup_llm">Configurar um modelo (chave de API)</string>
     <string name="setup_a11y">Ativar serviço de acessibilidade</string>
     <string name="setup_go">Ir para configurações ›</string>
 
@@ -1848,4 +1848,19 @@
     <string name="voice_name_sunny">Sunny</string>
     <string name="voice_name_jada">Jada</string>
     <string name="voice_cloned">Minha voz (clonada)</string>
+    <!-- Model settings: provider descriptions and setup wording (2026-10-14) -->
+    <string name="llm_provider_desc_openai">API oficial da OpenAI: GPT-4o, GPT-4.1, o1 e o3</string>
+    <string name="llm_provider_desc_anthropic">API oficial da Anthropic: Claude 3 e Claude 4</string>
+    <string name="llm_provider_desc_gemini">API nativa do Google Gemini: gemini-2.0 e gemini-1.5, multimodal</string>
+    <string name="llm_provider_desc_xai">Modelos Grok da xAI, API compatível com OpenAI</string>
+    <string name="llm_provider_desc_ollama">Um servidor Ollama local: rode antes ollama serve no computador (porta 11434)</string>
+    <string name="llm_provider_desc_deepseek">API oficial da DeepSeek, bom custo-benefício: deepseek-chat e deepseek-reasoner</string>
+    <string name="llm_provider_desc_dashscope">Alibaba Cloud DashScope: modelos Qwen, modo compatível com OpenAI</string>
+    <string name="llm_provider_desc_baidu">Baidu Qianfan: modelos ERNIE, API V2 compatível com OpenAI</string>
+    <string name="llm_provider_desc_siliconflow">SiliconFlow: vários modelos (Qwen, DeepSeek, GLM…), compatível com OpenAI</string>
+    <string name="llm_provider_desc_novita">Novita AI: Llama, Qwen e outros, compatível com OpenAI</string>
+    <string name="llm_provider_desc_nvidia">NVIDIA NIM: modelos abertos populares, compatível com OpenAI</string>
+    <string name="llm_provider_desc_openrouter">OpenRouter: mais de 200 modelos em uma API compatível com OpenAI</string>
+    <string name="llm_provider_desc_lmstudio">Um servidor LM Studio local: abra antes o LM Studio no computador (porta 1234)</string>
+    <string name="llm_provider_desc_local">Offline neste telefone com llama.cpp: precisa de um arquivo .gguf; sem chamadas de ferramentas</string>
 </resources>

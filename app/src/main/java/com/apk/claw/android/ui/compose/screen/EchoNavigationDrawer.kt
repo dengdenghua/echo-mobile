@@ -195,7 +195,7 @@ private fun EchoSessionLink(
     Row(Modifier.fillMaxWidth().background(if (selected) OctopusColors.SurfaceVariant else Color.Transparent, OctopusShape.small)
         .clickable(enabled = enabled) { onSwitch(session.id) }.padding(horizontal = 12.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(session.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            Text(session.shownTitle(stringResource(R.string.chat_new)), maxLines = 1, overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodyMedium, fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal)
             session.workspace?.takeIf { it.isNotBlank() }?.let {
                 Text(it.trimEnd('/').substringAfterLast('/'), color = OctopusColors.TextMuted,

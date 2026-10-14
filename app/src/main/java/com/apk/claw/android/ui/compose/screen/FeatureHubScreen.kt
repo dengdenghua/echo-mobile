@@ -206,7 +206,11 @@ private fun ExploreTab(
 ) {
     var selectedTopic by remember { mutableStateOf("recommend") }
     var selectedTab by remember { mutableIntStateOf(0) } // 0=推荐 1=关注 2=热门
-    val tabs = listOf("推荐", "关注", "热门")
+    val tabs = listOf(
+        stringResource(R.string.agent_square_tab_recommend),
+        stringResource(R.string.agent_square_tab_following),
+        stringResource(R.string.agent_square_tab_hot),
+    )
 
     val sort = when (selectedTab) {
         2 -> "hot"

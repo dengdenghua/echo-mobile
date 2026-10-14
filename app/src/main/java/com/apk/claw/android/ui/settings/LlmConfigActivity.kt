@@ -68,7 +68,7 @@ class LlmConfigActivity : BaseActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spProvider.adapter = adapter
         spProvider.setSelection(presets.indexOfFirst { it.provider == currentProvider })
-        tvProviderDesc.text = LlmProviderPreset.of(currentProvider).description
+        tvProviderDesc.text = providerDescription(currentProvider)
 
         spProvider.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -77,7 +77,7 @@ class LlmConfigActivity : BaseActivity() {
                     currentProvider = newProvider
                     loadProviderConfig(currentProvider)
                     updateApiKeyRowVisibility(currentProvider)
-                    tvProviderDesc.text = LlmProviderPreset.of(currentProvider).description
+                    tvProviderDesc.text = providerDescription(currentProvider)
                 }
             }
 
@@ -286,3 +286,24 @@ class LlmConfigActivity : BaseActivity() {
         tvKeyPoolStatus.text = getString(R.string.key_pool_status, keys.size, summary)
     }
 }
+
+/** Each provider's one-line description in the UI language (the preset's own text is Chinese). */
+private val PROVIDER_DESCRIPTIONS: Map<LlmProvider, Int> = mapOf(
+    LlmProvider.OPENAI to R.string.llm_provider_desc_openai,
+    LlmProvider.ANTHROPIC to R.string.llm_provider_desc_anthropic,
+    LlmProvider.GEMINI to R.string.llm_provider_desc_gemini,
+    LlmProvider.XAI to R.string.llm_provider_desc_xai,
+    LlmProvider.OLLAMA to R.string.llm_provider_desc_ollama,
+    LlmProvider.DEEPSEEK to R.string.llm_provider_desc_deepseek,
+    LlmProvider.DASHSCOPE to R.string.llm_provider_desc_dashscope,
+    LlmProvider.BAIDU_BAILING to R.string.llm_provider_desc_baidu,
+    LlmProvider.SILICONFLOW to R.string.llm_provider_desc_siliconflow,
+    LlmProvider.NOVITA to R.string.llm_provider_desc_novita,
+    LlmProvider.NVIDIA_NIM to R.string.llm_provider_desc_nvidia,
+    LlmProvider.OPENROUTER to R.string.llm_provider_desc_openrouter,
+    LlmProvider.LMSTUDIO to R.string.llm_provider_desc_lmstudio,
+    LlmProvider.LOCAL to R.string.llm_provider_desc_local,
+)
+
+private fun android.content.Context.providerDescription(p: LlmProvider): String =
+    PROVIDER_DESCRIPTIONS[p]?.let { getString(it) } ?: LlmProviderPreset.of(p).description

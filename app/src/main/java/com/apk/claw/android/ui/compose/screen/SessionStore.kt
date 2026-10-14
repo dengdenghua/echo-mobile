@@ -22,6 +22,12 @@ object SessionStore {
     const val CHARACTER_DEFAULT = "octopus"
 
     /**
+     * 未命名会话的存储标题(首条消息后改成摘要)。它是存储层的哨兵值,界面显示时用
+     * [shownTitle] 换成当前语言的「新对话」,英文界面不再出现中文标题。
+     */
+    const val UNTITLED = "新对话"
+
+    /**
      * @param character 会话归属的角色 id(TV 模式同一批角色)。会话/历史按角色隔离,
      *   互不可见。旧数据经 Gson 反序列化可能为 null —— 一律经 [charKey] 读。
      * @param workspace 该会话的工作空间路径(可选)。非空时覆盖全局脚本工作空间
@@ -38,6 +44,9 @@ object SessionStore {
         val pinned: Boolean = false,
         val manuallyNamed: Boolean = false,
     ) {
+        /** 界面上显示的标题:未命名会话显示 [untitled](当前语言的「新对话」)。 */
+        fun shownTitle(untitled: String): String = if (title == UNTITLED) untitled else title
+
         /** 归一化角色 key:null/空(历史数据)→ 默认 Octopus。 */
         fun charKey(): String = character?.takeIf { it.isNotBlank() } ?: CHARACTER_DEFAULT
 
@@ -90,7 +99,7 @@ object SessionStore {
         val list = index()
         val mine = list.filter { it.charKey() == character }.toMutableList()
         if (mine.isEmpty()) {
-            val meta = SessionMeta(newId(), "新对话", now, character)
+            val meta = SessionMeta(newId(), UNTITLED, now, character)
             list.add(0, meta)
             saveIndex(list)
             setCurrent(meta.id, character)
@@ -101,7 +110,7 @@ object SessionStore {
         if (character == CHARACTER_DEFAULT) {
             val demoSession = mine.firstOrNull { it.title == "Demo" }
             if (demoSession != null) {
-                demoSession.title = "新对话"
+                demoSession.title = UNTITLED
                 demoSession.updatedAt = now
                 saveIndex(list)
                 ChatStore.clear(demoSession.id)
@@ -113,7 +122,7 @@ object SessionStore {
     /** 新建该角色的空会话并设为其当前会话,返回其 meta。 */
     fun create(now: Long, character: String = CHARACTER_DEFAULT): SessionMeta {
         val list = index()
-        val meta = SessionMeta(newId(), "新对话", now, character)
+        val meta = SessionMeta(newId(), UNTITLED, now, character)
         list.add(0, meta)
         saveIndex(list)
         setCurrent(meta.id, character)
@@ -126,7 +135,7 @@ object SessionStore {
      */
     fun create(now: Long, character: String, workspace: String?): SessionMeta {
         val list = index()
-        val meta = SessionMeta(newId(), "新对话", now, character, workspace?.takeIf { it.isNotBlank() })
+        val meta = SessionMeta(newId(), UNTITLED, now, character, workspace?.takeIf { it.isNotBlank() })
         list.add(0, meta)
         saveIndex(list)
         setCurrent(meta.id, character)

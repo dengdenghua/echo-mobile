@@ -470,7 +470,7 @@
     <string name="chat_sessions_earlier">이전</string>
     <string name="chat_clear_current">현재 채팅 지우기</string>
     <string name="setup_title">시작하려면 설정을 완료하세요</string>
-    <string name="setup_llm">LLM 구성(API Key)</string>
+    <string name="setup_llm">모델 설정(API 키)</string>
     <string name="setup_a11y">접근성 서비스 활성화</string>
     <string name="setup_go">설정으로 이동 ›</string>
 
@@ -1847,4 +1847,19 @@
     <string name="voice_name_sunny">써니</string>
     <string name="voice_name_jada">제이다</string>
     <string name="voice_cloned">내 목소리(복제)</string>
+    <!-- Model settings: provider descriptions and setup wording (2026-10-14) -->
+    <string name="llm_provider_desc_openai">OpenAI 공식 API: GPT-4o, GPT-4.1, o1, o3</string>
+    <string name="llm_provider_desc_anthropic">Anthropic 공식 API: Claude 3, Claude 4</string>
+    <string name="llm_provider_desc_gemini">Google Gemini 네이티브 API: gemini-2.0, gemini-1.5, 멀티모달</string>
+    <string name="llm_provider_desc_xai">xAI Grok 모델, OpenAI 호환 API</string>
+    <string name="llm_provider_desc_ollama">로컬 Ollama 서버: 먼저 컴퓨터에서 ollama serve 실행(포트 11434)</string>
+    <string name="llm_provider_desc_deepseek">DeepSeek 공식 API, 가성비 좋음: deepseek-chat, deepseek-reasoner</string>
+    <string name="llm_provider_desc_dashscope">Alibaba Cloud DashScope: Qwen 모델, OpenAI 호환 모드</string>
+    <string name="llm_provider_desc_baidu">Baidu Qianfan: ERNIE 모델, OpenAI 호환 V2 API</string>
+    <string name="llm_provider_desc_siliconflow">SiliconFlow: 여러 모델(Qwen, DeepSeek, GLM 등), OpenAI 호환</string>
+    <string name="llm_provider_desc_novita">Novita AI: Llama, Qwen 등, OpenAI 호환</string>
+    <string name="llm_provider_desc_nvidia">NVIDIA NIM: 주요 오픈 모델, OpenAI 호환</string>
+    <string name="llm_provider_desc_openrouter">OpenRouter: 200개 이상의 모델을 하나의 OpenAI 호환 API로</string>
+    <string name="llm_provider_desc_lmstudio">로컬 LM Studio 서버: 먼저 컴퓨터에서 LM Studio 실행(포트 1234)</string>
+    <string name="llm_provider_desc_local">이 휴대폰에서 llama.cpp로 오프라인 추론: .gguf 모델 파일 필요, 도구 호출 미지원</string>
 </resources>

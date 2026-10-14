@@ -1853,4 +1853,19 @@
     <string name="voice_name_sunny">サニー</string>
     <string name="voice_name_jada">ジェイダ</string>
     <string name="voice_cloned">自分の声（複製）</string>
+    <!-- Model settings: provider descriptions and setup wording (2026-10-14) -->
+    <string name="llm_provider_desc_openai">OpenAI 公式 API：GPT-4o / GPT-4.1 / o1 / o3</string>
+    <string name="llm_provider_desc_anthropic">Anthropic 公式 API：Claude 3 / Claude 4</string>
+    <string name="llm_provider_desc_gemini">Google Gemini ネイティブ API：gemini-2.0 / gemini-1.5、マルチモーダル</string>
+    <string name="llm_provider_desc_xai">xAI Grok シリーズ、OpenAI 互換 API</string>
+    <string name="llm_provider_desc_ollama">ローカルの Ollama サーバー：先にパソコンで ollama serve を実行（ポート 11434）</string>
+    <string name="llm_provider_desc_deepseek">DeepSeek 公式 API、コスパ良好：deepseek-chat / deepseek-reasoner</string>
+    <string name="llm_provider_desc_dashscope">Alibaba Cloud DashScope：Qwen シリーズ、OpenAI 互換モード</string>
+    <string name="llm_provider_desc_baidu">Baidu Qianfan：ERNIE シリーズ、OpenAI 互換 V2 API</string>
+    <string name="llm_provider_desc_siliconflow">SiliconFlow：多数のモデル（Qwen / DeepSeek / GLM など）、OpenAI 互換</string>
+    <string name="llm_provider_desc_novita">Novita AI：Llama / Qwen など、OpenAI 互換</string>
+    <string name="llm_provider_desc_nvidia">NVIDIA NIM：主要なオープンモデル、OpenAI 互換</string>
+    <string name="llm_provider_desc_openrouter">OpenRouter：200 以上のモデルを 1 つの OpenAI 互換 API で</string>
+    <string name="llm_provider_desc_lmstudio">ローカルの LM Studio サーバー：先にパソコンで LM Studio を起動（ポート 1234）</string>
+    <string name="llm_provider_desc_local">この端末で llama.cpp によるオフライン推論：.gguf モデルが必要、ツール呼び出しは非対応</string>
 </resources>

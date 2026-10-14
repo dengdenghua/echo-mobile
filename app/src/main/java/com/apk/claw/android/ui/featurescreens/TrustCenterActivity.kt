@@ -83,8 +83,15 @@ class TrustCenterActivity : ComponentActivity() {
     }
 }
 
-private fun deviceModel(): String =
-    "${Build.MANUFACTURER} ${Build.MODEL}".trim().replaceFirstChar { it.uppercase() }
+/** "Maker Model", without an "unknown" maker (emulators) and without repeating a maker the model already names. */
+private fun deviceModel(): String {
+    val maker = Build.MANUFACTURER.orEmpty().trim()
+    val model = Build.MODEL.orEmpty().trim()
+    val name = if (maker.isEmpty() || maker.equals("unknown", ignoreCase = true) ||
+        model.startsWith(maker, ignoreCase = true)
+    ) model else "$maker $model"
+    return name.replaceFirstChar { it.uppercase() }
+}
 
 private fun batteryPct(c: Context): Int = runCatching {
     (c.getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager)
