@@ -19,7 +19,7 @@ import com.apk.claw.android.ui.compose.theme.OctopusColors
  * muted), replacing the ✓ ✗ ⏳ ■ glyphs in tool rows. The row's text still says what happened.
  */
 @Composable
-fun ToolStatusIcon(status: ChatMessage.ToolCallStatus, size: Dp = 14.dp, modifier: Modifier = Modifier) {
+fun ToolStatusIcon(status: ChatMessage.ToolCallStatus, modifier: Modifier = Modifier, size: Dp = 14.dp) {
     val (icon, tint) = when (status) {
         ChatMessage.ToolCallStatus.SUCCESS -> Icons.Outlined.CheckCircle to OctopusColors.Success
         ChatMessage.ToolCallStatus.FAILURE -> Icons.Outlined.ErrorOutline to OctopusColors.Error

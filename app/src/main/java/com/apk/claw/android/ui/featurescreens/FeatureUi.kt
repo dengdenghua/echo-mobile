@@ -153,7 +153,7 @@ fun FPill(text: String, color: Color) {
  * so the state is carried by an icon and words, not by an emoji.
  */
 @Composable
-fun FWarningNote(text: String, color: Color = FWarning, modifier: Modifier = Modifier) {
+fun FWarningNote(text: String, modifier: Modifier = Modifier, color: Color = FWarning) {
     Row(modifier = modifier, verticalAlignment = Alignment.Top) {
         Icon(
             Icons.Outlined.WarningAmber, contentDescription = null, tint = color,
