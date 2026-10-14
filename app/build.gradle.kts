@@ -349,6 +349,8 @@ dependencies {
     testImplementation(libs.org.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Agent E2E test (androidTest/.../agent/e2e): a deterministic model stub served in-process.
+    androidTestImplementation(libs.mockwebserver)
 }
 
 // ── 单元测试类路径修正:Robolectric 必须用桌面版 conscrypt ──────────────────────

@@ -103,6 +103,10 @@ cd octopus-mobile
 
 Then: install the APK (Android 9+) → grant permissions (Accessibility, notifications, overlay, battery whitelist, file access) → configure LLM (Settings > LLM Config) → configure at least one channel → send a message.
 
+Tests: CI runs `./gradlew :app:assembleDebug :app:lintDebug :app:detekt :app:testDebugUnitTest`. An
+end-to-end agent task (chat → agent loop → accessibility service, with SafetyGate blocking a key leak)
+runs on an emulator against a deterministic model stub; see [docs/testing/agent-e2e.md](docs/testing/agent-e2e.md).
+
 > The `src/` directory plus `package.json`/`vite.config.ts` are a small **React/Vite UI prototype** (a phone mockup) and are not part of the Android build.
 
 ## Implementation status
