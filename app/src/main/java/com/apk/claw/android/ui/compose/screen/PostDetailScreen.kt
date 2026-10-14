@@ -687,7 +687,7 @@ private fun InteractionBar(
         ActionPill(
             icon = if (post.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
             count = post.likesCount,
-            tint = if (post.liked) Color(0xFFE53935) else OctopusColors.TextSecondary,
+            tint = if (post.liked) OctopusColors.Resonance else OctopusColors.TextSecondary,
             onClick = onLike,
         )
         ActionPill(

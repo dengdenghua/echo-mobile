@@ -57,6 +57,12 @@ object OctopusColors {
     val InfoOnContainer: Color get() = if (isLight) Color(0xFF244A93) else Color(0xFFA9C7FF)
     val InfoContainer: Color get() = if (isLight) Color(0xFFEAEFF8) else Color(0xFF222832)
 
+    /**
+     * Resonance pink (Echo Core light language: emotional resonance). Only for emotional moments such as a
+     * liked heart, persona and memory; never for errors (that is [Error], breach red) and never as decoration.
+     */
+    val Resonance: Color get() = if (isLight) Color(0xFFA83669) else Color(0xFFF4A6C8)
+
     // ── Fills（与 XML colorFill* 对齐：ink / 白色按 16% · 12% · 8% · 5% 叠加）──
     val FillPrimary: Color get() = if (isLight) Color(0x290A0C10) else Color(0x29FFFFFF)
     val FillSecondary: Color get() = if (isLight) Color(0x1F0A0C10) else Color(0x1FFFFFFF)
