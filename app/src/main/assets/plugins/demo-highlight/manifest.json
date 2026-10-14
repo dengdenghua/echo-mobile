@@ -4,7 +4,7 @@
   "name": "示例·链接高亮",
   "version": "1.0.0",
   "description": "browser-script 示例:在 example.com 给所有链接加黄色高亮,演示标准油猴脚本格式与GM_addStyle API。",
-  "author": "Octopus Team",
+  "author": "ECHO",
   "script": "highlight.user.js",
   "match": ["*://example.com/*", "*://*.example.com/*"],
   "run_at": "document-end",

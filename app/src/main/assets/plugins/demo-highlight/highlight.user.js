@@ -3,7 +3,7 @@
 // @namespace    octopus
 // @version      1.0.0
 // @description  browser-script 示例:在 example.com 给所有链接加黄色高亮,演示用户脚本注入与GM_addStyle。
-// @author       Octopus Team
+// @author       ECHO
 // @match        *://example.com/*
 // @match        *://*.example.com/*
 // @run-at       document-end

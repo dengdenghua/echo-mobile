@@ -1696,4 +1696,31 @@
     <string name="update_link_copied">브라우저를 찾지 못했습니다. 다운로드 링크를 복사했습니다: %1$s</string>
     <string name="update_check_network">업데이트 서버에 연결할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.</string>
     <string name="update_check_failed">업데이트를 확인하지 못했습니다. 잠시 후 다시 시도하세요.</string>
+    <!-- Echo identity: chat persona menu and wake-word settings (2026-10-14) -->
+    <string name="chat_character_default">Echo · 기본</string>
+    <string name="chat_persona_thinking">%1$s 생각하는 중…</string>
+    <string name="chat_persona_active">페르소나: %1$s</string>
+    <string name="chat_persona_manage">페르소나 관리</string>
+    <string name="chat_persona_manage_desc">AI의 성격과 말투를 바꾸거나 직접 설정</string>
+    <string name="wakeword_state_listening">듣는 중</string>
+    <string name="wakeword_state_off">꺼짐</string>
+    <string name="wakeword_state_off_hint">켜면 호출어를 계속 듣습니다</string>
+    <string name="wakeword_section_engine">엔진</string>
+    <string name="wakeword_engine_name">소리 감지 (데모 엔진)</string>
+    <string name="wakeword_engine_desc">이 데모 엔진은 소리 크기만 감지합니다. 기준을 넘는 소리(박수, 큰 목소리, 부딪히는 소리)가 나면 어시스턴트가 깨어납니다. OpenWakeWord, Porcupine 같은 실제 키워드 인식 엔진은 나중에 지원됩니다.</string>
+    <string name="wakeword_section_keyword">호출어</string>
+    <string name="wakeword_section_sensitivity">감도</string>
+    <string name="wakeword_section_power">배터리 절약</string>
+    <string name="wakeword_only_charging">충전 중에만</string>
+    <string name="wakeword_only_charging_desc">충전 중이 아니면 듣기를 멈춰 배터리를 아낍니다</string>
+    <string name="wakeword_only_screen_off">화면이 꺼져 있을 때만</string>
+    <string name="wakeword_only_screen_off_desc">화면이 켜져 있으면 듣기를 멈춰 앱 안의 음성 기능과 겹치지 않게 합니다</string>
+    <string name="wakeword_section_privacy">개인정보</string>
+    <string name="wakeword_privacy_points">· 오디오는 휴대폰에서 처리되며 업로드되지 않습니다\n· 끄면 마이크가 즉시 멈춥니다\n· 서비스가 멈추면 스스로 다시 시작하지 않습니다\n· 알림에서 언제든 멈출 수 있습니다</string>
+    <string name="wakeword_sensitivity_low">낮음</string>
+    <string name="wakeword_sensitivity_low_desc">큰 소리가 필요합니다 (오작동 감소)</string>
+    <string name="wakeword_sensitivity_medium">보통</string>
+    <string name="wakeword_sensitivity_medium_desc">평소 말하는 크기</string>
+    <string name="wakeword_sensitivity_high">높음</string>
+    <string name="wakeword_sensitivity_high_desc">작은 소리에도 반응합니다 (오작동 증가)</string>
 </resources>

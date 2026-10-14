@@ -1697,4 +1697,31 @@
     <string name="update_link_copied">Nenhum navegador encontrado. Link de download copiado: %1$s</string>
     <string name="update_check_network">Não foi possível acessar o servidor de atualização. Verifique a conexão e tente de novo.</string>
     <string name="update_check_failed">Não foi possível verificar atualizações. Tente mais tarde.</string>
+    <!-- Echo identity: chat persona menu and wake-word settings (2026-10-14) -->
+    <string name="chat_character_default">Echo · Padrão</string>
+    <string name="chat_persona_thinking">%1$s está pensando…</string>
+    <string name="chat_persona_active">Persona: %1$s</string>
+    <string name="chat_persona_manage">Gerenciar personas</string>
+    <string name="chat_persona_manage_desc">Troque ou personalize a personalidade e o tom da IA</string>
+    <string name="wakeword_state_listening">Ouvindo</string>
+    <string name="wakeword_state_off">Desativado</string>
+    <string name="wakeword_state_off_hint">Ative para ouvir sempre a palavra de ativação</string>
+    <string name="wakeword_section_engine">Motor</string>
+    <string name="wakeword_engine_name">Ativação por som (motor de demonstração)</string>
+    <string name="wakeword_engine_desc">Este motor de demonstração mede apenas o volume: qualquer som acima do limite (uma palma, uma voz alta, uma batida) ativa o assistente. Um motor de palavras-chave real, como OpenWakeWord ou Porcupine, virá depois.</string>
+    <string name="wakeword_section_keyword">Palavra de ativação</string>
+    <string name="wakeword_section_sensitivity">Sensibilidade</string>
+    <string name="wakeword_section_power">Bateria</string>
+    <string name="wakeword_only_charging">Só durante o carregamento</string>
+    <string name="wakeword_only_charging_desc">Para de ouvir quando não está carregando, para poupar bateria</string>
+    <string name="wakeword_only_screen_off">Só com a tela desligada</string>
+    <string name="wakeword_only_screen_off_desc">Para de ouvir com a tela ligada, para não conflitar com a voz do app</string>
+    <string name="wakeword_section_privacy">Privacidade</string>
+    <string name="wakeword_privacy_points">· O áudio é processado no telefone e nunca é enviado\n· Ao desativar, o microfone para na hora\n· Se o serviço parar, ele não reinicia sozinho\n· Você pode pará-lo pela notificação a qualquer momento</string>
+    <string name="wakeword_sensitivity_low">Baixa</string>
+    <string name="wakeword_sensitivity_low_desc">Precisa de um som alto (menos ativações falsas)</string>
+    <string name="wakeword_sensitivity_medium">Média</string>
+    <string name="wakeword_sensitivity_medium_desc">Volume normal de fala</string>
+    <string name="wakeword_sensitivity_high">Alta</string>
+    <string name="wakeword_sensitivity_high_desc">Até sons baixos ativam (mais ativações falsas)</string>
 </resources>

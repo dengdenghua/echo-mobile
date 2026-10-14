@@ -1694,4 +1694,31 @@
     <string name="update_link_copied">没有找到浏览器，下载地址已复制：%1$s</string>
     <string name="update_check_network">连不上更新服务器，请检查网络后重试。</string>
     <string name="update_check_failed">检查更新失败，请稍后再试。</string>
+    <!-- Echo identity: chat persona menu and wake-word settings (2026-10-14) -->
+    <string name="chat_character_default">Echo · 默认助手</string>
+    <string name="chat_persona_thinking">%1$s 正在思考…</string>
+    <string name="chat_persona_active">人设：%1$s</string>
+    <string name="chat_persona_manage">管理人设</string>
+    <string name="chat_persona_manage_desc">切换或自定义 AI 的性格与语气</string>
+    <string name="wakeword_state_listening">正在监听</string>
+    <string name="wakeword_state_off">已关闭</string>
+    <string name="wakeword_state_off_hint">开启后常驻监听唤醒词</string>
+    <string name="wakeword_section_engine">引擎</string>
+    <string name="wakeword_engine_name">响声触发（演示引擎）</string>
+    <string name="wakeword_engine_desc">当前是演示引擎，只检测音量：任何超过阈值的响声（拍手、大声说话、撞击）都会唤醒助手。之后会接入 OpenWakeWord、Porcupine 等真正的关键词识别引擎。</string>
+    <string name="wakeword_section_keyword">唤醒词</string>
+    <string name="wakeword_section_sensitivity">灵敏度</string>
+    <string name="wakeword_section_power">省电策略</string>
+    <string name="wakeword_only_charging">仅充电时监听</string>
+    <string name="wakeword_only_charging_desc">未充电时停止监听，避免耗电</string>
+    <string name="wakeword_only_screen_off">仅屏幕熄灭时监听</string>
+    <string name="wakeword_only_screen_off_desc">屏幕点亮时停止监听，避免与应用内语音冲突</string>
+    <string name="wakeword_section_privacy">隐私</string>
+    <string name="wakeword_privacy_points">· 音频在本机处理，不会上传\n· 关闭后麦克风立即停止采集\n· 服务停止后不会自动拉起，避免偷偷监听\n· 可以随时在通知栏停止</string>
+    <string name="wakeword_sensitivity_low">低</string>
+    <string name="wakeword_sensitivity_low_desc">需要较大声响（防误触）</string>
+    <string name="wakeword_sensitivity_medium">中</string>
+    <string name="wakeword_sensitivity_medium_desc">正常说话音量</string>
+    <string name="wakeword_sensitivity_high">高</string>
+    <string name="wakeword_sensitivity_high_desc">小声也能触发（易误触）</string>
 </resources>

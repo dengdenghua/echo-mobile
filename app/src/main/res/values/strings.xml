@@ -1707,4 +1707,31 @@
     <string name="update_link_copied">No browser found. Download link copied: %1$s</string>
     <string name="update_check_network">Can\'t reach the update server. Check your connection and try again.</string>
     <string name="update_check_failed">Couldn\'t check for updates. Try again later.</string>
+    <!-- Echo identity: chat persona menu and wake-word settings (2026-10-14) -->
+    <string name="chat_character_default">Echo · Default</string>
+    <string name="chat_persona_thinking">%1$s is thinking…</string>
+    <string name="chat_persona_active">Persona: %1$s</string>
+    <string name="chat_persona_manage">Manage personas</string>
+    <string name="chat_persona_manage_desc">Switch or customise the AI\'s personality and tone</string>
+    <string name="wakeword_state_listening">Listening</string>
+    <string name="wakeword_state_off">Off</string>
+    <string name="wakeword_state_off_hint">Turn on to keep listening for the wake word</string>
+    <string name="wakeword_section_engine">Engine</string>
+    <string name="wakeword_engine_name">Sound trigger (demo engine)</string>
+    <string name="wakeword_engine_desc">This demo engine measures loudness only: any sound above the threshold (a clap, a loud voice, a knock) wakes the assistant. A real keyword engine such as OpenWakeWord or Porcupine comes later.</string>
+    <string name="wakeword_section_keyword">Wake word</string>
+    <string name="wakeword_section_sensitivity">Sensitivity</string>
+    <string name="wakeword_section_power">Battery</string>
+    <string name="wakeword_only_charging">Only while charging</string>
+    <string name="wakeword_only_charging_desc">Stops listening when not charging, to save battery</string>
+    <string name="wakeword_only_screen_off">Only while the screen is off</string>
+    <string name="wakeword_only_screen_off_desc">Stops listening while the screen is on, so it won\'t clash with in-app voice</string>
+    <string name="wakeword_section_privacy">Privacy</string>
+    <string name="wakeword_privacy_points">· Audio is processed on the phone and never uploaded\n· Turning it off stops the microphone at once\n· If the service stops, it does not restart itself\n· You can stop it from the notification at any time</string>
+    <string name="wakeword_sensitivity_low">Low</string>
+    <string name="wakeword_sensitivity_low_desc">Needs a loud sound (fewer false wakes)</string>
+    <string name="wakeword_sensitivity_medium">Medium</string>
+    <string name="wakeword_sensitivity_medium_desc">Normal speaking volume</string>
+    <string name="wakeword_sensitivity_high">High</string>
+    <string name="wakeword_sensitivity_high_desc">Even quiet sounds trigger it (more false wakes)</string>
 </resources>

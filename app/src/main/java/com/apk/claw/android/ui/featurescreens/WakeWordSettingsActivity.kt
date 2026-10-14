@@ -15,12 +15,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.BatteryChargingFull
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.MicOff
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.BatteryChargingFull
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -135,7 +135,7 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        if (running) Icons.Filled.Mic else Icons.Filled.MicOff,
+                        if (running) Icons.Outlined.Mic else Icons.Outlined.MicOff,
                         contentDescription = null,
                         tint = if (running) FSuccess else FMuted,
                         modifier = Modifier.size(22.dp),
@@ -143,13 +143,13 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            if (running) "正在监听" else "已关闭",
+                            stringResource(if (running) R.string.wakeword_state_listening else R.string.wakeword_state_off),
                             color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            if (running) "说「$keyword」唤起助手" else "开启后可常驻监听唤醒词",
-                            color = FMuted, fontSize = 11.sp,
+                            if (running) stringResource(R.string.wakeword_notification_text, keyword) else stringResource(R.string.wakeword_state_off_hint),
+                            color = FMuted, fontSize = 12.sp,
                         )
                     }
                     Switch(checked = enabled, onCheckedChange = onToggleEnabled)
@@ -158,20 +158,19 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
 
             // ── 引擎说明 ──
             FCard {
-                Text("引擎", color = FMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.wakeword_section_engine), color = FMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
-                Text("响声触发(演示引擎)", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.wakeword_engine_name), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "当前为演示引擎,基于音量能量检测,任何超过阈值的响声(拍手 / 大声说话 / 撞击)都会触发。\n" +
-                        "后续将接入 OpenWakeWord / Porcupine 等真正的关键词识别引擎。",
-                    color = FSub, fontSize = 11.sp, lineHeight = 16.sp,
+                    stringResource(R.string.wakeword_engine_desc),
+                    color = FSub, fontSize = 12.sp, lineHeight = 17.sp,
                 )
             }
 
             // ── 唤醒词 ──
             FCard {
-                Text("唤醒词", color = FMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.wakeword_section_keyword), color = FMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
                 KeywordChips(
                     current = keyword,
@@ -182,9 +181,9 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
             // ── 灵敏度 ──
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Tune, contentDescription = null, tint = FSub, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Tune, contentDescription = null, tint = FSub, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(10.dp))
-                    Text("灵敏度", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.wakeword_section_sensitivity), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(Modifier.height(10.dp))
                 SensibilitySelector(current = sensitivity, onChange = onSensitivityChange)
@@ -192,20 +191,20 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
 
             // ── 省电策略 ──
             FCard {
-                Text("省电策略", color = FMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.wakeword_section_power), color = FMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
                 SwitchRow(
-                    icon = Icons.Filled.BatteryChargingFull,
-                    title = "仅充电时监听",
-                    subtitle = "未充电时停止监听,避免耗电",
+                    icon = Icons.Outlined.BatteryChargingFull,
+                    title = stringResource(R.string.wakeword_only_charging),
+                    subtitle = stringResource(R.string.wakeword_only_charging_desc),
                     checked = onlyCharging,
                     onChange = onOnlyChargingChange,
                 )
                 Spacer(Modifier.height(8.dp))
                 SwitchRow(
-                    icon = Icons.Filled.VisibilityOff,
-                    title = "仅屏幕熄灭时监听",
-                    subtitle = "屏幕点亮时停止监听(避免与 App 内语音冲突)",
+                    icon = Icons.Outlined.VisibilityOff,
+                    title = stringResource(R.string.wakeword_only_screen_off),
+                    subtitle = stringResource(R.string.wakeword_only_screen_off_desc),
                     checked = onlyScreenOff,
                     onChange = onOnlyScreenOffChange,
                 )
@@ -214,17 +213,14 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
             // ── 隐私 ──
             FCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Bolt, contentDescription = null, tint = FWarning, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Lock, contentDescription = null, tint = FSub, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(10.dp))
-                    Text("隐私", color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.wakeword_section_privacy), color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "· 音频在本地处理,不会上传\n" +
-                        "· 关闭后麦克风立即停止采集\n" +
-                        "· 服务挂掉不会自动拉回(避免偷偷监听)\n" +
-                        "· 可在通知栏随时停止",
-                    color = FSub, fontSize = 11.sp, lineHeight = 16.sp,
+                    stringResource(R.string.wakeword_privacy_points),
+                    color = FSub, fontSize = 12.sp, lineHeight = 17.sp,
                 )
             }
         }
@@ -246,7 +242,8 @@ private fun WakeWordSettingsScreen(onBack: () -> Unit) {
 
 @Composable
 private fun KeywordChips(current: String, onChange: (String) -> Unit) {
-    val presets = listOf("章鱼章鱼", "你好章鱼", "小章鱼", "OK 章鱼")
+    // Echo 预设在前;老用户选过的章鱼词(或其他自定义词)接在后面,照常可选。
+    val presets = WakeWordSettings.presetsFor(current)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         presets.forEach { kw ->
             val selected = kw == current
@@ -265,11 +262,6 @@ private fun KeywordChips(current: String, onChange: (String) -> Unit) {
             }
         }
     }
-    Spacer(Modifier.height(8.dp))
-    // 自定义关键词输入(简化:用预设即可,自定义需要额外对话框,这里省略)
-    if (current !in presets) {
-        Text("当前: $current", color = FMuted, fontSize = 10.sp)
-    }
 }
 
 @Composable
@@ -278,9 +270,9 @@ private fun SensibilitySelector(
     onChange: (WakeWordSettings.Sensitivity) -> Unit,
 ) {
     val options = listOf(
-        WakeWordSettings.Sensitivity.LOW to ("低" to "需较大声响(防误触)"),
-        WakeWordSettings.Sensitivity.MEDIUM to ("中" to "正常说话音量"),
-        WakeWordSettings.Sensitivity.HIGH to ("高" to "小声也能触发(易误触)"),
+        WakeWordSettings.Sensitivity.LOW to (R.string.wakeword_sensitivity_low to R.string.wakeword_sensitivity_low_desc),
+        WakeWordSettings.Sensitivity.MEDIUM to (R.string.wakeword_sensitivity_medium to R.string.wakeword_sensitivity_medium_desc),
+        WakeWordSettings.Sensitivity.HIGH to (R.string.wakeword_sensitivity_high to R.string.wakeword_sensitivity_high_desc),
     )
     options.forEach { (s, label) ->
         val (title, desc) = label
@@ -296,8 +288,8 @@ private fun SensibilitySelector(
             RadioButton(selected = selected, onClick = { onChange(s) })
             Spacer(Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, color = FText, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                Text(desc, color = FMuted, fontSize = 10.sp)
+                Text(stringResource(title), color = FText, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Text(stringResource(desc), color = FMuted, fontSize = 12.sp)
             }
         }
     }
@@ -316,7 +308,7 @@ private fun SwitchRow(
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, color = FText, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-            Text(subtitle, color = FMuted, fontSize = 10.sp)
+            Text(subtitle, color = FMuted, fontSize = 12.sp)
         }
         Switch(checked = checked, onCheckedChange = onChange)
     }

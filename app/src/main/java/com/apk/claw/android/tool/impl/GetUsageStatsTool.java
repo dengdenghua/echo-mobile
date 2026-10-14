@@ -79,7 +79,7 @@ public class GetUsageStatsTool extends BaseTool {
         if (!hasUsageStatsPermission(context)) {
             return ToolResult.error("'Usage Access' permission not granted. "
                     + "Please go to Settings → Apps → Special app access → Usage access, "
-                    + "find 'Octopus Mobile' and enable it.");
+                    + "find 'Echo' and enable it.");
         }
 
         int limit = optionalInt(params, "limit", DEFAULT_LIMIT);

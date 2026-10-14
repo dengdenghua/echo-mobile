@@ -42,6 +42,7 @@ import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.compose.theme.EchoFieldColors
+import com.apk.claw.android.ui.compose.component.PersonaAvatar
 
 /**
  * 角色卡页 —— 列出所有角色，支持切换/新建/编辑/删除/导入/导出。
@@ -195,13 +196,17 @@ private fun PersonaCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    shape = CircleShape,
-                    color = FPrimary.copy(alpha = 0.15f),
-                    modifier = Modifier.size(44.dp),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(persona.avatar, fontSize = 22.sp)
+                if (persona.avatar.isBlank()) {
+                    PersonaAvatar(persona, 44.dp)
+                } else {
+                    Surface(
+                        shape = CircleShape,
+                        color = FPrimary.copy(alpha = 0.15f),
+                        modifier = Modifier.size(44.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(persona.avatar, fontSize = 22.sp)
+                        }
                     }
                 }
                 Spacer(Modifier.width(12.dp))
@@ -271,7 +276,7 @@ private fun PersonaEditorDialog(
                 if (name.isNotBlank()) {
                     onSave(initial.copy(
                         name = name.trim(),
-                        avatar = avatar.trim().ifEmpty { "🤖" }.take(2),
+                        avatar = avatar.trim().ifEmpty { if (initial.id == PersonaStore.ECHO_ID) "" else "🤖" }.take(2),
                         systemPrompt = systemPrompt.trim(),
                         greeting = greeting.trim(),
                         styleHint = styleHint.trim(),

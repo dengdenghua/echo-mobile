@@ -1702,4 +1702,31 @@
     <string name="update_link_copied">ブラウザが見つかりません。ダウンロードリンクをコピーしました: %1$s</string>
     <string name="update_check_network">アップデートサーバーに接続できません。ネットワークを確認してもう一度お試しください。</string>
     <string name="update_check_failed">アップデートを確認できませんでした。しばらくしてからもう一度お試しください。</string>
+    <!-- Echo identity: chat persona menu and wake-word settings (2026-10-14) -->
+    <string name="chat_character_default">Echo · デフォルト</string>
+    <string name="chat_persona_thinking">%1$s が考えています…</string>
+    <string name="chat_persona_active">ペルソナ：%1$s</string>
+    <string name="chat_persona_manage">ペルソナを管理</string>
+    <string name="chat_persona_manage_desc">AI の性格と口調を切り替え・カスタマイズ</string>
+    <string name="wakeword_state_listening">待ち受け中</string>
+    <string name="wakeword_state_off">オフ</string>
+    <string name="wakeword_state_off_hint">オンにするとウェイクワードを常に待ち受けます</string>
+    <string name="wakeword_section_engine">エンジン</string>
+    <string name="wakeword_engine_name">音で起動（デモエンジン）</string>
+    <string name="wakeword_engine_desc">このデモエンジンは音量だけを検出します。しきい値を超える音（拍手、大きな声、物音）でアシスタントが起動します。OpenWakeWord や Porcupine などの本物のキーワード認識エンジンは今後対応予定です。</string>
+    <string name="wakeword_section_keyword">ウェイクワード</string>
+    <string name="wakeword_section_sensitivity">感度</string>
+    <string name="wakeword_section_power">省電力</string>
+    <string name="wakeword_only_charging">充電中のみ</string>
+    <string name="wakeword_only_charging_desc">充電していないときは待ち受けを止めて電池を節約します</string>
+    <string name="wakeword_only_screen_off">画面オフのときのみ</string>
+    <string name="wakeword_only_screen_off_desc">画面がオンのときは待ち受けを止め、アプリ内の音声と競合しないようにします</string>
+    <string name="wakeword_section_privacy">プライバシー</string>
+    <string name="wakeword_privacy_points">· 音声は端末内で処理され、アップロードされません\n· オフにするとマイクはすぐに停止します\n· サービスが止まっても自動では再起動しません\n· 通知からいつでも停止できます</string>
+    <string name="wakeword_sensitivity_low">低</string>
+    <string name="wakeword_sensitivity_low_desc">大きな音が必要（誤作動を防ぐ）</string>
+    <string name="wakeword_sensitivity_medium">中</string>
+    <string name="wakeword_sensitivity_medium_desc">普通の話し声</string>
+    <string name="wakeword_sensitivity_high">高</string>
+    <string name="wakeword_sensitivity_high_desc">小さな音でも起動（誤作動しやすい）</string>
 </resources>

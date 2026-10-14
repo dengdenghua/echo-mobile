@@ -146,6 +146,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.ContextCompat
 import com.apk.claw.android.ui.compose.LocalBottomBarHidden
+import com.apk.claw.android.ui.compose.component.PersonaAvatar
 import com.apk.claw.android.ui.compose.screen.detail.CodeDetailPane
 import com.apk.claw.android.ui.compose.screen.detail.DetailDrawer
 import com.apk.claw.android.ui.compose.screen.detail.DetailPane
@@ -719,13 +720,13 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                             // 切到下一个 Persona：重置流式缓冲，重新显示思考气泡
                             finalizeStream(null)
                             hideThinking()
-                            val turnThinking = ChatMessage.Thinking("${persona.avatar} ${persona.name} 正在思考…")
+                            val turnThinking = ChatMessage.Thinking(context.getString(R.string.chat_persona_thinking, persona.label()))
                             if (!messages.contains(turnThinking)) { messages.add(turnThinking); scrollEnd() }
                         },
                         onTurnDone = { persona, reply ->
                             if (!acceptsCallback()) return@run
                             // 每个 Persona 的回复作为独立 AgentMessage 落盘，前缀带 avatar+name 以便区分
-                            val tagged = "**${persona.avatar} ${persona.name}**\n\n$reply"
+                            val tagged = "**${persona.label()}**\n\n$reply"
                             finalizeStream(tagged)
                             scrollEnd(); persist()
                         },
@@ -1378,7 +1379,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                     )
                     DropdownMenu(expanded = charMenuOpen, onDismissRequest = { charMenuOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text("${stringResource(R.string.app_name)} · 默认助手") },
+                            text = { Text(stringResource(R.string.chat_character_default)) },
                             onClick = { charMenuOpen = false; switchCharacter(SessionStore.CHARACTER_DEFAULT) },
                         )
                         CharacterRegistry.all.forEach { c ->
@@ -1400,11 +1401,11 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                         DropdownMenuItem(
                             text = {
                                 Column {
-                                    Text(if (activePersona != null) "人设：${activePersona.name}" else "管理 Persona 人设",
+                                    Text(if (activePersona != null) stringResource(R.string.chat_persona_active, activePersona.name) else stringResource(R.string.chat_persona_manage),
                                         fontWeight = FontWeight.SemiBold)
                                     Text(
-                                        if (activePersona != null) "${activePersona.avatar} ${activePersona.styleHint.take(20)}"
-                                        else "切换/自定义 AI 性格与语气",
+                                        if (activePersona != null) listOf(activePersona.avatar, activePersona.styleHint.take(20)).filter { it.isNotBlank() }.joinToString(" ")
+                                        else stringResource(R.string.chat_persona_manage_desc),
                                         fontSize = OctopusType.tag, color = TextMuted,
                                     )
                                 }
@@ -1696,7 +1697,7 @@ private fun MultiRosterPickerDialog(onDismiss: () -> Unit) {
                             .padding(vertical = OctopusSpacing.xs),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(p.avatar, fontSize = OctopusType.body)
+                        PersonaAvatar(p, OctopusIconSize.medium)
                         Spacer(Modifier.width(OctopusSpacing.sm))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(p.name, fontWeight = FontWeight.SemiBold, fontSize = OctopusType.body)

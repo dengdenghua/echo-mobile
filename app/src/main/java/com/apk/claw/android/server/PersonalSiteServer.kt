@@ -105,12 +105,12 @@ object PersonalSiteServer {
         <style>
         body{font-family:-apple-system,system-ui,sans-serif;margin:0;min-height:100vh;
         display:flex;align-items:center;justify-content:center;text-align:center;
-        background:linear-gradient(135deg,#1a1f2e,#0b0f17);color:#e6e8ee}
+        background:#090a0c;color:#eef1f4}
         .card{max-width:22rem;padding:2.5rem}h1{font-size:1.6rem;margin:.4rem 0}
-        p{opacity:.72;line-height:1.7}code{background:#ffffff1a;padding:.1rem .4rem;border-radius:.3rem}
+        p{color:#9aa3ae;line-height:1.7}code{background:#ffffff14;padding:.1rem .4rem;border-radius:.3rem}
         </style>
         <div class=card>
-        <h1>🐙 这是我的个人主页</h1>
+        <h1>这是我的个人主页</h1>
         <p>它托管在我自己的手机上。把 <code>filesDir/site/index.html</code>
         换成你自己的网页就好。</p>
         </div></html>

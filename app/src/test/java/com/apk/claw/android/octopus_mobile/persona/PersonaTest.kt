@@ -96,6 +96,46 @@ class PersonaTest {
     }
 
     @Test
+    fun `the default builtin persona is Echo, with no octopus left`() {
+        val echo = PersonaStore.ECHO
+        assertEquals("builtin-octo", echo.id) // 内部 id 不改，老用户的激活角色不丢
+        assertEquals("Echo", echo.name)
+        assertEquals("", echo.avatar)
+        assertTrue(echo.systemPrompt.startsWith("你是 Echo"))
+        assertFalse(echo.systemPrompt.contains("Octo"))
+        assertEquals("Echo", echo.label())
+        assertEquals("🤖 测试助手", samplePersona().label())
+    }
+
+    @Test
+    fun `an untouched legacy 小 Octo builtin migrates to Echo`() {
+        val legacy = Persona(
+            id = "builtin-octo", name = "小 Octo", avatar = "🐙",
+            systemPrompt = "你是小 Octo，一个住在用户手机里的 AI 助手。",
+            greeting = "在的，有什么需要我做的？", styleHint = "保持简洁，先做事再说话。",
+            isBuiltin = true, createdAt = 0,
+        )
+        val migrated = PersonaStore.migrateLegacy(Persona.fromJson(legacy.toJson()))
+        assertEquals(PersonaStore.ECHO.name, migrated.name)
+        assertEquals("", migrated.avatar)
+        assertEquals(PersonaStore.ECHO.systemPrompt, migrated.systemPrompt)
+        assertEquals(PersonaStore.ECHO.greeting, migrated.greeting)
+        assertTrue(migrated.isBuiltin)
+    }
+
+    @Test
+    fun `a user-edited legacy builtin keeps the user's edits`() {
+        val edited = Persona(
+            id = "builtin-octo", name = "阿章", avatar = "🦑",
+            systemPrompt = "你是阿章。", greeting = "嗨", styleHint = "",
+            isBuiltin = true, createdAt = 0,
+        )
+        assertEquals(edited, PersonaStore.migrateLegacy(edited))
+        // 其他角色不受影响
+        assertEquals(samplePersona(), PersonaStore.migrateLegacy(samplePersona()))
+    }
+
+    @Test
     fun `Persona export produces valid JSON`() {
         val p = samplePersona()
         val exported = PersonaStore.export(p)

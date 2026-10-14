@@ -15,9 +15,9 @@ import java.util.UUID
 data class Persona(
     /** 唯一 id（UUID） */
     val id: String,
-    /** 角色名（如"小 octo"/"傲娇猫娘"） */
+    /** 角色名（如"Echo"/"傲娇助手"） */
     val name: String,
-    /** 头像 emoji 或 URL */
+    /** 头像 emoji 或 URL；空串表示用 ECHO 标志（内置 Echo 角色） */
     val avatar: String,
     /** 人设描述：性格、说话风格、背景故事 */
     val systemPrompt: String,
@@ -41,6 +41,9 @@ data class Persona(
         put("createdAt", createdAt)
     }
 
+    /** 列表、消息前缀里用的「头像 + 名字」；没有 emoji 头像（Echo）时只显示名字。 */
+    fun label(): String = if (avatar.isBlank()) name else "$avatar $name"
+
     companion object {
         fun fromJson(json: JSONObject): Persona = Persona(
             id = json.optString("id", UUID.randomUUID().toString()),
@@ -62,18 +65,43 @@ object PersonaStore {
     private const val KEY_LIST = "persona_list_v1"
     private const val KEY_ACTIVE = "persona_active_v1"
 
+    /** 内置 Echo 角色的 id。沿用旧 id，老用户的激活角色与独立历史不丢。 */
+    const val ECHO_ID = "builtin-octo"
+
+    /** 内置 Echo 角色：应用自己的人设。头像为空串，界面上画 ECHO 标志。 */
+    val ECHO = Persona(
+        id = ECHO_ID,
+        name = "Echo",
+        avatar = "",
+        systemPrompt = "你是 Echo，住在用户手机里的 AI 助手。语气冷静、准确、务实，话不多但句句到位。" +
+            "你擅长操作手机、解答问题、执行自动化任务。回答简洁直接，先说结果再说原因；不卖萌，不用感叹号。",
+        greeting = "在。需要我做什么？",
+        styleHint = "保持简洁，先做事再说话。",
+        isBuiltin = true,
+        createdAt = 0,
+    )
+
+    /**
+     * 1.1.0 之前的内置角色叫「小 Octo」（🐙）。用户没改过的旧内置值在读取时换成 [ECHO]；
+     * 用户自己改过的名字、头像或人设保留不动。
+     */
+    private const val LEGACY_ECHO_NAME = "小 Octo"
+    private const val LEGACY_ECHO_AVATAR = "🐙"
+    private const val LEGACY_ECHO_PROMPT_PREFIX = "你是小 Octo"
+
+    /** 把未改动过的旧「小 Octo」内置角色迁移成 Echo；其余角色原样返回。 */
+    fun migrateLegacy(p: Persona): Persona {
+        if (p.id != ECHO_ID) return p
+        val name = if (p.name == LEGACY_ECHO_NAME) ECHO.name else p.name
+        val avatar = if (p.avatar == LEGACY_ECHO_AVATAR) ECHO.avatar else p.avatar
+        val prompt = if (p.systemPrompt.startsWith(LEGACY_ECHO_PROMPT_PREFIX)) ECHO.systemPrompt else p.systemPrompt
+        val greeting = if (p.greeting == "在的，有什么需要我做的？") ECHO.greeting else p.greeting
+        return p.copy(name = name, avatar = avatar, systemPrompt = prompt, greeting = greeting)
+    }
+
     /** 内置角色（首次启动时自动注入） */
     private val BUILTIN = listOf(
-        Persona(
-            id = "builtin-octo",
-            name = "小 Octo",
-            avatar = "🐙",
-            systemPrompt = "你是小 Octo，一个住在用户手机里的 AI 助手。性格温和、务实、话不多但句句到位。你擅长操作手机、解答问题、执行自动化任务。回答简洁直接，不啰嗦，不卖萌，但偶尔会用 emoji 表达情绪。",
-            greeting = "在的，有什么需要我做的？",
-            styleHint = "保持简洁，先做事再说话。",
-            isBuiltin = true,
-            createdAt = 0,
-        ),
+        ECHO,
         Persona(
             id = "builtin-tsundere",
             name = "傲娇助手",
@@ -163,7 +191,7 @@ object PersonaStore {
         } else {
             try {
                 val arr = JSONArray(raw)
-                val loaded = (0 until arr.length()).map { Persona.fromJson(arr.getJSONObject(it)) }
+                val loaded = (0 until arr.length()).map { migrateLegacy(Persona.fromJson(arr.getJSONObject(it))) }
                 // 确保内置角色存在（升级时新增的内置角色会被补齐）
                 val missing = BUILTIN.filter { b -> loaded.none { it.id == b.id } }
                 (loaded + missing).toMutableList()
