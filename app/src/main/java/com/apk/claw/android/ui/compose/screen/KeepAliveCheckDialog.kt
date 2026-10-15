@@ -19,21 +19,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
+import com.apk.claw.android.R
 import com.apk.claw.android.service.ClawAccessibilityService
 import com.apk.claw.android.service.ForegroundService
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -53,8 +56,20 @@ import com.apk.claw.android.ui.compose.theme.OctopusType
 @Composable
 fun KeepAliveCheckDialog(onDismiss: () -> Unit) {
     val ctx = LocalContext.current
-    var tick by remember { mutableStateOf(0) }
+    var tick by remember { mutableIntStateOf(0) }
 
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.keepalive_title), fontWeight = FontWeight.Bold) },
+        text = { KeepAliveChecklist(ctx, tick) },
+        confirmButton = { TextButton(onClick = { tick++ }) { Text(stringResource(R.string.keepalive_recheck)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_close)) } },
+    )
+}
+
+/** The four checks; [tick] re-reads their state after 重新检测. */
+@Composable
+private fun KeepAliveChecklist(ctx: Context, tick: Int) {
     val a11yOk = remember(tick) { runCatching { ClawAccessibilityService.isRunning() }.getOrDefault(false) }
     val notifOk = remember(tick) {
         runCatching { NotificationManagerCompat.from(ctx).areNotificationsEnabled() }.getOrDefault(false)
@@ -62,45 +77,52 @@ fun KeepAliveCheckDialog(onDismiss: () -> Unit) {
     val fgsOk = remember(tick) { runCatching { ForegroundService.isRunning() }.getOrDefault(false) }
     val batteryOk = remember(tick) { isBatteryUnrestricted(ctx) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("保活体检", fontWeight = FontWeight.Bold) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
-            ) {
-                Text(
-                    "无障碍老掉线?逐条点亮下面 4 项,ROM 就不会再杀后台。",
-                    color = OctopusColors.TextMuted, fontSize = OctopusType.caption,
-                )
-                KeepAliveRow("无障碍服务已开启", a11yOk, "去开启") {
-                    ctx.launchSafe(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                }
-                KeepAliveRow("常驻通知可见(前台服务)", notifOk && fgsOk, "开通知") {
-                    ctx.launchSafe(
-                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            .putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName),
-                    )
-                }
-                KeepAliveRow("电池不受限(允许后台运行)", batteryOk, "去设置") {
-                    ctx.launchSafe(
-                        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                            .setData(Uri.parse("package:${ctx.packageName}")),
-                    )
-                }
-                KeepAliveManualRow("自启动 + 关后台冻结(ColorOS/OriginOS 必做)", "打开") {
-                    openAutoStartSettings(ctx)
-                }
-                Text(
-                    "再把 App 在「最近任务」里下拉锁定,保活最稳。",
-                    color = OctopusColors.TextMuted, fontSize = OctopusType.tag,
-                )
-            }
-        },
-        confirmButton = { TextButton(onClick = { tick++ }) { Text("重新检测") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
-    )
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
+    ) {
+        Text(
+            stringResource(R.string.keepalive_intro),
+            color = OctopusColors.TextMuted, fontSize = OctopusType.caption,
+        )
+        KeepAliveRow(
+            stringResource(R.string.keepalive_a11y),
+            a11yOk,
+            stringResource(R.string.keepalive_a11y_action),
+        ) {
+            ctx.launchSafe(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+        KeepAliveRow(
+            stringResource(R.string.keepalive_notification),
+            notifOk && fgsOk,
+            stringResource(R.string.keepalive_notification_action),
+        ) {
+            ctx.launchSafe(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName),
+            )
+        }
+        KeepAliveRow(
+            stringResource(R.string.keepalive_battery),
+            batteryOk,
+            stringResource(R.string.keepalive_battery_action),
+        ) {
+            ctx.launchSafe(
+                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    .setData(Uri.parse("package:${ctx.packageName}")),
+            )
+        }
+        KeepAliveManualRow(
+            stringResource(R.string.keepalive_autostart),
+            stringResource(R.string.keepalive_autostart_action),
+        ) {
+            openAutoStartSettings(ctx)
+        }
+        Text(
+            stringResource(R.string.keepalive_lock_tip),
+            color = OctopusColors.TextMuted, fontSize = OctopusType.caption,
+        )
+    }
 }
 
 @Composable
@@ -109,13 +131,18 @@ private fun KeepAliveRow(label: String, ok: Boolean, action: String, onAction: (
         Icon(
             if (ok) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline,
             contentDescription = null,
-            tint = if (ok) OctopusColors.Success else OctopusColors.Error,
+            // Not set up yet is something to do (warning), not an error.
+            tint = if (ok) OctopusColors.Success else OctopusColors.Warning,
             modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(OctopusSpacing.sm))
         Text(label, color = OctopusColors.TextPrimary, fontSize = OctopusType.caption, modifier = Modifier.weight(1f))
         if (ok) {
-            Text("已就绪", color = OctopusColors.Success, fontSize = OctopusType.tag)
+            Text(
+                stringResource(R.string.keepalive_ready),
+                color = OctopusColors.Success,
+                fontSize = OctopusType.caption,
+            )
         } else {
             TextButton(
                 onClick = onAction,
@@ -130,7 +157,8 @@ private fun KeepAliveRow(label: String, ok: Boolean, action: String, onAction: (
 @Composable
 private fun KeepAliveManualRow(label: String, action: String, onAction: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Text("!", color = OctopusColors.Warning, fontWeight = FontWeight.Bold, fontSize = OctopusType.body)
+        // The app cannot check this one, so it is information, not a state.
+        Icon(Icons.Outlined.Info, contentDescription = null, tint = OctopusColors.Info, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(OctopusSpacing.sm))
         Text(label, color = OctopusColors.TextPrimary, fontSize = OctopusType.caption, modifier = Modifier.weight(1f))
         TextButton(

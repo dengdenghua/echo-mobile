@@ -125,7 +125,9 @@ android {
         // + 韩文 values-ko + 西班牙文 values-es + 葡萄牙文 values-pt)。
         // AndroidX/Material/Compose 等库自带数十种语言的字符串,这里过滤掉未支持的语言,
         // 缩减 resources.arsc / res。注意必须含 ja/ko/es/pt,否则会误删 app 自带的对应翻译。
-        resourceConfigurations += setOf("en", "zh", "ja", "ko", "es", "pt")
+        // "zh" only keeps values-zh; AndroidX / Compose / Material ship their Chinese as values-zh-rCN, so
+        // without "zh-rCN" their strings (sheet / drawer labels for TalkBack, pickers…) fell back to English.
+        resourceConfigurations += setOf("en", "zh", "zh-rCN", "ja", "ko", "es", "pt")
 
         // ABI 由下方 splits 块按架构分包(每个 APK 只带自己架构);另出一个
         // universal 通用包(含所有 .so,一个包多架构都能装)。GeckoView 已移除,

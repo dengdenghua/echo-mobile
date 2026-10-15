@@ -771,7 +771,7 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                 SettingsDivider()
                 ClickableSettingsRow(
                     Icons.Filled.Api,
-                    "MCP Server",
+                    stringResource(R.string.settings_mcp_title),
                     stringResource(R.string.settings_mcp_desc),
                 ) {
                     context.startActivity(Intent(context, McpServersActivity::class.java))

@@ -32,10 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.persona.Persona
 import com.apk.claw.android.octopus_mobile.persona.PersonaPromptBuilder
 import com.apk.claw.android.octopus_mobile.persona.PersonaStore
@@ -98,32 +100,36 @@ private fun PersonasScreen(onBack: () -> Unit) {
     }
 
     FeatureScaffold(
-        title = "角色卡",
+        title = stringResource(R.string.settings_personas_title),
         onBack = onBack,
         action = {
             IconButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }) {
-                Icon(Icons.Filled.Upload, contentDescription = "导入", tint = FText)
+                Icon(Icons.Filled.Upload, contentDescription = stringResource(R.string.personas_import), tint = FText)
             }
             IconButton(onClick = { adding = true }) {
-                Icon(Icons.Filled.Add, contentDescription = "新建", tint = FText)
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.personas_new), tint = FText)
             }
         },
     ) {
         if (items.isEmpty()) {
-            FEmpty("还没有角色卡\n点右上角 + 新建一个\n或点 ↑ 导入 JSON")
+            FEmpty(stringResource(R.string.personas_empty))
         } else {
             LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(vertical = 6.dp)) {
                 item {
                     FCard {
-                        Text("角色卡人设", color = FText, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            stringResource(R.string.personas_header),
+                            color = FText, fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                        )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "切换后，AI 助手会用此角色的性格和语气回复。" +
-                                "支持自定义 systemPrompt、开场白、说话风格，可导出分享。",
+                            stringResource(R.string.personas_intro),
                             color = FSub, fontSize = 12.sp, lineHeight = 17.sp,
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text("当前激活：${items.firstOrNull { it.id == activeId }?.name ?: "（未激活）"}",
+                        val activeName = items.firstOrNull { it.id == activeId }?.name
+                            ?: stringResource(R.string.personas_none_active)
+                        Text(stringResource(R.string.personas_active_now, activeName),
                             color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
@@ -215,11 +221,11 @@ private fun PersonaCard(
                         Text(persona.name, color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         if (persona.isBuiltin) {
                             Spacer(Modifier.width(6.dp))
-                            FPill("内置", FSub)
+                            FPill(stringResource(R.string.personas_builtin), FSub)
                         }
                         if (isActive) {
                             Spacer(Modifier.width(6.dp))
-                            FPill("已激活", FPrimary)
+                            FPill(stringResource(R.string.personas_active_badge), FPrimary)
                         }
                     }
                     Spacer(Modifier.height(2.dp))
@@ -235,21 +241,26 @@ private fun PersonaCard(
                 if (!isActive) {
                     FilledTonalButton(onClick = onActivate, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(Modifier.width(4.dp)); Text("激活", fontSize = 12.sp)
+                        Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.personas_activate), fontSize = 12.sp)
                     }
                 }
                 TextButton(onClick = onEdit, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(4.dp)); Text("编辑", fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.personas_edit), fontSize = 12.sp)
                 }
                 TextButton(onClick = onExport, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(4.dp)); Text("导出", fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.personas_export), fontSize = 12.sp)
                 }
                 if (!persona.isBuiltin) {
                     TextButton(onClick = onDelete, modifier = Modifier.weight(1f)) {
-                        Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(14.dp), tint = FWarning)
-                        Spacer(Modifier.width(4.dp)); Text("删除", fontSize = 12.sp, color = FWarning)
+                        // Delete is destructive: breach, not warning amber.
+                        Icon(
+                            Icons.Filled.Delete, contentDescription = null,
+                            modifier = Modifier.size(14.dp), tint = FError,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.common_delete), fontSize = 12.sp, color = FError)
                     }
                 }
             }
@@ -282,10 +293,15 @@ private fun PersonaEditorDialog(
                         styleHint = styleHint.trim(),
                     ))
                 }
-            }) { Text("保存") }
+            }) { Text(stringResource(R.string.common_save)) }
         },
-        dismissButton = { TextButton(onClick = onCancel) { Text("取消") } },
-        title = { Text(if (initial.id.isBlank()) "新建角色卡" else "编辑角色卡", color = FText) },
+        dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) } },
+        title = {
+            Text(
+                stringResource(if (initial.id.isBlank()) R.string.personas_new_title else R.string.personas_edit_title),
+                color = FText,
+            )
+        },
         text = {
             Column(
                 modifier = Modifier
@@ -293,19 +309,19 @@ private fun PersonaEditorDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(vertical = 4.dp),
             ) {
-                FLabel("名字")
+                FLabel(stringResource(R.string.personas_field_name))
                 FTextField(name) { name = it }
                 Spacer(Modifier.height(8.dp))
-                FLabel("头像（emoji 或单字符）")
+                FLabel(stringResource(R.string.personas_field_avatar))
                 FTextField(avatar) { avatar = it }
                 Spacer(Modifier.height(8.dp))
-                FLabel("人设描述（systemPrompt）")
+                FLabel(stringResource(R.string.personas_field_prompt))
                 FTextField(systemPrompt, minLines = 3) { systemPrompt = it }
                 Spacer(Modifier.height(8.dp))
-                FLabel("开场白（greeting，新对话首条 AI 消息）")
+                FLabel(stringResource(R.string.personas_field_greeting))
                 FTextField(greeting, minLines = 2) { greeting = it }
                 Spacer(Modifier.height(8.dp))
-                FLabel("说话风格提示（styleHint）")
+                FLabel(stringResource(R.string.personas_field_style))
                 FTextField(styleHint, minLines = 2) { styleHint = it }
             }
         },
@@ -314,7 +330,7 @@ private fun PersonaEditorDialog(
 
 @Composable
 private fun FLabel(text: String) {
-    Text(text, color = FSub, fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
+    Text(text, color = FSub, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(start = 2.dp, bottom = 4.dp))
 }
 

@@ -23,11 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import com.apk.claw.android.tool.mcp.McpManager
 import com.apk.claw.android.tool.mcp.McpServerConfig
 import com.apk.claw.android.tool.mcp.McpServerConfigStore
@@ -60,7 +62,7 @@ private fun McpServersScreen(onBack: () -> Unit) {
     var adding by remember { mutableStateOf(false) }
 
     FeatureScaffold(
-        title = "MCP Server",
+        title = stringResource(R.string.settings_mcp_title),
         onBack = onBack,
         action = {
             IconButton(onClick = { adding = true }) {
