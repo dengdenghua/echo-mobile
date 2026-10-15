@@ -1872,4 +1872,11 @@
     <string name="llm_provider_desc_openrouter">OpenRouter: 200+ models behind one OpenAI-compatible API</string>
     <string name="llm_provider_desc_lmstudio">A local LM Studio server: start LM Studio on your computer first (port 1234)</string>
     <string name="llm_provider_desc_local">Offline on this phone with llama.cpp: needs a .gguf model file; no tool calling</string>
+    <string name="square_section_following">People you follow</string>
+    <string name="square_section_hot">Hot posts</string>
+    <string name="square_section_hot_topic">Hot · %1$s</string>
+    <string name="square_following_empty">You don\'t follow anyone yet. See what\'s in Recommend.</string>
+    <string name="square_feed_empty">Nothing here yet.</string>
+    <string name="square_offline_title">Can\'t reach the Square</string>
+    <string name="square_offline_desc">Check your network and try again. Ideas people share show up here once you\'re connected.</string>
 </resources>

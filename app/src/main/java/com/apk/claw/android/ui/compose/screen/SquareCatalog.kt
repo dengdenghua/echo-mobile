@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
  *
  * 设计目标（按需求）：
  *  - **广场目录走服务端 API**（`<baseUrl>/square/feed`），后台可随意增删改，App 不用发版；
- *    网络失败时回退到本地缓存，再回退到内置种子，保证永远有内容、不空屏。
+ *    网络失败时回退到本地缓存；没有缓存就显示离线状态和重试，不拿虚构的示例帖充数。
  *  - **与本机强相关的技能/插件走本地注册**（[LocalSkillRegistry]），不依赖服务端目录。
  *
  * UI（[AgentSquareScreen]）只消费 [AgentPost]，不关心来源。
@@ -210,22 +210,22 @@ internal object LocalSkillRegistry {
     }
 }
 
-/** 广场目录仓库：服务端 → 缓存 → 内置种子，三级回退。 */
+/** 广场目录仓库：服务端 → 缓存；都没有时如实显示离线状态。 */
 internal object SquareRepository {
-    private const val CACHE_KEY = "SQUARE_FEED_CACHE_JSON"
     private val gson = Gson()
     private val http = OctoHttp.shared.newBuilder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    /** 服务端目录（后台可随意改）。失败回退缓存，再回退内置种子。
+    /** 服务端目录（后台可随意改）。服务端回什么就显示什么（可以为空）；连不上时回退到上次成功的缓存；
+     *  连缓存也没有时返回 null，由界面显示离线状态和重试。不再用虚构的示例帖（假作者、假点赞数）充数。
      *  [topic] 为分类 key(recommend=全部,不过滤);按 topic 分桶缓存,避免切分类污染主 feed 缓存。 */
     suspend fun remoteFeed(
         topic: String = "recommend",
         sort: String = "latest",
         following: Boolean = false,
-    ): List<AgentPost> = withContext(Dispatchers.IO) {
+    ): List<AgentPost>? = withContext(Dispatchers.IO) {
         RemoteConfig.refresh()  // 先取服务端下发的技能中心域名（拿不到则用缓存/默认）
         val filter = topic.trim().takeIf { it.isNotBlank() && it != "recommend" }.orEmpty()
         val cacheKey = "SQUARE_FEED_CACHE_JSON_${filter}_${sort}_${if (following) "following" else "all"}"
@@ -246,18 +246,20 @@ internal object SquareRepository {
                     val body = resp.body?.string().orEmpty()
                     if (resp.isSuccessful && body.isNotBlank()) {
                         val feed = gson.fromJson(body, SquareFeedDto::class.java)
-                        if (feed?.posts?.isNotEmpty() == true) {
-                            KVUtils.putString(cacheKey, body)            // 缓存成功结果(按 topic 分桶)
+                        if (feed != null) {
+                            // 缓存有内容的成功结果(按 topic 分桶)
+                            if (feed.posts.isNotEmpty()) KVUtils.putString(cacheKey, body)
                             return@withContext feed.posts.map { it.toAgentPost() }
                         }
                     }
                 }
             }
         }
-        cachedOrSeed(cacheKey)
+        cached(cacheKey)
     }
 
-    private fun cachedOrSeed(cacheKey: String = CACHE_KEY): List<AgentPost> {
+    /** 上次成功拿到的目录；从没成功过时为 null。 */
+    private fun cached(cacheKey: String): List<AgentPost>? {
         val cached = KVUtils.getString(cacheKey, "")
         if (cached.isNotBlank()) {
             runCatching {
@@ -265,23 +267,11 @@ internal object SquareRepository {
                 if (feed?.posts?.isNotEmpty() == true) return feed.posts.map { it.toAgentPost() }
             }
         }
-        return SEED
+        return null
     }
 
     /** 本地技能/插件（本地注册，不依赖服务端）。 */
     fun localFeed(): List<AgentPost> = LocalSkillRegistry.all()
-
-    /** 离线兜底种子：服务端与缓存都不可用时仍有内容可展示。 */
-    private val SEED: List<AgentPost> = listOf(
-        AgentPost("seed.1", "让 AI 每天自动整理手机相册，生成回忆视频", "影像助手", "影", OctopusTints.Video, "1.2k", "自动化", OctopusTints.Routine, 180, EchoCoverGradients[3]),
-        AgentPost("seed.2", "3 步搭一个会订外卖的助手", "效率玩家", "效", OctopusTints.Skill, "856", "教程", OctopusTints.Browser, 140, EchoCoverGradients[0]),
-        AgentPost("seed.3", "自动写一周周报，老板直呼专业", "打工侠", "打", OctopusTints.Window, "2.3k", "职场", OctopusTints.Memory, 200, EchoCoverGradients[1]),
-        AgentPost("seed.4", "用语音唤醒助手，开车时也能回消息", "车载达人", "车", OctopusTints.Plugin, "634", "语音", OctopusTints.Trust, 160, EchoCoverGradients[2]),
-        AgentPost("seed.5", "自动比价，618 我省了 2000+", "省钱 Bot", "省", OctopusTints.Cloud, "3.1k", "购物", OctopusTints.Hot, 170, EchoCoverGradients[3]),
-        AgentPost("seed.6", "接入智能家居，一句话控制全屋", "极客居", "极", OctopusTints.Evolve, "1.5k", "IoT", OctopusTints.Plugin, 150, EchoCoverGradients[0]),
-        AgentPost("seed.7", "生成旅行攻略，细到每天照着走", "旅行灵感", "旅", OctopusTints.Browser, "987", "生活", OctopusTints.Routine, 190, EchoCoverGradients[1]),
-        AgentPost("seed.8", "让助手帮你读论文，10 分钟抓重点", "学术喵", "学", OctopusTints.Memory, "742", "学习", OctopusTints.Skill, 145, EchoCoverGradients[2]),
-    )
 }
 
 // ───────────────────────── 灵感发现流（FeatureHub「灵感」tab）─────────────────────────

@@ -81,9 +81,9 @@ fun AgentSquareScreen(
     onCreatePost: () -> Unit = {},
     onOpenPost: (String) -> Unit = {},
 ) {
-    // 广场目录来自服务端 API（可后台随意改），null=加载中；本地技能走本地注册表。
+    // 广场目录来自服务端 API（可后台随意改），null=加载中；离线又没有缓存时只显示本地技能。
     val remote by produceState<List<AgentPost>?>(initialValue = null) {
-        value = SquareRepository.remoteFeed()
+        value = SquareRepository.remoteFeed().orEmpty()
     }
     val local = remember { SquareRepository.localFeed() }
     Column(

@@ -1861,4 +1861,11 @@
     <string name="llm_provider_desc_openrouter">OpenRouter: 200개 이상의 모델을 하나의 OpenAI 호환 API로</string>
     <string name="llm_provider_desc_lmstudio">로컬 LM Studio 서버: 먼저 컴퓨터에서 LM Studio 실행(포트 1234)</string>
     <string name="llm_provider_desc_local">이 휴대폰에서 llama.cpp로 오프라인 추론: .gguf 모델 파일 필요, 도구 호출 미지원</string>
+    <string name="square_section_following">팔로우한 사람</string>
+    <string name="square_section_hot">인기 게시물</string>
+    <string name="square_section_hot_topic">인기 · %1$s</string>
+    <string name="square_following_empty">아직 팔로우한 사람이 없습니다. 추천에서 둘러보세요.</string>
+    <string name="square_feed_empty">아직 내용이 없습니다.</string>
+    <string name="square_offline_title">광장에 연결할 수 없습니다</string>
+    <string name="square_offline_desc">네트워크를 확인한 뒤 다시 시도하세요. 연결되면 사람들이 공유한 아이디어가 여기에 표시됩니다.</string>
 </resources>

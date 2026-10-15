@@ -1862,4 +1862,11 @@
     <string name="llm_provider_desc_openrouter">OpenRouter: más de 200 modelos con una sola API compatible con OpenAI</string>
     <string name="llm_provider_desc_lmstudio">Un servidor LM Studio local: abre antes LM Studio en tu ordenador (puerto 1234)</string>
     <string name="llm_provider_desc_local">Sin conexión en este teléfono con llama.cpp: necesita un archivo .gguf; sin llamadas a herramientas</string>
+    <string name="square_section_following">Personas que sigues</string>
+    <string name="square_section_hot">Publicaciones populares</string>
+    <string name="square_section_hot_topic">Popular · %1$s</string>
+    <string name="square_following_empty">Aún no sigues a nadie. Echa un vistazo a Recomendado.</string>
+    <string name="square_feed_empty">Aún no hay nada aquí.</string>
+    <string name="square_offline_title">No se puede conectar con la Plaza</string>
+    <string name="square_offline_desc">Comprueba tu conexión e inténtalo de nuevo. Cuando te conectes, aquí aparecerán las ideas que comparte la gente.</string>
 </resources>

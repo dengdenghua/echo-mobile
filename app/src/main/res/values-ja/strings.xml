@@ -1867,4 +1867,11 @@
     <string name="llm_provider_desc_openrouter">OpenRouter：200 以上のモデルを 1 つの OpenAI 互換 API で</string>
     <string name="llm_provider_desc_lmstudio">ローカルの LM Studio サーバー：先にパソコンで LM Studio を起動（ポート 1234）</string>
     <string name="llm_provider_desc_local">この端末で llama.cpp によるオフライン推論：.gguf モデルが必要、ツール呼び出しは非対応</string>
+    <string name="square_section_following">フォロー中の人</string>
+    <string name="square_section_hot">人気の投稿</string>
+    <string name="square_section_hot_topic">人気 · %1$s</string>
+    <string name="square_following_empty">まだ誰もフォローしていません。「おすすめ」を見てみてください。</string>
+    <string name="square_feed_empty">まだ何もありません。</string>
+    <string name="square_offline_title">広場に接続できません</string>
+    <string name="square_offline_desc">ネットワークを確認して、もう一度お試しください。接続すると、みんなが共有したアイデアがここに表示されます。</string>
 </resources>

@@ -1859,4 +1859,11 @@
     <string name="llm_provider_desc_openrouter">OpenRouter 聚合 200+ 模型，统一 OpenAI 兼容 API</string>
     <string name="llm_provider_desc_lmstudio">本地 LM Studio 服务，需先在电脑上运行 LM Studio，默认端口 1234</string>
     <string name="llm_provider_desc_local">设备内置 llama.cpp 离线推理，需要 .gguf 模型文件，不支持 function calling</string>
+    <string name="square_section_following">关注的人</string>
+    <string name="square_section_hot">热门内容</string>
+    <string name="square_section_hot_topic">热门 · %1$s</string>
+    <string name="square_following_empty">你还没有关注任何人，可以先去「推荐」看看。</string>
+    <string name="square_feed_empty">这里还没有内容。</string>
+    <string name="square_offline_title">暂时连不上广场</string>
+    <string name="square_offline_desc">请检查网络后重试。连上后会显示大家分享的玩法。</string>
 </resources>

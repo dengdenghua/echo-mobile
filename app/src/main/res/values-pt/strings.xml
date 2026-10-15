@@ -1862,4 +1862,11 @@
     <string name="llm_provider_desc_openrouter">OpenRouter: mais de 200 modelos em uma API compatível com OpenAI</string>
     <string name="llm_provider_desc_lmstudio">Um servidor LM Studio local: abra antes o LM Studio no computador (porta 1234)</string>
     <string name="llm_provider_desc_local">Offline neste telefone com llama.cpp: precisa de um arquivo .gguf; sem chamadas de ferramentas</string>
+    <string name="square_section_following">Pessoas que você segue</string>
+    <string name="square_section_hot">Publicações em alta</string>
+    <string name="square_section_hot_topic">Em alta · %1$s</string>
+    <string name="square_following_empty">Você ainda não segue ninguém. Veja o que há em Recomendar.</string>
+    <string name="square_feed_empty">Ainda não há nada aqui.</string>
+    <string name="square_offline_title">Não foi possível acessar a Praça</string>
+    <string name="square_offline_desc">Verifique sua conexão e tente novamente. Quando você estiver conectado, as ideias que as pessoas compartilham aparecem aqui.</string>
 </resources>

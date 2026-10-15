@@ -74,6 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.LoadFailedState
 import com.apk.claw.android.ui.compose.component.OctopusCard
 import com.apk.claw.android.ui.compose.component.OctopusPill
 import com.apk.claw.android.ui.compose.component.OctopusTextPill
@@ -218,9 +219,15 @@ private fun ExploreTab(
     }
     val following = selectedTab == 1
 
-    val posts by produceState<List<AgentPost>?>(initialValue = null, selectedTopic, selectedTab) {
+    // null = loading. offline = the square could not be reached and nothing was cached: say so, with a retry,
+    // instead of showing made-up example posts.
+    var reloadKey by remember { mutableIntStateOf(0) }
+    var offline by remember { mutableStateOf(false) }
+    val posts by produceState<List<AgentPost>?>(initialValue = null, selectedTopic, selectedTab, reloadKey) {
         value = null
-        value = SquareRepository.remoteFeed(selectedTopic, sort = sort, following = following)
+        val feed = SquareRepository.remoteFeed(selectedTopic, sort = sort, following = following)
+        offline = feed == null
+        value = feed.orEmpty()
     }
 
     LazyVerticalStaggeredGrid(
@@ -285,8 +292,9 @@ private fun ExploreTab(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             val title = when (selectedTab) {
-                1 -> "关注的人"
-                2 -> if (selectedTopic == "recommend") "热门内容" else "热门 · ${topicLabel(selectedTopic)}"
+                1 -> stringResource(R.string.square_section_following)
+                2 -> if (selectedTopic == "recommend") stringResource(R.string.square_section_hot)
+                     else stringResource(R.string.square_section_hot_topic, topicLabel(selectedTopic))
                 else -> if (selectedTopic == "recommend") stringResource(R.string.agent_trending_now)
                         else stringResource(R.string.agent_topic_inspiration, topicLabel(selectedTopic))
             }
@@ -315,9 +323,20 @@ private fun ExploreTab(
                     )
                 }
             }
+        } else if (offline) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                LoadFailedState(
+                    title = stringResource(R.string.square_offline_title),
+                    message = stringResource(R.string.square_offline_desc),
+                    onRetry = { reloadKey++ },
+                    modifier = Modifier.padding(vertical = OctopusSpacing.xl),
+                )
+            }
         } else if (data.isEmpty()) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                val msg = if (selectedTab == 1) "还没有关注的人,去推荐页看看吧" else "暂无内容"
+                val msg = stringResource(
+                    if (selectedTab == 1) R.string.square_following_empty else R.string.square_feed_empty,
+                )
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(vertical = OctopusSpacing.xl),
                     contentAlignment = Alignment.Center,
