@@ -434,7 +434,7 @@
     <string name="settings_val_plugins_loaded">3 loaded</string>
     <string name="settings_device_control_section">Screen &amp; Remote Control</string>
     <string name="settings_device_mgmt_desc">Manage connected and controllable old phones</string>
-    <string name="settings_plugin_desc">Manage skills and extensions the agent can invoke</string>
+    <string name="settings_plugin_desc">Manage skills and extensions Echo can invoke</string>
 
     <!-- Shared status -->
     <string name="status_online">Online</string>
@@ -516,8 +516,8 @@
     <string name="routine_alarm_skipped_title">Routine skipped</string>
     <string name="routine_alarm_skipped_text">\"%1$s\" was triggered, but the model is not configured</string>
     <string name="routine_alarm_retry_title">Routine queued</string>
-    <string name="routine_alarm_retry_text">\"%1$s\" was triggered, but the agent is busy. Retry %2$d/%3$d will run later.</string>
-    <string name="routine_alarm_busy_give_up_text">\"%1$s\" was triggered, but the agent is still busy after multiple retries</string>
+    <string name="routine_alarm_retry_text">\"%1$s\" was triggered, but Echo is busy. Retry %2$d/%3$d will run later.</string>
+    <string name="routine_alarm_busy_give_up_text">\"%1$s\" was triggered, but Echo is still busy after multiple retries</string>
     <string name="browser_loading_text">Loading...</string>
     <string name="browser_engine_chip_description">Switch search engine</string>
     <string name="browser_url_hint">Search or enter URL</string>
@@ -587,7 +587,7 @@
     <string name="browser_menu_mobile_mode">Mobile mode</string>
     <string name="browser_menu_desktop_mode">Desktop mode</string>
     <string name="browser_menu_userscript_store">Userscript Store</string>
-    <string name="browser_menu_record_agent">Record Agent Actions</string>
+    <string name="browser_menu_record_agent">Record Echo\'s Actions</string>
     <string name="browser_menu_stop_recording">Stop Recording</string>
     <string name="browser_menu_cloud_sync">Cloud Sync</string>
     <string name="browser_menu_stealth_protection">Fingerprint Protection</string>
@@ -773,14 +773,14 @@
     <string name="pc_remote_webrtc_webview_unavailable">System WebView unavailable, cannot start remote desktop.</string>
     <string name="routines_title">Automation</string>
     <string name="routines_empty_state">No routines yet.\n\nLong-press a command in chat to save it, or clone a template from Inspiration Square to replay, schedule, or refine here.</string>
-    <string name="routines_count_summary">%1$d total · learned fast paths run faster; otherwise the agent re-plans from screen on execution</string>
+    <string name="routines_count_summary">%1$d total · learned fast paths run faster; otherwise Echo re-plans from screen on execution</string>
     <string name="routines_item_target_and_count">Target %1$s · ran %2$d times</string>
     <string name="routines_item_schedule_daily"> · Daily %1$s</string>
     <string name="routines_item_schedule_once"> · Once %1$s</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">Run</string>
     <string name="routines_forget_fastpath_title">Forget fast path</string>
-    <string name="routines_forget_fastpath_message">\"%1$s\" has learned a %2$d-step fast path. After forgetting, the agent will re-plan from screen and re-record next run.</string>
+    <string name="routines_forget_fastpath_message">\"%1$s\" has learned a %2$d-step fast path. After forgetting, Echo will re-plan from screen and re-record next run.</string>
     <string name="routines_forget_button">Forget</string>
     <string name="routines_forgotten_toast">Fast path forgotten</string>
     <string name="routines_schedule_dialog_title">Schedule %1$s</string>
@@ -791,7 +791,7 @@
     <string name="routines_set_once_toast">Set to run once at %1$s</string>
     <string name="routines_cancel_scheduling_toast">Schedule cancelled</string>
     <string name="skills_screen_title">Skills &amp; Tools</string>
-    <string name="skills_screen_description">Agent can invoke %1$d tools. Core control/perception tools are locked; others can be disabled on demand to reduce misuse and privacy exposure.</string>
+    <string name="skills_screen_description">Echo can invoke %1$d tools. Core control/perception tools are locked; others can be disabled on demand to reduce misuse and privacy exposure.</string>
     <string name="skills_badge_core">Core</string>
     <string name="trustcenter_title">Trust Center</string>
     <string name="trustcenter_description">Operates your device via the following permissions. View status, open management, or revoke access anytime.</string>
@@ -822,7 +822,7 @@
     <string name="plugin_available_group_title">Available skills</string>
     <string name="plugin_empty_state">No skills available</string>
     <string name="plugin_install_button">Install from file</string>
-    <string name="plugin_install_note">Note: skills require a .dex file + manifest.json. After installation they register as agent-invocable tools.</string>
+    <string name="plugin_install_note">Note: skills require a .dex file + manifest.json. After installation they register as tools Echo can invoke.</string>
     <string name="plugin_error_status">Error</string>
     <string name="plugin_load_action">Load</string>
     <string name="plugin_load_success_toast">Skill loaded</string>
@@ -957,10 +957,10 @@
     <string name="settings_remote_lan_title">Remote Desktop · LAN</string>
     <string name="settings_runtime_plain_desc">Let the PC dispatch tasks to this phone</string>
     <string name="settings_workspace_title">Script Workspace</string>
-    <string name="settings_workspace_desc">Default directory accessed via the WORKSPACE constant by agent scripts. readFile/writeFile are restricted to this directory and Download/Documents; the directory is auto-created if missing.</string>
+    <string name="settings_workspace_desc">Default directory accessed via the WORKSPACE constant by scripts Echo runs. readFile/writeFile are restricted to this directory and Download/Documents; the directory is auto-created if missing.</string>
     <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
     <string name="chat_workspace_pick_title">Pick workspace for this session</string>
-    <string name="chat_workspace_pick_desc">Similar to selecting a project directory with --cd when launching Codex. The agent can read code and files in this directory, and the WORKSPACE for run_code/run_python switches here too. Leave empty to use the global default.</string>
+    <string name="chat_workspace_pick_desc">Similar to selecting a project directory with --cd when launching Codex. Echo can read code and files in this directory, and the WORKSPACE for run_code/run_python switches here too. Leave empty to use the global default.</string>
     <string name="chat_workspace_change">Change workspace</string>
     <string name="chat_artifact_preview">Preview</string>
     <string name="chat_artifact_open">Open</string>
@@ -1632,7 +1632,7 @@
     <string name="hub_local_characters">Local characters</string>
     <string name="settings_more_title">More settings</string>
     <string name="settings_more_desc">Language, permission mode, channels, LAN and devices</string>
-    <string name="activity_row_desc">A record of every task the agent ran</string>
+    <string name="activity_row_desc">A record of every task Echo ran</string>
     <string name="settings_pair_binding">Linking…</string>
     <string name="settings_pair_one_tap">Link to this account (no code needed)</string>
     <string name="settings_pair_manual">Or enter a pairing code:</string>
@@ -1745,7 +1745,7 @@
     <string name="tc_mode_full_title">Full permission mode · spare or fleet phone</string>
     <string name="tc_mode_full_desc">Unlocks everything. The host, the LAN and proactive rules can run every high-risk tool without asking, and file tools are no longer limited to /sdcard. This lowers safety a lot: use it only on a spare or dedicated automation phone that you fully control, never on your everyday phone. The privacy scanner, audit log and circuit breaker cannot be turned off.</string>
     <string name="tc_dry_run_title">Demo / read-only mode</string>
-    <string name="tc_dry_run_desc">The agent can still look at the screen, plan and walk through the task, but every action that changes something (taps, typing, messages, installs, running code) is skipped and only shown. A safe way to preview what it would do on first use, or whenever you are unsure.</string>
+    <string name="tc_dry_run_desc">Echo can still look at the screen, plan and walk through the task, but every action that changes something (taps, typing, messages, installs, running code) is skipped and only shown. A safe way to preview what it would do on first use, or whenever you are unsure.</string>
     <string name="tc_remote_high_risk_title">Let remote sources run high-risk tools</string>
     <string name="tc_remote_high_risk_desc">When on, the host WebSocket, LAN HTTP and proactive rules can run high-risk tools such as sending SMS, installing apps, or reading, writing and deleting files without asking. Off (blocked) by default; turn it on only in a setup you fully control.</string>
     <string name="tc_sms_otp_title">Copy verification codes from SMS</string>
@@ -1753,16 +1753,16 @@
     <string name="tc_sms_otp_warning">Codes go to the system clipboard, where other apps may read them. Turn this on only if you need it.</string>
     <string name="tc_section_access_audit">Access and audit</string>
     <string name="tc_nav_acl_title">Channel access control (ACL)</string>
-    <string name="tc_nav_acl_desc">Choose who may message the agent on each chat channel, and the switches for access control and remote high-risk tools</string>
+    <string name="tc_nav_acl_desc">Choose who may message Echo on each chat channel, and the switches for access control and remote high-risk tools</string>
     <string name="tc_nav_audit_title">Action audit log</string>
-    <string name="tc_nav_audit_desc">See the agent\'s recent medium- and high-risk tool calls and what was blocked</string>
+    <string name="tc_nav_audit_desc">See Echo\'s recent medium- and high-risk tool calls and what was blocked</string>
     <string name="tc_section_evolution">Self-improvement · measured</string>
     <string name="tc_section_lessons">Lessons · what this phone has learned</string>
-    <string name="tc_section_memory">Memory · what the agent remembers about you</string>
+    <string name="tc_section_memory">Memory · what Echo remembers about you</string>
     <string name="tc_section_backup">Knowledge backup · take it with you</string>
     <string name="tc_readiness_title">Readiness</string>
     <string name="tc_readiness_count">Ready: %1$d of %2$d</string>
-    <string name="tc_readiness_missing">Still needed: %1$s. The agent cannot work until these are set up.</string>
+    <string name="tc_readiness_missing">Still needed: %1$s. Echo cannot work until these are set up.</string>
     <string name="tc_list_separator">,\u0020</string>
     <string name="tc_readiness_ok">All the essentials are set up. You can start.</string>
     <string name="tc_metric_reflex">Reflex fast-path hit rate</string>
@@ -1789,9 +1789,9 @@
     <string name="tc_lessons_add">Teach it a rule</string>
     <string name="tc_lessons_reset">Reset lessons (keep rules)</string>
     <string name="tc_lessons_dialog_title">Teach it a rule</string>
-    <string name="tc_lessons_dialog_body">Tell the agent in one sentence how to do something. It is applied with the highest priority. For example: close the pop-up before using Taobao; confirm who you are messaging before sending.</string>
+    <string name="tc_lessons_dialog_body">Tell Echo in one sentence how to do something. It is applied with the highest priority. For example: close the pop-up before using Taobao; confirm who you are messaging before sending.</string>
     <string name="tc_lessons_dialog_hint">Type a rule…</string>
-    <string name="tc_memory_empty">The agent hasn\'t remembered anything about you yet. It notes preferences and facts you mention in chat (apps you use, food you avoid, how to address you, your address), and you can use Remember something to tell it directly. This stays on this phone, and you can delete it any time.</string>
+    <string name="tc_memory_empty">Echo hasn\'t remembered anything about you yet. It notes preferences and facts you mention in chat (apps you use, food you avoid, how to address you, your address), and you can use Remember something to tell it directly. This stays on this phone, and you can delete it any time.</string>
     <string name="tc_memory_type_preference">Preference</string>
     <string name="tc_memory_type_fact">Fact</string>
     <string name="tc_memory_type_context">Recent</string>
@@ -1799,9 +1799,9 @@
     <string name="tc_memory_add">Remember something</string>
     <string name="tc_memory_clear">Clear memory</string>
     <string name="tc_memory_dialog_title">Remember something about you</string>
-    <string name="tc_memory_dialog_body">Tell the agent a preference or fact to keep. Later tasks take it into account. For example: I order food with Ele.me; I\'m allergic to peanuts; call me Lao Wang.</string>
+    <string name="tc_memory_dialog_body">Tell Echo a preference or fact to keep. Later tasks take it into account. For example: I order food with Ele.me; I\'m allergic to peanuts; call me Lao Wang.</string>
     <string name="tc_memory_dialog_hint">Type something…</string>
-    <string name="tc_backup_desc">Back up or move the rules you taught and what the agent remembers about you: copy to the clipboard, save to a file, or pull from a paired device on your LAN. It only moves between your devices and is never uploaded to a server.</string>
+    <string name="tc_backup_desc">Back up or move the rules you taught and what Echo remembers about you: copy to the clipboard, save to a file, or pull from a paired device on your LAN. It only moves between your devices and is never uploaded to a server.</string>
     <string name="tc_backup_export_clipboard">Copy to clipboard</string>
     <string name="tc_backup_copied">Knowledge pack copied to the clipboard</string>
     <string name="tc_backup_import_clipboard">Import from clipboard</string>
@@ -1819,16 +1819,16 @@
     <string name="tc_backup_pulled">Pulled from %1$s: rules %2$d, memories %3$d</string>
     <!-- Skills, audit log and voice settings: localized, emoji replaced by icons (2026-10-14) -->
     <string name="skills_group_prompt">Prompt skills</string>
-    <string name="skills_group_prompt_desc">Added to related tasks automatically, so the agent knows the job better</string>
-    <string name="skills_group_tools">Tools the agent can call</string>
-    <string name="skills_group_tools_desc">Core control and perception tools are locked; turn off the others you don\'t need, to reduce mistakes and what the agent can see</string>
+    <string name="skills_group_prompt_desc">Added to related tasks automatically, so Echo knows the job better</string>
+    <string name="skills_group_tools">Tools Echo can call</string>
+    <string name="skills_group_tools_desc">Core control and perception tools are locked; turn off the others you don\'t need, to reduce mistakes and what Echo can see</string>
     <string name="audit_clear">Clear</string>
     <string name="audit_description">Every medium- and high-risk tool call is recorded here, with sensitive values masked. The latest 300 are kept.</string>
     <string name="audit_filter_all">All %1$d</string>
     <string name="audit_risk_high">High risk</string>
     <string name="audit_risk_medium">Medium risk</string>
     <string name="audit_risk_low">Low risk</string>
-    <string name="audit_empty">No audit records yet. They appear here after the agent calls a medium- or high-risk tool.</string>
+    <string name="audit_empty">No audit records yet. They appear here after Echo calls a medium- or high-risk tool.</string>
     <string name="audit_tampered">Signature check failed: this entry may have been altered or forged</string>
     <string name="audit_status_blocked">Blocked (%1$s)</string>
     <string name="audit_status_ok">Succeeded</string>

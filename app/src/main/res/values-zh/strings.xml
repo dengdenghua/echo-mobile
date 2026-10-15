@@ -26,7 +26,7 @@
     <string name="channel_wechat">微信</string>
     <string name="common_load_failed">加载失败: %s</string>
 
-    <string name="app_slogan">一款能做事的AI Agents</string>
+    <string name="app_slogan">替你办好手机上的事的智能助手</string>
 
     <!-- 引导页 -->
     <string name="guide_page_title">权限设置</string>
@@ -214,7 +214,7 @@
     <string name="notification_channel_name">Echo 运行状态</string>
     <string name="notification_channel_description">显示 Echo 运行状态及统计数据</string>
     <string name="notification_content_title">Echo 运行中</string>
-    <string name="notification_content_text">AI Agent 服务正在运行</string>
+    <string name="notification_content_text">Echo 服务正在运行</string>
 
     <!-- 通道消息（发给用户的回复） -->
     <string name="channel_msg_task_cancelled">任务已手动取消</string>
@@ -336,25 +336,25 @@
     <string name="discover_stat_llm_on">模型已配置</string>
     <string name="discover_stat_llm_off">模型未配置</string>
     <string name="workbench_title">旧手机 AI 工作台</string>
-    <string name="workbench_subtitle">让这台设备常驻、能操作、能养 Agent</string>
-    <string name="workbench_agent_ready">Agent 就绪</string>
+    <string name="workbench_subtitle">让这台设备常驻、能操作、能养 Echo</string>
+    <string name="workbench_agent_ready">Echo 就绪</string>
     <string name="workbench_agent_incomplete">待配置</string>
     <string name="workbench_device_card_title">这台手机正在待命</string>
     <string name="workbench_device_card_target">执行目标：%1$s</string>
     <string name="workbench_lan_off">局域网未开</string>
-    <string name="workbench_action_chat">交给 Agent</string>
+    <string name="workbench_action_chat">交给 Echo</string>
     <string name="workbench_metric_sessions">会话</string>
     <string name="workbench_metric_routines">自动任务</string>
     <string name="workbench_metric_target">目标</string>
-    <string name="workbench_section_tasks">Agent 工作</string>
+    <string name="workbench_section_tasks">Echo 工作</string>
     <string name="workbench_routines_desc">已保存 %1$d 条自动化，可定时或立即执行</string>
-    <string name="workbench_skills_desc">管理 Agent 在这台手机上能调用的能力</string>
+    <string name="workbench_skills_desc">管理 Echo 在这台手机上能调用的能力</string>
     <string name="workbench_devices_desc">发现旧手机，批量控制在线设备</string>
-    <string name="workbench_activity_desc">查看 Agent 最近做过什么</string>
+    <string name="workbench_activity_desc">查看 Echo 最近做过什么</string>
     <string name="workbench_section_templates">任务模板</string>
     <string name="workbench_section_tools">设备工具</string>
     <string name="ai_browser_title">AI 浏览器</string>
-    <string name="ai_browser_subtitle">搜索、阅读、总结，也能让 Agent 操作网页</string>
+    <string name="ai_browser_subtitle">搜索、阅读、总结，也能让 Echo 操作网页</string>
     <string name="ai_browser_omnibox_hint">搜索或输入网址</string>
     <string name="ai_browser_clean_home">简洁首页</string>
     <string name="ai_browser_mode_web">网页</string>
@@ -366,7 +366,7 @@
     <string name="ai_browser_action_ask">问这个页面</string>
     <string name="ai_browser_action_ask_desc">打开浏览器，用问 AI 总结、翻译、提取要点</string>
     <string name="ai_browser_action_operate">操作网页</string>
-    <string name="ai_browser_action_operate_desc">让 Agent 点击、填写表单、完成网页任务</string>
+    <string name="ai_browser_action_operate_desc">让 Echo 点击、填写表单、完成网页任务</string>
     <string name="ai_browser_extensions_desc">使用 GeckoView 扩展，增强旧手机浏览器</string>
     <string name="ai_browser_files_desc">浏览网盘和本地文件，服务网页任务</string>
     <string name="ai_browser_section_quick_search">快速搜索</string>
@@ -374,7 +374,7 @@
     <string name="ai_browser_quick_research">找 3 个关于 Android 自动化的可靠资料</string>
     <string name="ai_browser_quick_shopping">对比适合常驻 Agent 的二手安卓手机</string>
     <string name="ai_browser_section_agent">网页 Agent</string>
-    <string name="ai_browser_agent_desc">浏览器可通过无障碍读取当前页面内容，并让 Agent 点击、输入、总结、翻译或执行网页任务。</string>
+    <string name="ai_browser_agent_desc">浏览器可通过无障碍读取当前页面内容，并让 Echo 点击、输入、总结、翻译或执行网页任务。</string>
     <string name="ai_browser_section_automation">自动化</string>
     <string name="ai_browser_routines_desc">已保存 %1$d 条浏览器/设备自动化</string>
     <string name="browser_home_title">AI 浏览器桌面</string>
@@ -429,7 +429,7 @@
     <string name="settings_val_plugins_loaded">3 个已加载</string>
     <string name="settings_device_control_section">屏幕与远程控制</string>
     <string name="settings_device_mgmt_desc">管理已连接和可控的旧手机</string>
-    <string name="settings_plugin_desc">管理 Agent 可调用的技能与扩展</string>
+    <string name="settings_plugin_desc">管理 Echo 可调用的技能与扩展</string>
 
     <!-- Shared status -->
     <string name="status_online">在线</string>
@@ -516,8 +516,8 @@
     <string name="routine_alarm_skipped_title">例程已跳过</string>
     <string name="routine_alarm_skipped_text">「%1$s」到点，但未配置模型</string>
     <string name="routine_alarm_retry_title">例程已排队</string>
-    <string name="routine_alarm_retry_text">「%1$s」到点，但 Agent 正忙。稍后第 %2$d/%3$d 次重试。</string>
-    <string name="routine_alarm_busy_give_up_text">「%1$s」到点，但 Agent 多次重试后仍在忙</string>
+    <string name="routine_alarm_retry_text">「%1$s」到点，但 Echo 正忙。稍后第 %2$d/%3$d 次重试。</string>
+    <string name="routine_alarm_busy_give_up_text">「%1$s」到点，但 Echo 多次重试后仍在忙</string>
     <string name="browser_loading_text">加载中…</string>
     <string name="browser_engine_chip_description">切换搜索引擎</string>
     <string name="browser_url_hint">搜索或输入网址</string>
@@ -598,7 +598,7 @@
     <string name="chat_agent_bridge_manually_stopped">已手动停止</string>
     <string name="chat_mic_permission_granted">已授权，按住麦克风说话</string>
     <string name="chat_mic_permission_denied">未授权录音，无法语音输入</string>
-    <string name="chat_voice_stop_agent">■  停止 Agent</string>
+    <string name="chat_voice_stop_agent">■  停止 Echo</string>
     <string name="chat_voice_listening_release">正在聆听… 松手发送</string>
     <string name="chat_voice_hold_to_speak">按住说话</string>
     <string name="chat_target_local_device">本机</string>
@@ -660,7 +660,7 @@
     <string name="activity_time_hours_ago">%1$d 小时前</string>
     <string name="activity_screen_title">活动</string>
     <string name="activity_clear_button">清空</string>
-    <string name="activity_empty_state">还没有活动记录。Agent 每完成一次任务，都会在这里留下一条可回看的审计（指令 / 目标 / 步数 / 结果）。</string>
+    <string name="activity_empty_state">还没有活动记录。Echo 每完成一次任务，都会在这里留下一条可回看的审计（指令 / 目标 / 步数 / 结果）。</string>
     <string name="activity_summary_count">共 %1$d 条 · 跨所有会话与设备</string>
     <string name="activity_steps_and_time">%1$d 步 · %2$s</string>
     <string name="clouddrive_empty_or_auth_failed">目录为空，或服务器不可达 / 认证失败</string>
@@ -673,7 +673,7 @@
     <string name="clouddrive_label_start_path">起始路径（如 / 或 /dav）</string>
     <string name="clouddrive_label_username">用户名（可选）</string>
     <string name="clouddrive_label_password">密码（可选）</string>
-    <string name="evolution_empty_state">还没有进化记录。Agent 会在任务后自我反思，沉淀「教训」并通过灰度逐步生效，结果会显示在这里。</string>
+    <string name="evolution_empty_state">还没有进化记录。Echo 会在任务后自我反思，沉淀「教训」并通过灰度逐步生效，结果会显示在这里。</string>
     <string name="evolution_lessons_section_title">已沉淀教训 (%1$d)</string>
     <string name="evolution_no_lessons">暂无教训</string>
     <string name="evolution_hit_count">命中 %1$d</string>
@@ -696,8 +696,8 @@
     <string name="memory_type_preference">偏好</string>
     <string name="memory_type_context">上下文</string>
     <string name="memory_type_fact">事实</string>
-    <string name="memory_empty_state">还没有记忆。Agent 会在对话中自动记录你的偏好与事实，也可点右上角 ＋ 手动添加。</string>
-    <string name="memory_count_info">共 %1$d 条 · 会注入到 Agent 的系统提示</string>
+    <string name="memory_empty_state">还没有记忆。Echo 会在对话中自动记录你的偏好与事实，也可点右上角 ＋ 手动添加。</string>
+    <string name="memory_count_info">共 %1$d 条 · 会注入到 Echo 的系统提示</string>
     <string name="memory_source_reference_count">来源 %1$s · 引用 %2$d 次</string>
     <string name="memory_add_dialog_title">添加记忆</string>
     <string name="memory_input_placeholder">例如：我喜欢简洁的回答</string>
@@ -730,7 +730,7 @@
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">运行</string>
     <string name="routines_forget_fastpath_title">忘记快路径</string>
-    <string name="routines_forget_fastpath_message">「%1$s」已学会 %2$d 步快路径。忘记后下次运行会让 Agent 重新看屏规划，并重新录制。</string>
+    <string name="routines_forget_fastpath_message">「%1$s」已学会 %2$d 步快路径。忘记后下次运行会让 Echo 重新看屏规划，并重新录制。</string>
     <string name="routines_forget_button">忘记</string>
     <string name="routines_forgotten_toast">已忘记快路径</string>
     <string name="routines_schedule_dialog_title">%1$s 定时</string>
@@ -741,10 +741,10 @@
     <string name="routines_set_once_toast">已设为一次 %1$s（下一个 %1$s 触发）</string>
     <string name="routines_cancel_scheduling_toast">已取消定时</string>
     <string name="skills_screen_title">技能 / 能力</string>
-    <string name="skills_screen_description">Agent 能调用的工具共 %1$d 个。核心控制/感知工具锁定;其余可按需停用(停用后 Agent 不再使用该能力,降低误操作/隐私面)。</string>
+    <string name="skills_screen_description">Echo 能调用的工具共 %1$d 个。核心控制/感知工具锁定;其余可按需停用(停用后 Echo 不再使用该能力,降低误操作/隐私面)。</string>
     <string name="skills_badge_core">核心</string>
     <string name="trustcenter_title">信任中心</string>
-    <string name="trustcenter_description">Agent 通过下列权限操作你的设备。可随时查看状态、点开管理或一键收回。</string>
+    <string name="trustcenter_description">Echo 通过下列权限操作你的设备。可随时查看状态、点开管理或一键收回。</string>
     <string name="trustcenter_section_capabilities">设备控制能力</string>
     <string name="trustcenter_capability_accessibility_desc">核心：读屏与点击/输入（控制本机）</string>
     <string name="trustcenter_capability_overlay_desc">实时控制层：操作时悬浮显示步骤+停止</string>
@@ -760,19 +760,19 @@
     <string name="trustcenter_lan_discoverable_label">本机可被发现</string>
     <string name="trustcenter_lan_not_started">未启动</string>
     <string name="trustcenter_section_target">当前执行目标</string>
-    <string name="trustcenter_target_label">Agent 将操作</string>
+    <string name="trustcenter_target_label">Echo 将操作</string>
     <string name="trustcenter_action_revoke">一键收回联网控制</string>
     <string name="trustcenter_action_revoke_desc">关闭局域网广播并把执行目标改回本机</string>
     <string name="trustcenter_instruction_manual_disable">无障碍 / 悬浮窗等系统权限需在系统设置中手动关闭（点上方对应项进入）。</string>
     <string name="videolibrary_scanning">扫描本地视频…</string>
-    <string name="videolibrary_no_files">未扫描到视频文件。把视频放到手机存储后再来，或在对话页让 Agent 播放在线/网盘视频。</string>
+    <string name="videolibrary_no_files">未扫描到视频文件。把视频放到手机存储后再来，或在对话页让 Echo 播放在线/网盘视频。</string>
     <string name="videolibrary_count">共 %1$d 个视频</string>
     <string name="videolibrary_bluray_label"> · 蓝光</string>
     <string name="plugin_loaded_group_title">已加载技能</string>
     <string name="plugin_available_group_title">可用技能</string>
     <string name="plugin_empty_state">暂无可用技能</string>
     <string name="plugin_install_button">从文件安装</string>
-    <string name="plugin_install_note">提示: 技能需要 .dex 文件 + manifest.json。技能会注册为 Agent 可调用的工具。</string>
+    <string name="plugin_install_note">提示: 技能需要 .dex 文件 + manifest.json。技能会注册为 Echo 可调用的工具。</string>
     <string name="plugin_error_status">错误</string>
     <string name="plugin_load_action">加载</string>
     <string name="plugin_load_success_toast">技能加载成功</string>
@@ -811,7 +811,7 @@
     <string name="chat_demo_dinner_msg">你好，今晚一起吃饭吗？</string>
     <string name="control_target_local">本机</string>
     <string name="channels_hub_title">消息渠道</string>
-    <string name="channels_hub_desc">接入 IM 机器人,从聊天软件里指挥 Agent。点按渠道进行配置。</string>
+    <string name="channels_hub_desc">接入 IM 机器人,从聊天软件里指挥 Echo。点按渠道进行配置。</string>
     <string name="wechat_login_title">微信扫码登录</string>
     <string name="wechat_login_hint">打开手机微信「扫一扫」,扫描下方二维码并在手机上确认。</string>
     <string name="wechat_login_get_qr">获取二维码</string>
@@ -859,7 +859,7 @@
     <string name="feat_explore_life">生活日常</string>
     <string name="feat_explore_coming">敬请期待</string>
     <string name="feat_explore_hint">精选案例与技能即将上线</string>
-    <string name="feat_skills_desc">Agent 能力与工具集</string>
+    <string name="feat_skills_desc">Echo 能力与工具集</string>
     <string name="feat_extensions_desc">浏览器扩展与插件</string>
     <string name="feat_routines_desc">自动化任务定时执行</string>
     <string name="feat_clouddrive_desc">云端文件访问</string>
@@ -874,7 +874,7 @@
     <string name="feat_explore_my_circles">我的圈子</string>
     <string name="feat_explore_members">成员</string>
     <string name="feat_explore_all_skills">全部技能</string>
-    <string name="feat_explore_all_skills_desc">浏览所有 Agent 能力</string>
+    <string name="feat_explore_all_skills_desc">浏览 Echo 的所有能力</string>
     <string name="feat_explore_join_circle">加入圈子</string>
     <string name="feat_explore_join_circle_hint">与社区分享例程和技巧</string>
     <string name="browser_settings_title">浏览器设置</string>
@@ -1207,11 +1207,11 @@
     <string name="remote_control_notif_controlling">正在被远程控制</string>
     <string name="remote_control_notif_text">查看 %1$d 人 · 控制 %2$d 人 · 来源: %3$s</string>
     <string name="remote_control_notif_viewing">正在被远程查看</string>
-    <string name="settings_workspace_desc">Agent 脚本通过 WORKSPACE 常量访问的默认目录。readFile/writeFile 限制在此目录和 Download/Documents 内，目录不存在时自动创建。</string>
+    <string name="settings_workspace_desc">Echo 运行的脚本通过 WORKSPACE 常量访问的默认目录。readFile/writeFile 限制在此目录和 Download/Documents 内，目录不存在时自动创建。</string>
     <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
     <string name="settings_workspace_title">脚本工作空间</string>
     <string name="chat_workspace_pick_title">选定本会话工作空间</string>
-    <string name="chat_workspace_pick_desc">类似 Codex 启动时 --cd 选定项目目录。Agent 可读取该目录下的代码与文件,run_code/run_python 的 WORKSPACE 也会切到此处。留空则使用全局默认。</string>
+    <string name="chat_workspace_pick_desc">类似 Codex 启动时 --cd 选定项目目录。Echo 可读取该目录下的代码与文件,run_code/run_python 的 WORKSPACE 也会切到此处。留空则使用全局默认。</string>
     <string name="chat_workspace_change">更改工作空间</string>
     <string name="chat_artifact_preview">预览</string>
     <string name="chat_artifact_open">打开</string>
@@ -1360,7 +1360,7 @@
     <string name="browser_menu_downloads">下载</string>
     <string name="browser_menu_light_mode">浅色模式</string>
     <string name="browser_menu_mobile_mode">移动模式</string>
-    <string name="browser_menu_record_agent">录制 Agent 操作</string>
+    <string name="browser_menu_record_agent">录制 Echo 操作</string>
     <string name="browser_menu_share">分享</string>
     <string name="browser_menu_stealth_off">指纹保护已关闭</string>
     <string name="browser_menu_stealth_on">指纹保护已开启</string>
@@ -1619,7 +1619,7 @@
     <string name="hub_local_characters">本地角色</string>
     <string name="settings_more_title">更多设置</string>
     <string name="settings_more_desc">语言、权限模式、消息渠道、局域网与设备</string>
-    <string name="activity_row_desc">Agent 每次任务的结果记录</string>
+    <string name="activity_row_desc">Echo 每次任务的结果记录</string>
     <string name="settings_pair_binding">绑定中…</string>
     <string name="settings_pair_one_tap">一键绑定到本账号（免输码）</string>
     <string name="settings_pair_manual">或手动输入配对码：</string>
@@ -1732,7 +1732,7 @@
     <string name="tc_mode_full_title">完全权限模式 · 闲置机或群控机</string>
     <string name="tc_mode_full_desc">释放全部能力。母体、局域网、主动规则可以不经确认执行所有高危工具，文件工具也不再限制在 /sdcard。安全性会明显降低：只用在你完全掌控的闲置机或专用自动化手机上，日常主力机不要开启。隐私扫描、审计日志、断路器三项不可关闭。</string>
     <string name="tc_dry_run_title">演示 / 只读模式</string>
-    <string name="tc_dry_run_desc">开启后 Agent 仍能看屏、规划、走完流程，但所有会改动的操作（点按、输入、发消息、装应用、跑代码）都会跳过，只演示不执行。首次上手或不放心时，用它安全预览 Agent 会怎么做。</string>
+    <string name="tc_dry_run_desc">开启后 Echo 仍能看屏、规划、走完流程，但所有会改动的操作（点按、输入、发消息、装应用、跑代码）都会跳过，只演示不执行。首次上手或不放心时，用它安全预览 Echo 会怎么做。</string>
     <string name="tc_remote_high_risk_title">允许远程来源执行高危工具</string>
     <string name="tc_remote_high_risk_desc">开启后，母体 WebSocket、局域网 HTTP、主动规则可以不经确认执行发短信、装应用、读写删文件等高危工具。默认关闭（拦截），只在你完全掌控的环境里开启。</string>
     <string name="tc_sms_otp_title">验证码短信自动复制</string>
@@ -1742,14 +1742,14 @@
     <string name="tc_nav_acl_title">通道访问控制（ACL）</string>
     <string name="tc_nav_acl_desc">管理各聊天通道的授权发送者名单，以及访问控制和远程高危工具的开关</string>
     <string name="tc_nav_audit_title">操作审计日志</string>
-    <string name="tc_nav_audit_desc">查看 Agent 最近的中、高危工具调用和拦截决定</string>
+    <string name="tc_nav_audit_desc">查看 Echo 最近的中、高危工具调用和拦截决定</string>
     <string name="tc_section_evolution">自进化引擎 · 实测效果</string>
     <string name="tc_section_lessons">操作经验 · 这台设备学到的</string>
-    <string name="tc_section_memory">关于你的记忆 · Agent 记住的</string>
-    <string name="tc_section_backup">知识备份 · 带走 Agent 的经验</string>
+    <string name="tc_section_memory">关于你的记忆 · Echo 记住的</string>
+    <string name="tc_section_backup">知识备份 · 带走 Echo 的经验</string>
     <string name="tc_readiness_title">准备就绪度</string>
     <string name="tc_readiness_count">%1$d/%2$d 项已就绪</string>
-    <string name="tc_readiness_missing">核心前置缺失：%1$s。补齐后 Agent 才能正常工作。</string>
+    <string name="tc_readiness_missing">核心前置缺失：%1$s。补齐后 Echo 才能正常工作。</string>
     <string name="tc_list_separator">、</string>
     <string name="tc_readiness_ok">核心前置已齐备，可以开始使用。</string>
     <string name="tc_metric_reflex">反射快路径命中率</string>
@@ -1776,9 +1776,9 @@
     <string name="tc_lessons_add">教它一条规矩</string>
     <string name="tc_lessons_reset">重置经验（保留规矩）</string>
     <string name="tc_lessons_dialog_title">教它一条操作规矩</string>
-    <string name="tc_lessons_dialog_body">用一句话告诉 Agent 该怎么操作，会以最高优先级注入。例如：打开淘宝先关弹窗再操作；发消息前先确认对象。</string>
+    <string name="tc_lessons_dialog_body">用一句话告诉 Echo 该怎么操作，会以最高优先级注入。例如：打开淘宝先关弹窗再操作；发消息前先确认对象。</string>
     <string name="tc_lessons_dialog_hint">输入一条规矩…</string>
-    <string name="tc_memory_empty">Agent 还没记住关于你的事。它会在对话里留意你提到的偏好和事实（常用 App、饮食忌口、称呼、住址等）；你也可以点「记一条」直接告诉它。这些只存在本机，随时可删。</string>
+    <string name="tc_memory_empty">Echo 还没记住关于你的事。它会在对话里留意你提到的偏好和事实（常用 App、饮食忌口、称呼、住址等）；你也可以点「记一条」直接告诉它。这些只存在本机，随时可删。</string>
     <string name="tc_memory_type_preference">偏好</string>
     <string name="tc_memory_type_fact">事实</string>
     <string name="tc_memory_type_context">近期</string>
@@ -1786,9 +1786,9 @@
     <string name="tc_memory_add">记一条</string>
     <string name="tc_memory_clear">清空记忆</string>
     <string name="tc_memory_dialog_title">记一条关于你的事</string>
-    <string name="tc_memory_dialog_body">告诉 Agent 一条要长期记住的偏好或事实，之后的任务会据此调整。例如：我用饿了么点外卖；对花生过敏；称呼我老王。</string>
+    <string name="tc_memory_dialog_body">告诉 Echo 一条要长期记住的偏好或事实，之后的任务会据此调整。例如：我用饿了么点外卖；对花生过敏；称呼我老王。</string>
     <string name="tc_memory_dialog_hint">输入一条…</string>
-    <string name="tc_backup_desc">把你教的规矩和 Agent 记住的关于你的事备份或迁移：复制到剪贴板、存成文件，或从已配对的局域网设备拉取。只在本机和你的设备之间流转，不上传任何服务器。</string>
+    <string name="tc_backup_desc">把你教的规矩和 Echo 记住的关于你的事备份或迁移：复制到剪贴板、存成文件，或从已配对的局域网设备拉取。只在本机和你的设备之间流转，不上传任何服务器。</string>
     <string name="tc_backup_export_clipboard">导出到剪贴板</string>
     <string name="tc_backup_copied">知识包已复制到剪贴板</string>
     <string name="tc_backup_import_clipboard">从剪贴板导入</string>
@@ -1806,7 +1806,7 @@
     <string name="tc_backup_pulled">已从 %1$s 拉取 %2$d 条规矩、%3$d 条记忆</string>
     <!-- Skills, audit log and voice settings: localized, emoji replaced by icons (2026-10-14) -->
     <string name="skills_group_prompt">提示词技能</string>
-    <string name="skills_group_prompt_desc">相关任务时自动注入，让 Agent 更懂这件事</string>
+    <string name="skills_group_prompt_desc">相关任务时自动注入，让 Echo 更懂这件事</string>
     <string name="skills_group_tools">可调用工具</string>
     <string name="skills_group_tools_desc">核心控制与感知工具锁定；其余可按需停用，减少误操作和隐私暴露</string>
     <string name="audit_clear">清空</string>
@@ -1815,7 +1815,7 @@
     <string name="audit_risk_high">高危</string>
     <string name="audit_risk_medium">中危</string>
     <string name="audit_risk_low">低危</string>
-    <string name="audit_empty">暂无审计记录。Agent 调用中、高危工具后会记录在这里。</string>
+    <string name="audit_empty">暂无审计记录。Echo 调用中、高危工具后会记录在这里。</string>
     <string name="audit_tampered">签名校验失败：这条记录可能被篡改或伪造</string>
     <string name="audit_status_blocked">已拦截（%1$s）</string>
     <string name="audit_status_ok">成功</string>

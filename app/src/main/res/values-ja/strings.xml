@@ -25,7 +25,7 @@
     <string name="channel_wechat">WeChat</string>
     <string name="common_load_failed">読み込み失敗: %s</string>
 
-    <string name="app_slogan">タスクをこなすAI Agents</string>
+    <string name="app_slogan">スマートフォンの用事をこなすスマートアシスタント</string>
 
     <!-- ガイド -->
     <string name="guide_page_title">権限の設定</string>
@@ -199,7 +199,7 @@
     <string name="notification_channel_name">Echo ステータス</string>
     <string name="notification_channel_description">Echoの実行状態と統計を表示</string>
     <string name="notification_content_title">Echo 実行中</string>
-    <string name="notification_content_text">AI Agentサービスが稼働中</string>
+    <string name="notification_content_text">Echo サービスが稼働中</string>
 
     <!-- チャネルメッセージ -->
     <string name="channel_msg_task_cancelled">タスクを手動でキャンセルしました</string>
@@ -487,7 +487,7 @@
     <string name="chat_agent_bridge_manually_stopped">手動で停止されました</string>
     <string name="chat_mic_permission_granted">認可されました。マイクを押して話してください</string>
     <string name="chat_mic_permission_denied">録音が認可されていません。音声入力は利用できません</string>
-    <string name="chat_voice_stop_agent">■  Agentを停止</string>
+    <string name="chat_voice_stop_agent">■  Echo を停止</string>
     <string name="chat_voice_listening_release">聞いています...リリースして送信</string>
     <string name="chat_voice_hold_to_speak">マイクを押して話す</string>
     <string name="chat_target_local_device">このデバイス</string>
@@ -540,7 +540,7 @@
     <string name="activity_time_hours_ago">%1$d 時間前</string>
     <string name="activity_screen_title">アクティビティ</string>
     <string name="activity_clear_button">クリア</string>
-    <string name="activity_empty_state">アクティビティがまだありません。エージェントがタスクを完了するたびに、確認可能な監査ログがここに記録されます（指示/ターゲット/ステップ/結果）。</string>
+    <string name="activity_empty_state">アクティビティがまだありません。Echo がタスクを完了するたびに、確認可能な監査ログがここに記録されます（指示/ターゲット/ステップ/結果）。</string>
     <string name="activity_summary_count">合計 %1$d 件 · すべてのセッションとデバイス間</string>
     <string name="activity_steps_and_time">%1$d ステップ · %2$s</string>
     <string name="clouddrive_empty_or_auth_failed">ディレクトリが空であるか、サーバーに到達できません / 認証に失敗しました</string>
@@ -553,7 +553,7 @@
     <string name="clouddrive_label_start_path">開始パス（例：/ または /dav）</string>
     <string name="clouddrive_label_username">ユーザー名（オプション）</string>
     <string name="clouddrive_label_password">パスワード（オプション）</string>
-    <string name="evolution_empty_state">進化記録がまだありません。エージェントは各タスク後に自己反省し、教訓を抽出し、段階的ロールアウトで徐々に有効化します。結果がここに表示されます。</string>
+    <string name="evolution_empty_state">進化記録がまだありません。Echo は各タスク後に自己反省し、教訓を抽出し、段階的ロールアウトで徐々に有効化します。結果がここに表示されます。</string>
     <string name="evolution_lessons_section_title">抽出済み教訓 (%1$d)</string>
     <string name="evolution_no_lessons">教訓がありません</string>
     <string name="evolution_hit_count">ヒット: %1$d</string>
@@ -576,8 +576,8 @@
     <string name="memory_type_preference">優先度</string>
     <string name="memory_type_context">コンテキスト</string>
     <string name="memory_type_fact">ファクト</string>
-    <string name="memory_empty_state">メモリがまだありません。エージェントは会話中に自動的にあなたの優先度とファクトを記録します。右上の＋ボタンで手動追加することもできます。</string>
-    <string name="memory_count_info">%1$d 個の合計 · エージェントのシステムプロンプトに挿入されます</string>
+    <string name="memory_empty_state">メモリがまだありません。Echo は会話中に自動的にあなたの優先度とファクトを記録します。右上の＋ボタンで手動追加することもできます。</string>
+    <string name="memory_count_info">%1$d 個の合計 · Echo のシステムプロンプトに挿入されます</string>
     <string name="memory_source_reference_count">ソース %1$s · %2$d 回参照</string>
     <string name="memory_add_dialog_title">メモリを追加</string>
     <string name="memory_input_placeholder">例：簡潔な回答が好きです</string>
@@ -602,15 +602,15 @@
     <string name="pcremote_enter_button">Enter</string>
     <string name="pc_remote_webrtc_webview_unavailable">システム WebView は利用できません。リモートデスクトップを起動できません。</string>
     <string name="routines_title">オートメーション</string>
-    <string name="routines_empty_state">ルーチンはまだありません。\n\nチャットで送信したコマンドを長押し → 「ルーチンとして保存」でワンタップ再生またはスケジュール設定できます。再生により、エージェントが画面に基づいて実行を再度計画します。</string>
-    <string name="routines_count_summary">合計 %1$d 条 · ⚡=学習済み高速パス(より高速に再生)、それ以外はエージェントが再計画</string>
+    <string name="routines_empty_state">ルーチンはまだありません。\n\nチャットで送信したコマンドを長押し → 「ルーチンとして保存」でワンタップ再生またはスケジュール設定できます。再生により、Echo が画面に基づいて実行を再度計画します。</string>
+    <string name="routines_count_summary">合計 %1$d 条 · ⚡=学習済み高速パス(より高速に再生)、それ以外は Echo が再計画</string>
     <string name="routines_item_target_and_count">ターゲット %1$s · 実行 %2$d 回</string>
     <string name="routines_item_schedule_daily"> · 毎日 %1$s</string>
     <string name="routines_item_schedule_once"> · 一度 %1$s</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">▶ 実行</string>
     <string name="routines_forget_fastpath_title">高速パスを忘れる</string>
-    <string name="routines_forget_fastpath_message">「%1$s」は%2$d ステップの高速パスを学習しました。これを忘れると、次回の実行時にエージェントが画面に基づいて再度計画し、再度記録します。</string>
+    <string name="routines_forget_fastpath_message">「%1$s」は%2$d ステップの高速パスを学習しました。これを忘れると、次回の実行時に Echo が画面に基づいて再度計画し、再度記録します。</string>
     <string name="routines_forget_button">忘れる</string>
     <string name="routines_forgotten_toast">高速パスを忘れました</string>
     <string name="routines_schedule_dialog_title">%1$s にスケジュール</string>
@@ -621,10 +621,10 @@
     <string name="routines_set_once_toast">%1$s に一度実行するように設定しました（次の %1$s でトリガー）</string>
     <string name="routines_cancel_scheduling_toast">スケジュール設定がキャンセルされました</string>
     <string name="skills_screen_title">スキル / 機能</string>
-    <string name="skills_screen_description">エージェントが呼び出し可能なツールは %1$d 個あります。コア制御/センシングツールはロックされており、その他は必要に応じて無効化できます(無効化後、エージェントはこの機能を使用しなくなり、誤操作やプライバシーの懸念が減ります)。</string>
+    <string name="skills_screen_description">Echo が呼び出し可能なツールは %1$d 個あります。コア制御/センシングツールはロックされており、その他は必要に応じて無効化できます(無効化後、Echo はこの機能を使用しなくなり、誤操作やプライバシーの懸念が減ります)。</string>
     <string name="skills_badge_core">コア</string>
     <string name="trustcenter_title">トラストセンター</string>
-    <string name="trustcenter_description">エージェントは以下の権限を使用してデバイスにアクセスします。ステータスの確認、設定の管理、またはアクセスの取り消しはいつでも可能です。</string>
+    <string name="trustcenter_description">Echo は以下の権限を使用してデバイスにアクセスします。ステータスの確認、設定の管理、またはアクセスの取り消しはいつでも可能です。</string>
     <string name="trustcenter_section_capabilities">デバイス制御機能</string>
     <string name="trustcenter_capability_accessibility_desc">コア：スクリーン読み上げ、タップ、入力（デバイス制御）</string>
     <string name="trustcenter_capability_overlay_desc">リアルタイムコントロール層：操作時にフローティングステップと停止ボタンを表示</string>
@@ -640,19 +640,19 @@
     <string name="trustcenter_lan_discoverable_label">デバイスが検出可能</string>
     <string name="trustcenter_lan_not_started">起動していません</string>
     <string name="trustcenter_section_target">現在の実行ターゲット</string>
-    <string name="trustcenter_target_label">エージェントが操作します</string>
+    <string name="trustcenter_target_label">Echo が操作します</string>
     <string name="trustcenter_action_revoke">ネットワークコントロールを取り消す</string>
     <string name="trustcenter_action_revoke_desc">ローカルネットワークブロードキャストを無効にし、実行ターゲットをこのデバイスにリセット</string>
     <string name="trustcenter_instruction_manual_disable">アクセシビリティやフローティングウィンドウなどのシステム権限は、システム設定で手動で無効にする必要があります（上記の対応する項目をタップ）。</string>
     <string name="videolibrary_scanning">ローカルビデオをスキャン中…</string>
-    <string name="videolibrary_no_files">ビデオファイルが見つかりません。電話ストレージにビデオを追加するか、チャットページでエージェントにオンライン/クラウドビデオを再生させてください。</string>
+    <string name="videolibrary_no_files">ビデオファイルが見つかりません。電話ストレージにビデオを追加するか、チャットページで Echo にオンライン/クラウドビデオを再生させてください。</string>
     <string name="videolibrary_count">合計 %1$d 個のビデオ</string>
     <string name="videolibrary_bluray_label"> · ブルーレイ</string>
     <string name="plugin_loaded_group_title">ロード済みスキル</string>
     <string name="plugin_available_group_title">利用可能なスキル</string>
     <string name="plugin_empty_state">利用可能なスキルがありません</string>
     <string name="plugin_install_button">ファイルからインストール</string>
-    <string name="plugin_install_note">注意: スキルには .dex ファイル + manifest.json が必要です。スキルは Agent から呼び出し可能なツールとして登録されます。</string>
+    <string name="plugin_install_note">注意: スキルには .dex ファイル + manifest.json が必要です。スキルは Echo から呼び出し可能なツールとして登録されます。</string>
     <string name="plugin_error_status">エラー</string>
     <string name="plugin_load_action">ロード</string>
     <string name="plugin_load_success_toast">スキルが正常にロードされました</string>
@@ -691,7 +691,7 @@
     <string name="chat_demo_dinner_msg">こんにちは、今夜一緒に食事しませんか？</string>
     <string name="control_target_local">このデバイス</string>
     <string name="channels_hub_title">メッセージチャネル</string>
-    <string name="channels_hub_desc">IMボットを接続し、チャットアプリからエージェントを操作。タップして設定します。</string>
+    <string name="channels_hub_desc">IMボットを接続し、チャットアプリから Echo を操作。タップして設定します。</string>
     <string name="wechat_login_title">WeChat QRログイン</string>
     <string name="wechat_login_hint">WeChatの「スキャン」で下のQRコードを読み取り、スマホで確認してください。</string>
     <string name="wechat_login_get_qr">QRコードを取得</string>
@@ -739,7 +739,7 @@
     <string name="feat_explore_life">日常生活</string>
     <string name="feat_explore_coming">お楽しみに</string>
     <string name="feat_explore_hint">注目の事例とスキルがまもなく登場</string>
-    <string name="feat_skills_desc">エージェントの能力とツール</string>
+    <string name="feat_skills_desc">Echo の能力とツール</string>
     <string name="feat_extensions_desc">ブラウザ拡張機能</string>
     <string name="feat_routines_desc">自動タスクスケジュール</string>
     <string name="feat_clouddrive_desc">クラウドファイルアクセス</string>
@@ -754,7 +754,7 @@
     <string name="feat_explore_my_circles">マイサークル</string>
     <string name="feat_explore_members">メンバー</string>
     <string name="feat_explore_all_skills">全スキル</string>
-    <string name="feat_explore_all_skills_desc">エージェントの全能力を閲覧</string>
+    <string name="feat_explore_all_skills_desc">Echo の全能力を閲覧</string>
     <string name="feat_explore_join_circle">サークルに参加</string>
     <string name="feat_explore_join_circle_hint">コミュニティとルーチンやコツを共有</string>
     <string name="browser_settings_title">ブラウザ設定</string>
@@ -1210,11 +1210,11 @@
     <string name="remote_control_notif_text">閲覧 %1$d 人 · 操作 %2$d 人 · 接続元: %3$s</string>
     <string name="remote_control_notif_viewing">リモート閲覧されています</string>
     <!-- 设置 -->
-    <string name="settings_workspace_desc">Agent スクリプトが WORKSPACE 定数でアクセスする既定ディレクトリ。readFile/writeFile はこのディレクトリと Download/Documents 内に制限され、存在しない場合は自動作成されます。</string>
+    <string name="settings_workspace_desc">Echo が実行するスクリプトが WORKSPACE 定数でアクセスする既定ディレクトリ。readFile/writeFile はこのディレクトリと Download/Documents 内に制限され、存在しない場合は自動作成されます。</string>
     <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
     <string name="settings_workspace_title">スクリプトワークスペース</string>
     <string name="chat_workspace_pick_title">この会話のワークスペースを選択</string>
-    <string name="chat_workspace_pick_desc">Codex 起動時の --cd のようにプロジェクトディレクトリを選択。Agent はそのディレクトリ内のコードやファイルを読み取れ、run_code/run_python の WORKSPACE もここに切り替わります。空欄ならグローバル既定を使用。</string>
+    <string name="chat_workspace_pick_desc">Codex 起動時の --cd のようにプロジェクトディレクトリを選択。Echo はそのディレクトリ内のコードやファイルを読み取れ、run_code/run_python の WORKSPACE もここに切り替わります。空欄ならグローバル既定を使用。</string>
     <string name="chat_workspace_change">ワークスペースを変更</string>
     <string name="chat_artifact_preview">プレビュー</string>
     <string name="chat_artifact_open">開く</string>
@@ -1339,7 +1339,7 @@
     <string name="browser_menu_downloads">ダウンロード</string>
     <string name="browser_menu_light_mode">ライトモード</string>
     <string name="browser_menu_mobile_mode">モバイルモード</string>
-    <string name="browser_menu_record_agent">Agent 操作を記録</string>
+    <string name="browser_menu_record_agent">Echo の操作を記録</string>
     <string name="browser_menu_share">共有</string>
     <string name="browser_menu_stealth_off">フィンガープリント保護オフ</string>
     <string name="browser_menu_stealth_on">フィンガープリント保護オン</string>
@@ -1441,7 +1441,7 @@
     <string name="hub_local_characters">ローカルキャラクター</string>
     <string name="settings_more_title">その他の設定</string>
     <string name="settings_more_desc">言語、権限モード、チャネル、LAN とデバイス</string>
-    <string name="activity_row_desc">エージェントが実行したタスクの記録</string>
+    <string name="activity_row_desc">Echo が実行したタスクの記録</string>
     <string name="chat_input_actions">会話のショートカット</string>
     <string name="chat_text_mode">メッセージを入力</string>
     <string name="chat_voice_mode">音声メッセージ</string>
@@ -1740,7 +1740,7 @@
     <string name="tc_mode_full_title">フル権限モード · 予備機・群制御用の端末</string>
     <string name="tc_mode_full_desc">すべての機能を解放します。ホスト、LAN、プロアクティブルールが確認なしで高リスクのツールをすべて実行でき、ファイル操作も /sdcard に限定されなくなります。安全性が大きく下がるため、完全に管理している予備機や自動化専用の端末だけで使い、普段使いの端末ではオンにしないでください。プライバシースキャン、監査ログ、サーキットブレーカーはオフにできません。</string>
     <string name="tc_dry_run_title">デモ / 読み取り専用モード</string>
-    <string name="tc_dry_run_desc">エージェントは画面の確認、計画、手順の実行までは行いますが、何かを変更する操作（タップ、入力、メッセージ送信、インストール、コード実行）はすべてスキップし、表示だけします。初めて使うときや不安なときに、何をするかを安全に確認できます。</string>
+    <string name="tc_dry_run_desc">Echo は画面の確認、計画、手順の実行までは行いますが、何かを変更する操作（タップ、入力、メッセージ送信、インストール、コード実行）はすべてスキップし、表示だけします。初めて使うときや不安なときに、何をするかを安全に確認できます。</string>
     <string name="tc_remote_high_risk_title">リモートからの高リスクツール実行を許可</string>
     <string name="tc_remote_high_risk_desc">オンにすると、ホストの WebSocket、LAN の HTTP、プロアクティブルールが、SMS 送信、アプリのインストール、ファイルの読み書き・削除などの高リスクツールを確認なしで実行できます。初期設定はオフ（ブロック）です。完全に管理している環境でだけオンにしてください。</string>
     <string name="tc_sms_otp_title">SMS の認証コードを自動コピー</string>
@@ -1750,14 +1750,14 @@
     <string name="tc_nav_acl_title">チャネルのアクセス制御（ACL）</string>
     <string name="tc_nav_acl_desc">チャットチャネルごとの送信許可リストと、アクセス制御・リモート高リスクツールのスイッチを管理</string>
     <string name="tc_nav_audit_title">操作の監査ログ</string>
-    <string name="tc_nav_audit_desc">エージェントが最近行った中・高リスクツールの呼び出しと、ブロックされた内容を確認</string>
+    <string name="tc_nav_audit_desc">Echo が最近行った中・高リスクツールの呼び出しと、ブロックされた内容を確認</string>
     <string name="tc_section_evolution">自己改善 · 実測</string>
     <string name="tc_section_lessons">操作の経験 · この端末が学んだこと</string>
-    <string name="tc_section_memory">メモリー · エージェントが覚えているあなたのこと</string>
+    <string name="tc_section_memory">メモリー · Echo が覚えているあなたのこと</string>
     <string name="tc_section_backup">知識のバックアップ · 持ち運ぶ</string>
     <string name="tc_readiness_title">準備状況</string>
     <string name="tc_readiness_count">%2$d 件中 %1$d 件完了</string>
-    <string name="tc_readiness_missing">まだ必要です：%1$s。設定するまでエージェントは動作できません。</string>
+    <string name="tc_readiness_missing">まだ必要です：%1$s。設定するまで Echo は動作できません。</string>
     <string name="tc_list_separator">、</string>
     <string name="tc_readiness_ok">必要な設定はそろっています。使い始められます。</string>
     <string name="tc_metric_reflex">反射ファストパスのヒット率</string>
@@ -1784,9 +1784,9 @@
     <string name="tc_lessons_add">ルールを教える</string>
     <string name="tc_lessons_reset">経験をリセット（ルールは残す）</string>
     <string name="tc_lessons_dialog_title">操作ルールを教える</string>
-    <string name="tc_lessons_dialog_body">操作のしかたを一文でエージェントに伝えます。最優先で適用されます。例：タオバオを開いたら先にポップアップを閉じる；送信前に宛先を確認する。</string>
+    <string name="tc_lessons_dialog_body">操作のしかたを一文で Echo に伝えます。最優先で適用されます。例：タオバオを開いたら先にポップアップを閉じる；送信前に宛先を確認する。</string>
     <string name="tc_lessons_dialog_hint">ルールを入力…</string>
-    <string name="tc_memory_empty">エージェントはまだあなたについて何も覚えていません。チャットで話した好みや事実（よく使うアプリ、食べられないもの、呼び方、住所など）を覚えます。「ひとつ覚えさせる」で直接伝えることもできます。データはこの端末だけに保存され、いつでも削除できます。</string>
+    <string name="tc_memory_empty">Echo はまだあなたについて何も覚えていません。チャットで話した好みや事実（よく使うアプリ、食べられないもの、呼び方、住所など）を覚えます。「ひとつ覚えさせる」で直接伝えることもできます。データはこの端末だけに保存され、いつでも削除できます。</string>
     <string name="tc_memory_type_preference">好み</string>
     <string name="tc_memory_type_fact">事実</string>
     <string name="tc_memory_type_context">最近</string>
@@ -1794,9 +1794,9 @@
     <string name="tc_memory_add">ひとつ覚えさせる</string>
     <string name="tc_memory_clear">メモリーを消去</string>
     <string name="tc_memory_dialog_title">あなたについてひとつ覚えさせる</string>
-    <string name="tc_memory_dialog_body">覚えておいてほしい好みや事実をエージェントに伝えます。以降のタスクに反映されます。例：出前は Ele.me で頼む；ピーナッツアレルギーがある；老王と呼んで。</string>
+    <string name="tc_memory_dialog_body">覚えておいてほしい好みや事実を Echo に伝えます。以降のタスクに反映されます。例：出前は Ele.me で頼む；ピーナッツアレルギーがある；老王と呼んで。</string>
     <string name="tc_memory_dialog_hint">入力…</string>
-    <string name="tc_backup_desc">教えたルールと、エージェントが覚えているあなたのことをバックアップ・移行します：クリップボードにコピー、ファイルに保存、または LAN 上のペアリング済み端末から取得。あなたの端末の間だけでやり取りし、サーバーにはアップロードしません。</string>
+    <string name="tc_backup_desc">教えたルールと、Echo が覚えているあなたのことをバックアップ・移行します：クリップボードにコピー、ファイルに保存、または LAN 上のペアリング済み端末から取得。あなたの端末の間だけでやり取りし、サーバーにはアップロードしません。</string>
     <string name="tc_backup_export_clipboard">クリップボードにコピー</string>
     <string name="tc_backup_copied">知識パックをクリップボードにコピーしました</string>
     <string name="tc_backup_import_clipboard">クリップボードから読み込む</string>
@@ -1814,8 +1814,8 @@
     <string name="tc_backup_pulled">%1$s からルール %2$d 件とメモリー %3$d 件を取得しました</string>
     <!-- Skills, audit log and voice settings: localized, emoji replaced by icons (2026-10-14) -->
     <string name="skills_group_prompt">プロンプトスキル</string>
-    <string name="skills_group_prompt_desc">関連するタスクに自動で追加され、エージェントがその作業をよく理解できます</string>
-    <string name="skills_group_tools">エージェントが使えるツール</string>
+    <string name="skills_group_prompt_desc">関連するタスクに自動で追加され、Echo がその作業をよく理解できます</string>
+    <string name="skills_group_tools">Echo が使えるツール</string>
     <string name="skills_group_tools_desc">基本の操作・認識ツールはロックされています。不要なものはオフにして、誤操作と見える範囲を減らせます</string>
     <string name="audit_clear">消去</string>
     <string name="audit_description">中・高リスクのツール呼び出しをすべて記録します（機密の値はマスク済み）。最新の 300 件を保存します。</string>
@@ -1823,7 +1823,7 @@
     <string name="audit_risk_high">高リスク</string>
     <string name="audit_risk_medium">中リスク</string>
     <string name="audit_risk_low">低リスク</string>
-    <string name="audit_empty">監査記録はまだありません。エージェントが中・高リスクのツールを呼び出すとここに表示されます。</string>
+    <string name="audit_empty">監査記録はまだありません。Echo が中・高リスクのツールを呼び出すとここに表示されます。</string>
     <string name="audit_tampered">署名の検証に失敗しました：この記録は改ざんまたは偽造された可能性があります</string>
     <string name="audit_status_blocked">ブロック（%1$s）</string>
     <string name="audit_status_ok">成功</string>

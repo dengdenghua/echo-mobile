@@ -434,7 +434,7 @@
     <string name="settings_val_plugins_loaded">3개 로드됨</string>
     <string name="settings_device_control_section">화면 &amp; 원격 제어</string>
     <string name="settings_device_mgmt_desc">연결되고 제어 가능한 이전 휴대폰 관리</string>
-    <string name="settings_plugin_desc">에이전트가 호출할 수 있는 스킬 및 확장 프로그램 관리</string>
+    <string name="settings_plugin_desc">Echo가 호출할 수 있는 스킬 및 확장 프로그램 관리</string>
 
     <!-- Shared status -->
     <string name="status_online">온라인</string>
@@ -516,8 +516,8 @@
     <string name="routine_alarm_skipped_title">루틴 건너뜀</string>
     <string name="routine_alarm_skipped_text">\"%1$s\"이(가) 트리거되었지만 모델이 구성되지 않았습니다</string>
     <string name="routine_alarm_retry_title">루틴 대기 중</string>
-    <string name="routine_alarm_retry_text">\"%1$s\"이(가) 트리거되었지만 에이전트가 사용 중입니다. 재시도 %2$d/%3$d이(가) 나중에 실행됩니다.</string>
-    <string name="routine_alarm_busy_give_up_text">\"%1$s\"이(가) 트리거되었지만 여러 번 재시도 후에도 에이전트가 여전히 사용 중입니다</string>
+    <string name="routine_alarm_retry_text">\"%1$s\"이(가) 트리거되었지만 Echo가 사용 중입니다. 재시도 %2$d/%3$d이(가) 나중에 실행됩니다.</string>
+    <string name="routine_alarm_busy_give_up_text">\"%1$s\"이(가) 트리거되었지만 여러 번 재시도 후에도 Echo가 여전히 사용 중입니다</string>
     <string name="browser_loading_text">로드 중...</string>
     <string name="browser_engine_chip_description">검색 엔진 전환</string>
     <string name="browser_url_hint">검색 또는 URL 입력</string>
@@ -587,7 +587,7 @@
     <string name="browser_menu_mobile_mode">모바일 모드</string>
     <string name="browser_menu_desktop_mode">데스크톱 모드</string>
     <string name="browser_menu_userscript_store">유저스크립트 스토어</string>
-    <string name="browser_menu_record_agent">에이전트 작업 기록</string>
+    <string name="browser_menu_record_agent">Echo 작업 기록</string>
     <string name="browser_menu_stop_recording">기록 중지</string>
     <string name="browser_menu_cloud_sync">클라우드 동기화</string>
     <string name="browser_menu_stealth_protection">지문 보호</string>
@@ -773,14 +773,14 @@
     <string name="pc_remote_webrtc_webview_unavailable">시스템 WebView를 사용할 수 없어 원격 데스크톱을 시작할 수 없습니다.</string>
     <string name="routines_title">자동화</string>
     <string name="routines_empty_state">아직 루틴이 없습니다.\n\n채팅에서 명령을 길게 눌러 저장하거나, 영감의 광장에서 템플릿을 복제하여 여기서 재생, 예약 또는 개선하세요.</string>
-    <string name="routines_count_summary">총 %1$d개 · 학습된 빠른 경로는 더 빠르게 실행됩니다. 그렇지 않으면 에이전트가 실행 시 화면에서 다시 계획합니다</string>
+    <string name="routines_count_summary">총 %1$d개 · 학습된 빠른 경로는 더 빠르게 실행됩니다. 그렇지 않으면 Echo가 실행 시 화면에서 다시 계획합니다</string>
     <string name="routines_item_target_and_count">대상 %1$s · %2$d회 실행</string>
     <string name="routines_item_schedule_daily"> · 매일 %1$s</string>
     <string name="routines_item_schedule_once"> · 1회 %1$s</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">실행</string>
     <string name="routines_forget_fastpath_title">빠른 경로 잊기</string>
-    <string name="routines_forget_fastpath_message">\"%1$s\"은(는) %2$d단계 빠른 경로를 학습했습니다. 잊으면 에이전트가 화면에서 다시 계획하고 다음 실행 시 다시 기록합니다.</string>
+    <string name="routines_forget_fastpath_message">\"%1$s\"은(는) %2$d단계 빠른 경로를 학습했습니다. 잊으면 Echo가 화면에서 다시 계획하고 다음 실행 시 다시 기록합니다.</string>
     <string name="routines_forget_button">잊기</string>
     <string name="routines_forgotten_toast">빠른 경로가 잊혀졌습니다</string>
     <string name="routines_schedule_dialog_title">%1$s 예약</string>
@@ -791,7 +791,7 @@
     <string name="routines_set_once_toast">%1$s에 1회 실행으로 설정됨</string>
     <string name="routines_cancel_scheduling_toast">예약 취소됨</string>
     <string name="skills_screen_title">스킬 &amp; 도구</string>
-    <string name="skills_screen_description">에이전트는 %1$d개 도구를 호출할 수 있습니다. 핵심 제어/인식 도구는 잠겨 있으며, 나머지는 오용과 프라이버시 노출을 줄이기 위해 필요에 따라 비활성화할 수 있습니다.</string>
+    <string name="skills_screen_description">Echo는 %1$d개 도구를 호출할 수 있습니다. 핵심 제어/인식 도구는 잠겨 있으며, 나머지는 오용과 프라이버시 노출을 줄이기 위해 필요에 따라 비활성화할 수 있습니다.</string>
     <string name="skills_badge_core">핵심</string>
     <string name="trustcenter_title">신뢰 센터</string>
     <string name="trustcenter_description">다음 권한을 통해 기기를 조작합니다. 상태를 보거나, 관리를 열거나, 언제든지 접근을 취소할 수 있습니다.</string>
@@ -822,7 +822,7 @@
     <string name="plugin_available_group_title">사용 가능한 스킬</string>
     <string name="plugin_empty_state">사용 가능한 스킬이 없습니다</string>
     <string name="plugin_install_button">파일에서 설치</string>
-    <string name="plugin_install_note">참고: 스킬은 .dex 파일 + manifest.json이 필요합니다. 설치 후 에이전트가 호출 가능한 도구로 등록됩니다.</string>
+    <string name="plugin_install_note">참고: 스킬은 .dex 파일 + manifest.json이 필요합니다. 설치 후 Echo가 호출 가능한 도구로 등록됩니다.</string>
     <string name="plugin_error_status">오류</string>
     <string name="plugin_load_action">로드</string>
     <string name="plugin_load_success_toast">스킬이 로드됨</string>
@@ -957,10 +957,10 @@
     <string name="settings_remote_lan_title">원격 데스크톱 · LAN</string>
     <string name="settings_runtime_plain_desc">PC가 이 휴대폰에 작업을 디스패치하도록 허용</string>
     <string name="settings_workspace_title">스크립트 워크스페이스</string>
-    <string name="settings_workspace_desc">에이전트 스크립트가 WORKSPACE 상수를 통해 접근하는 기본 디렉토리. readFile/writeFile은 이 디렉토리와 Download/Documents로 제한됩니다. 디렉토리가 없으면 자동 생성됩니다.</string>
+    <string name="settings_workspace_desc">Echo가 실행하는 스크립트가 WORKSPACE 상수를 통해 접근하는 기본 디렉토리. readFile/writeFile은 이 디렉토리와 Download/Documents로 제한됩니다. 디렉토리가 없으면 자동 생성됩니다.</string>
     <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
     <string name="chat_workspace_pick_title">이 세션의 워크스페이스 선택</string>
-    <string name="chat_workspace_pick_desc">Codex를 실행할 때 --cd로 프로젝트 디렉토리를 선택하는 것과 비슷합니다. 에이전트가 이 디렉토리의 코드와 파일을 읽을 수 있으며, run_code/run_python의 WORKSPACE도 여기로 전환됩니다. 비워두면 전역 기본값을 사용합니다.</string>
+    <string name="chat_workspace_pick_desc">Codex를 실행할 때 --cd로 프로젝트 디렉토리를 선택하는 것과 비슷합니다. Echo가 이 디렉토리의 코드와 파일을 읽을 수 있으며, run_code/run_python의 WORKSPACE도 여기로 전환됩니다. 비워두면 전역 기본값을 사용합니다.</string>
     <string name="chat_workspace_change">워크스페이스 변경</string>
     <string name="chat_artifact_preview">미리보기</string>
     <string name="chat_artifact_open">열기</string>
@@ -1435,7 +1435,7 @@
     <string name="hub_local_characters">로컬 캐릭터</string>
     <string name="settings_more_title">추가 설정</string>
     <string name="settings_more_desc">언어, 권한 모드, 채널, LAN 및 기기</string>
-    <string name="activity_row_desc">에이전트가 실행한 모든 작업 기록</string>
+    <string name="activity_row_desc">Echo가 실행한 모든 작업 기록</string>
     <string name="chat_input_actions">대화 바로가기</string>
     <string name="chat_text_mode">메시지 입력</string>
     <string name="chat_voice_mode">음성 메시지</string>
@@ -1734,7 +1734,7 @@
     <string name="tc_mode_full_title">전체 권한 모드 · 남는 폰·다중 제어용 폰</string>
     <string name="tc_mode_full_desc">모든 기능을 엽니다. 호스트, LAN, 능동 규칙이 확인 없이 모든 고위험 도구를 실행할 수 있고, 파일 도구도 더 이상 /sdcard로 제한되지 않습니다. 안전성이 크게 낮아지므로 완전히 관리하는 남는 폰이나 자동화 전용 폰에서만 쓰고, 평소 쓰는 휴대폰에서는 켜지 마세요. 개인정보 스캔, 감사 로그, 회로 차단기는 끌 수 없습니다.</string>
     <string name="tc_dry_run_title">데모 / 읽기 전용 모드</string>
-    <string name="tc_dry_run_desc">에이전트는 화면을 보고 계획하고 작업을 끝까지 진행하지만, 무언가를 바꾸는 동작(탭, 입력, 메시지, 설치, 코드 실행)은 모두 건너뛰고 보여주기만 합니다. 처음 쓰거나 불안할 때 무엇을 할지 안전하게 미리 볼 수 있습니다.</string>
+    <string name="tc_dry_run_desc">Echo는 화면을 보고 계획하고 작업을 끝까지 진행하지만, 무언가를 바꾸는 동작(탭, 입력, 메시지, 설치, 코드 실행)은 모두 건너뛰고 보여주기만 합니다. 처음 쓰거나 불안할 때 무엇을 할지 안전하게 미리 볼 수 있습니다.</string>
     <string name="tc_remote_high_risk_title">원격 출처의 고위험 도구 실행 허용</string>
     <string name="tc_remote_high_risk_desc">켜면 호스트 WebSocket, LAN HTTP, 능동 규칙이 SMS 보내기, 앱 설치, 파일 읽기·쓰기·삭제 같은 고위험 도구를 확인 없이 실행할 수 있습니다. 기본값은 꺼짐(차단)이며, 완전히 관리하는 환경에서만 켜세요.</string>
     <string name="tc_sms_otp_title">SMS 인증번호 자동 복사</string>
@@ -1742,16 +1742,16 @@
     <string name="tc_sms_otp_warning">인증번호는 시스템 클립보드에 들어가 다른 앱이 읽을 수 있습니다. 필요할 때만 켜세요.</string>
     <string name="tc_section_access_audit">접근 및 감사</string>
     <string name="tc_nav_acl_title">채널 접근 제어(ACL)</string>
-    <string name="tc_nav_acl_desc">채팅 채널별로 에이전트에 메시지를 보낼 수 있는 사람과 접근 제어·원격 고위험 도구 스위치를 관리합니다</string>
+    <string name="tc_nav_acl_desc">채팅 채널별로 Echo에게 메시지를 보낼 수 있는 사람과 접근 제어·원격 고위험 도구 스위치를 관리합니다</string>
     <string name="tc_nav_audit_title">작업 감사 로그</string>
-    <string name="tc_nav_audit_desc">에이전트의 최근 중·고위험 도구 호출과 차단된 내역을 봅니다</string>
+    <string name="tc_nav_audit_desc">Echo의 최근 중·고위험 도구 호출과 차단된 내역을 봅니다</string>
     <string name="tc_section_evolution">자기 개선 · 실측</string>
     <string name="tc_section_lessons">작업 경험 · 이 휴대폰이 배운 것</string>
-    <string name="tc_section_memory">기억 · 에이전트가 기억하는 당신</string>
+    <string name="tc_section_memory">기억 · Echo가 기억하는 당신</string>
     <string name="tc_section_backup">지식 백업 · 가져가기</string>
     <string name="tc_readiness_title">준비 상태</string>
     <string name="tc_readiness_count">%2$d개 중 %1$d개 준비됨</string>
-    <string name="tc_readiness_missing">아직 필요합니다: %1$s. 설정해야 에이전트가 작동합니다.</string>
+    <string name="tc_readiness_missing">아직 필요합니다: %1$s. 설정해야 Echo가 작동합니다.</string>
     <string name="tc_list_separator">,\u0020</string>
     <string name="tc_readiness_ok">필수 설정이 모두 끝났습니다. 바로 시작할 수 있습니다.</string>
     <string name="tc_metric_reflex">반사 빠른 경로 적중률</string>
@@ -1778,9 +1778,9 @@
     <string name="tc_lessons_add">규칙 가르치기</string>
     <string name="tc_lessons_reset">경험 초기화(규칙 유지)</string>
     <string name="tc_lessons_dialog_title">작업 규칙 가르치기</string>
-    <string name="tc_lessons_dialog_body">에이전트에게 작업 방법을 한 문장으로 알려 주세요. 가장 높은 우선순위로 적용됩니다. 예: 타오바오를 열면 먼저 팝업 닫기, 보내기 전에 받는 사람 확인하기.</string>
+    <string name="tc_lessons_dialog_body">Echo에게 작업 방법을 한 문장으로 알려 주세요. 가장 높은 우선순위로 적용됩니다. 예: 타오바오를 열면 먼저 팝업 닫기, 보내기 전에 받는 사람 확인하기.</string>
     <string name="tc_lessons_dialog_hint">규칙 입력…</string>
-    <string name="tc_memory_empty">에이전트가 아직 당신에 대해 기억하는 것이 없습니다. 대화에서 말한 선호와 사실(자주 쓰는 앱, 못 먹는 음식, 호칭, 주소 등)을 기억하며, \'기억 추가\'로 직접 알려 줄 수도 있습니다. 이 정보는 이 휴대폰에만 저장되고 언제든 지울 수 있습니다.</string>
+    <string name="tc_memory_empty">Echo가 아직 당신에 대해 기억하는 것이 없습니다. 대화에서 말한 선호와 사실(자주 쓰는 앱, 못 먹는 음식, 호칭, 주소 등)을 기억하며, \'기억 추가\'로 직접 알려 줄 수도 있습니다. 이 정보는 이 휴대폰에만 저장되고 언제든 지울 수 있습니다.</string>
     <string name="tc_memory_type_preference">선호</string>
     <string name="tc_memory_type_fact">사실</string>
     <string name="tc_memory_type_context">최근</string>
@@ -1788,9 +1788,9 @@
     <string name="tc_memory_add">기억 추가</string>
     <string name="tc_memory_clear">기억 지우기</string>
     <string name="tc_memory_dialog_title">나에 대해 기억시키기</string>
-    <string name="tc_memory_dialog_body">에이전트가 기억할 선호나 사실을 알려 주세요. 이후 작업에 반영됩니다. 예: 배달은 Ele.me로 시킨다, 땅콩 알레르기가 있다, 라오왕이라고 불러 줘.</string>
+    <string name="tc_memory_dialog_body">Echo가 기억할 선호나 사실을 알려 주세요. 이후 작업에 반영됩니다. 예: 배달은 Ele.me로 시킨다, 땅콩 알레르기가 있다, 라오왕이라고 불러 줘.</string>
     <string name="tc_memory_dialog_hint">입력…</string>
-    <string name="tc_backup_desc">가르친 규칙과 에이전트가 기억하는 당신에 대한 정보를 백업하거나 옮깁니다: 클립보드에 복사, 파일로 저장, 또는 LAN의 페어링된 기기에서 가져오기. 내 기기 사이에서만 오가며 서버에는 올리지 않습니다.</string>
+    <string name="tc_backup_desc">가르친 규칙과 Echo가 기억하는 당신에 대한 정보를 백업하거나 옮깁니다: 클립보드에 복사, 파일로 저장, 또는 LAN의 페어링된 기기에서 가져오기. 내 기기 사이에서만 오가며 서버에는 올리지 않습니다.</string>
     <string name="tc_backup_export_clipboard">클립보드에 복사</string>
     <string name="tc_backup_copied">지식 팩을 클립보드에 복사했습니다</string>
     <string name="tc_backup_import_clipboard">클립보드에서 가져오기</string>
@@ -1808,8 +1808,8 @@
     <string name="tc_backup_pulled">%1$s에서 규칙 %2$d개와 기억 %3$d개를 가져왔습니다</string>
     <!-- Skills, audit log and voice settings: localized, emoji replaced by icons (2026-10-14) -->
     <string name="skills_group_prompt">프롬프트 스킬</string>
-    <string name="skills_group_prompt_desc">관련 작업에 자동으로 추가되어 에이전트가 일을 더 잘 이해합니다</string>
-    <string name="skills_group_tools">에이전트가 쓸 수 있는 도구</string>
+    <string name="skills_group_prompt_desc">관련 작업에 자동으로 추가되어 Echo가 일을 더 잘 이해합니다</string>
+    <string name="skills_group_tools">Echo가 쓸 수 있는 도구</string>
     <string name="skills_group_tools_desc">핵심 제어·인식 도구는 잠겨 있습니다. 필요 없는 나머지는 꺼서 실수와 노출을 줄이세요</string>
     <string name="audit_clear">지우기</string>
     <string name="audit_description">중·고위험 도구 호출을 모두 기록합니다(민감한 값은 가림). 최근 300건을 보관합니다.</string>
@@ -1817,7 +1817,7 @@
     <string name="audit_risk_high">고위험</string>
     <string name="audit_risk_medium">중위험</string>
     <string name="audit_risk_low">저위험</string>
-    <string name="audit_empty">아직 감사 기록이 없습니다. 에이전트가 중·고위험 도구를 호출하면 여기에 표시됩니다.</string>
+    <string name="audit_empty">아직 감사 기록이 없습니다. Echo가 중·고위험 도구를 호출하면 여기에 표시됩니다.</string>
     <string name="audit_tampered">서명 검증 실패: 이 기록은 변조되거나 위조되었을 수 있습니다</string>
     <string name="audit_status_blocked">차단됨(%1$s)</string>
     <string name="audit_status_ok">성공</string>

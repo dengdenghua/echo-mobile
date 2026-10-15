@@ -434,7 +434,7 @@
     <string name="settings_val_plugins_loaded">3 carregados</string>
     <string name="settings_device_control_section">Tela &amp; controle remoto</string>
     <string name="settings_device_mgmt_desc">Gerencie celulares antigos conectados e controláveis</string>
-    <string name="settings_plugin_desc">Gerencie habilidades e extensões que o agente pode invocar</string>
+    <string name="settings_plugin_desc">Gerencie habilidades e extensões que o Echo pode invocar</string>
 
     <!-- Status compartilhado -->
     <string name="status_online">Online</string>
@@ -516,8 +516,8 @@
     <string name="routine_alarm_skipped_title">Rotina ignorada</string>
     <string name="routine_alarm_skipped_text">\"%1$s\" foi acionada, mas o modelo não está configurado</string>
     <string name="routine_alarm_retry_title">Rotina na fila</string>
-    <string name="routine_alarm_retry_text">\"%1$s\" foi acionada, mas o agente está ocupado. A tentativa %2$d/%3$d será executada mais tarde.</string>
-    <string name="routine_alarm_busy_give_up_text">\"%1$s\" foi acionada, mas o agente continua ocupado após várias tentativas</string>
+    <string name="routine_alarm_retry_text">\"%1$s\" foi acionada, mas o Echo está ocupado. A tentativa %2$d/%3$d será executada mais tarde.</string>
+    <string name="routine_alarm_busy_give_up_text">\"%1$s\" foi acionada, mas o Echo continua ocupado após várias tentativas</string>
     <string name="browser_loading_text">Carregando...</string>
     <string name="browser_engine_chip_description">Trocar mecanismo de busca</string>
     <string name="browser_url_hint">Buscar ou digitar URL</string>
@@ -587,7 +587,7 @@
     <string name="browser_menu_mobile_mode">Modo móvel</string>
     <string name="browser_menu_desktop_mode">Modo desktop</string>
     <string name="browser_menu_userscript_store">Loja de Userscripts</string>
-    <string name="browser_menu_record_agent">Gravar ações do agente</string>
+    <string name="browser_menu_record_agent">Gravar ações do Echo</string>
     <string name="browser_menu_stop_recording">Parar gravação</string>
     <string name="browser_menu_cloud_sync">Sincronização na nuvem</string>
     <string name="browser_menu_stealth_protection">Proteção de impressão digital</string>
@@ -773,14 +773,14 @@
     <string name="pc_remote_webrtc_webview_unavailable">WebView do sistema indisponível, não é possível iniciar a área de trabalho remota.</string>
     <string name="routines_title">Automação</string>
     <string name="routines_empty_state">Nenhuma rotina ainda.\n\nPressione e segure um comando no chat para salvá-lo, ou clone um modelo da Praça de inspiração para reproduzir, agendar ou refinar aqui.</string>
-    <string name="routines_count_summary">%1$d total · caminhos rápidos aprendidos executam mais rápido; caso contrário, o agente replaneja a partir da tela ao executar</string>
+    <string name="routines_count_summary">%1$d total · caminhos rápidos aprendidos executam mais rápido; caso contrário, o Echo replaneja a partir da tela ao executar</string>
     <string name="routines_item_target_and_count">Destino %1$s · executada %2$d vezes</string>
     <string name="routines_item_schedule_daily"> · Diariamente %1$s</string>
     <string name="routines_item_schedule_once"> · Uma vez %1$s</string>
     <string name="routines_item_lightning_steps">%1$d</string>
     <string name="routines_item_run_button">Executar</string>
     <string name="routines_forget_fastpath_title">Esquecer caminho rápido</string>
-    <string name="routines_forget_fastpath_message">\"%1$s\" aprendeu um caminho rápido de %2$d etapas. Após esquecer, o agente vai replanejar a partir da tela e registrar novamente na próxima execução.</string>
+    <string name="routines_forget_fastpath_message">\"%1$s\" aprendeu um caminho rápido de %2$d etapas. Após esquecer, o Echo vai replanejar a partir da tela e registrar novamente na próxima execução.</string>
     <string name="routines_forget_button">Esquecer</string>
     <string name="routines_forgotten_toast">Caminho rápido esquecido</string>
     <string name="routines_schedule_dialog_title">Agendar %1$s</string>
@@ -791,7 +791,7 @@
     <string name="routines_set_once_toast">Definido para executar uma vez às %1$s</string>
     <string name="routines_cancel_scheduling_toast">Agendamento cancelado</string>
     <string name="skills_screen_title">Habilidades &amp; Ferramentas</string>
-    <string name="skills_screen_description">O agente pode invocar %1$d ferramentas. As ferramentas centrais de controle/percepção são bloqueadas; as outras podem ser desativadas sob demanda para reduzir uso indevido e exposição de privacidade.</string>
+    <string name="skills_screen_description">O Echo pode invocar %1$d ferramentas. As ferramentas centrais de controle/percepção são bloqueadas; as outras podem ser desativadas sob demanda para reduzir uso indevido e exposição de privacidade.</string>
     <string name="skills_badge_core">Núcleo</string>
     <string name="trustcenter_title">Central de confiança</string>
     <string name="trustcenter_description">Opera seu dispositivo pelas permissões a seguir. Veja o status, abra o gerenciamento ou revogue o acesso quando quiser.</string>
@@ -822,7 +822,7 @@
     <string name="plugin_available_group_title">Habilidades disponíveis</string>
     <string name="plugin_empty_state">Nenhuma habilidade disponível</string>
     <string name="plugin_install_button">Instalar do arquivo</string>
-    <string name="plugin_install_note">Nota: habilidades requerem um arquivo .dex + manifest.json. Após a instalação, elas se registram como ferramentas invocáveis pelo agente.</string>
+    <string name="plugin_install_note">Nota: habilidades requerem um arquivo .dex + manifest.json. Após a instalação, elas se registram como ferramentas invocáveis pelo Echo.</string>
     <string name="plugin_error_status">Erro</string>
     <string name="plugin_load_action">Carregar</string>
     <string name="plugin_load_success_toast">Habilidade carregada</string>
@@ -957,10 +957,10 @@
     <string name="settings_remote_lan_title">Área de trabalho remota · LAN</string>
     <string name="settings_runtime_plain_desc">Deixe o PC despachar tarefas para este celular</string>
     <string name="settings_workspace_title">Espaço de trabalho de scripts</string>
-    <string name="settings_workspace_desc">Diretório padrão acessado pela constante WORKSPACE pelos scripts do agente. readFile/writeFile são restritos a este diretório e a Download/Documents; o diretório é criado automaticamente se não existir.</string>
+    <string name="settings_workspace_desc">Diretório padrão acessado pela constante WORKSPACE pelos scripts que o Echo executa. readFile/writeFile são restritos a este diretório e a Download/Documents; o diretório é criado automaticamente se não existir.</string>
     <string name="settings_workspace_hint">/sdcard/Download/Octopus/</string>
     <string name="chat_workspace_pick_title">Escolher espaço de trabalho desta sessão</string>
-    <string name="chat_workspace_pick_desc">Similar a selecionar um diretório de projeto com --cd ao iniciar o Codex. O agente pode ler código e arquivos neste diretório, e o WORKSPACE para run_code/run_python também muda para aqui. Deixe vazio para usar o padrão global.</string>
+    <string name="chat_workspace_pick_desc">Similar a selecionar um diretório de projeto com --cd ao iniciar o Codex. O Echo pode ler código e arquivos neste diretório, e o WORKSPACE para run_code/run_python também muda para aqui. Deixe vazio para usar o padrão global.</string>
     <string name="chat_workspace_change">Trocar espaço de trabalho</string>
     <string name="chat_artifact_preview">Pré-visualizar</string>
     <string name="chat_artifact_open">Abrir</string>
@@ -1436,7 +1436,7 @@
     <string name="hub_local_characters">Personagens locais</string>
     <string name="settings_more_title">Mais configurações</string>
     <string name="settings_more_desc">Idioma, modo de permissão, canais, rede local e dispositivos</string>
-    <string name="activity_row_desc">Registro de cada tarefa executada pelo agente</string>
+    <string name="activity_row_desc">Registro de cada tarefa executada pelo Echo</string>
     <string name="chat_input_actions">Atalhos da conversa</string>
     <string name="chat_text_mode">Digitar uma mensagem</string>
     <string name="chat_voice_mode">Mensagem de voz</string>
@@ -1735,7 +1735,7 @@
     <string name="tc_mode_full_title">Modo de permissão total · telefone reserva ou de frota</string>
     <string name="tc_mode_full_desc">Libera tudo. O host, a rede local e as regras proativas podem executar qualquer ferramenta de alto risco sem perguntar, e as ferramentas de arquivo deixam de ficar limitadas a /sdcard. Isso reduz muito a segurança: use só em um telefone reserva ou dedicado à automação que você controla por completo, nunca no telefone do dia a dia. O verificador de privacidade, o registro de auditoria e o disjuntor não podem ser desligados.</string>
     <string name="tc_dry_run_title">Modo demonstração / somente leitura</string>
-    <string name="tc_dry_run_desc">O agente ainda pode olhar a tela, planejar e percorrer a tarefa, mas toda ação que muda algo (toques, digitação, mensagens, instalações, executar código) é pulada e só mostrada. Uma forma segura de ver o que ele faria no primeiro uso ou quando estiver em dúvida.</string>
+    <string name="tc_dry_run_desc">O Echo ainda pode olhar a tela, planejar e percorrer a tarefa, mas toda ação que muda algo (toques, digitação, mensagens, instalações, executar código) é pulada e só mostrada. Uma forma segura de ver o que ele faria no primeiro uso ou quando estiver em dúvida.</string>
     <string name="tc_remote_high_risk_title">Permitir que fontes remotas usem ferramentas de alto risco</string>
     <string name="tc_remote_high_risk_desc">Quando ligado, o WebSocket do host, o HTTP da rede local e as regras proativas podem executar sem perguntar ferramentas de alto risco, como enviar SMS, instalar apps ou ler, gravar e apagar arquivos. Desligado (bloqueado) por padrão; ligue só em um ambiente que você controla por completo.</string>
     <string name="tc_sms_otp_title">Copiar códigos de verificação dos SMS</string>
@@ -1743,16 +1743,16 @@
     <string name="tc_sms_otp_warning">Os códigos vão para a área de transferência do sistema, onde outros apps podem lê-los. Ligue só se precisar.</string>
     <string name="tc_section_access_audit">Acesso e auditoria</string>
     <string name="tc_nav_acl_title">Controle de acesso dos canais (ACL)</string>
-    <string name="tc_nav_acl_desc">Escolha quem pode falar com o agente em cada canal e as chaves de controle de acesso e de ferramentas remotas de alto risco</string>
+    <string name="tc_nav_acl_desc">Escolha quem pode falar com o Echo em cada canal e as chaves de controle de acesso e de ferramentas remotas de alto risco</string>
     <string name="tc_nav_audit_title">Registro de auditoria de ações</string>
-    <string name="tc_nav_audit_desc">Veja as chamadas recentes do agente a ferramentas de risco médio e alto e o que foi bloqueado</string>
+    <string name="tc_nav_audit_desc">Veja as chamadas recentes do Echo a ferramentas de risco médio e alto e o que foi bloqueado</string>
     <string name="tc_section_evolution">Autoaperfeiçoamento · medido</string>
     <string name="tc_section_lessons">Lições · o que este telefone aprendeu</string>
-    <string name="tc_section_memory">Memória · o que o agente lembra sobre você</string>
+    <string name="tc_section_memory">Memória · o que o Echo lembra sobre você</string>
     <string name="tc_section_backup">Backup do conhecimento · leve com você</string>
     <string name="tc_readiness_title">Prontidão</string>
     <string name="tc_readiness_count">Prontos: %1$d de %2$d</string>
-    <string name="tc_readiness_missing">Ainda falta: %1$s. O agente não funciona até você configurar.</string>
+    <string name="tc_readiness_missing">Ainda falta: %1$s. O Echo não funciona até você configurar.</string>
     <string name="tc_list_separator">,\u0020</string>
     <string name="tc_readiness_ok">O essencial está pronto. Você já pode começar.</string>
     <string name="tc_metric_reflex">Acertos do caminho rápido reflexo</string>
@@ -1779,9 +1779,9 @@
     <string name="tc_lessons_add">Ensinar uma regra</string>
     <string name="tc_lessons_reset">Redefinir lições (manter regras)</string>
     <string name="tc_lessons_dialog_title">Ensine uma regra</string>
-    <string name="tc_lessons_dialog_body">Diga ao agente em uma frase como fazer algo. Isso é aplicado com prioridade máxima. Por exemplo: feche o pop-up antes de usar o Taobao; confirme para quem está escrevendo antes de enviar.</string>
+    <string name="tc_lessons_dialog_body">Diga ao Echo em uma frase como fazer algo. Isso é aplicado com prioridade máxima. Por exemplo: feche o pop-up antes de usar o Taobao; confirme para quem está escrevendo antes de enviar.</string>
     <string name="tc_lessons_dialog_hint">Digite uma regra…</string>
-    <string name="tc_memory_empty">O agente ainda não lembra nada sobre você. Ele anota preferências e fatos que você menciona no chat (apps que usa, comidas que evita, como chamar você, seu endereço), e você pode usar Lembrar algo para contar diretamente. Tudo fica neste telefone e pode ser apagado a qualquer momento.</string>
+    <string name="tc_memory_empty">O Echo ainda não lembra nada sobre você. Ele anota preferências e fatos que você menciona no chat (apps que usa, comidas que evita, como chamar você, seu endereço), e você pode usar Lembrar algo para contar diretamente. Tudo fica neste telefone e pode ser apagado a qualquer momento.</string>
     <string name="tc_memory_type_preference">Preferência</string>
     <string name="tc_memory_type_fact">Fato</string>
     <string name="tc_memory_type_context">Recente</string>
@@ -1789,9 +1789,9 @@
     <string name="tc_memory_add">Lembrar algo</string>
     <string name="tc_memory_clear">Limpar memória</string>
     <string name="tc_memory_dialog_title">Lembrar algo sobre você</string>
-    <string name="tc_memory_dialog_body">Diga ao agente uma preferência ou um fato para guardar. As próximas tarefas vão considerar isso. Por exemplo: peço comida pelo Ele.me; tenho alergia a amendoim; me chame de Lao Wang.</string>
+    <string name="tc_memory_dialog_body">Diga ao Echo uma preferência ou um fato para guardar. As próximas tarefas vão considerar isso. Por exemplo: peço comida pelo Ele.me; tenho alergia a amendoim; me chame de Lao Wang.</string>
     <string name="tc_memory_dialog_hint">Digite algo…</string>
-    <string name="tc_backup_desc">Faça backup ou mova as regras que você ensinou e o que o agente lembra sobre você: copie para a área de transferência, salve em um arquivo ou traga de um dispositivo pareado na rede local. Só circula entre seus dispositivos e nunca é enviado a um servidor.</string>
+    <string name="tc_backup_desc">Faça backup ou mova as regras que você ensinou e o que o Echo lembra sobre você: copie para a área de transferência, salve em um arquivo ou traga de um dispositivo pareado na rede local. Só circula entre seus dispositivos e nunca é enviado a um servidor.</string>
     <string name="tc_backup_export_clipboard">Copiar para a área de transferência</string>
     <string name="tc_backup_copied">Pacote de conhecimento copiado para a área de transferência</string>
     <string name="tc_backup_import_clipboard">Importar da área de transferência</string>
@@ -1809,16 +1809,16 @@
     <string name="tc_backup_pulled">Trazido de %1$s: %2$d regras, %3$d memórias</string>
     <!-- Skills, audit log and voice settings: localized, emoji replaced by icons (2026-10-14) -->
     <string name="skills_group_prompt">Habilidades de prompt</string>
-    <string name="skills_group_prompt_desc">Entram sozinhas nas tarefas relacionadas, para o agente entender melhor o trabalho</string>
-    <string name="skills_group_tools">Ferramentas que o agente pode usar</string>
-    <string name="skills_group_tools_desc">As ferramentas básicas de controle e percepção ficam bloqueadas; desligue as outras que não precisa, para reduzir erros e o que o agente pode ver</string>
+    <string name="skills_group_prompt_desc">Entram sozinhas nas tarefas relacionadas, para o Echo entender melhor o trabalho</string>
+    <string name="skills_group_tools">Ferramentas que o Echo pode usar</string>
+    <string name="skills_group_tools_desc">As ferramentas básicas de controle e percepção ficam bloqueadas; desligue as outras que não precisa, para reduzir erros e o que o Echo pode ver</string>
     <string name="audit_clear">Limpar</string>
     <string name="audit_description">Toda chamada a ferramentas de risco médio e alto fica registrada aqui, com valores sensíveis ocultos. As 300 mais recentes são mantidas.</string>
     <string name="audit_filter_all">Tudo %1$d</string>
     <string name="audit_risk_high">Risco alto</string>
     <string name="audit_risk_medium">Risco médio</string>
     <string name="audit_risk_low">Risco baixo</string>
-    <string name="audit_empty">Ainda não há registros. Eles aparecem aqui quando o agente usa uma ferramenta de risco médio ou alto.</string>
+    <string name="audit_empty">Ainda não há registros. Eles aparecem aqui quando o Echo usa uma ferramenta de risco médio ou alto.</string>
     <string name="audit_tampered">Falha na verificação da assinatura: este registro pode ter sido alterado ou forjado</string>
     <string name="audit_status_blocked">Bloqueado (%1$s)</string>
     <string name="audit_status_ok">Sucesso</string>
