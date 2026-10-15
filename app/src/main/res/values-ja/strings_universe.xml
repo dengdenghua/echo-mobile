@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ECHO Universe screen (UniverseScreen.kt / UniverseRepository.kt) -->
+    <string name="universe_title">ECHO Universe</string>
+    <string name="universe_subtitle">マイ Ghost</string>
+    <string name="universe_syncing">同期中</string>
+    <string name="universe_refresh">更新</string>
+
+    <string name="universe_identity_title">ユニバースでの身分</string>
+    <string name="universe_local_user">この端末のユーザー</string>
+    <string name="universe_identity_access">権限</string>
+    <string name="universe_ghost_active">Ghost アクティブ</string>
+    <string name="universe_edge_state">エッジ状態</string>
+    <string name="universe_realms_label">入れる領域</string>
+    <string name="universe_realm_personal">個人インスタンス</string>
+    <string name="universe_atlas_unchecked">Atlas の権限は未確認</string>
+    <string name="universe_atlas_allowed">Atlas 都市イベント：投稿できます（審査あり）</string>
+    <string name="universe_atlas_closed">Atlas 都市イベント：未開放</string>
+    <string name="universe_atlas_hint">Realm Pass を購入するか、審査で昇格すると、より広い範囲が開放されます。</string>
+
+    <string name="universe_service_title">ECHO サービス</string>
+    <string name="universe_base_url_label">ECHO ベース URL</string>
+    <string name="universe_runtime_url_label">ホスト Runtime HTTP</string>
+
+    <string name="universe_choose_character">キャラクターを選択</string>
+    <string name="universe_binding">連携中</string>
+    <string name="universe_bind_ghost">Ghost を連携</string>
+
+    <string name="universe_economy_title">デジタル生命経済</string>
+    <string name="universe_economy_subtitle">クレジット · 延命 · Realm パス</string>
+    <string name="universe_credits_amount">%1$d cr</string>
+    <string name="universe_ghost_not_renewed">Ghost は未延長</string>
+    <string name="universe_ghost_active_until">Ghost は %1$s まで有効</string>
+    <string name="universe_ghost_status">Ghost：%1$s</string>
+    <string name="universe_no_realm_pass">Realm Pass はまだありません</string>
+    <string name="universe_processing">処理中</string>
+    <string name="universe_monthly_pass">月パス %1$d</string>
+    <string name="universe_payment_note">支払いで得られるのはアクセス、延命、優先キュー、ツールのみです。canon への採用は保証されません。</string>
+
+    <string name="universe_advancing">進行中</string>
+    <string name="universe_advance_day">1 日進める</string>
+    <string name="universe_open_main_chat">メインチャットを開く</string>
+    <string name="universe_tick_hint">ECHO 生命場の tick を同期してから、現在の Ghost を更新します。</string>
+    <string name="universe_stat_focus">フォーカス</string>
+    <string name="universe_stat_diary">日記</string>
+    <string name="universe_stat_growth">成長</string>
+    <string name="universe_goals">目標</string>
+    <string name="universe_relations">関係</string>
+    <string name="universe_day">%1$d 日目</string>
+
+    <string name="universe_ghost_chat_title">Ghost と話す</string>
+    <string name="universe_chat_me">自分</string>
+    <string name="universe_chat_ghost">Ghost</string>
+    <string name="universe_chat_line">%1$s：%2$s</string>
+    <string name="universe_ghost_replying">Ghost が応答中</string>
+    <string name="universe_input_hint">メッセージを入力</string>
+    <string name="universe_waiting_reply">応答を待っています</string>
+    <string name="universe_send_to_host">ホストに送信</string>
+    <string name="universe_host_no_response">ホスト Runtime から応答がありません：%1$s</string>
+
+    <string name="universe_empty_title">まだユニバースに入っていません</string>
+    <string name="universe_empty_hint">Ghost はまだ連携されていません。上でキャラクターを選んで連携してください。</string>
+
+    <string name="universe_error_empty_prompt">Ghost に伝える言葉を入力してください。</string>
+    <string name="universe_error_empty_reply">ホスト Runtime から空の応答が返りました。</string>
+    <string name="universe_error_http">ECHO へのリクエストに失敗しました：HTTP %1$d</string>
+    <string name="universe_error_empty_response">ECHO から空の応答が返りました。</string>
+</resources>

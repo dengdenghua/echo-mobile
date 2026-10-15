@@ -187,7 +187,7 @@ class WorkflowEngine(
          */
         fun defaultPromptCallback(context: Context): suspend (String) -> String = { prompt ->
             val apiKey = KVUtils.getLlmApiKey().trim()
-            check(apiKey.isNotEmpty()) { "未配置 LLM API Key，PROMPT 步骤无法执行" }
+            check(apiKey.isNotEmpty()) { context.getString(com.apk.claw.android.R.string.workflow_err_no_api_key) }
             val base = KVUtils.getLlmBaseUrl().trim().ifEmpty { "https://api.deepseek.com/v1" }
             val model = KVUtils.getLlmModelName().trim().ifEmpty { "deepseek-chat" }
             val apiUrl = if (base.endsWith("/chat/completions")) base

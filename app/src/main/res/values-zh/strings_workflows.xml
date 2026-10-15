@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Workflows screen (ui/featurescreens/WorkflowsActivity.kt). Keep the same keys in all six locales. -->
+<resources>
+    <string name="workflows_title">工作流</string>
+    <string name="workflows_import">导入</string>
+    <string name="workflows_new">新建工作流</string>
+    <string name="workflows_empty">还没有工作流\n点右上角 + 新建一个\n\n工作流可把多个工具、Prompt 和条件\n串联成可复用的自动化流程</string>
+    <string name="workflows_header_title">工作流编排</string>
+    <string name="workflows_header_desc">把多个步骤（工具调用 / 自然语言 Prompt / 条件分支）串联成可复用流程，支持变量传递 ${var} 和步骤间结果引用。</string>
+    <string name="workflows_stats">总数：%1$d · 累计运行：%2$d</string>
+    <string name="workflows_running_title">运行中</string>
+    <string name="workflows_running_message">正在执行：%1$s</string>
+    <string name="workflows_schedule_title">定时触发：%1$s</string>
+    <string name="workflows_schedule_desc">设定每天或一次性的触发时刻。留空两个字段并保存即取消定时。</string>
+    <string name="workflows_schedule_hour">时 (0-23)</string>
+    <string name="workflows_schedule_minute">分 (0-59)</string>
+    <string name="workflows_schedule_daily">每天重复触发</string>
+    <string name="workflows_schedule_once">仅触发一次</string>
+    <string name="workflows_step_count">%1$d 步</string>
+    <string name="workflows_run_summary">运行 %1$d 次 · %2$s</string>
+    <string name="workflows_last_run">上次 %1$s</string>
+    <string name="workflows_never_run">未运行过</string>
+    <string name="workflows_badge_daily">每天 %1$s</string>
+    <string name="workflows_badge_once">一次 %1$s</string>
+    <string name="workflows_run">运行</string>
+    <string name="workflows_edit">编辑</string>
+    <string name="workflows_schedule">定时</string>
+    <string name="workflows_export">导出</string>
+    <string name="workflows_editor_new">新建工作流</string>
+    <string name="workflows_editor_edit">编辑工作流</string>
+    <string name="workflows_field_name">名字</string>
+    <string name="workflows_field_description">描述</string>
+    <string name="workflows_steps">步骤</string>
+    <string name="workflows_step_default_name">步骤 %1$d</string>
+    <string name="workflows_add_step">添加</string>
+    <string name="workflows_no_steps">还没有步骤，点上方「添加」</string>
+    <string name="workflows_step_type">类型</string>
+    <string name="workflows_type_tool">工具</string>
+    <string name="workflows_type_prompt">Prompt</string>
+    <string name="workflows_type_condition">条件</string>
+    <string name="workflows_tool_name">工具名</string>
+    <string name="workflows_params_label">参数（支持 ${var} 引用前序输出）</string>
+    <string name="workflows_prompt_label">自然语言指令</string>
+    <string name="workflows_condition_label">条件 → 跳转目标（每行一条，格式：表达式 => stepId）</string>
+    <string name="workflows_condition_example">示例：${status} == \"ok\" => step_done\n支持运算符：== != contains > &lt;</string>
+    <string name="workflows_condition_step_ids">可选 stepId：%1$s</string>
+    <string name="workflows_output_var_label">输出变量名（可选，后续步骤可用 ${名称} 引用）</string>
+    <string name="workflows_result_success">运行成功</string>
+    <string name="workflows_result_failed">运行失败</string>
+    <string name="workflows_result_summary">耗时：%1$d ms · 步骤数：%2$d</string>
+    <string name="workflows_result_error">错误：%1$s</string>
+    <string name="workflows_result_output">最终输出：</string>
+    <string name="workflows_result_logs">步骤日志：</string>
+</resources>

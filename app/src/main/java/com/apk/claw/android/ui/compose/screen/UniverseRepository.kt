@@ -1,4 +1,6 @@
 package com.apk.claw.android.ui.compose.screen
+import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.apk.claw.android.utils.OctoHttp
 
 import com.apk.claw.android.account.AccountConfig
@@ -310,7 +312,7 @@ internal object UniverseRepository {
         history: List<GhostChatMessage>,
     ): String = withContext(Dispatchers.IO) {
         val prompt = userText.trim()
-        if (prompt.isBlank()) error("请输入要对 Ghost 说的话")
+        if (prompt.isBlank()) error(ClawApplication.instance.getString(R.string.universe_error_empty_prompt))
         val messages = buildList {
             add(
                 mapOf(
@@ -348,7 +350,7 @@ internal object UniverseRepository {
         resp.choices.firstOrNull()?.message?.content
             ?.let { stripReasoning(it) }
             ?.takeIf { it.isNotBlank() }
-            ?: error("母体 Runtime 返回了空回复")
+            ?: error(ClawApplication.instance.getString(R.string.universe_error_empty_reply))
     }
 
     /** 母体 chat 会把推理用 <details>💭 思考过程</details> 包回来,渲染前剥掉,只留正文。 */
@@ -374,9 +376,9 @@ internal object UniverseRepository {
                 val detail = runCatching {
                     gson.fromJson(body, Map::class.java)["detail"]?.toString()
                 }.getOrNull()
-                error(detail ?: "ECHO request failed: HTTP ${resp.code}")
+                error(detail ?: ClawApplication.instance.getString(R.string.universe_error_http, resp.code))
             }
-            if (body.isBlank()) error("ECHO returned an empty response")
+            if (body.isBlank()) error(ClawApplication.instance.getString(R.string.universe_error_empty_response))
             return gson.fromJson(body, clazz)
         }
     }

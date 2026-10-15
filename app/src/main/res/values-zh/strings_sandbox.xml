@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 设置 > Linux 容器（LinuxSandboxSettingsActivity）。页面标题复用 settings_linux_title。 -->
+    <string name="sandbox_about_title">什么是 Linux 容器</string>
+    <string name="sandbox_about_body">应用内置 PRoot 用户态 Linux 沙箱。Echo 调用 run_shell 工具时，可在容器内执行真实的 Linux 命令（apt/pip 装包、git、ffmpeg、python 等），无需 root。\n\n两个发行版：\n• Alpine：3 MB，已打包进 APK，首次使用时自动解压\n• Ubuntu：28 MB，需在此页下载后才能使用\n\n安全：容器根目录隔离、bind mount 白名单（只挂载 Download 和 Documents）、UID 隔离、HIGH 风险闸门、超时强制终止、64 KB 输出上限。</string>
+    <string name="sandbox_alpine_title">Alpine（内置）</string>
+    <string name="sandbox_status">状态</string>
+    <string name="sandbox_ready">已就绪</string>
+    <string name="sandbox_alpine_not_ready">未初始化。首次调用 run_shell 时自动解压。</string>
+    <string name="sandbox_storage_used">占用：%1$s</string>
+    <string name="sandbox_reset_done">%1$s 容器已重置。</string>
+    <string name="sandbox_reset_failed">重置失败：%1$s</string>
+    <string name="sandbox_unknown_error">未知错误</string>
+    <string name="sandbox_reset_alpine">重置 Alpine</string>
+    <string name="sandbox_resetting">正在重置…</string>
+    <string name="sandbox_ubuntu_title">Ubuntu（需下载）</string>
+    <string name="sandbox_ubuntu_downloaded">rootfs 已下载，首次调用 run_shell 时自动解压。</string>
+    <string name="sandbox_ubuntu_missing">未下载（28 MB，来自 cdimage.ubuntu.com）</string>
+    <string name="sandbox_downloading">正在下载… %1$d%%</string>
+    <string name="sandbox_download_done">Ubuntu rootfs 已下载，现在可以运行 run_shell distro=ubuntu。</string>
+    <string name="sandbox_download_failed">下载失败：%1$s</string>
+    <string name="sandbox_download_again">重新下载</string>
+    <string name="sandbox_download_ubuntu">下载 Ubuntu rootfs</string>
+    <string name="sandbox_cache_deleted">已删除 Ubuntu rootfs 下载缓存。</string>
+    <string name="sandbox_delete_failed">删除失败。</string>
+    <string name="sandbox_delete_cache">删除缓存</string>
+    <string name="sandbox_reset_ubuntu">重置 Ubuntu 容器（删除 rootfs 和 home）</string>
+    <string name="sandbox_usage_title">使用方式</string>
+    <string name="sandbox_usage_body">Echo 调用 run_shell 工具时自动使用此容器：\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session（交互式会话）\n\n默认使用 Alpine（轻量快速）。需要 glibc 或完整 apt 生态时，适合用 Ubuntu。\nBind mount 白名单：/sdcard/Download 和 /sdcard/Documents（容器内可读写）。</string>
+</resources>

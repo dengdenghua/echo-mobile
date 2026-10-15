@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ECHO Universe screen (UniverseScreen.kt / UniverseRepository.kt) -->
+    <string name="universe_title">ECHO Universe</string>
+    <string name="universe_subtitle">My Ghost</string>
+    <string name="universe_syncing">Syncing</string>
+    <string name="universe_refresh">Refresh</string>
+
+    <string name="universe_identity_title">Universe identity</string>
+    <string name="universe_local_user">Local user</string>
+    <string name="universe_identity_access">Access</string>
+    <string name="universe_ghost_active">Ghost active</string>
+    <string name="universe_edge_state">Edge state</string>
+    <string name="universe_realms_label">Can enter</string>
+    <string name="universe_realm_personal">Personal instance</string>
+    <string name="universe_atlas_unchecked">Atlas access not checked</string>
+    <string name="universe_atlas_allowed">Atlas city events: you can submit, review still applies</string>
+    <string name="universe_atlas_closed">Atlas city events: not open</string>
+    <string name="universe_atlas_hint">Buy a Realm Pass or earn a review promotion to open a wider radius.</string>
+
+    <string name="universe_service_title">ECHO service</string>
+    <string name="universe_base_url_label">ECHO base URL</string>
+    <string name="universe_runtime_url_label">Host runtime HTTP</string>
+
+    <string name="universe_choose_character">Choose a character</string>
+    <string name="universe_binding">Binding</string>
+    <string name="universe_bind_ghost">Bind Ghost</string>
+
+    <string name="universe_economy_title">Digital life economy</string>
+    <string name="universe_economy_subtitle">Credits · Renewal · Realm passes</string>
+    <string name="universe_credits_amount">%1$d cr</string>
+    <string name="universe_ghost_not_renewed">Ghost not renewed</string>
+    <string name="universe_ghost_active_until">Ghost active until %1$s</string>
+    <string name="universe_ghost_status">Ghost: %1$s</string>
+    <string name="universe_no_realm_pass">No Realm Pass yet</string>
+    <string name="universe_processing">Processing</string>
+    <string name="universe_monthly_pass">Monthly %1$d</string>
+    <string name="universe_payment_note">Payment buys access, renewal, queue priority or tools. It does not guarantee canon approval.</string>
+
+    <string name="universe_advancing">Advancing</string>
+    <string name="universe_advance_day">Advance one day</string>
+    <string name="universe_open_main_chat">Open main chat</string>
+    <string name="universe_tick_hint">Syncs the ECHO life-field tick, then refreshes the current Ghost.</string>
+    <string name="universe_stat_focus">Focus</string>
+    <string name="universe_stat_diary">Diary</string>
+    <string name="universe_stat_growth">Growth</string>
+    <string name="universe_goals">Goals</string>
+    <string name="universe_relations">Relations</string>
+    <string name="universe_day">Day %1$d</string>
+
+    <string name="universe_ghost_chat_title">Talk with Ghost</string>
+    <string name="universe_chat_me">Me</string>
+    <string name="universe_chat_ghost">Ghost</string>
+    <string name="universe_chat_line">%1$s: %2$s</string>
+    <string name="universe_ghost_replying">Ghost is replying</string>
+    <string name="universe_input_hint">Type a message</string>
+    <string name="universe_waiting_reply">Waiting for reply</string>
+    <string name="universe_send_to_host">Send to host</string>
+    <string name="universe_host_no_response">Host runtime did not respond: %1$s</string>
+
+    <string name="universe_empty_title">Not in the universe yet</string>
+    <string name="universe_empty_hint">No Ghost bound yet. Choose a character above to bind one.</string>
+
+    <string name="universe_error_empty_prompt">Type something to say to Ghost.</string>
+    <string name="universe_error_empty_reply">The host runtime returned an empty reply.</string>
+    <string name="universe_error_http">ECHO request failed: HTTP %1$d</string>
+    <string name="universe_error_empty_response">ECHO returned an empty response.</string>
+</resources>

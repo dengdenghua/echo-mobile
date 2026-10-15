@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,11 +40,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import com.apk.claw.android.account.AccountConfig
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.apk.claw.android.ui.compose.component.OctopusCard
 import com.apk.claw.android.ui.compose.component.OctopusPill
 import com.apk.claw.android.ui.compose.component.OctopusTextPill
@@ -67,6 +70,7 @@ internal fun UniverseScreen(
     onOpenGhostChat: (UniverseFeedDto) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
+    val ctx = LocalContext.current
     var baseUrl by remember { mutableStateOf(AccountConfig.echoUniverseBaseUrl) }
     var runtimeUrl by remember { mutableStateOf(AccountConfig.octopusRuntimeBaseUrl) }
     var selectedCharacterId by remember { mutableStateOf("001") }
@@ -330,7 +334,8 @@ internal fun UniverseScreen(
                             }.onSuccess { reply ->
                                 ghostChatHistory = (ghostChatHistory + GhostChatMessage("assistant", reply)).takeLast(10)
                             }.onFailure {
-                                ghostChatHistory = (ghostChatHistory + GhostChatMessage("assistant", "母体 Runtime 未回应：${it.message.orEmpty()}")).takeLast(10)
+                                val note = ctx.getString(R.string.universe_host_no_response, it.message.orEmpty())
+                                ghostChatHistory = (ghostChatHistory + GhostChatMessage("assistant", note)).takeLast(10)
                             }
                             ghostChatRunning = false
                         }
@@ -351,55 +356,86 @@ private fun UniverseIdentityCard(
 ) {
     val current = identity ?: UniverseIdentityDto()
     val title = current.tierName.ifBlank { current.tier }
+    val personalRealm = stringResource(R.string.universe_realm_personal)
     val realms = current.allowedRealms
         .filter { it != "personal_instance" }
         .joinToString(" · ")
-        .ifBlank { "个人实例" }
+        .ifBlank { personalRealm }
     val accessText = when {
-        atlasAccess == null -> "Atlas 权限未检测"
-        atlasAccess.allowed -> "Atlas 城市事件：可提交，仍需审核"
-        else -> "Atlas 城市事件：未开放"
+        atlasAccess == null -> stringResource(R.string.universe_atlas_unchecked)
+        atlasAccess.allowed -> stringResource(R.string.universe_atlas_allowed)
+        else -> stringResource(R.string.universe_atlas_closed)
     }
     OctopusCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(OctopusSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .background(OctopusTints.Window.copy(alpha = 0.18f), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(Icons.Filled.Shield, contentDescription = null, tint = OctopusTints.Window, modifier = Modifier.size(OctopusIconSize.medium))
-                }
-                Column(modifier = Modifier.weight(1f).padding(start = OctopusSpacing.sm)) {
-                    Text("宇宙身份", color = OctopusColors.TextPrimary, fontSize = OctopusType.titleSm, fontWeight = FontWeight.Bold)
-                    Text(current.userId.ifBlank { "本机用户" }, color = OctopusColors.TextMuted, fontSize = OctopusType.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                OctopusPill(
-                    icon = Icons.Filled.Refresh,
-                    text = if (loading) "同步" else "权限",
-                    tint = OctopusTints.Window,
-                    onClick = onRefresh,
-                )
-            }
+            IdentityHeader(userId = current.userId, loading = loading, onRefresh = onRefresh)
             Row(horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm), modifier = Modifier.fillMaxWidth()) {
                 IdentityBadge(title, OctopusTints.Memory, Modifier.weight(1f))
-                IdentityBadge(if (current.ghostSubscriptionActive) "Ghost 活跃" else "边缘态", OctopusTints.Evolve, Modifier.weight(1f))
+                val stateRes = if (current.ghostSubscriptionActive) {
+                    R.string.universe_ghost_active
+                } else {
+                    R.string.universe_edge_state
+                }
+                IdentityBadge(stringResource(stateRes), OctopusTints.Evolve, Modifier.weight(1f))
             }
-            StatLine("可进入", realms)
+            StatLine(stringResource(R.string.universe_realms_label), realms)
             StatLine("Atlas", accessText)
             if (atlasAccess?.allowed == false) {
                 Text(
-                    atlasAccess.reason.ifBlank { "购买 Realm Pass 或获得审核提升后开放更大半径。" },
+                    atlasAccess.reason.ifBlank { stringResource(R.string.universe_atlas_hint) },
                     color = OctopusColors.TextMuted,
                     fontSize = OctopusType.tag,
-                    lineHeight = 14.sp,
+                    lineHeight = 16.sp,
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun IdentityHeader(
+    userId: String,
+    loading: Boolean,
+    onRefresh: () -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .background(OctopusTints.Window.copy(alpha = 0.18f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Shield,
+                contentDescription = null,
+                tint = OctopusTints.Window,
+                modifier = Modifier.size(OctopusIconSize.medium),
+            )
+        }
+        Column(modifier = Modifier.weight(1f).padding(start = OctopusSpacing.sm)) {
+            Text(
+                stringResource(R.string.universe_identity_title),
+                color = OctopusColors.TextPrimary,
+                fontSize = OctopusType.titleSm,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                userId.ifBlank { stringResource(R.string.universe_local_user) },
+                color = OctopusColors.TextMuted,
+                fontSize = OctopusType.caption,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        OctopusPill(
+            icon = Icons.Filled.Refresh,
+            text = stringResource(if (loading) R.string.universe_syncing else R.string.universe_identity_access),
+            tint = OctopusTints.Window,
+            onClick = onRefresh,
+        )
     }
 }
 
@@ -438,12 +474,21 @@ private fun UniverseTopBar(
     ) {
         TopBarBackButton(onClick = onBack)
         Column(modifier = Modifier.weight(1f).padding(start = OctopusSpacing.sm)) {
-            Text("ECHO Universe", color = OctopusColors.TextPrimary, fontSize = OctopusType.headline, fontWeight = FontWeight.Bold)
-            Text("我的 Ghost", color = OctopusColors.TextMuted, fontSize = OctopusType.caption)
+            Text(
+                stringResource(R.string.universe_title),
+                color = OctopusColors.TextPrimary,
+                fontSize = OctopusType.headline,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                stringResource(R.string.universe_subtitle),
+                color = OctopusColors.TextMuted,
+                fontSize = OctopusType.caption,
+            )
         }
         OctopusPill(
             icon = Icons.Filled.Refresh,
-            text = if (loading) "同步中" else "刷新",
+            text = stringResource(if (loading) R.string.universe_syncing else R.string.universe_refresh),
             tint = OctopusTints.Browser,
             onClick = onRefresh,
         )
@@ -463,12 +508,17 @@ private fun UniverseEndpointCard(
             modifier = Modifier.padding(OctopusSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
         ) {
-            Text("ECHO 服务", color = OctopusColors.TextPrimary, fontSize = OctopusType.titleSm, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.universe_service_title),
+                color = OctopusColors.TextPrimary,
+                fontSize = OctopusType.titleSm,
+                fontWeight = FontWeight.Bold,
+            )
             OutlinedTextField(
                 value = echoValue,
                 onValueChange = onEchoValueChange,
                 singleLine = true,
-                label = { Text("ECHO Base URL") },
+                label = { Text(stringResource(R.string.universe_base_url_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = EchoFieldColors.outlined(),
             )
@@ -476,13 +526,13 @@ private fun UniverseEndpointCard(
                 value = runtimeValue,
                 onValueChange = onRuntimeValueChange,
                 singleLine = true,
-                label = { Text("母体 Runtime HTTP") },
+                label = { Text(stringResource(R.string.universe_runtime_url_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = EchoFieldColors.outlined(),
             )
             OctopusPill(
                 icon = Icons.Filled.Save,
-                text = "保存",
+                text = stringResource(R.string.common_save),
                 tint = OctopusTints.Skill,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onSave,
@@ -504,7 +554,12 @@ private fun CharacterBindCard(
             modifier = Modifier.padding(OctopusSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
         ) {
-            Text("选择角色", color = OctopusColors.TextPrimary, fontSize = OctopusType.titleSm, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.universe_choose_character),
+                color = OctopusColors.TextPrimary,
+                fontSize = OctopusType.titleSm,
+                fontWeight = FontWeight.Bold,
+            )
             val options = characters.ifEmpty {
                 listOf(EchoCharacterOption("001", "Zero", "White Ghost"))
             }
@@ -524,7 +579,7 @@ private fun CharacterBindCard(
             }
             OctopusPill(
                 icon = Icons.Filled.Sync,
-                text = if (loading) "绑定中" else "绑定 Ghost",
+                text = stringResource(if (loading) R.string.universe_binding else R.string.universe_bind_ghost),
                 tint = OctopusTints.Memory,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onBind,
@@ -532,6 +587,9 @@ private fun CharacterBindCard(
         }
     }
 }
+
+/** Monthly Ghost-life price shown before the product list loads. */
+private const val GHOST_LIFE_FALLBACK_PRICE = 300
 
 @Composable
 private fun UniverseEconomyCard(
@@ -555,38 +613,55 @@ private fun UniverseEconomyCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = OctopusTints.Plugin, modifier = Modifier.size(OctopusIconSize.medium))
                 Column(modifier = Modifier.weight(1f).padding(start = OctopusSpacing.sm)) {
-                    Text("数字生命经济", color = OctopusColors.TextPrimary, fontSize = OctopusType.titleSm, fontWeight = FontWeight.Bold)
-                    Text("Credits · 续命 · Realm 通行证", color = OctopusColors.TextMuted, fontSize = OctopusType.caption)
+                    Text(
+                        stringResource(R.string.universe_economy_title),
+                        color = OctopusColors.TextPrimary,
+                        fontSize = OctopusType.titleSm,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        stringResource(R.string.universe_economy_subtitle),
+                        color = OctopusColors.TextMuted,
+                        fontSize = OctopusType.caption,
+                    )
                 }
                 Text(
-                    "${economy?.walletBalance ?: 0} cr",
+                    stringResource(R.string.universe_credits_amount, economy?.walletBalance ?: 0),
                     color = OctopusTints.Plugin,
                     fontSize = OctopusType.titleSm,
                     fontWeight = FontWeight.Bold,
                 )
             }
             val subscriptionText = when {
-                subscription == null -> "Ghost 未续命"
-                subscription.status == "active" -> "Ghost 活跃至 ${subscription.currentPeriodEnd.take(10)}"
-                else -> "Ghost ${subscription.status}"
+                subscription == null -> stringResource(R.string.universe_ghost_not_renewed)
+                subscription.status == "active" ->
+                    stringResource(R.string.universe_ghost_active_until, subscription.currentPeriodEnd.take(10))
+                else -> stringResource(R.string.universe_ghost_status, subscription.status)
             }
             Text(subscriptionText, color = OctopusColors.TextPrimary, fontSize = OctopusType.body)
+            val noRealmPass = stringResource(R.string.universe_no_realm_pass)
             val access = economy?.entitlements.orEmpty()
                 .filter { it.type == "realm_access" }
                 .joinToString(" · ") { it.refId }
-                .ifBlank { "暂无 Realm Pass" }
+                .ifBlank { noRealmPass }
             Text(access, color = OctopusColors.TextMuted, fontSize = OctopusType.caption)
             Row(horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm), modifier = Modifier.fillMaxWidth()) {
-                OctopusPill(
-                    icon = Icons.Filled.Add,
-                    text = if (loading) "处理中" else "+500",
-                    tint = OctopusTints.Skill,
-                    modifier = Modifier.weight(1f),
-                    onClick = onGrantCredits,
-                )
+                // 「+500」走钱包测试发放接口(reason = mobile_test_topup),只在调试包里出现
+                if (com.apk.claw.android.BuildConfig.DEBUG) {
+                    OctopusPill(
+                        icon = Icons.Filled.Add,
+                        text = if (loading) stringResource(R.string.universe_processing) else "+500",
+                        tint = OctopusTints.Skill,
+                        modifier = Modifier.weight(1f),
+                        onClick = onGrantCredits,
+                    )
+                }
                 OctopusPill(
                     icon = Icons.Filled.AutoAwesome,
-                    text = "月卡 ${ghostLife?.priceCredits ?: 300}",
+                    text = stringResource(
+                        R.string.universe_monthly_pass,
+                        ghostLife?.priceCredits ?: GHOST_LIFE_FALLBACK_PRICE,
+                    ),
                     tint = OctopusTints.Memory,
                     modifier = Modifier.weight(1f),
                     onClick = onBuyGhostLife,
@@ -609,10 +684,10 @@ private fun UniverseEconomyCard(
                 )
             }
             Text(
-                "付费只购买访问、续命、优先队列或工具，不保证主线 canon 通过。",
+                stringResource(R.string.universe_payment_note),
                 color = OctopusColors.TextMuted,
                 fontSize = OctopusType.tag,
-                lineHeight = 14.sp,
+                lineHeight = 16.sp,
             )
         }
     }
@@ -657,7 +732,7 @@ private fun UniverseFeedCard(
             Spacer(Modifier.height(OctopusSpacing.md))
             OctopusPill(
                 icon = Icons.Filled.Schedule,
-                text = if (loading) "推进中" else "过一天",
+                text = stringResource(if (loading) R.string.universe_advancing else R.string.universe_advance_day),
                 tint = OctopusTints.Evolve,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onTick,
@@ -665,31 +740,44 @@ private fun UniverseFeedCard(
             Spacer(Modifier.height(OctopusSpacing.sm))
             OctopusPill(
                 icon = Icons.Filled.ChatBubbleOutline,
-                text = "进入主对话",
+                text = stringResource(R.string.universe_open_main_chat),
                 tint = OctopusTints.Memory,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onOpenChat,
             )
             Text(
-                "同步 ECHO 生命场 tick 后刷新当前 Ghost。",
+                stringResource(R.string.universe_tick_hint),
                 color = OctopusColors.TextMuted,
                 fontSize = OctopusType.tag,
                 modifier = Modifier.padding(top = OctopusSpacing.xs),
             )
             Spacer(Modifier.height(OctopusSpacing.sm))
-            StatLine("Focus", feed.currentFocus)
-            StatLine("Diary", feed.latestDiary ?: "Day 0")
-            feed.latestGrowth?.let { StatLine("Growth", it) }
+            StatLine(stringResource(R.string.universe_stat_focus), feed.currentFocus)
+            StatLine(
+                stringResource(R.string.universe_stat_diary),
+                feed.latestDiary ?: stringResource(R.string.universe_day, 0),
+            )
+            feed.latestGrowth?.let { StatLine(stringResource(R.string.universe_stat_growth), it) }
             if (feed.goals.isNotEmpty()) {
                 Spacer(Modifier.height(OctopusSpacing.sm))
-                Text("Goals", color = OctopusColors.TextPrimary, fontSize = OctopusType.label, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.universe_goals),
+                    color = OctopusColors.TextPrimary,
+                    fontSize = OctopusType.label,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 feed.goals.take(3).forEach { item ->
                     Text("• $item", color = OctopusColors.TextSecondary, fontSize = OctopusType.caption, lineHeight = 16.sp)
                 }
             }
             if (feed.friends.isNotEmpty()) {
                 Spacer(Modifier.height(OctopusSpacing.sm))
-                Text("Relations", color = OctopusColors.TextPrimary, fontSize = OctopusType.label, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.universe_relations),
+                    color = OctopusColors.TextPrimary,
+                    fontSize = OctopusType.label,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 feed.friends.entries.take(4).forEach { (name, relation) ->
                     Text("$name · $relation", color = OctopusColors.TextSecondary, fontSize = OctopusType.caption, lineHeight = 16.sp)
                 }
@@ -718,17 +806,19 @@ private fun GhostChatPanel(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.ChatBubbleOutline, contentDescription = null, tint = OctopusTints.Memory, modifier = Modifier.size(OctopusIconSize.small))
             Text(
-                "和 Ghost 对话",
+                stringResource(R.string.universe_ghost_chat_title),
                 color = OctopusColors.TextPrimary,
                 fontSize = OctopusType.label,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(start = OctopusSpacing.xs),
             )
         }
+        val meLabel = stringResource(R.string.universe_chat_me)
+        val ghostLabel = stringResource(R.string.universe_chat_ghost)
         history.takeLast(4).forEach { item ->
             val isUser = item.role == "user"
             Text(
-                text = "${if (isUser) "我" else "Ghost"}：${item.text}",
+                text = stringResource(R.string.universe_chat_line, if (isUser) meLabel else ghostLabel, item.text),
                 color = if (isUser) OctopusColors.TextSecondary else OctopusColors.TextPrimary,
                 fontSize = OctopusType.caption,
                 lineHeight = 17.sp,
@@ -739,7 +829,9 @@ private fun GhostChatPanel(
             onValueChange = onInputChange,
             minLines = 1,
             maxLines = 3,
-            label = { Text(if (running) "Ghost 正在回应" else "输入一句话") },
+            label = {
+                Text(stringResource(if (running) R.string.universe_ghost_replying else R.string.universe_input_hint))
+            },
             trailingIcon = {
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
@@ -752,7 +844,7 @@ private fun GhostChatPanel(
         )
         OctopusPill(
             icon = Icons.AutoMirrored.Filled.Send,
-            text = if (running) "等待回应" else "发送到母体",
+            text = stringResource(if (running) R.string.universe_waiting_reply else R.string.universe_send_to_host),
             tint = OctopusTints.Memory,
             modifier = Modifier.fillMaxWidth(),
             onClick = onSend,
@@ -767,7 +859,12 @@ private fun DayBadge(day: Int) {
             .background(OctopusTints.Memory.copy(alpha = 0.18f), OctopusShape.capsule)
             .padding(horizontal = OctopusSpacing.md, vertical = OctopusSpacing.sm),
     ) {
-        Text("Day $day", color = OctopusTints.Memory, fontSize = OctopusType.label, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(R.string.universe_day, day),
+            color = OctopusTints.Memory,
+            fontSize = OctopusType.label,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 
@@ -783,7 +880,7 @@ private fun StatLine(label: String, value: String) {
 private fun LoadingCard() {
     OctopusCard(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth().padding(OctopusSpacing.xl), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = OctopusTints.Memory)
+            EchoProgressLine()
         }
     }
 }
@@ -792,10 +889,15 @@ private fun LoadingCard() {
 private fun EmptyUniverseCard(message: String) {
     OctopusCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(OctopusSpacing.lg)) {
-            Text("尚未进入宇宙", color = OctopusColors.TextPrimary, fontSize = OctopusType.titleSm, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.universe_empty_title),
+                color = OctopusColors.TextPrimary,
+                fontSize = OctopusType.titleSm,
+                fontWeight = FontWeight.Bold,
+            )
             Spacer(Modifier.height(OctopusSpacing.xs))
             Text(
-                message.ifBlank { "等待 Ghost 绑定。" },
+                message.ifBlank { stringResource(R.string.universe_empty_hint) },
                 color = OctopusColors.TextMuted,
                 fontSize = OctopusType.caption,
                 lineHeight = 16.sp,

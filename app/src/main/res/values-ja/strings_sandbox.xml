@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 設定 > Linux コンテナ（LinuxSandboxSettingsActivity）。タイトルは settings_linux_title を再利用。 -->
+    <string name="sandbox_about_title">Linux コンテナとは</string>
+    <string name="sandbox_about_body">アプリには PRoot によるユーザー空間の Linux サンドボックスが内蔵されています。Echo が run_shell ツールを呼び出すと、コンテナ内で実際の Linux コマンド（apt や pip でのパッケージ導入、git、ffmpeg、python など）を root なしで実行できます。\n\n2 つのディストリビューション:\n• Alpine: 3 MB、APK に同梱、初回使用時に自動展開\n• Ubuntu: 28 MB、使う前にこのページでダウンロード\n\nセキュリティ: コンテナのルート分離、bind mount の許可リスト（Download と Documents のみ）、UID 分離、HIGH リスクのゲート、タイムアウト時の強制終了、出力上限 64 KB。</string>
+    <string name="sandbox_alpine_title">Alpine（内蔵）</string>
+    <string name="sandbox_status">状態</string>
+    <string name="sandbox_ready">準備完了</string>
+    <string name="sandbox_alpine_not_ready">未初期化。初回の run_shell 呼び出し時に自動展開されます。</string>
+    <string name="sandbox_storage_used">使用容量: %1$s</string>
+    <string name="sandbox_reset_done">%1$s コンテナをリセットしました。</string>
+    <string name="sandbox_reset_failed">リセットに失敗しました: %1$s</string>
+    <string name="sandbox_unknown_error">不明なエラー</string>
+    <string name="sandbox_reset_alpine">Alpine をリセット</string>
+    <string name="sandbox_resetting">リセットしています…</string>
+    <string name="sandbox_ubuntu_title">Ubuntu（要ダウンロード）</string>
+    <string name="sandbox_ubuntu_downloaded">rootfs はダウンロード済みです。初回の run_shell 呼び出し時に自動展開されます。</string>
+    <string name="sandbox_ubuntu_missing">未ダウンロード（28 MB、cdimage.ubuntu.com から）</string>
+    <string name="sandbox_downloading">ダウンロードしています… %1$d%%</string>
+    <string name="sandbox_download_done">Ubuntu rootfs をダウンロードしました。run_shell で distro=ubuntu を使えます。</string>
+    <string name="sandbox_download_failed">ダウンロードに失敗しました: %1$s</string>
+    <string name="sandbox_download_again">再ダウンロード</string>
+    <string name="sandbox_download_ubuntu">Ubuntu rootfs をダウンロード</string>
+    <string name="sandbox_cache_deleted">Ubuntu rootfs のダウンロードを削除しました。</string>
+    <string name="sandbox_delete_failed">削除できませんでした。</string>
+    <string name="sandbox_delete_cache">キャッシュを削除</string>
+    <string name="sandbox_reset_ubuntu">Ubuntu をリセット（rootfs と home を削除）</string>
+    <string name="sandbox_usage_title">使い方</string>
+    <string name="sandbox_usage_body">Echo が run_shell ツールを呼び出すと、このコンテナが自動で使われます:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session（対話型セッション）\n\n既定は Alpine（軽量で高速）。glibc や apt の完全なエコシステムが必要な場合は Ubuntu が適しています。\nbind mount の許可リスト: /sdcard/Download と /sdcard/Documents（コンテナ内で読み書き可能）。</string>
+</resources>

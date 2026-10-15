@@ -166,7 +166,7 @@ class SettingsActivity : BaseActivity() {
 
         menuItems[SettingsViewModel.MenuAction.LOCAL_MODEL.name] = modelGroup.addMenuItem(
             leadingIcon = R.drawable.icon_current_model,
-            title = "本地大模型",
+            title = getString(R.string.localmodel_title),
             onClick = { viewModel.onMenuItemClick(SettingsViewModel.MenuAction.LOCAL_MODEL) },
             showDivider = false
         )
@@ -525,7 +525,7 @@ class SettingsActivity : BaseActivity() {
      */
     private fun showPermissionModeDialog() {
         val modes = PermissionMode.entries.toTypedArray()
-        val labels = modes.map { it.displayName }.toTypedArray()
+        val labels = modes.map { label(it) }.toTypedArray()
         val current = AgentConfig.currentPermissionMode()
         val checked = modes.indexOf(current).coerceAtLeast(0)
 
@@ -535,7 +535,7 @@ class SettingsActivity : BaseActivity() {
                 val mode = modes[which]
                 KVUtils.setPermissionMode(mode.name)
                 AgentConfig.invalidatePermissionModeCache()
-                menuItems["PERMISSION_MODE"]?.setTrailingText(mode.displayName)
+                menuItems["PERMISSION_MODE"]?.setTrailingText(label(mode))
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
@@ -545,9 +545,17 @@ class SettingsActivity : BaseActivity() {
     /**
      * 返回当前权限模式的可读名称(用于菜单项副标题)。
      */
-    private fun getCurrentPermissionModeDisplayName(): String {
-        return AgentConfig.currentPermissionMode().displayName
-    }
+    private fun getCurrentPermissionModeDisplayName(): String = label(AgentConfig.currentPermissionMode())
+
+    /** 权限模式在界面上的名字(当前语言);[PermissionMode.displayName] 是给日志和 Agent 用的中文名。 */
+    private fun label(mode: PermissionMode): String = getString(
+        when (mode) {
+            PermissionMode.DEFAULT -> R.string.permission_mode_default
+            PermissionMode.ACCEPT_EDITS -> R.string.permission_mode_accept_edits
+            PermissionMode.BYPASS_PERMISSIONS -> R.string.permission_mode_bypass
+            PermissionMode.PLAN -> R.string.permission_mode_plan
+        },
+    )
 
     /**
      * MCP 服务端配置弹窗。
@@ -561,12 +569,12 @@ class SettingsActivity : BaseActivity() {
             setPadding(48, 24, 48, 24)
         }
         val switch = SwitchCompat(this).apply {
-            text = "Enable MCP Server"
+            text = getString(R.string.mcp_server_enable)
             isChecked = KVUtils.isMcpServerEnabled()
         }
         val portEdit = EditText(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
-            hint = "Port (default 9528)"
+            hint = getString(R.string.mcp_server_port_hint)
             setText(KVUtils.getMcpServerPort().toString())
         }
         container.addView(switch)
@@ -585,7 +593,7 @@ class SettingsActivity : BaseActivity() {
                 menuItems["MCP_SERVER"]?.setTrailingText(getCurrentMcpServerDisplayText())
                 Toast.makeText(
                     this,
-                    "Saved. Restart app to apply (MCP server starts in onCreate).",
+                    getString(R.string.mcp_server_saved_restart),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -596,9 +604,9 @@ class SettingsActivity : BaseActivity() {
     /** MCP 服务端菜单项副标题: ON · :port / OFF */
     private fun getCurrentMcpServerDisplayText(): String {
         return if (KVUtils.isMcpServerEnabled()) {
-            "ON · :${KVUtils.getMcpServerPort()}"
+            getString(R.string.mcp_server_on_port, KVUtils.getMcpServerPort())
         } else {
-            "OFF"
+            getString(R.string.mcp_server_off)
         }
     }
 
@@ -625,7 +633,7 @@ class SettingsActivity : BaseActivity() {
                 menuItems["GITHUB_TOKEN"]?.setTrailingText(getCurrentGithubTokenDisplayText())
                 Toast.makeText(
                     this,
-                    "Token saved (encrypted). Used by git_push / github_create_pr.",
+                    getString(R.string.github_token_saved),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -636,9 +644,9 @@ class SettingsActivity : BaseActivity() {
     /** GitHub Token 菜单项副标题: 已设置 / 未设置 */
     private fun getCurrentGithubTokenDisplayText(): String {
         return if (KVUtils.getGithubToken().isNotEmpty()) {
-            "已设置"
+            getString(R.string.common_set)
         } else {
-            "未设置"
+            getString(R.string.common_unconfigured)
         }
     }
 
@@ -648,7 +656,7 @@ class SettingsActivity : BaseActivity() {
      */
     private fun showDiffViewDialog() {
         val switch = SwitchCompat(this).apply {
-            text = "Show unified diff before file write"
+            text = getString(R.string.diff_view_switch)
             isChecked = KVUtils.isDiffViewEnabled()
         }
         val container = LinearLayout(this).apply {
@@ -669,7 +677,7 @@ class SettingsActivity : BaseActivity() {
 
     /** Diff View 菜单项副标题: ON / OFF */
     private fun getCurrentDiffViewDisplayText(): String {
-        return if (KVUtils.isDiffViewEnabled()) "ON" else "OFF"
+        return getString(if (KVUtils.isDiffViewEnabled()) R.string.common_on else R.string.common_off)
     }
 
     /**
@@ -699,7 +707,7 @@ class SettingsActivity : BaseActivity() {
 
     /** 折叠并行工具菜单项副标题: ON / OFF */
     private fun getCurrentCollapseParallelToolsDisplayText(): String {
-        return if (KVUtils.isCollapseParallelTools()) "ON" else "OFF"
+        return getString(if (KVUtils.isCollapseParallelTools()) R.string.common_on else R.string.common_off)
     }
 
     /**
@@ -729,6 +737,6 @@ class SettingsActivity : BaseActivity() {
 
     /** 右侧栏详情菜单项副标题: ON / OFF */
     private fun getCurrentDetailDrawerDisplayText(): String {
-        return if (KVUtils.isDetailDrawerEnabled()) "ON" else "OFF"
+        return getString(if (KVUtils.isDetailDrawerEnabled()) R.string.common_on else R.string.common_off)
     }
 }

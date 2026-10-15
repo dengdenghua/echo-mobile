@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +36,10 @@ import com.apk.claw.android.registry.CommunityMiniAppInstaller
 import com.apk.claw.android.registry.CommunitySquareApi
 import com.apk.claw.android.registry.PluginRegistryStore
 import kotlinx.coroutines.launch
+import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
+import com.apk.claw.android.ui.compose.component.LoadFailedState
+import androidx.compose.ui.res.stringResource
 
 /**
  * 广场小程序商城 —— 浏览 + 安装其他用户投稿并审核通过的社区小程序。
@@ -77,20 +80,23 @@ private fun MiniAppMarketplaceScreen(onBack: () -> Unit) {
             reloadInstalled()
             val result = CommunitySquareApi.list()
             result.onSuccess { apps = it }
-                .onFailure { loadError = it.message ?: "加载失败" }
+                .onFailure { loadError = it.message.orEmpty() }
             loading = false
         }
     }
 
     LaunchedEffect(Unit) { reload() }
 
-    FeatureScaffold(title = "广场小程序", onBack = onBack) {
+    FeatureScaffold(title = stringResource(R.string.square_apps_title), onBack = onBack) {
         when {
-            loading -> Box(Modifier.fillMaxWidth().padding(top = 60.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = FPrimary)
-            }
-            loadError != null -> FEmpty("加载失败:${loadError}\n请检查网络后重试")
-            apps.isEmpty() -> FEmpty("广场上还没有审核通过的社区小程序,晚点再来看看吧")
+            loading -> EchoLoadingPanel()
+            // 网络失败不是「没有内容」:说发生了什么,给一个重试
+            loadError != null -> LoadFailedState(
+                title = stringResource(R.string.market_load_failed),
+                message = stringResource(R.string.market_load_failed_desc),
+                onRetry = { reload() },
+            )
+            apps.isEmpty() -> FEmpty(stringResource(R.string.square_apps_empty))
             else -> Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
                 apps.forEach { app ->
                     CommunityMiniAppCard(
@@ -103,15 +109,16 @@ private fun MiniAppMarketplaceScreen(onBack: () -> Unit) {
                                 scope.launch {
                                     val result = CommunitySquareApi.download(app.effectiveSlug)
                                     val err = if (result.isFailure) {
-                                        "下载失败:${result.exceptionOrNull()?.message}"
+                                        ctx.getString(R.string.square_apps_download_failed)
                                     } else {
                                         CommunityMiniAppInstaller.install(ctx, result.getOrThrow())
+                                            ?.let { ctx.getString(R.string.post_detail_install_failed, it) }
                                     }
                                     installingSlug = null
                                     reloadInstalled()
                                     android.widget.Toast.makeText(
                                         ctx,
-                                        err ?: "已安装「${app.name}」,可在「小程序」里打开",
+                                        err ?: ctx.getString(R.string.square_apps_installed_toast, app.name),
                                         android.widget.Toast.LENGTH_LONG,
                                     ).show()
                                 }
@@ -146,7 +153,7 @@ private fun CommunityMiniAppCard(
                     )
                 }
                 Spacer(Modifier.height(4.dp))
-                Text("v${app.version.ifBlank { "1.0.0" }}", color = FMuted, fontSize = 11.sp)
+                Text("v${app.version.ifBlank { "1.0.0" }}", color = FMuted, fontSize = 12.sp)
             }
             Spacer(Modifier.height(8.dp))
             CommunityInstallButton(installed = installed, installing = installing, onInstall = onInstall)
@@ -156,11 +163,13 @@ private fun CommunityMiniAppCard(
 
 @Composable
 private fun CommunityInstallButton(installed: Boolean, installing: Boolean, onInstall: () -> Unit) {
-    val label = when {
-        installing -> "安装中…"
-        installed -> "已安装"
-        else -> "安装"
-    }
+    val label = stringResource(
+        when {
+            installing -> R.string.square_apps_installing
+            installed -> R.string.square_apps_installed
+            else -> R.string.square_apps_install
+        },
+    )
     val activeColor = if (installed) FMuted else FPrimary
     Box(
         modifier = Modifier

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 广场 > 帖子详情 (PostDetailScreen)。post_detail_title 等共用 key 在 strings.xml。 -->
+    <string name="post_detail_share">分享</string>
+    <string name="post_detail_share_title">分享帖子</string>
+    <string name="post_detail_qr_desc">帖子二维码</string>
+    <string name="post_detail_qr_failed">二维码生成失败</string>
+    <string name="post_detail_like">点赞</string>
+    <string name="post_detail_unlike">取消点赞</string>
+    <string name="post_detail_comments">评论</string>
+    <string name="post_detail_favorite">收藏</string>
+    <string name="post_detail_unfavorite">取消收藏</string>
+    <string name="post_detail_reply">回复</string>
+    <string name="post_detail_reply_hint">回复评论…</string>
+    <string name="post_detail_comment_error">评论失败：%1$s</string>
+    <string name="post_detail_action_error">操作失败：%1$s</string>
+    <string name="post_detail_forked_from">基于他人作品 Fork</string>
+    <string name="post_detail_try_run">试运行</string>
+    <string name="post_detail_try_run_error">小程序加载失败：%1$s</string>
+    <string name="post_detail_fork">Fork 到我的名下</string>
+    <string name="post_detail_forking">Fork 中…</string>
+    <string name="post_detail_forked">已 Fork 到你的名下，可在「我的发布」查看</string>
+    <string name="post_detail_fork_failed">Fork 失败</string>
+    <string name="post_detail_fork_error">Fork 失败：%1$s</string>
+    <string name="post_detail_acquire_free">免费复刻</string>
+    <string name="post_detail_acquire_price">%1$d 积分复刻</string>
+    <string name="post_detail_acquiring">复刻中…</string>
+    <string name="post_detail_owned_reinstall">已复刻 · 重新安装</string>
+    <string name="post_detail_acquired">已复刻</string>
+    <string name="post_detail_acquired_app">已复刻「%1$s」，可在「小程序」里打开</string>
+    <string name="post_detail_acquire_failed">复刻失败</string>
+    <string name="post_detail_install_failed">安装失败：%1$s</string>
+    <string name="post_detail_acquire_confirm_title">确认复刻</string>
+    <string name="post_detail_acquire_confirm_body">将花费 %1$d 积分复刻「%2$s」，复刻后可反复安装。</string>
+    <string name="post_detail_acquire_confirm">确认复刻</string>
+    <string name="post_detail_subscribe_price">订阅 · %1$d 积分/月</string>
+    <string name="post_detail_sub_active_renew">已订阅 · 续订（%1$d 积分/月）</string>
+    <string name="post_detail_subscribing">订阅中…</string>
+    <string name="post_detail_subscribe_title">确认订阅</string>
+    <string name="post_detail_renew_title">续订</string>
+    <string name="post_detail_subscribe_body">将花费 %1$d 积分订阅「%2$s」1 个月，到期后需手动续订。</string>
+    <string name="post_detail_subscribe_month">订阅一个月</string>
+    <string name="post_detail_renew_month">续订一个月</string>
+    <string name="post_detail_sub_already">订阅仍在有效期内</string>
+    <string name="post_detail_sub_success">订阅成功，有效期已延长 30 天</string>
+    <string name="post_detail_sub_failed">订阅失败</string>
+</resources>

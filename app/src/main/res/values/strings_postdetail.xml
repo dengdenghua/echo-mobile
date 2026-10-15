@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Square > Post detail (PostDetailScreen). Shared keys post_detail_title etc. live in strings.xml. -->
+    <string name="post_detail_share">Share</string>
+    <string name="post_detail_share_title">Share post</string>
+    <string name="post_detail_qr_desc">QR code for this post</string>
+    <string name="post_detail_qr_failed">Couldn\'t create the QR code</string>
+    <string name="post_detail_like">Like</string>
+    <string name="post_detail_unlike">Unlike</string>
+    <string name="post_detail_comments">Comments</string>
+    <string name="post_detail_favorite">Save</string>
+    <string name="post_detail_unfavorite">Remove from saved</string>
+    <string name="post_detail_reply">Reply</string>
+    <string name="post_detail_reply_hint">Write a reply…</string>
+    <string name="post_detail_comment_error">Couldn\'t post the comment: %1$s</string>
+    <string name="post_detail_action_error">Couldn\'t complete the action: %1$s</string>
+    <string name="post_detail_forked_from">Forked from another creator\'s work</string>
+    <string name="post_detail_try_run">Try it</string>
+    <string name="post_detail_try_run_error">Couldn\'t load the mini app: %1$s</string>
+    <string name="post_detail_fork">Fork to my account</string>
+    <string name="post_detail_forking">Forking…</string>
+    <string name="post_detail_forked">Forked to your account. Find it in My posts.</string>
+    <string name="post_detail_fork_failed">Couldn\'t fork</string>
+    <string name="post_detail_fork_error">Couldn\'t fork: %1$s</string>
+    <string name="post_detail_acquire_free">Clone for free</string>
+    <string name="post_detail_acquire_price">Clone for %1$d credits</string>
+    <string name="post_detail_acquiring">Cloning…</string>
+    <string name="post_detail_owned_reinstall">Cloned · Reinstall</string>
+    <string name="post_detail_acquired">Cloned</string>
+    <string name="post_detail_acquired_app">Cloned %1$s. Open it from Mini apps.</string>
+    <string name="post_detail_acquire_failed">Couldn\'t clone</string>
+    <string name="post_detail_install_failed">Couldn\'t install: %1$s</string>
+    <string name="post_detail_acquire_confirm_title">Clone this app</string>
+    <string name="post_detail_acquire_confirm_body">Cloning %2$s uses %1$d credits. You can reinstall it any time after.</string>
+    <string name="post_detail_acquire_confirm">Clone</string>
+    <string name="post_detail_subscribe_price">Subscribe · %1$d credits/month</string>
+    <string name="post_detail_sub_active_renew">Subscribed · Renew (%1$d credits/month)</string>
+    <string name="post_detail_subscribing">Subscribing…</string>
+    <string name="post_detail_subscribe_title">Confirm subscription</string>
+    <string name="post_detail_renew_title">Renew subscription</string>
+    <string name="post_detail_subscribe_body">Subscribing to %2$s for 1 month uses %1$d credits. Renew it yourself when it ends.</string>
+    <string name="post_detail_subscribe_month">Subscribe for 1 month</string>
+    <string name="post_detail_renew_month">Renew for 1 month</string>
+    <string name="post_detail_sub_already">Your subscription is already active</string>
+    <string name="post_detail_sub_success">Subscribed. Access extended by 30 days.</string>
+    <string name="post_detail_sub_failed">Couldn\'t subscribe</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Local model (LocalModelActivity) -->
+    <string name="localmodel_title">Local model</string>
+    <string name="localmodel_engine_status">Engine status</string>
+    <string name="localmodel_engine_loaded">Loaded</string>
+    <string name="localmodel_engine_not_built">Not built</string>
+    <string name="localmodel_loaded_count">Models loaded</string>
+    <string name="localmodel_offline_mode">Offline mode</string>
+    <string name="localmodel_offline_mode_desc">Chat runs on the local model, with no network. Chat only: Echo can\'t control the device.</string>
+    <string name="localmodel_offline_needs_native">Offline mode can\'t turn on: neither the llama.cpp nor the MNN native library is built. Run build-native.sh or build-mnn.sh first.</string>
+    <string name="localmodel_offline_needs_model">Choose and load a .gguf or .mnn model first.</string>
+    <string name="localmodel_active_model">Active model</string>
+    <string name="localmodel_active_none">Not set. Choose a .gguf model file.</string>
+    <string name="localmodel_pick_gguf">Choose .gguf file</string>
+    <string name="localmodel_importing">Importing model…</string>
+    <string name="localmodel_read_file_failed">Couldn\'t read the selected file.</string>
+    <string name="localmodel_load_failed">Couldn\'t load the model: %1$s</string>
+    <string name="localmodel_import_failed_reason">Import failed: %1$s</string>
+    <string name="localmodel_import_failed">Import failed.</string>
+    <string name="localmodel_import_done">Imported %1$s (%2$s)</string>
+    <string name="localmodel_loaded_models">Loaded models</string>
+    <string name="localmodel_badge_active">Active</string>
+    <string name="localmodel_loaded_meta">%1$s · ctx %2$d · loaded at %3$s</string>
+    <string name="localmodel_set_active">Set active</string>
+    <string name="localmodel_unload">Unload</string>
+    <string name="localmodel_mnn_title">MNN models</string>
+    <string name="localmodel_mnn_empty">No MNN models imported yet.\nAn MNN model is a folder with .mnn weights, a tokenizer and a config.\nZip the folder and import the .zip here. It is unpacked into the app\'s private storage.</string>
+    <string name="localmodel_mnn_meta">%1$s · %2$d files · %3$s</string>
+    <string name="localmodel_use_as_llm">Use as LLM</string>
+    <string name="localmodel_load_whisper">Load Whisper</string>
+    <string name="localmodel_import_mnn">Import .zip / .mnn model</string>
+    <string name="localmodel_whisper_load_failed">Couldn\'t load the Whisper model (native returned 0).</string>
+    <string name="localmodel_asr_title">On-device ASR (Whisper)</string>
+    <string name="localmodel_asr_switch">Recognize speech on device with Whisper</string>
+    <string name="localmodel_asr_loaded">Loaded: %1$s</string>
+    <string name="localmodel_asr_not_loaded">Set up, not loaded yet</string>
+    <string name="localmodel_asr_none">No Whisper model. Import a whisper-tiny folder above first.</string>
+    <string name="localmodel_asr_needs_model">The Whisper model isn\'t loaded. Import and load a Whisper model folder first.</string>
+    <string name="localmodel_asr_desc" formatted="false">When on, \"Press and hold to speak\" and desktop voice input use MNN Whisper offline.\nNo Google services needed, and your audio stays on the device.\nWhisper-tiny gets about 80% of Chinese speech right, less than cloud recognition. Best when you\'re offline.</string>
+    <string name="localmodel_guide_title">How to use</string>
+    <string name="localmodel_guide_llama">llama.cpp: Qwen2.5-3B-Q4_K_M recommended (~2 GB, good at Chinese)</string>
+    <string name="localmodel_guide_mnn">MNN: Qwen-1.8B-INT8 recommended (~700 MB, 30+ tok/s with GPU)</string>
+    <string name="localmodel_guide_whisper" formatted="false">Whisper ASR: whisper-tiny (~150 MB, about 80% accurate on Chinese)</string>
+    <string name="localmodel_guide_speed">Reference speed on Snapdragon 8 Gen 2: llama.cpp ~15 tok/s, MNN ~30 tok/s</string>
+    <string name="localmodel_guide_ram">Needs 6 GB+ RAM for 3B models, 4 GB+ for 1.8B MNN models</string>
+    <string name="localmodel_guide_build">First build: ./build-native.sh (llama) or ./build-mnn.sh (MNN)</string>
+    <string name="localmodel_limits">Known limits:\n• No function calling: offline mode is chat only and can\'t control the device\n• No vision: screenshots and images are ignored\n• Lower quality than GPT-4 or Claude: best for private or offline use</string>
+</resources>

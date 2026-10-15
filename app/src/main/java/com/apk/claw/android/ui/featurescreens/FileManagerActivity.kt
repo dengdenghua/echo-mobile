@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.SportsEsports
@@ -43,11 +44,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.files.LsParser
 import com.apk.claw.android.octopus_mobile.files.LsParser.FileEntry
 import com.apk.claw.android.octopus_mobile.files.LsParser.FileType
@@ -56,9 +59,11 @@ import com.apk.claw.android.shizuku.ShizukuManager
 import com.apk.claw.android.shizuku.ShizukuShellService
 import com.apk.claw.android.tool.ToolRegistry
 import com.apk.claw.android.tool.ToolResult
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
+import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.widget.AdvancedPermissionDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -120,7 +125,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                 .onSuccess { raw ->
                     if (raw == null) {
                         shizukuAvailable = false
-                        errorMsg = "Shizuku 不可用"
+                        errorMsg = ctx.getString(R.string.filemanager_shizuku_unavailable)
                         entries = emptyList()
                     } else if (raw.startsWith("Error:")) {
                         errorMsg = raw.removePrefix("Error:").trim()
@@ -129,7 +134,10 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                         entries = LsParser.parse(raw, path)
                     }
                 }
-                .onFailure { errorMsg = it.message ?: "加载失败"; entries = emptyList() }
+                .onFailure {
+                    errorMsg = it.message ?: ctx.getString(R.string.filemanager_load_failed)
+                    entries = emptyList()
+                }
             loading = false
         }
     }
@@ -198,7 +206,12 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                                 ),
                             )
                         }
-                        toast(ctx, if (r.isSuccess) "已${if (mode == "copy") "复制" else "移动"}到当前目录" else (r.error ?: "失败"))
+                        val msg = when {
+                            !r.isSuccess -> r.error ?: ctx.getString(R.string.filemanager_action_failed)
+                            mode == "copy" -> ctx.getString(R.string.filemanager_copied_here)
+                            else -> ctx.getString(R.string.filemanager_moved_here)
+                        }
+                        toast(ctx, msg)
                         loadDir(currentPath)
                     }
                 }
@@ -207,14 +220,12 @@ private fun FileManagerScreen(onBack: () -> Unit) {
 
         // 文件列表
         when {
-            loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                CircularProgressIndicator(color = OctopusColors.Primary)
-            }
+            loading -> EchoLoadingPanel()
             errorMsg != null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text(errorMsg!!, color = FWarning, fontSize = 13.sp, textAlign = TextAlign.Center)
+                Text(errorMsg!!, color = FError, fontSize = 13.sp, textAlign = TextAlign.Center)
             }
             entries.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text("(空目录)", color = FMuted, fontSize = 13.sp)
+                Text(stringResource(R.string.filemanager_empty), color = FMuted, fontSize = 13.sp)
             }
             else -> {
                 val filtered = remember(entries, showHidden, sortMode) {
@@ -250,12 +261,12 @@ private fun FileManagerScreen(onBack: () -> Unit) {
             onDismiss = { selectedEntry = null },
             onCopy = {
                 clipboard = entry.path to "copy"
-                toast(ctx, "已复制: ${entry.name}")
+                toast(ctx, ctx.getString(R.string.filemanager_copy_ready, entry.name))
                 selectedEntry = null
             },
             onMove = {
                 clipboard = entry.path to "move"
-                toast(ctx, "已剪切: ${entry.name}")
+                toast(ctx, ctx.getString(R.string.filemanager_cut_ready, entry.name))
                 selectedEntry = null
             },
             onRename = {
@@ -273,7 +284,12 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                             mapOf("action" to "delete", "source" to entry.path),
                         )
                     }
-                    toast(ctx, if (r.isSuccess) "已删除: ${entry.name}" else (r.error ?: "删除失败"))
+                    val msg = if (r.isSuccess) {
+                        ctx.getString(R.string.filemanager_deleted, entry.name)
+                    } else {
+                        r.error ?: ctx.getString(R.string.filemanager_delete_failed)
+                    }
+                    toast(ctx, msg)
                     selectedEntry = null
                     loadDir(currentPath)
                 }
@@ -283,7 +299,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                     val r = withContext(Dispatchers.IO) {
                         ShizukuShellService.getFileInfo(entry.path)
                     }
-                    infoPreview = r ?: "无法获取信息"
+                    infoPreview = r ?: ctx.getString(R.string.filemanager_info_unavailable)
                     selectedEntry = null
                 }
             },
@@ -305,8 +321,8 @@ private fun FileManagerScreen(onBack: () -> Unit) {
     // 新建目录对话框
     if (showNewFolderDialog) {
         TextInputDialog(
-            title = "新建目录",
-            hint = "目录名",
+            title = stringResource(R.string.filemanager_new_folder),
+            hint = stringResource(R.string.filemanager_folder_name),
             onCancel = { showNewFolderDialog = false },
             onConfirm = { name ->
                 showNewFolderDialog = false
@@ -317,7 +333,12 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                             mapOf("action" to "mkdir", "source" to "$currentPath/$name"),
                         )
                     }
-                    toast(ctx, if (r.isSuccess) "已创建: $name" else (r.error ?: "创建失败"))
+                    val msg = if (r.isSuccess) {
+                        ctx.getString(R.string.filemanager_created, name)
+                    } else {
+                        r.error ?: ctx.getString(R.string.filemanager_create_failed)
+                    }
+                    toast(ctx, msg)
                     loadDir(currentPath)
                 }
             },
@@ -330,9 +351,9 @@ private fun FileManagerScreen(onBack: () -> Unit) {
             val oldPath = content.removePrefix("RENAME:")
             val oldName = oldPath.substringAfterLast('/')
             TextInputDialog(
-                title = "重命名",
+                title = stringResource(R.string.filemanager_rename),
                 initial = oldName,
-                hint = "新名称",
+                hint = stringResource(R.string.filemanager_new_name),
                 onCancel = { infoPreview = null },
                 onConfirm = { newName ->
                     infoPreview = null
@@ -344,7 +365,12 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                                 mapOf("action" to "move", "source" to oldPath, "destination" to newPath),
                             )
                         }
-                        toast(ctx, if (r.isSuccess) "已重命名" else (r.error ?: "失败"))
+                        val msg = if (r.isSuccess) {
+                            ctx.getString(R.string.filemanager_renamed)
+                        } else {
+                            r.error ?: ctx.getString(R.string.filemanager_action_failed)
+                        }
+                        toast(ctx, msg)
                         loadDir(currentPath)
                     }
                 },
@@ -352,7 +378,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
         } else {
             // 文件信息对话框
             InfoDialog(
-                title = "文件信息",
+                title = stringResource(R.string.filemanager_info_title),
                 content = content,
                 onDismiss = { infoPreview = null },
             )
@@ -362,7 +388,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
     // 文本预览
     textPreview?.let { content ->
         InfoDialog(
-            title = "文件内容",
+            title = stringResource(R.string.filemanager_content_title),
             content = content,
             onDismiss = { textPreview = null },
         )
@@ -378,7 +404,7 @@ private fun TopBar(currentPath: String, onBack: () -> Unit, onClose: () -> Unit)
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "返回上级", tint = FText)
+            Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.filemanager_up), tint = FText)
         }
         Text(
             currentPath,
@@ -390,9 +416,15 @@ private fun TopBar(currentPath: String, onBack: () -> Unit, onClose: () -> Unit)
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = onClose) {
-            Icon(Icons.Filled.Info, contentDescription = "关闭", tint = FMuted)
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = FMuted)
         }
     }
+}
+
+private fun sortLabel(mode: SortMode): Int = when (mode) {
+    SortMode.NAME -> R.string.filemanager_sort_name
+    SortMode.SIZE -> R.string.filemanager_sort_size
+    SortMode.MTIME -> R.string.filemanager_sort_time
 }
 
 @Composable
@@ -430,30 +462,31 @@ private fun PathActionBar(
                 Icon(Icons.Filled.Sort, contentDescription = null, tint = FSub, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    when (sortMode) {
-                        SortMode.NAME -> "名称"
-                        SortMode.SIZE -> "大小"
-                        SortMode.MTIME -> "时间"
-                    },
-                    color = FSub, fontSize = 11.sp, fontWeight = FontWeight.Medium,
+                    stringResource(sortLabel(sortMode)),
+                    color = FSub, fontSize = OctopusType.caption, fontWeight = FontWeight.Medium,
                 )
             }
         }
         IconToggle(
             icon = if (showHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
             active = showHidden,
+            label = stringResource(
+                if (showHidden) R.string.filemanager_hide_hidden else R.string.filemanager_show_hidden,
+            ),
             onClick = onToggleHidden,
         )
         Spacer(Modifier.weight(1f))
         IconToggle(
             icon = Icons.Filled.CreateNewFolder,
             active = false,
+            label = stringResource(R.string.filemanager_new_folder),
             onClick = onNewFolder,
         )
         if (onPaste != null) {
             IconToggle(
                 icon = Icons.Filled.ContentPaste,
                 active = true,
+                label = stringResource(R.string.filemanager_paste),
                 onClick = onPaste,
             )
         }
@@ -461,7 +494,7 @@ private fun PathActionBar(
 }
 
 @Composable
-private fun IconToggle(icon: ImageVector, active: Boolean, onClick: () -> Unit) {
+private fun IconToggle(icon: ImageVector, active: Boolean, label: String, onClick: () -> Unit) {
     Surface(
         shape = OctopusShape.capsule,
         color = if (active) OctopusColors.Primary.copy(alpha = 0.15f) else OctopusColors.SurfaceVariant.copy(alpha = 0.5f),
@@ -469,7 +502,7 @@ private fun IconToggle(icon: ImageVector, active: Boolean, onClick: () -> Unit) 
     ) {
         Icon(
             icon,
-            contentDescription = null,
+            contentDescription = label,
             tint = if (active) OctopusColors.Primary else FSub,
             modifier = Modifier.padding(8.dp).size(16.dp),
         )
@@ -515,7 +548,7 @@ private fun FileRow(entry: FileEntry, onClick: () -> Unit) {
                 if (isNotEmpty()) append(" · ")
                 append(entry.mtime)
             }
-            Text(sub, color = FMuted, fontSize = 10.sp, maxLines = 1)
+            Text(sub, color = FMuted, fontSize = OctopusType.caption, maxLines = 1)
         }
         if (entry.isDir) {
             Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = FMuted, modifier = Modifier.size(14.dp).rotate(180f))
@@ -540,16 +573,18 @@ private fun FileActionSheet(
         title = { Text(entry.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         text = {
             Column {
-                ActionItem("复制", Icons.Filled.ContentCopy, onCopy)
-                ActionItem("剪切", Icons.Filled.ContentPaste, onMove)
-                ActionItem("重命名", Icons.Filled.Edit, onRename)
-                if (!entry.isDir) ActionItem("查看内容", Icons.Filled.Description, onRead)
-                ActionItem("详细信息", Icons.Filled.Info, onInfo)
-                ActionItem("删除", Icons.Filled.Delete, onDelete, danger = true)
+                ActionItem(stringResource(R.string.filemanager_copy), Icons.Filled.ContentCopy, onCopy)
+                ActionItem(stringResource(R.string.filemanager_cut), Icons.Filled.ContentPaste, onMove)
+                ActionItem(stringResource(R.string.filemanager_rename), Icons.Filled.Edit, onRename)
+                if (!entry.isDir) {
+                    ActionItem(stringResource(R.string.filemanager_view_content), Icons.Filled.Description, onRead)
+                }
+                ActionItem(stringResource(R.string.filemanager_details), Icons.Filled.Info, onInfo)
+                ActionItem(stringResource(R.string.common_delete), Icons.Filled.Delete, onDelete, danger = true)
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -559,9 +594,10 @@ private fun ActionItem(text: String, icon: ImageVector, onClick: () -> Unit, dan
         modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(icon, contentDescription = null, tint = if (danger) FWarning else FSub, modifier = Modifier.size(18.dp))
+        // 删除这类破坏性操作用 breach,琥珀只给审批 / 风险
+        Icon(icon, contentDescription = null, tint = if (danger) FError else FSub, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(14.dp))
-        Text(text, color = if (danger) FWarning else FText, fontSize = 14.sp)
+        Text(text, color = if (danger) FError else FText, fontSize = 14.sp)
     }
 }
 
@@ -574,15 +610,26 @@ private fun ShizukuEmptyState(onAuthorize: () -> Unit) {
     ) {
         Icon(Icons.Filled.Folder, contentDescription = null, tint = FMuted, modifier = Modifier.size(48.dp))
         Spacer(Modifier.height(16.dp))
-        Text("需要 Shizuku 才能访问文件系统", color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        Text(
+            stringResource(R.string.filemanager_shizuku_title),
+            color = FText,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+        )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Shizuku 提供 shell 级权限,可访问 /sdcard/ 和 /sdcard/Android/data/。\n本应用不会上传你的文件。",
+            stringResource(R.string.filemanager_shizuku_desc),
             color = FMuted, fontSize = 12.sp, textAlign = TextAlign.Center, lineHeight = 17.sp,
         )
         Spacer(Modifier.height(20.dp))
         Button(onClick = onAuthorize, colors = ButtonDefaults.buttonColors(containerColor = OctopusColors.Primary)) {
-            Text("去授权", color = OctopusColors.OnPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                stringResource(R.string.filemanager_authorize),
+                color = OctopusColors.OnPrimary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }
@@ -610,9 +657,11 @@ private fun TextInputDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) { Text("确定") }
+            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
+                Text(stringResource(R.string.common_confirm))
+            }
         },
-        dismissButton = { TextButton(onClick = onCancel) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -630,7 +679,7 @@ private fun InfoDialog(title: String, content: String, onDismiss: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp),
             )
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_close)) } },
     )
 }
 

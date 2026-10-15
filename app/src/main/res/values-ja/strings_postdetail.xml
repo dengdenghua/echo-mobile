@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 広場 > 投稿の詳細 (PostDetailScreen)。共通キーは strings.xml にあります。 -->
+    <string name="post_detail_share">共有</string>
+    <string name="post_detail_share_title">投稿を共有</string>
+    <string name="post_detail_qr_desc">この投稿の QR コード</string>
+    <string name="post_detail_qr_failed">QR コードを作成できませんでした</string>
+    <string name="post_detail_like">いいね</string>
+    <string name="post_detail_unlike">いいねを取り消す</string>
+    <string name="post_detail_comments">コメント</string>
+    <string name="post_detail_favorite">保存</string>
+    <string name="post_detail_unfavorite">保存を解除</string>
+    <string name="post_detail_reply">返信</string>
+    <string name="post_detail_reply_hint">返信を入力…</string>
+    <string name="post_detail_comment_error">コメントを投稿できませんでした：%1$s</string>
+    <string name="post_detail_action_error">操作を完了できませんでした：%1$s</string>
+    <string name="post_detail_forked_from">他のクリエイターの作品から Fork</string>
+    <string name="post_detail_try_run">試しに実行</string>
+    <string name="post_detail_try_run_error">ミニアプリを読み込めませんでした：%1$s</string>
+    <string name="post_detail_fork">自分のアカウントに Fork</string>
+    <string name="post_detail_forking">Fork 中…</string>
+    <string name="post_detail_forked">あなたのアカウントに Fork しました。「自分の投稿」で確認できます。</string>
+    <string name="post_detail_fork_failed">Fork できませんでした</string>
+    <string name="post_detail_fork_error">Fork できませんでした：%1$s</string>
+    <string name="post_detail_acquire_free">無料で複製</string>
+    <string name="post_detail_acquire_price">%1$d クレジットで複製</string>
+    <string name="post_detail_acquiring">複製中…</string>
+    <string name="post_detail_owned_reinstall">複製済み · 再インストール</string>
+    <string name="post_detail_acquired">複製しました</string>
+    <string name="post_detail_acquired_app">「%1$s」を複製しました。ミニアプリから開けます。</string>
+    <string name="post_detail_acquire_failed">複製できませんでした</string>
+    <string name="post_detail_install_failed">インストールできませんでした：%1$s</string>
+    <string name="post_detail_acquire_confirm_title">このアプリを複製</string>
+    <string name="post_detail_acquire_confirm_body">%1$d クレジットで「%2$s」を複製します。複製後は何度でもインストールできます。</string>
+    <string name="post_detail_acquire_confirm">複製する</string>
+    <string name="post_detail_subscribe_price">購読 · %1$d クレジット/月</string>
+    <string name="post_detail_sub_active_renew">購読中 · 更新（%1$d クレジット/月）</string>
+    <string name="post_detail_subscribing">購読を処理中…</string>
+    <string name="post_detail_subscribe_title">購読の確認</string>
+    <string name="post_detail_renew_title">購読を更新</string>
+    <string name="post_detail_subscribe_body">%1$d クレジットで「%2$s」を 1 か月購読します。期限が切れたら手動で更新してください。</string>
+    <string name="post_detail_subscribe_month">1 か月購読する</string>
+    <string name="post_detail_renew_month">1 か月更新する</string>
+    <string name="post_detail_sub_already">購読はすでに有効です</string>
+    <string name="post_detail_sub_success">購読しました。有効期間を 30 日延長しました。</string>
+    <string name="post_detail_sub_failed">購読できませんでした</string>
+</resources>

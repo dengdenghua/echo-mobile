@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Workflows screen (ui/featurescreens/WorkflowsActivity.kt). Keep the same keys in all six locales. -->
+<resources>
+    <string name="workflows_title">워크플로</string>
+    <string name="workflows_import">가져오기</string>
+    <string name="workflows_new">새 워크플로</string>
+    <string name="workflows_empty">아직 워크플로가 없습니다\n오른쪽 위의 + 를 눌러 만드세요.\n\n워크플로는 여러 도구, 프롬프트, 조건을\n재사용할 수 있는 자동화 흐름으로 연결합니다.</string>
+    <string name="workflows_header_title">워크플로 오케스트레이션</string>
+    <string name="workflows_header_desc">여러 단계(도구 호출 / 자연어 프롬프트 / 조건 분기)를 재사용할 수 있는 흐름으로 연결합니다. ${var}로 변수를 전달하고 이전 단계의 결과를 참조할 수 있습니다.</string>
+    <string name="workflows_stats">전체: %1$d · 누적 실행: %2$d</string>
+    <string name="workflows_running_title">실행 중</string>
+    <string name="workflows_running_message">실행 중: %1$s</string>
+    <string name="workflows_schedule_title">예약 실행: %1$s</string>
+    <string name="workflows_schedule_desc">매일 또는 한 번만 실행할 시각을 설정합니다. 예약을 해제하려면 두 칸을 모두 비우고 저장하세요.</string>
+    <string name="workflows_schedule_hour">시 (0-23)</string>
+    <string name="workflows_schedule_minute">분 (0-59)</string>
+    <string name="workflows_schedule_daily">매일 반복</string>
+    <string name="workflows_schedule_once">한 번만 실행</string>
+    <string name="workflows_step_count">%1$d단계</string>
+    <string name="workflows_run_summary">실행 %1$d회 · %2$s</string>
+    <string name="workflows_last_run">최근 %1$s</string>
+    <string name="workflows_never_run">실행 기록 없음</string>
+    <string name="workflows_badge_daily">매일 %1$s</string>
+    <string name="workflows_badge_once">한 번 %1$s</string>
+    <string name="workflows_run">실행</string>
+    <string name="workflows_edit">편집</string>
+    <string name="workflows_schedule">예약</string>
+    <string name="workflows_export">내보내기</string>
+    <string name="workflows_editor_new">새 워크플로</string>
+    <string name="workflows_editor_edit">워크플로 편집</string>
+    <string name="workflows_field_name">이름</string>
+    <string name="workflows_field_description">설명</string>
+    <string name="workflows_steps">단계</string>
+    <string name="workflows_step_default_name">단계 %1$d</string>
+    <string name="workflows_add_step">추가</string>
+    <string name="workflows_no_steps">아직 단계가 없습니다. 위의 추가를 누르세요.</string>
+    <string name="workflows_step_type">유형</string>
+    <string name="workflows_type_tool">도구</string>
+    <string name="workflows_type_prompt">프롬프트</string>
+    <string name="workflows_type_condition">조건</string>
+    <string name="workflows_tool_name">도구 이름</string>
+    <string name="workflows_params_label">매개변수(${var}로 이전 출력을 참조할 수 있음)</string>
+    <string name="workflows_prompt_label">자연어 지시</string>
+    <string name="workflows_condition_label">조건 → 이동 대상(한 줄에 하나, 형식: 표현식 => stepId)</string>
+    <string name="workflows_condition_example">예: ${status} == \"ok\" => step_done\n연산자: == != contains > &lt;</string>
+    <string name="workflows_condition_step_ids">사용 가능한 stepId: %1$s</string>
+    <string name="workflows_output_var_label">출력 변수 이름(선택, 이후 단계에서 ${이름}으로 참조)</string>
+    <string name="workflows_result_success">실행 완료</string>
+    <string name="workflows_result_failed">실행 실패</string>
+    <string name="workflows_result_summary">소요 시간: %1$d ms · 단계 수: %2$d</string>
+    <string name="workflows_result_error">오류: %1$s</string>
+    <string name="workflows_result_output">최종 출력:</string>
+    <string name="workflows_result_logs">단계 로그:</string>
+</resources>

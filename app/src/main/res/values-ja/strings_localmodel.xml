@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 設定 > ローカルモデル（LocalModelActivity） -->
+    <string name="localmodel_title">ローカルモデル</string>
+    <string name="localmodel_engine_status">エンジンの状態</string>
+    <string name="localmodel_engine_loaded">読み込み済み</string>
+    <string name="localmodel_engine_not_built">未ビルド</string>
+    <string name="localmodel_loaded_count">読み込み済みモデル数</string>
+    <string name="localmodel_offline_mode">オフラインモード</string>
+    <string name="localmodel_offline_mode_desc">オンにすると、チャットはネットワークを使わずローカルモデルで動作します。チャットのみで、Echo は端末を操作できません。</string>
+    <string name="localmodel_offline_needs_native">llama.cpp と MNN のネイティブライブラリがどちらもビルドされていないため、オフラインモードをオンにできません。先に build-native.sh または build-mnn.sh を実行してください。</string>
+    <string name="localmodel_offline_needs_model">先に .gguf または .mnn モデルを選択して読み込んでください。</string>
+    <string name="localmodel_active_model">使用中のモデル</string>
+    <string name="localmodel_active_none">未設定です。.gguf モデルファイルを選択してください。</string>
+    <string name="localmodel_pick_gguf">.gguf ファイルを選択</string>
+    <string name="localmodel_importing">モデルをインポートしています…</string>
+    <string name="localmodel_read_file_failed">選択したファイルを読み取れませんでした。</string>
+    <string name="localmodel_load_failed">モデルを読み込めませんでした: %1$s</string>
+    <string name="localmodel_import_failed_reason">インポートに失敗しました: %1$s</string>
+    <string name="localmodel_import_failed">インポートに失敗しました。</string>
+    <string name="localmodel_import_done">インポートしました: %1$s（%2$s）</string>
+    <string name="localmodel_loaded_models">読み込み済みのモデル</string>
+    <string name="localmodel_badge_active">使用中</string>
+    <string name="localmodel_loaded_meta">%1$s · ctx %2$d · %3$s に読み込み</string>
+    <string name="localmodel_set_active">使用する</string>
+    <string name="localmodel_unload">アンロード</string>
+    <string name="localmodel_mnn_title">MNN モデル</string>
+    <string name="localmodel_mnn_empty">MNN モデルはまだインポートされていません。\nMNN モデルは .mnn の重み、tokenizer、config を含むフォルダです。\nフォルダを .zip にまとめてここでインポートすると、アプリ専用の領域に展開されます。</string>
+    <string name="localmodel_mnn_meta">%1$s · %2$d ファイル · %3$s</string>
+    <string name="localmodel_use_as_llm">LLM として使用</string>
+    <string name="localmodel_load_whisper">Whisper を読み込む</string>
+    <string name="localmodel_import_mnn">.zip / .mnn モデルをインポート</string>
+    <string name="localmodel_whisper_load_failed">Whisper モデルを読み込めませんでした（native が 0 を返しました）。</string>
+    <string name="localmodel_asr_title">端末内 ASR（Whisper）</string>
+    <string name="localmodel_asr_switch">端末内の Whisper で音声を認識</string>
+    <string name="localmodel_asr_loaded">読み込み済み: %1$s</string>
+    <string name="localmodel_asr_not_loaded">設定済み、未読み込み</string>
+    <string name="localmodel_asr_none">Whisper モデルがありません。先に上で whisper-tiny フォルダをインポートしてください。</string>
+    <string name="localmodel_asr_needs_model">Whisper モデルが読み込まれていません。先に Whisper モデルのフォルダをインポートして読み込んでください。</string>
+    <string name="localmodel_asr_desc" formatted="false">オンにすると、「マイクを押して話す」とデスクトップの音声入力が MNN Whisper のオフライン認識に切り替わります。\nGoogle のサービスに依存せず、音声は端末の外に出ません。\nWhisper-tiny の中国語認識率は約 80% で、クラウドより低めです。オフライン時に適しています。</string>
+    <string name="localmodel_guide_title">使い方</string>
+    <string name="localmodel_guide_llama">llama.cpp のおすすめ: Qwen2.5-3B-Q4_K_M（約 2 GB、中国語に強い）</string>
+    <string name="localmodel_guide_mnn">MNN のおすすめ: Qwen-1.8B-INT8（約 700 MB、GPU で 30+ tok/s）</string>
+    <string name="localmodel_guide_whisper" formatted="false">Whisper ASR: whisper-tiny（約 150 MB、中国語認識率 約 80%）</string>
+    <string name="localmodel_guide_speed">参考速度（Snapdragon 8 Gen 2）: llama.cpp 約 15 tok/s、MNN 約 30 tok/s</string>
+    <string name="localmodel_guide_ram">3B モデルには 6 GB 以上、1.8B の MNN モデルには 4 GB 以上の RAM が必要です</string>
+    <string name="localmodel_guide_build">初回ビルド: ./build-native.sh（llama）または ./build-mnn.sh（MNN）</string>
+    <string name="localmodel_limits">既知の制限:\n• function calling 非対応: オフラインモードはチャットのみで、端末を操作できません\n• 画像認識非対応: スクリーンショットや画像は無視されます\n• 品質は GPT-4 や Claude より低め: プライバシー重視やオフラインでの利用向け</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes > Contenedor Linux (LinuxSandboxSettingsActivity). El título reutiliza settings_linux_title. -->
+    <string name="sandbox_about_title">Qué es el contenedor Linux</string>
+    <string name="sandbox_about_body">La app incluye un sandbox Linux PRoot en espacio de usuario. Cuando Echo llama a la herramienta run_shell, ejecuta comandos Linux reales en el contenedor (instalar paquetes con apt o pip, git, ffmpeg, python y más), sin root.\n\nDos distribuciones:\n• Alpine: 3 MB, incluido en el APK, se descomprime en el primer uso\n• Ubuntu: 28 MB, descárgalo en esta página antes de usarlo\n\nSeguridad: raíz del contenedor aislada, lista de permitidos para bind mount (solo Download y Documents), aislamiento por UID, control de riesgo HIGH, cierre forzado por tiempo de espera y límite de salida de 64 KB.</string>
+    <string name="sandbox_alpine_title">Alpine (incluido)</string>
+    <string name="sandbox_status">Estado</string>
+    <string name="sandbox_ready">Listo</string>
+    <string name="sandbox_alpine_not_ready">Sin inicializar. Se descomprime en la primera llamada a run_shell.</string>
+    <string name="sandbox_storage_used">Ocupa: %1$s</string>
+    <string name="sandbox_reset_done">Contenedor %1$s restablecido.</string>
+    <string name="sandbox_reset_failed">Error al restablecer: %1$s</string>
+    <string name="sandbox_unknown_error">Error desconocido</string>
+    <string name="sandbox_reset_alpine">Restablecer Alpine</string>
+    <string name="sandbox_resetting">Restableciendo…</string>
+    <string name="sandbox_ubuntu_title">Ubuntu (requiere descarga)</string>
+    <string name="sandbox_ubuntu_downloaded">rootfs descargado. Se descomprime en la primera llamada a run_shell.</string>
+    <string name="sandbox_ubuntu_missing">Sin descargar (28 MB, desde cdimage.ubuntu.com)</string>
+    <string name="sandbox_downloading">Descargando… %1$d%%</string>
+    <string name="sandbox_download_done">Ubuntu rootfs descargado. run_shell ya puede usar distro=ubuntu.</string>
+    <string name="sandbox_download_failed">Error en la descarga: %1$s</string>
+    <string name="sandbox_download_again">Descargar de nuevo</string>
+    <string name="sandbox_download_ubuntu">Descargar Ubuntu rootfs</string>
+    <string name="sandbox_cache_deleted">Descarga de Ubuntu rootfs eliminada.</string>
+    <string name="sandbox_delete_failed">No se pudo eliminar la descarga.</string>
+    <string name="sandbox_delete_cache">Eliminar descarga</string>
+    <string name="sandbox_reset_ubuntu">Restablecer Ubuntu (borra rootfs y home)</string>
+    <string name="sandbox_usage_title">Cómo lo usa Echo</string>
+    <string name="sandbox_usage_body">Echo usa este contenedor cuando llama a la herramienta run_shell:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session (sesión interactiva)\n\nAlpine es la opción predeterminada (ligera y rápida). Ubuntu sirve cuando necesitas glibc o el ecosistema completo de apt.\nLista de permitidos para bind mount: /sdcard/Download y /sdcard/Documents (lectura y escritura dentro del contenedor).</string>
+</resources>

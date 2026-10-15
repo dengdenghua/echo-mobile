@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Workflows screen (ui/featurescreens/WorkflowsActivity.kt). Keep the same keys in all six locales. -->
+<resources>
+    <string name="workflows_title">Workflows</string>
+    <string name="workflows_import">Import</string>
+    <string name="workflows_new">New workflow</string>
+    <string name="workflows_empty">No workflows yet\nTap + at the top right to create one.\n\nA workflow chains tools, prompts and conditions\ninto a reusable automation.</string>
+    <string name="workflows_header_title">Workflow orchestration</string>
+    <string name="workflows_header_desc">Chain steps (tool calls, natural-language prompts, condition branches) into a reusable flow. Pass variables with ${var} and use results from earlier steps.</string>
+    <string name="workflows_stats">Workflows: %1$d · Total runs: %2$d</string>
+    <string name="workflows_running_title">Running</string>
+    <string name="workflows_running_message">Executing: %1$s</string>
+    <string name="workflows_schedule_title">Schedule: %1$s</string>
+    <string name="workflows_schedule_desc">Set a daily or one-time trigger time. To remove the schedule, clear both fields and save.</string>
+    <string name="workflows_schedule_hour">Hour (0-23)</string>
+    <string name="workflows_schedule_minute">Minute (0-59)</string>
+    <string name="workflows_schedule_daily">Repeat every day</string>
+    <string name="workflows_schedule_once">Run once</string>
+    <string name="workflows_step_count">Steps: %1$d</string>
+    <string name="workflows_run_summary">Runs: %1$d · %2$s</string>
+    <string name="workflows_last_run">Last run %1$s</string>
+    <string name="workflows_never_run">Never run</string>
+    <string name="workflows_badge_daily">Daily %1$s</string>
+    <string name="workflows_badge_once">Once %1$s</string>
+    <string name="workflows_run">Run</string>
+    <string name="workflows_edit">Edit</string>
+    <string name="workflows_schedule">Schedule</string>
+    <string name="workflows_export">Export</string>
+    <string name="workflows_editor_new">New workflow</string>
+    <string name="workflows_editor_edit">Edit workflow</string>
+    <string name="workflows_field_name">Name</string>
+    <string name="workflows_field_description">Description</string>
+    <string name="workflows_steps">Steps</string>
+    <string name="workflows_step_default_name">Step %1$d</string>
+    <string name="workflows_add_step">Add</string>
+    <string name="workflows_no_steps">No steps yet. Tap Add above.</string>
+    <string name="workflows_step_type">Type</string>
+    <string name="workflows_type_tool">Tool</string>
+    <string name="workflows_type_prompt">Prompt</string>
+    <string name="workflows_type_condition">Condition</string>
+    <string name="workflows_tool_name">Tool name</string>
+    <string name="workflows_params_label">Parameters (use ${var} to reference earlier output)</string>
+    <string name="workflows_prompt_label">Natural-language instruction</string>
+    <string name="workflows_condition_label">Condition → target (one per line: expression => stepId)</string>
+    <string name="workflows_condition_example">Example: ${status} == \"ok\" => step_done\nOperators: == != contains > &lt;</string>
+    <string name="workflows_condition_step_ids">Available stepIds: %1$s</string>
+    <string name="workflows_output_var_label">Output variable (optional; later steps can use ${name})</string>
+    <string name="workflows_result_success">Run complete</string>
+    <string name="workflows_result_failed">Run failed</string>
+    <string name="workflows_result_summary">Time: %1$d ms · Steps: %2$d</string>
+    <string name="workflows_result_error">Error: %1$s</string>
+    <string name="workflows_result_output">Final output:</string>
+    <string name="workflows_result_logs">Step log:</string>
+</resources>

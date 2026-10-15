@@ -1,5 +1,6 @@
 package com.apk.claw.android.ui.featurescreens
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -20,11 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
+import com.apk.claw.android.tool.ToolResult
 import com.apk.claw.android.tool.impl.LinuxSandbox
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
+import com.apk.claw.android.ui.compose.theme.OctopusType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,7 +71,7 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
     fun refresh() { rev++ }
 
     FeatureScaffold(
-        title = "Linux 容器",
+        title = stringResource(R.string.settings_linux_title),
         onBack = onBack,
     ) {
         Column(
@@ -73,44 +80,46 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 24.dp),
         ) {
+            val statusLabel = stringResource(R.string.sandbox_status)
+            val statusReady = stringResource(R.string.sandbox_ready)
             // ── 卡片 1:说明 ──
             FCard {
-                Text("什么是 Linux 容器", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.sandbox_about_title),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "App 内置 PRoot 用户态 Linux 沙箱,Agent 调 run_shell 工具可在容器内执行真实 Linux 命令" +
-                        "(apt/pip 装包、git、ffmpeg、python 等),无需 root。\n\n" +
-                        "两个发行版:\n" +
-                        "  • Alpine — 3MB,已打包进 APK,首调自动解压\n" +
-                        "  • Ubuntu — 28MB,需在此页主动下载后才能用\n\n" +
-                        "安全:容器根目录隔离 + bind mount 白名单(只挂 Download/Documents)+" +
-                        "UID 隔离 + HIGH 风险闸门 + 超时强杀 + 64KB 输出上限。",
-                    color = FSub, fontSize = 11.sp, lineHeight = 16.sp,
+                    stringResource(R.string.sandbox_about_body),
+                    color = FSub, fontSize = OctopusType.caption, lineHeight = 16.sp,
                 )
             }
 
             // ── 卡片 2:Alpine 状态 ──
             FCard {
-                Text("Alpine (内置)", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.sandbox_alpine_title),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
                 StatusRow(
                     icon = if (alpineReady) Icons.Filled.CheckCircle else Icons.Filled.Terminal,
                     iconColor = if (alpineReady) FSuccess else FPrimary,
-                    label = "状态",
-                    value = if (alpineReady) "已就绪 ✓" else "未初始化(首调 run_shell 自动解压)",
+                    label = statusLabel,
+                    value = if (alpineReady) statusReady else stringResource(R.string.sandbox_alpine_not_ready),
                 )
                 if (alpinePath != null) {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         alpinePath,
-                        color = FMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace,
-                        lineHeight = 14.sp,
+                        color = FMuted, fontSize = OctopusType.caption, fontFamily = FontFamily.Monospace,
+                        lineHeight = 16.sp,
                     )
                     Spacer(Modifier.height(4.dp))
                     val size = runCatching { dirSize(File(alpinePath)) }.getOrDefault(0L)
                     Text(
-                        "占用: ${formatSize(size)}",
-                        color = FMuted, fontSize = 10.sp,
+                        stringResource(R.string.sandbox_storage_used, formatSize(size)),
+                        color = FMuted, fontSize = OctopusType.caption,
                     )
                 }
                 Spacer(Modifier.height(12.dp))
@@ -122,7 +131,7 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                                 val r = withContext(Dispatchers.IO) {
                                     LinuxSandbox.reset(LinuxSandbox.Distro.ALPINE)
                                 }
-                                msg = if (r.isSuccess) "Alpine 容器已重置" else "重置失败: ${r.error ?: r.errorCode ?: "未知错误"}"
+                                msg = resetMessage(ctx, "Alpine", r)
                                 resetting = null
                                 refresh()
                             }
@@ -133,22 +142,21 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                     ) {
                         Icon(Icons.Filled.Refresh, null, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("重置 Alpine")
+                        Text(stringResource(R.string.sandbox_reset_alpine))
                     }
                 }
                 if (resetting == "Alpine") {
                     Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                        Spacer(Modifier.width(8.dp))
-                        Text("正在重置...", color = FSub, fontSize = 11.sp)
-                    }
+                    ResettingRow()
                 }
             }
 
             // ── 卡片 3:Ubuntu rootfs 下载 ──
             FCard {
-                Text("Ubuntu (需下载)", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.sandbox_ubuntu_title),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
                 StatusRow(
                     icon = when {
@@ -161,31 +169,31 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                         ubuntuRootfsDownloaded -> FPrimary
                         else -> FWarning
                     },
-                    label = "状态",
+                    label = statusLabel,
                     value = when {
-                        ubuntuReady -> "已就绪 ✓"
-                        ubuntuRootfsDownloaded -> "rootfs 已下载,首调 run_shell 时自动解压"
-                        else -> "未下载(28MB,从 cdimage.ubuntu.com)"
+                        ubuntuReady -> statusReady
+                        ubuntuRootfsDownloaded -> stringResource(R.string.sandbox_ubuntu_downloaded)
+                        else -> stringResource(R.string.sandbox_ubuntu_missing)
                     },
                 )
                 if (ubuntuPath != null) {
                     Spacer(Modifier.height(4.dp))
                     Text(
                         ubuntuPath,
-                        color = FMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace,
-                        lineHeight = 14.sp,
+                        color = FMuted, fontSize = OctopusType.caption, fontFamily = FontFamily.Monospace,
+                        lineHeight = 16.sp,
                     )
                 }
                 Spacer(Modifier.height(12.dp))
 
                 if (downloading) {
                     // 下载进度
-                    LinearProgressIndicator(
-                        progress = { progress / 100f },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    EchoProgressLine(progress = { progress / 100f })
                     Spacer(Modifier.height(4.dp))
-                    Text("下载中... $progress%", color = FSub, fontSize = 11.sp)
+                    Text(
+                        stringResource(R.string.sandbox_downloading, progress),
+                        color = FSub, fontSize = OctopusType.caption,
+                    )
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(
@@ -199,7 +207,11 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                                             progress = p
                                         }
                                     }
-                                    msg = if (r.isSuccess) r.data else "下载失败: ${r.error ?: r.errorCode ?: "未知错误"}"
+                                    msg = if (r.isSuccess) {
+                                        ctx.getString(R.string.sandbox_download_done)
+                                    } else {
+                                        ctx.getString(R.string.sandbox_download_failed, failureReason(ctx, r))
+                                    }
                                     downloading = false
                                     refresh()
                                 }
@@ -210,7 +222,15 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                         ) {
                             Icon(Icons.Filled.Download, null, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text(if (ubuntuRootfsDownloaded) "重新下载" else "下载 Ubuntu rootfs")
+                            Text(
+                                stringResource(
+                                    if (ubuntuRootfsDownloaded) {
+                                        R.string.sandbox_download_again
+                                    } else {
+                                        R.string.sandbox_download_ubuntu
+                                    },
+                                ),
+                            )
                         }
                         if (ubuntuRootfsDownloaded) {
                             OutlinedButton(
@@ -219,7 +239,11 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                                         val r = withContext(Dispatchers.IO) {
                                             LinuxSandbox.deleteUbuntuRootfsDownload()
                                         }
-                                        msg = if (r.isSuccess) "Ubuntu rootfs 下载缓存已删除" else "删除失败"
+                                        msg = if (r.isSuccess) {
+                                            ctx.getString(R.string.sandbox_cache_deleted)
+                                        } else {
+                                            ctx.getString(R.string.sandbox_delete_failed)
+                                        }
                                         refresh()
                                     }
                                 },
@@ -229,7 +253,7 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                             ) {
                                 Icon(Icons.Filled.Delete, null, modifier = Modifier.size(14.dp))
                                 Spacer(Modifier.width(4.dp))
-                                Text("删除缓存")
+                                Text(stringResource(R.string.sandbox_delete_cache))
                             }
                         }
                     }
@@ -242,7 +266,7 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                                     val r = withContext(Dispatchers.IO) {
                                         LinuxSandbox.reset(LinuxSandbox.Distro.UBUNTU)
                                     }
-                                    msg = if (r.isSuccess) "Ubuntu 容器已重置" else "重置失败: ${r.error ?: r.errorCode ?: "未知错误"}"
+                                    msg = resetMessage(ctx, "Ubuntu", r)
                                     resetting = null
                                     refresh()
                                 }
@@ -253,32 +277,26 @@ private fun LinuxSandboxSettingsScreen(onBack: () -> Unit) {
                         ) {
                             Icon(Icons.Filled.Refresh, null, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("重置 Ubuntu 容器(删 rootfs + home)")
+                            Text(stringResource(R.string.sandbox_reset_ubuntu))
                         }
                     }
                 }
                 if (resetting == "Ubuntu") {
                     Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                        Spacer(Modifier.width(8.dp))
-                        Text("正在重置...", color = FSub, fontSize = 11.sp)
-                    }
+                    ResettingRow()
                 }
             }
 
             // ── 卡片 4:使用提示 ──
             FCard {
-                Text("使用方式", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.sandbox_usage_title),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Agent 调用 run_shell 工具时自动使用此容器:\n" +
-                        "  • run_shell command=\"ls -la /\"\n" +
-                        "  • run_shell command=\"apt install -y jq\" distro=ubuntu\n" +
-                        "  • run_shell_session(交互式会话)\n\n" +
-                        "默认 Alpine(轻量快速)。Ubuntu 适合需要 glibc / apt 完整生态的场景。\n" +
-                        "Bind mount 白名单:/sdcard/Download + /sdcard/Documents(容器内可读写)。",
-                    color = FSub, fontSize = 11.sp, lineHeight = 16.sp,
+                    stringResource(R.string.sandbox_usage_body),
+                    color = FSub, fontSize = OctopusType.caption, lineHeight = 16.sp,
                 )
             }
 
@@ -316,6 +334,28 @@ private fun StatusRow(
         Text(value, color = FText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 }
+
+/** 重置进行中:一条细线 + 「正在重置…」。 */
+@Composable
+private fun ResettingRow() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(R.string.sandbox_resetting), color = FSub, fontSize = OctopusType.caption)
+    }
+}
+
+/** 失败原因:工具返回的 error,其次 errorCode,都没有时用「未知错误」。 */
+private fun failureReason(ctx: Context, r: ToolResult): String =
+    r.error ?: r.errorCode ?: ctx.getString(R.string.sandbox_unknown_error)
+
+/** 重置 [distro] 容器后在消息条显示的文案。 */
+private fun resetMessage(ctx: Context, distro: String, r: ToolResult): String =
+    if (r.isSuccess) {
+        ctx.getString(R.string.sandbox_reset_done, distro)
+    } else {
+        ctx.getString(R.string.sandbox_reset_failed, failureReason(ctx, r))
+    }
 
 /** 递归计算目录大小(字节)。 */
 private fun dirSize(dir: File): Long {

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 광장 > 게시물 상세 (PostDetailScreen). 공통 키는 strings.xml에 있습니다. -->
+    <string name="post_detail_share">공유</string>
+    <string name="post_detail_share_title">게시물 공유</string>
+    <string name="post_detail_qr_desc">이 게시물의 QR 코드</string>
+    <string name="post_detail_qr_failed">QR 코드를 만들 수 없습니다</string>
+    <string name="post_detail_like">좋아요</string>
+    <string name="post_detail_unlike">좋아요 취소</string>
+    <string name="post_detail_comments">댓글</string>
+    <string name="post_detail_favorite">저장</string>
+    <string name="post_detail_unfavorite">저장 취소</string>
+    <string name="post_detail_reply">답글</string>
+    <string name="post_detail_reply_hint">답글 입력…</string>
+    <string name="post_detail_comment_error">댓글을 게시할 수 없습니다: %1$s</string>
+    <string name="post_detail_action_error">작업을 완료할 수 없습니다: %1$s</string>
+    <string name="post_detail_forked_from">다른 크리에이터의 작품에서 Fork함</string>
+    <string name="post_detail_try_run">미리 실행</string>
+    <string name="post_detail_try_run_error">미니 앱을 불러올 수 없습니다: %1$s</string>
+    <string name="post_detail_fork">내 계정으로 Fork</string>
+    <string name="post_detail_forking">Fork 중…</string>
+    <string name="post_detail_forked">내 계정으로 Fork했습니다. 내 게시물에서 확인하세요.</string>
+    <string name="post_detail_fork_failed">Fork할 수 없습니다</string>
+    <string name="post_detail_fork_error">Fork할 수 없습니다: %1$s</string>
+    <string name="post_detail_acquire_free">무료로 복제</string>
+    <string name="post_detail_acquire_price">%1$d 크레딧으로 복제</string>
+    <string name="post_detail_acquiring">복제 중…</string>
+    <string name="post_detail_owned_reinstall">복제됨 · 다시 설치</string>
+    <string name="post_detail_acquired">복제했습니다</string>
+    <string name="post_detail_acquired_app">%1$s을(를) 복제했습니다. 미니 앱에서 열 수 있습니다.</string>
+    <string name="post_detail_acquire_failed">복제할 수 없습니다</string>
+    <string name="post_detail_install_failed">설치할 수 없습니다: %1$s</string>
+    <string name="post_detail_acquire_confirm_title">이 앱 복제</string>
+    <string name="post_detail_acquire_confirm_body">%1$d 크레딧으로 %2$s을(를) 복제합니다. 복제 후에는 언제든 다시 설치할 수 있습니다.</string>
+    <string name="post_detail_acquire_confirm">복제</string>
+    <string name="post_detail_subscribe_price">구독 · %1$d 크레딧/월</string>
+    <string name="post_detail_sub_active_renew">구독 중 · 갱신(%1$d 크레딧/월)</string>
+    <string name="post_detail_subscribing">구독 처리 중…</string>
+    <string name="post_detail_subscribe_title">구독 확인</string>
+    <string name="post_detail_renew_title">구독 갱신</string>
+    <string name="post_detail_subscribe_body">%1$d 크레딧으로 %2$s을(를) 1개월 구독합니다. 만료되면 직접 갱신하세요.</string>
+    <string name="post_detail_subscribe_month">1개월 구독</string>
+    <string name="post_detail_renew_month">1개월 갱신</string>
+    <string name="post_detail_sub_already">구독이 이미 활성화되어 있습니다</string>
+    <string name="post_detail_sub_success">구독했습니다. 이용 기간이 30일 연장되었습니다.</string>
+    <string name="post_detail_sub_failed">구독할 수 없습니다</string>
+</resources>

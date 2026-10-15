@@ -294,11 +294,12 @@ fun OctopusNavHost(
         // 「灵感广场」(AgentSquare)独立入口已移除 —— 灵感 tab(FeatureHub 探索)即广场,
         // 其 search/发帖 直连下面的 square_search / square_create_post。
         composable("square_create_post") {
+            val context = LocalContext.current
             com.apk.claw.android.ui.compose.screen.CreatePostScreen(
                 onBack = { navController.popBackStack() },
                 onPublished = {
                     navController.popBackStack()
-                    showMessage("发布成功,等待审核")
+                    showMessage(context.getString(com.apk.claw.android.R.string.create_post_published_pending))
                 },
                 onMessage = showMessage,
             )

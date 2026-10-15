@@ -37,7 +37,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -68,11 +68,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.formatCompactCount
 import com.apk.claw.android.account.AccountFeature
 import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.plugin.SubscriptionGate
 import com.apk.claw.android.registry.CommunityMiniAppInstaller
 import com.apk.claw.android.registry.CommunitySquareApi
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
 import com.apk.claw.android.ui.compose.component.LoadFailedState
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -147,18 +151,18 @@ fun PostDetailScreen(
                     val download = CommunitySquareApi.parseDownloadPayload(r.app)
                     val err = CommunityMiniAppInstaller.install(ctx, download)
                     if (err != null) {
-                        onMessage("安装失败:$err")
+                        onMessage(ctx.getString(R.string.post_detail_install_failed, err))
                     } else {
-                        onMessage("已复刻「${download.name}」,在「小程序」里可打开")
+                        onMessage(ctx.getString(R.string.post_detail_acquired_app, download.name))
                         post = post?.copy(owned = true)
                     }
                 } else {
                     // routine 等类型的落地由后续增量处理,先标记已获取
-                    onMessage("已复刻")
+                    onMessage(ctx.getString(R.string.post_detail_acquired))
                     post = post?.copy(owned = true)
                 }
             } catch (e: Exception) {
-                onMessage(e.message ?: "复刻失败")
+                onMessage(e.message ?: ctx.getString(R.string.post_detail_acquire_failed))
             }
             acquiring = false
         }
@@ -173,16 +177,17 @@ fun PostDetailScreen(
                     val download = CommunitySquareApi.parseDownloadPayload(r.app)
                     val err = CommunityMiniAppInstaller.install(ctx, download)
                     if (err != null) {
-                        onMessage("安装失败:$err")
+                        onMessage(ctx.getString(R.string.post_detail_install_failed, err))
                         subscribing = false
                         return@launch
                     }
                 }
                 if (r.appRef.isNotBlank()) SubscriptionGate.mark(r.appRef)  // 标记订阅制,打开时校验
-                onMessage(if (r.duplicate) "已是有效订阅" else "订阅成功,有效期已续 30 天")
+                val doneRes = if (r.duplicate) R.string.post_detail_sub_already else R.string.post_detail_sub_success
+                onMessage(ctx.getString(doneRes))
                 post = post?.copy(subActive = true)
             } catch (e: Exception) {
-                onMessage(e.message ?: "订阅失败")
+                onMessage(e.message ?: ctx.getString(R.string.post_detail_sub_failed))
             }
             subscribing = false
         }
@@ -223,16 +228,14 @@ fun PostDetailScreen(
             IconButton(onClick = { showShareDialog = true }) {
                 Icon(
                     Icons.Filled.Share,
-                    contentDescription = "分享",
+                    contentDescription = stringResource(R.string.post_detail_share),
                     tint = OctopusColors.TextPrimary,
                 )
             }
         }
 
         when {
-            loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = OctopusColors.Primary)
-            }
+            loading -> EchoLoadingPanel()
             loadFailed || post == null -> LoadFailedState(
                 title = stringResource(R.string.post_detail_load_failed),
                 message = stringResource(R.string.post_detail_load_failed_desc),
@@ -297,7 +300,9 @@ fun PostDetailScreen(
                                                     val dl = CommunitySquareApi.download(p.appRef).getOrThrow()
                                                     tryRunHtml = dl.body
                                                 } catch (e: Exception) {
-                                                    onMessage("加载失败:${e.message}")
+                                                    onMessage(
+                                                        ctx.getString(R.string.post_detail_try_run_error, e.message),
+                                                    )
                                                 }
                                                 tryRunLoading = false
                                             }
@@ -309,9 +314,17 @@ fun PostDetailScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         if (tryRunLoading) {
-                                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = OctopusColors.Primary)
+                                            // 与文字同高,避免加载时按钮高度跳动
+                                            Box(Modifier.height(20.dp), contentAlignment = Alignment.Center) {
+                                                EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
+                                            }
                                         } else {
-                                            Text("试运行", color = OctopusColors.Primary, fontSize = OctopusType.body, fontWeight = FontWeight.SemiBold)
+                                            Text(
+                                                stringResource(R.string.post_detail_try_run),
+                                                color = OctopusColors.Primary,
+                                                fontSize = OctopusType.body,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
                                         }
                                     }
                                 }
@@ -334,13 +347,16 @@ fun PostDetailScreen(
                                                 try {
                                                     val r = SquarePostApi.forkPost(postId)
                                                     if (r.ok) {
-                                                        onMessage("已 Fork 到你的名下,去「我的发布」查看")
+                                                        onMessage(ctx.getString(R.string.post_detail_forked))
                                                         post = post?.copy(owned = true)
                                                     } else {
-                                                        onMessage(r.message.ifBlank { "Fork 失败" })
+                                                        val failed = ctx.getString(R.string.post_detail_fork_failed)
+                                                        onMessage(r.message.ifBlank { failed })
                                                     }
                                                 } catch (e: Exception) {
-                                                    onMessage("Fork 失败:${e.message}")
+                                                    onMessage(
+                                                        ctx.getString(R.string.post_detail_fork_error, e.message),
+                                                    )
                                                 }
                                                 forking = false
                                             }
@@ -352,7 +368,11 @@ fun PostDetailScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Text(
-                                            if (forking) "Fork 中…" else "Fork 到我的名下",
+                                            if (forking) {
+                                                stringResource(R.string.post_detail_forking)
+                                            } else {
+                                                stringResource(R.string.post_detail_fork)
+                                            },
                                             color = OctopusColors.Primary,
                                             fontSize = OctopusType.body,
                                             fontWeight = FontWeight.SemiBold,
@@ -373,7 +393,7 @@ fun PostDetailScreen(
                                         val r = if (p.liked) SquarePostApi.unlike(p.id) else SquarePostApi.like(p.id)
                                         post = p.copy(liked = r.liked, likesCount = r.likesCount)
                                     } catch (e: Exception) {
-                                        onMessage("操作失败:${e.message}")
+                                        onMessage(ctx.getString(R.string.post_detail_action_error, e.message))
                                     }
                                 }
                             },
@@ -383,7 +403,7 @@ fun PostDetailScreen(
                                         val r = if (p.favorited) SquarePostApi.unfavorite(p.id) else SquarePostApi.favorite(p.id)
                                         post = p.copy(favorited = r.favorited, favoritesCount = r.favoritesCount)
                                     } catch (e: Exception) {
-                                        onMessage("操作失败:${e.message}")
+                                        onMessage(ctx.getString(R.string.post_detail_action_error, e.message))
                                     }
                                 }
                             },
@@ -441,7 +461,7 @@ fun PostDetailScreen(
                 // ── 底部评论输入 ──
                 CommentInputBar(
                     text = newComment,
-                    placeholder = if (replyingTo != null) "回复评论…" else null,
+                    placeholder = if (replyingTo != null) stringResource(R.string.post_detail_reply_hint) else null,
                     onTextChange = { newComment = it },
                     onSend = {
                         val text = newComment.trim()
@@ -456,7 +476,7 @@ fun PostDetailScreen(
                                 replyingTo = null
                                 post = post?.copy(commentsCount = (post?.commentsCount ?: 0) + 1)
                             } catch (e: Exception) {
-                                onMessage("评论失败:${e.message}")
+                                onMessage(ctx.getString(R.string.post_detail_comment_error, e.message))
                             }
                         }
                     },
@@ -469,10 +489,12 @@ fun PostDetailScreen(
         post?.let { p ->
             AlertDialog(
                 onDismissRequest = { showPayConfirm = false },
-                title = { Text("确认复刻", color = OctopusColors.TextPrimary) },
+                title = {
+                    Text(stringResource(R.string.post_detail_acquire_confirm_title), color = OctopusColors.TextPrimary)
+                },
                 text = {
                     Text(
-                        "将花费 ${p.priceCredits} 积分复刻「${p.title}」,复刻后可反复安装。",
+                        stringResource(R.string.post_detail_acquire_confirm_body, p.priceCredits, p.title),
                         color = OctopusColors.TextSecondary,
                     )
                 },
@@ -480,11 +502,11 @@ fun PostDetailScreen(
                     TextButton(onClick = {
                         showPayConfirm = false
                         doAcquire()
-                    }) { Text("确认复刻", color = OctopusColors.Primary) }
+                    }) { Text(stringResource(R.string.post_detail_acquire_confirm), color = OctopusColors.Primary) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showPayConfirm = false }) {
-                        Text("取消", color = OctopusColors.TextSecondary)
+                        Text(stringResource(R.string.common_cancel), color = OctopusColors.TextSecondary)
                     }
                 },
                 containerColor = OctopusBackground.cardSurface,
@@ -494,12 +516,14 @@ fun PostDetailScreen(
 
     if (showSubConfirm) {
         post?.let { p ->
+            val titleRes = if (p.subActive) R.string.post_detail_renew_title else R.string.post_detail_subscribe_title
+            val confirmRes = if (p.subActive) R.string.post_detail_renew_month else R.string.post_detail_subscribe_month
             AlertDialog(
                 onDismissRequest = { showSubConfirm = false },
-                title = { Text(if (p.subActive) "续订" else "确认订阅", color = OctopusColors.TextPrimary) },
+                title = { Text(stringResource(titleRes), color = OctopusColors.TextPrimary) },
                 text = {
                     Text(
-                        "将花费 ${p.subPriceCredits} 积分订阅「${p.title}」1 个月,到期后手动续订。",
+                        stringResource(R.string.post_detail_subscribe_body, p.subPriceCredits, p.title),
                         color = OctopusColors.TextSecondary,
                     )
                 },
@@ -507,11 +531,11 @@ fun PostDetailScreen(
                     TextButton(onClick = {
                         showSubConfirm = false
                         doSubscribe()
-                    }) { Text(if (p.subActive) "续订一个月" else "订阅一个月", color = OctopusColors.Primary) }
+                    }) { Text(stringResource(confirmRes), color = OctopusColors.Primary) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showSubConfirm = false }) {
-                        Text("取消", color = OctopusColors.TextSecondary)
+                        Text(stringResource(R.string.common_cancel), color = OctopusColors.TextSecondary)
                     }
                 },
                 containerColor = OctopusBackground.cardSurface,
@@ -536,8 +560,15 @@ fun PostDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("试运行", color = OctopusColors.TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    TextButton(onClick = { tryRunHtml = null }) { Text("关闭", color = OctopusColors.Primary) }
+                    Text(
+                        stringResource(R.string.post_detail_try_run),
+                        color = OctopusColors.TextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    TextButton(onClick = { tryRunHtml = null }) {
+                        Text(stringResource(R.string.common_close), color = OctopusColors.Primary)
+                    }
                 }
                 AndroidView(
                     factory = { ctx ->
@@ -662,7 +693,7 @@ private fun PostBody(post: AgentPost, onOpenAuthor: (String) -> Unit) {
         // Fork 溯源
         if (post.forkedFrom.isNotBlank()) {
             Text(
-                "基于他人作品 Fork",
+                stringResource(R.string.post_detail_forked_from),
                 color = OctopusColors.TextMuted,
                 fontSize = OctopusType.tag,
                 modifier = Modifier.padding(top = OctopusSpacing.xs),
@@ -688,19 +719,23 @@ private fun InteractionBar(
             icon = if (post.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
             count = post.likesCount,
             tint = if (post.liked) OctopusColors.Resonance else OctopusColors.TextSecondary,
+            label = stringResource(if (post.liked) R.string.post_detail_unlike else R.string.post_detail_like),
             onClick = onLike,
         )
         ActionPill(
             icon = Icons.AutoMirrored.Filled.Comment,
             count = post.commentsCount,
             tint = OctopusColors.TextSecondary,
+            label = stringResource(R.string.post_detail_comments),
             onClick = {},
         )
         Spacer(Modifier.weight(1f))
         IconButton(onClick = onFavorite) {
             Icon(
                 if (post.favorited) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                contentDescription = null,
+                contentDescription = stringResource(
+                    if (post.favorited) R.string.post_detail_unfavorite else R.string.post_detail_favorite,
+                ),
                 tint = if (post.favorited) OctopusColors.Primary else OctopusColors.TextSecondary,
             )
         }
@@ -712,6 +747,7 @@ private fun ActionPill(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     count: Int,
     tint: Color,
+    label: String,
     onClick: () -> Unit,
 ) {
     Row(
@@ -722,7 +758,7 @@ private fun ActionPill(
             .tvFocusable()
             .padding(horizontal = OctopusSpacing.sm, vertical = OctopusSpacing.xs),
     ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(4.dp))
         Text(
             formatCount(count),
@@ -752,7 +788,12 @@ private fun CommentRow(
                 .background(OctopusColors.Primary.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(c.author.take(1), color = OctopusColors.Primary, fontSize = if (isReply) 10.sp else 12.sp, fontWeight = FontWeight.Bold)
+            Text(
+                c.author.take(1),
+                color = OctopusColors.Primary,
+                fontSize = OctopusType.caption,
+                fontWeight = FontWeight.Bold,
+            )
         }
         Spacer(Modifier.width(OctopusSpacing.sm))
         Column(modifier = Modifier.weight(1f)) {
@@ -768,7 +809,7 @@ private fun CommentRow(
                     Text(DATE_FMT.format(Date(c.createdAt)), color = OctopusColors.TextMuted, fontSize = OctopusType.tag, maxLines = 1)
                 }
                 Text(
-                    "回复",
+                    stringResource(R.string.post_detail_reply),
                     color = OctopusColors.TextMuted,
                     fontSize = OctopusType.tag,
                     modifier = Modifier.clickable { onReply("") },
@@ -787,46 +828,56 @@ private fun CommentInputBar(
 ) {
     Surface(
         color = OctopusBackground.cardSurface,
-        shadowElevation = 4.dp,
+        shadowElevation = 0.dp,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(OctopusSpacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = onTextChange,
-                placeholder = { Text(placeholder ?: stringResource(R.string.post_detail_comment_hint), color = OctopusColors.TextMuted, fontSize = OctopusType.body) },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                shape = OctopusShape.medium,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = OctopusColors.SurfaceVariant,
-                    unfocusedContainerColor = OctopusColors.SurfaceVariant,
-                    focusedIndicatorColor = OctopusColors.Accent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = OctopusColors.TextPrimary,
-                    unfocusedTextColor = OctopusColors.TextPrimary,
-                ),
-            )
-            Spacer(Modifier.width(OctopusSpacing.sm))
-            Surface(
-                shape = OctopusShape.medium,
-                color = if (text.isNotBlank()) OctopusColors.Primary else OctopusColors.SurfaceVariant,
+        // 平铺底栏:顶部 1dp 细线代替阴影
+        Column {
+            HorizontalDivider(thickness = 1.dp, color = OctopusColors.Border)
+            Row(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clickable(enabled = text.isNotBlank(), onClick = onSend)
-                    .tvFocusable(),
+                    .fillMaxWidth()
+                    .padding(OctopusSpacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        stringResource(R.string.post_detail_send),
-                        color = if (text.isNotBlank()) OctopusColors.OnPrimary else OctopusColors.TextMuted,
-                        fontSize = OctopusType.caption,
-                        fontWeight = FontWeight.Bold,
-                    )
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = onTextChange,
+                    placeholder = {
+                        Text(
+                            placeholder ?: stringResource(R.string.post_detail_comment_hint),
+                            color = OctopusColors.TextMuted,
+                            fontSize = OctopusType.body,
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    shape = OctopusShape.medium,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = OctopusColors.SurfaceVariant,
+                        unfocusedContainerColor = OctopusColors.SurfaceVariant,
+                        focusedIndicatorColor = OctopusColors.Accent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = OctopusColors.TextPrimary,
+                        unfocusedTextColor = OctopusColors.TextPrimary,
+                    ),
+                )
+                Spacer(Modifier.width(OctopusSpacing.sm))
+                Surface(
+                    shape = OctopusShape.medium,
+                    color = if (text.isNotBlank()) OctopusColors.Primary else OctopusColors.SurfaceVariant,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable(enabled = text.isNotBlank(), onClick = onSend)
+                        .tvFocusable(),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            stringResource(R.string.post_detail_send),
+                            color = if (text.isNotBlank()) OctopusColors.OnPrimary else OctopusColors.TextMuted,
+                            fontSize = OctopusType.caption,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }
@@ -837,9 +888,9 @@ private fun CommentInputBar(
 @Composable
 private fun SubscribeCard(post: AgentPost, subscribing: Boolean, onSubscribe: () -> Unit) {
     val label = when {
-        subscribing -> "订阅中…"
-        post.subActive -> "已订阅 · 续订(${post.subPriceCredits} 积分/月)"
-        else -> "订阅 · ${post.subPriceCredits} 积分/月"
+        subscribing -> stringResource(R.string.post_detail_subscribing)
+        post.subActive -> stringResource(R.string.post_detail_sub_active_renew, post.subPriceCredits)
+        else -> stringResource(R.string.post_detail_subscribe_price, post.subPriceCredits)
     }
     val filled = !post.subActive
     Surface(
@@ -879,10 +930,10 @@ private fun SubscribeCard(post: AgentPost, subscribing: Boolean, onSubscribe: ()
 @Composable
 private fun AppAcquireCard(post: AgentPost, acquiring: Boolean, onAcquire: () -> Unit) {
     val label = when {
-        acquiring -> "复刻中…"
-        post.owned -> "已复刻 · 重新安装"
-        post.priceCredits > 0 -> "${post.priceCredits} 积分复刻"
-        else -> "免费复刻"
+        acquiring -> stringResource(R.string.post_detail_acquiring)
+        post.owned -> stringResource(R.string.post_detail_owned_reinstall)
+        post.priceCredits > 0 -> stringResource(R.string.post_detail_acquire_price, post.priceCredits)
+        else -> stringResource(R.string.post_detail_acquire_free)
     }
     val filled = !post.owned
     Surface(
@@ -926,11 +977,7 @@ internal fun fullUrl(url: String): String {
 }
 
 /** 数字格式化:<1000 原样,≥1000 显示 1.2k,≥10000 显示 1.2w。 */
-private fun formatCount(n: Int): String = when {
-    n >= 10000 -> String.format(Locale.US, "%.1fw", n / 10000.0)
-    n >= 1000 -> String.format(Locale.US, "%.1fk", n / 1000.0)
-    else -> n.toString()
-}
+private fun formatCount(n: Int): String = formatCompactCount(n)
 
 /** 帖子分享二维码 Dialog:生成帖子直达链接的 QR。 */
 @Composable
@@ -939,7 +986,7 @@ private fun ShareQrDialog(postId: String, onDismiss: () -> Unit) {
     val qrBitmap = remember(shareUrl) { generateQrBitmap(shareUrl, 400) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("分享帖子", color = OctopusColors.TextPrimary) },
+        title = { Text(stringResource(R.string.post_detail_share_title), color = OctopusColors.TextPrimary) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -948,11 +995,11 @@ private fun ShareQrDialog(postId: String, onDismiss: () -> Unit) {
                 if (qrBitmap != null) {
                     Image(
                         bitmap = qrBitmap.asImageBitmap(),
-                        contentDescription = "QR Code",
+                        contentDescription = stringResource(R.string.post_detail_qr_desc),
                         modifier = Modifier.size(200.dp),
                     )
                 } else {
-                    Text("二维码生成失败", color = OctopusColors.TextMuted)
+                    Text(stringResource(R.string.post_detail_qr_failed), color = OctopusColors.TextMuted)
                 }
                 Spacer(Modifier.height(OctopusSpacing.md))
                 Text(
@@ -963,7 +1010,9 @@ private fun ShareQrDialog(postId: String, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("关闭", color = OctopusColors.Primary) }
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.common_close), color = OctopusColors.Primary)
+            }
         },
         containerColor = OctopusBackground.cardSurface,
     )

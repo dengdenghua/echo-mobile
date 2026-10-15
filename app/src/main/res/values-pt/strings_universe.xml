@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ECHO Universe screen (UniverseScreen.kt / UniverseRepository.kt) -->
+    <string name="universe_title">ECHO Universe</string>
+    <string name="universe_subtitle">Meu Ghost</string>
+    <string name="universe_syncing">Sincronizando</string>
+    <string name="universe_refresh">Atualizar</string>
+
+    <string name="universe_identity_title">Identidade no universo</string>
+    <string name="universe_local_user">Usuário local</string>
+    <string name="universe_identity_access">Acesso</string>
+    <string name="universe_ghost_active">Ghost ativo</string>
+    <string name="universe_edge_state">Estado de borda</string>
+    <string name="universe_realms_label">Pode entrar</string>
+    <string name="universe_realm_personal">Instância pessoal</string>
+    <string name="universe_atlas_unchecked">Acesso ao Atlas não verificado</string>
+    <string name="universe_atlas_allowed">Eventos de cidade do Atlas: você pode enviar, com revisão</string>
+    <string name="universe_atlas_closed">Eventos de cidade do Atlas: não disponíveis</string>
+    <string name="universe_atlas_hint">Compre um Realm Pass ou obtenha uma promoção por revisão para abrir um raio maior.</string>
+
+    <string name="universe_service_title">Serviço ECHO</string>
+    <string name="universe_base_url_label">URL base do ECHO</string>
+    <string name="universe_runtime_url_label">HTTP do runtime do host</string>
+
+    <string name="universe_choose_character">Escolha um personagem</string>
+    <string name="universe_binding">Vinculando</string>
+    <string name="universe_bind_ghost">Vincular Ghost</string>
+
+    <string name="universe_economy_title">Economia da vida digital</string>
+    <string name="universe_economy_subtitle">Créditos · Renovação · Passes de Realm</string>
+    <string name="universe_credits_amount">%1$d cr</string>
+    <string name="universe_ghost_not_renewed">Ghost não renovado</string>
+    <string name="universe_ghost_active_until">Ghost ativo até %1$s</string>
+    <string name="universe_ghost_status">Ghost: %1$s</string>
+    <string name="universe_no_realm_pass">Ainda sem Realm Pass</string>
+    <string name="universe_processing">Processando</string>
+    <string name="universe_monthly_pass">Mensal %1$d</string>
+    <string name="universe_payment_note">O pagamento compra acesso, renovação, prioridade na fila ou ferramentas. Não garante aprovação no canon.</string>
+
+    <string name="universe_advancing">Avançando</string>
+    <string name="universe_advance_day">Avançar um dia</string>
+    <string name="universe_open_main_chat">Abrir chat principal</string>
+    <string name="universe_tick_hint">Sincroniza o tick do campo de vida do ECHO e depois atualiza o Ghost atual.</string>
+    <string name="universe_stat_focus">Foco</string>
+    <string name="universe_stat_diary">Diário</string>
+    <string name="universe_stat_growth">Crescimento</string>
+    <string name="universe_goals">Objetivos</string>
+    <string name="universe_relations">Relações</string>
+    <string name="universe_day">Dia %1$d</string>
+
+    <string name="universe_ghost_chat_title">Converse com o Ghost</string>
+    <string name="universe_chat_me">Eu</string>
+    <string name="universe_chat_ghost">Ghost</string>
+    <string name="universe_chat_line">%1$s: %2$s</string>
+    <string name="universe_ghost_replying">Ghost está respondendo</string>
+    <string name="universe_input_hint">Digite uma mensagem</string>
+    <string name="universe_waiting_reply">Aguardando resposta</string>
+    <string name="universe_send_to_host">Enviar ao host</string>
+    <string name="universe_host_no_response">O runtime do host não respondeu: %1$s</string>
+
+    <string name="universe_empty_title">Você ainda não entrou no universo</string>
+    <string name="universe_empty_hint">Nenhum Ghost vinculado ainda. Escolha um personagem acima para vinculá-lo.</string>
+
+    <string name="universe_error_empty_prompt">Digite algo para dizer ao Ghost.</string>
+    <string name="universe_error_empty_reply">O runtime do host retornou uma resposta vazia.</string>
+    <string name="universe_error_http">A solicitação ao ECHO falhou: HTTP %1$d</string>
+    <string name="universe_error_empty_response">O ECHO retornou uma resposta vazia.</string>
+</resources>

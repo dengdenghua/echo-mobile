@@ -2,6 +2,7 @@ package com.apk.claw.android.registry
 
 import android.content.Context
 import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.apk.claw.android.plugin.PluginActionDef
 import com.apk.claw.android.plugin.PluginManifest
 import com.google.gson.Gson
@@ -90,22 +91,27 @@ internal object CommunityMiniAppInstaller {
 
                 ClawApplication.instance.pluginManager.refreshNonDexPlugins()
                 null
-            }.getOrElse { "安装失败:${it.message}" }
+            }.getOrElse { it.message.orEmpty() }
         }
     }
 
-    /** 写盘前合并校验:slug 合法性 + body 非空 + sha256 匹配。返回 null = 通过。 */
-    private fun validate(slug: String, data: CommunityMiniAppDownload): String? = when {
-        slug.isBlank() -> "安装失败:服务端未提供小程序 slug"
-        !SLUG_RE.matches(slug) -> "安装失败:slug 格式不合法,已拒绝(疑似非法数据)"
-        data.body.isBlank() -> "安装失败:小程序页面内容为空"
-        data.content?.checksum?.removePrefix("sha256:").isNullOrBlank() ->
-            "校验失败:服务端未提供 checksum,已拒绝安装"
-        else -> {
-            val expected = data.content!!.checksum.removePrefix("sha256:")
-            val actual = sha256Hex(data.body.toByteArray(Charsets.UTF_8))
-            if (!actual.equals(expected, ignoreCase = true)) "校验失败:checksum 不符,已拒绝安装" else null
+    /**
+     * 写盘前合并校验:slug 合法性 + body 非空 + sha256 匹配。返回 null = 通过,否则是当前语言的原因
+     * (调用方再包一层「安装失败：…」)。
+     */
+    private fun validate(slug: String, data: CommunityMiniAppDownload): String? {
+        val reason = when {
+            slug.isBlank() -> R.string.installer_err_no_slug
+            !SLUG_RE.matches(slug) -> R.string.installer_err_bad_slug
+            data.body.isBlank() -> R.string.installer_err_empty
+            data.content?.checksum?.removePrefix("sha256:").isNullOrBlank() -> R.string.installer_err_no_checksum
+            else -> {
+                val expected = data.content!!.checksum.removePrefix("sha256:")
+                val actual = sha256Hex(data.body.toByteArray(Charsets.UTF_8))
+                if (!actual.equals(expected, ignoreCase = true)) R.string.installer_err_checksum else null
+            }
         }
+        return reason?.let { ClawApplication.instance.getString(it) }
     }
 
     /** 卸载:复用 [PluginRegistryStore.uninstall](删目录 + 移出清单),再刷新一次。 */

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes > Modelo local (LocalModelActivity) -->
+    <string name="localmodel_title">Modelo local</string>
+    <string name="localmodel_engine_status">Estado de los motores</string>
+    <string name="localmodel_engine_loaded">Cargado</string>
+    <string name="localmodel_engine_not_built">Sin compilar</string>
+    <string name="localmodel_loaded_count">Modelos cargados</string>
+    <string name="localmodel_offline_mode">Modo sin conexión</string>
+    <string name="localmodel_offline_mode_desc">El chat usa el modelo local, sin red. Solo chat: Echo no puede controlar el dispositivo.</string>
+    <string name="localmodel_offline_needs_native">No se puede activar el modo sin conexión: no está compilada la biblioteca nativa de llama.cpp ni la de MNN. Ejecuta primero build-native.sh o build-mnn.sh.</string>
+    <string name="localmodel_offline_needs_model">Primero elige y carga un modelo .gguf o .mnn.</string>
+    <string name="localmodel_active_model">Modelo activo</string>
+    <string name="localmodel_active_none">Sin configurar. Elige un archivo de modelo .gguf.</string>
+    <string name="localmodel_pick_gguf">Elegir archivo .gguf</string>
+    <string name="localmodel_importing">Importando modelo…</string>
+    <string name="localmodel_read_file_failed">No se pudo leer el archivo seleccionado.</string>
+    <string name="localmodel_load_failed">No se pudo cargar el modelo: %1$s</string>
+    <string name="localmodel_import_failed_reason">Error al importar: %1$s</string>
+    <string name="localmodel_import_failed">Error al importar.</string>
+    <string name="localmodel_import_done">Importado: %1$s (%2$s)</string>
+    <string name="localmodel_loaded_models">Modelos cargados</string>
+    <string name="localmodel_badge_active">Activo</string>
+    <string name="localmodel_loaded_meta">%1$s · ctx %2$d · cargado a las %3$s</string>
+    <string name="localmodel_set_active">Activar</string>
+    <string name="localmodel_unload">Liberar</string>
+    <string name="localmodel_mnn_title">Modelos MNN</string>
+    <string name="localmodel_mnn_empty">Aún no hay modelos MNN importados.\nUn modelo MNN es una carpeta con pesos .mnn, un tokenizer y un config.\nComprime la carpeta en .zip e impórtala aquí. Se descomprime en el almacenamiento privado de la app.</string>
+    <string name="localmodel_mnn_meta">%1$s · %2$d archivos · %3$s</string>
+    <string name="localmodel_use_as_llm">Usar como LLM</string>
+    <string name="localmodel_load_whisper">Cargar Whisper</string>
+    <string name="localmodel_import_mnn">Importar modelo .zip / .mnn</string>
+    <string name="localmodel_whisper_load_failed">No se pudo cargar el modelo Whisper (native devolvió 0).</string>
+    <string name="localmodel_asr_title">ASR en el dispositivo (Whisper)</string>
+    <string name="localmodel_asr_switch">Reconocer la voz en el dispositivo con Whisper</string>
+    <string name="localmodel_asr_loaded">Cargado: %1$s</string>
+    <string name="localmodel_asr_not_loaded">Configurado, aún sin cargar</string>
+    <string name="localmodel_asr_none">No hay modelo Whisper. Primero importa una carpeta whisper-tiny más arriba.</string>
+    <string name="localmodel_asr_needs_model">El modelo Whisper no está cargado. Primero importa y carga una carpeta de modelo Whisper.</string>
+    <string name="localmodel_asr_desc" formatted="false">Al activarlo, «Mantén pulsado para hablar» y la entrada de voz del escritorio usan MNN Whisper sin conexión.\nNo depende de los servicios de Google y el audio no sale del dispositivo.\nWhisper-tiny acierta cerca del 80% del habla en chino, menos que el reconocimiento en la nube. Ideal sin conexión.</string>
+    <string name="localmodel_guide_title">Cómo usarlo</string>
+    <string name="localmodel_guide_llama">llama.cpp: se recomienda Qwen2.5-3B-Q4_K_M (~2 GB, bueno en chino)</string>
+    <string name="localmodel_guide_mnn">MNN: se recomienda Qwen-1.8B-INT8 (~700 MB, 30+ tok/s con GPU)</string>
+    <string name="localmodel_guide_whisper" formatted="false">Whisper ASR: whisper-tiny (~150 MB, cerca del 80% de acierto en chino)</string>
+    <string name="localmodel_guide_speed">Velocidad de referencia en Snapdragon 8 Gen 2: llama.cpp ~15 tok/s, MNN ~30 tok/s</string>
+    <string name="localmodel_guide_ram">Requiere 6 GB+ de RAM para modelos 3B y 4 GB+ para modelos MNN 1.8B</string>
+    <string name="localmodel_guide_build">Primera compilación: ./build-native.sh (llama) o ./build-mnn.sh (MNN)</string>
+    <string name="localmodel_limits">Limitaciones conocidas:\n• Sin function calling: el modo sin conexión es solo chat y no puede controlar el dispositivo\n• Sin visión: se ignoran las capturas y las imágenes\n• Menor calidad que GPT-4 o Claude: ideal para uso privado o sin conexión</string>
+</resources>

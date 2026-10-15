@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 설정 > 로컬 모델 (LocalModelActivity) -->
+    <string name="localmodel_title">로컬 모델</string>
+    <string name="localmodel_engine_status">엔진 상태</string>
+    <string name="localmodel_engine_loaded">로드됨</string>
+    <string name="localmodel_engine_not_built">빌드 안 됨</string>
+    <string name="localmodel_loaded_count">로드된 모델 수</string>
+    <string name="localmodel_offline_mode">오프라인 모드</string>
+    <string name="localmodel_offline_mode_desc">켜면 채팅이 네트워크 없이 로컬 모델로 실행됩니다. 채팅만 가능하며 Echo가 기기를 제어할 수 없습니다.</string>
+    <string name="localmodel_offline_needs_native">llama.cpp와 MNN 네이티브 라이브러리가 모두 빌드되지 않아 오프라인 모드를 켤 수 없습니다. 먼저 build-native.sh 또는 build-mnn.sh를 실행하세요.</string>
+    <string name="localmodel_offline_needs_model">먼저 .gguf 또는 .mnn 모델을 선택하고 로드하세요.</string>
+    <string name="localmodel_active_model">활성 모델</string>
+    <string name="localmodel_active_none">설정되지 않았습니다. .gguf 모델 파일을 선택하세요.</string>
+    <string name="localmodel_pick_gguf">.gguf 파일 선택</string>
+    <string name="localmodel_importing">모델 가져오는 중…</string>
+    <string name="localmodel_read_file_failed">선택한 파일을 읽을 수 없습니다.</string>
+    <string name="localmodel_load_failed">모델을 로드할 수 없습니다: %1$s</string>
+    <string name="localmodel_import_failed_reason">가져오기 실패: %1$s</string>
+    <string name="localmodel_import_failed">가져오기에 실패했습니다.</string>
+    <string name="localmodel_import_done">가져옴: %1$s (%2$s)</string>
+    <string name="localmodel_loaded_models">로드된 모델</string>
+    <string name="localmodel_badge_active">활성</string>
+    <string name="localmodel_loaded_meta">%1$s · ctx %2$d · %3$s에 로드됨</string>
+    <string name="localmodel_set_active">활성으로 설정</string>
+    <string name="localmodel_unload">언로드</string>
+    <string name="localmodel_mnn_title">MNN 모델</string>
+    <string name="localmodel_mnn_empty">가져온 MNN 모델이 없습니다.\nMNN 모델은 .mnn 가중치, tokenizer, config가 들어 있는 폴더입니다.\n폴더를 .zip으로 압축해 여기서 가져오면 앱 전용 저장소에 압축이 풀립니다.</string>
+    <string name="localmodel_mnn_meta">%1$s · 파일 %2$d개 · %3$s</string>
+    <string name="localmodel_use_as_llm">LLM으로 사용</string>
+    <string name="localmodel_load_whisper">Whisper 로드</string>
+    <string name="localmodel_import_mnn">.zip / .mnn 모델 가져오기</string>
+    <string name="localmodel_whisper_load_failed">Whisper 모델을 로드할 수 없습니다(native가 0을 반환함).</string>
+    <string name="localmodel_asr_title">기기 내 ASR(Whisper)</string>
+    <string name="localmodel_asr_switch">기기 내 Whisper로 음성 인식</string>
+    <string name="localmodel_asr_loaded">로드됨: %1$s</string>
+    <string name="localmodel_asr_not_loaded">설정됨, 아직 로드되지 않음</string>
+    <string name="localmodel_asr_none">Whisper 모델이 없습니다. 먼저 위에서 whisper-tiny 폴더를 가져오세요.</string>
+    <string name="localmodel_asr_needs_model">Whisper 모델이 로드되지 않았습니다. 먼저 Whisper 모델 폴더를 가져와 로드하세요.</string>
+    <string name="localmodel_asr_desc" formatted="false">켜면 \"길게 눌러 말하기\"와 데스크톱 음성 입력이 MNN Whisper 오프라인 인식을 사용합니다.\nGoogle 서비스가 필요 없고 오디오가 기기 밖으로 나가지 않습니다.\nWhisper-tiny의 중국어 인식률은 약 80%로 클라우드보다 낮습니다. 오프라인일 때 적합합니다.</string>
+    <string name="localmodel_guide_title">사용 방법</string>
+    <string name="localmodel_guide_llama">llama.cpp 추천: Qwen2.5-3B-Q4_K_M(약 2 GB, 중국어에 강함)</string>
+    <string name="localmodel_guide_mnn">MNN 추천: Qwen-1.8B-INT8(약 700 MB, GPU 가속 30+ tok/s)</string>
+    <string name="localmodel_guide_whisper" formatted="false">Whisper ASR: whisper-tiny(약 150 MB, 중국어 인식률 약 80%)</string>
+    <string name="localmodel_guide_speed">참고 속도(Snapdragon 8 Gen 2): llama.cpp 약 15 tok/s, MNN 약 30 tok/s</string>
+    <string name="localmodel_guide_ram">3B 모델은 RAM 6 GB 이상, 1.8B MNN 모델은 4 GB 이상 필요</string>
+    <string name="localmodel_guide_build">첫 빌드: ./build-native.sh(llama) 또는 ./build-mnn.sh(MNN)</string>
+    <string name="localmodel_limits">알려진 제한:\n• function calling 미지원: 오프라인 모드는 채팅만 가능하며 기기를 제어할 수 없습니다\n• 비전 미지원: 스크린샷과 이미지 입력은 무시됩니다\n• GPT-4나 Claude보다 품질이 낮음: 개인정보 보호나 오프라인 사용에 적합</string>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Praça > Detalhes da publicação (PostDetailScreen). As chaves compartilhadas ficam em strings.xml. -->
+    <string name="post_detail_share">Compartilhar</string>
+    <string name="post_detail_share_title">Compartilhar publicação</string>
+    <string name="post_detail_qr_desc">Código QR desta publicação</string>
+    <string name="post_detail_qr_failed">Não foi possível criar o código QR</string>
+    <string name="post_detail_like">Curtir</string>
+    <string name="post_detail_unlike">Descurtir</string>
+    <string name="post_detail_comments">Comentários</string>
+    <string name="post_detail_favorite">Salvar</string>
+    <string name="post_detail_unfavorite">Remover dos salvos</string>
+    <string name="post_detail_reply">Responder</string>
+    <string name="post_detail_reply_hint">Escreva uma resposta…</string>
+    <string name="post_detail_comment_error">Não foi possível publicar o comentário: %1$s</string>
+    <string name="post_detail_action_error">Não foi possível concluir a ação: %1$s</string>
+    <string name="post_detail_forked_from">Fork da obra de outro criador</string>
+    <string name="post_detail_try_run">Testar</string>
+    <string name="post_detail_try_run_error">Não foi possível carregar o mini app: %1$s</string>
+    <string name="post_detail_fork">Fazer fork para minha conta</string>
+    <string name="post_detail_forking">Fazendo fork…</string>
+    <string name="post_detail_forked">Fork criado na sua conta. Veja em Minhas publicações.</string>
+    <string name="post_detail_fork_failed">Não foi possível fazer o fork</string>
+    <string name="post_detail_fork_error">Não foi possível fazer o fork: %1$s</string>
+    <string name="post_detail_acquire_free">Clonar grátis</string>
+    <string name="post_detail_acquire_price">Clonar por %1$d créditos</string>
+    <string name="post_detail_acquiring">Clonando…</string>
+    <string name="post_detail_owned_reinstall">Clonado · Reinstalar</string>
+    <string name="post_detail_acquired">Clonado</string>
+    <string name="post_detail_acquired_app">%1$s clonado. Abra em Mini apps.</string>
+    <string name="post_detail_acquire_failed">Não foi possível clonar</string>
+    <string name="post_detail_install_failed">Não foi possível instalar: %1$s</string>
+    <string name="post_detail_acquire_confirm_title">Clonar este app</string>
+    <string name="post_detail_acquire_confirm_body">Clonar %2$s usa %1$d créditos. Depois, você pode reinstalar quando quiser.</string>
+    <string name="post_detail_acquire_confirm">Clonar</string>
+    <string name="post_detail_subscribe_price">Assinar · %1$d créditos/mês</string>
+    <string name="post_detail_sub_active_renew">Assinado · Renovar (%1$d créditos/mês)</string>
+    <string name="post_detail_subscribing">Assinando…</string>
+    <string name="post_detail_subscribe_title">Confirmar assinatura</string>
+    <string name="post_detail_renew_title">Renovar assinatura</string>
+    <string name="post_detail_subscribe_body">Assinar %2$s por 1 mês usa %1$d créditos. Renove manualmente quando terminar.</string>
+    <string name="post_detail_subscribe_month">Assinar por 1 mês</string>
+    <string name="post_detail_renew_month">Renovar por 1 mês</string>
+    <string name="post_detail_sub_already">Sua assinatura já está ativa</string>
+    <string name="post_detail_sub_success">Assinatura concluída. Acesso estendido por 30 dias.</string>
+    <string name="post_detail_sub_failed">Não foi possível assinar</string>
+</resources>

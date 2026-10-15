@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 设置 > 高级功能 > 文件管理器 (FileManagerActivity) -->
+    <string name="filemanager_up">返回上级</string>
+    <string name="filemanager_sort_name">名称</string>
+    <string name="filemanager_sort_size">大小</string>
+    <string name="filemanager_sort_time">时间</string>
+    <string name="filemanager_show_hidden">显示隐藏文件</string>
+    <string name="filemanager_hide_hidden">不显示隐藏文件</string>
+    <string name="filemanager_new_folder">新建目录</string>
+    <string name="filemanager_paste">粘贴到此处</string>
+    <string name="filemanager_empty">此目录为空</string>
+    <string name="filemanager_shizuku_unavailable">Shizuku 不可用</string>
+    <string name="filemanager_load_failed">无法加载此目录</string>
+    <string name="filemanager_copy">复制</string>
+    <string name="filemanager_cut">剪切</string>
+    <string name="filemanager_rename">重命名</string>
+    <string name="filemanager_view_content">查看内容</string>
+    <string name="filemanager_details">详细信息</string>
+    <string name="filemanager_copy_ready">已复制 %1$s，可在任意目录粘贴</string>
+    <string name="filemanager_cut_ready">已剪切 %1$s，可在任意目录粘贴</string>
+    <string name="filemanager_copied_here">已复制到当前目录</string>
+    <string name="filemanager_moved_here">已移动到当前目录</string>
+    <string name="filemanager_action_failed">操作失败</string>
+    <string name="filemanager_deleted">已删除 %1$s</string>
+    <string name="filemanager_delete_failed">删除失败</string>
+    <string name="filemanager_info_unavailable">无法获取文件信息</string>
+    <string name="filemanager_folder_name">目录名</string>
+    <string name="filemanager_created">已创建 %1$s</string>
+    <string name="filemanager_create_failed">无法创建目录</string>
+    <string name="filemanager_new_name">新名称</string>
+    <string name="filemanager_renamed">已重命名</string>
+    <string name="filemanager_info_title">文件信息</string>
+    <string name="filemanager_content_title">文件内容</string>
+    <string name="filemanager_shizuku_title">需要 Shizuku 才能访问文件系统</string>
+    <string name="filemanager_shizuku_desc">Shizuku 提供 shell 级权限，可访问 /sdcard/ 和 /sdcard/Android/data/。\nEcho 不会上传你的文件。</string>
+    <string name="filemanager_authorize">去授权</string>
+</resources>

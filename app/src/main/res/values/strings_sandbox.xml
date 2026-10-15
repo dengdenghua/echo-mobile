@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Linux container (LinuxSandboxSettingsActivity). Page title reuses settings_linux_title. -->
+    <string name="sandbox_about_title">About the Linux container</string>
+    <string name="sandbox_about_body">The app has a built-in PRoot user-space Linux sandbox. When Echo calls the run_shell tool, it runs real Linux commands in the container (apt and pip installs, git, ffmpeg, python and more), without root.\n\nTwo distributions:\n• Alpine: 3 MB, bundled in the APK, unpacked on first use\n• Ubuntu: 28 MB, download it on this page before use\n\nSecurity: isolated container root, bind mount allowlist (Download and Documents only), UID isolation, HIGH-risk gate, forced stop on timeout and a 64 KB output limit.</string>
+    <string name="sandbox_alpine_title">Alpine (built in)</string>
+    <string name="sandbox_status">Status</string>
+    <string name="sandbox_ready">Ready</string>
+    <string name="sandbox_alpine_not_ready">Not set up. Unpacks on the first run_shell call.</string>
+    <string name="sandbox_storage_used">Storage: %1$s</string>
+    <string name="sandbox_reset_done">%1$s container reset.</string>
+    <string name="sandbox_reset_failed">Reset failed: %1$s</string>
+    <string name="sandbox_unknown_error">Unknown error</string>
+    <string name="sandbox_reset_alpine">Reset Alpine</string>
+    <string name="sandbox_resetting">Resetting…</string>
+    <string name="sandbox_ubuntu_title">Ubuntu (download)</string>
+    <string name="sandbox_ubuntu_downloaded">rootfs downloaded. Unpacks on the first run_shell call.</string>
+    <string name="sandbox_ubuntu_missing">Not downloaded (28 MB, from cdimage.ubuntu.com)</string>
+    <string name="sandbox_downloading">Downloading… %1$d%%</string>
+    <string name="sandbox_download_done">Ubuntu rootfs downloaded. run_shell can now use distro=ubuntu.</string>
+    <string name="sandbox_download_failed">Download failed: %1$s</string>
+    <string name="sandbox_download_again">Download again</string>
+    <string name="sandbox_download_ubuntu">Download Ubuntu rootfs</string>
+    <string name="sandbox_cache_deleted">Downloaded Ubuntu rootfs deleted.</string>
+    <string name="sandbox_delete_failed">Couldn\'t delete the download.</string>
+    <string name="sandbox_delete_cache">Delete download</string>
+    <string name="sandbox_reset_ubuntu">Reset Ubuntu (deletes rootfs and home)</string>
+    <string name="sandbox_usage_title">How Echo uses it</string>
+    <string name="sandbox_usage_body">Echo uses this container whenever it calls the run_shell tool:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session (interactive session)\n\nAlpine is the default (light and fast). Ubuntu suits work that needs glibc or the full apt ecosystem.\nBind mount allowlist: /sdcard/Download and /sdcard/Documents (read and write inside the container).</string>
+</resources>

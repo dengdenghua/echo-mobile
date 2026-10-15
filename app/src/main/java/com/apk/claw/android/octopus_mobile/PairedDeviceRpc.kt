@@ -1,5 +1,8 @@
 package com.apk.claw.android.octopus_mobile
 
+import androidx.annotation.StringRes
+import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
@@ -19,8 +22,9 @@ internal class PairedDeviceRpc(private val snapshot: () -> PairedConnectionSnaps
 
     suspend fun request(method: String, args: Map<String, Any?>, prefix: String): JsonObject {
         val before = snapshot()
-        val socket = before.socket ?: error("请先连接设备中心")
-        check(before.online) { "设备中心尚未连接" }
+        val socket = before.socket
+            ?: error(text(R.string.devicelink_err_not_connected, "Connect to the device hub first."))
+        check(before.online) { text(R.string.devicetasks_error_hub_not_connected, "The device hub is not connected.") }
         val id = "$prefix-${UUID.randomUUID()}"
         val result = CompletableDeferred<JsonObject>()
         pending[id] = result
@@ -28,10 +32,10 @@ internal class PairedDeviceRpc(private val snapshot: () -> PairedConnectionSnaps
             // Close the registration race with a simultaneous connection change.
             val current = snapshot()
             check(current.generation == before.generation && current.socket === socket && current.online) {
-                "连接已变更，请重新读取任务状态"
+                text(R.string.devicelink_err_connection_changed, "The connection changed. Reload the task status.")
             }
             check(socket.send(Envelope.Request(method = method, id = id, params = args).toJson())) {
-                "连接已断开"
+                text(R.string.devicelink_err_disconnected, "The connection dropped.")
             }
             withTimeout(REPLY_TIMEOUT_MS) { result.await() }
         } finally {
@@ -54,16 +58,25 @@ internal class PairedDeviceRpc(private val snapshot: () -> PairedConnectionSnaps
             root.has("error") -> reply.completeExceptionally(
                 IllegalStateException(
                     root.get("error")?.takeIf { it.isJsonObject }?.asJsonObject
-                        ?.get("message")?.asString ?: "设备中心拒绝了此操作",
+                        ?.get("message")?.asString
+                        ?: text(R.string.devicelink_err_refused, "The device hub refused this action."),
                 ),
             )
             result?.isJsonObject == true -> reply.complete(result.asJsonObject)
-            else -> reply.completeExceptionally(IllegalStateException("Invalid peer result"))
+            else -> reply.completeExceptionally(
+                IllegalStateException(
+                    text(R.string.devicelink_err_bad_reply, "The device hub sent an unreadable reply."),
+                ),
+            )
         }
         return true
     }
 
     private companion object {
         const val REPLY_TIMEOUT_MS = 35_000L
+
+        /** These messages reach the device-tasks screen; [fallback] covers JVM tests, where there is no app. */
+        fun text(@StringRes id: Int, fallback: String): String =
+            runCatching { ClawApplication.instance.getString(id) }.getOrDefault(fallback)
     }
 }

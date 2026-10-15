@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Advanced > File manager (FileManagerActivity) -->
+    <string name="filemanager_up">Up one level</string>
+    <string name="filemanager_sort_name">Name</string>
+    <string name="filemanager_sort_size">Size</string>
+    <string name="filemanager_sort_time">Date</string>
+    <string name="filemanager_show_hidden">Show hidden files</string>
+    <string name="filemanager_hide_hidden">Hide hidden files</string>
+    <string name="filemanager_new_folder">New folder</string>
+    <string name="filemanager_paste">Paste here</string>
+    <string name="filemanager_empty">This folder is empty</string>
+    <string name="filemanager_shizuku_unavailable">Shizuku is unavailable</string>
+    <string name="filemanager_load_failed">Couldn\'t load this folder</string>
+    <string name="filemanager_copy">Copy</string>
+    <string name="filemanager_cut">Cut</string>
+    <string name="filemanager_rename">Rename</string>
+    <string name="filemanager_view_content">View content</string>
+    <string name="filemanager_details">Details</string>
+    <string name="filemanager_copy_ready">Copied %1$s. Paste it in any folder.</string>
+    <string name="filemanager_cut_ready">Cut %1$s. Paste it in any folder.</string>
+    <string name="filemanager_copied_here">Copied to this folder</string>
+    <string name="filemanager_moved_here">Moved to this folder</string>
+    <string name="filemanager_action_failed">Couldn\'t complete the action</string>
+    <string name="filemanager_deleted">Deleted %1$s</string>
+    <string name="filemanager_delete_failed">Couldn\'t delete</string>
+    <string name="filemanager_info_unavailable">Couldn\'t read the file details</string>
+    <string name="filemanager_folder_name">Folder name</string>
+    <string name="filemanager_created">Created %1$s</string>
+    <string name="filemanager_create_failed">Couldn\'t create the folder</string>
+    <string name="filemanager_new_name">New name</string>
+    <string name="filemanager_renamed">Renamed</string>
+    <string name="filemanager_info_title">File details</string>
+    <string name="filemanager_content_title">File content</string>
+    <string name="filemanager_shizuku_title">Shizuku is needed to access files</string>
+    <string name="filemanager_shizuku_desc">Shizuku gives shell-level access to /sdcard/ and /sdcard/Android/data/.\nEcho doesn\'t upload your files.</string>
+    <string name="filemanager_authorize">Grant access</string>
+</resources>

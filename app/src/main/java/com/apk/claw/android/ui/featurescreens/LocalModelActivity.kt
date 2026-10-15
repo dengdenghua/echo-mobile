@@ -23,16 +23,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.apk.claw.android.tool.localmodel.LocalModelManager
 import com.apk.claw.android.tool.localmodel.LlamaJni
 import com.apk.claw.android.tool.localmodel.MnnJni
 import com.apk.claw.android.tool.localmodel.MnnModelManager
 import com.apk.claw.android.tool.localmodel.MnnWhisperEngine
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
+import com.apk.claw.android.ui.compose.theme.OctopusType
 import com.apk.claw.android.utils.KVUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,6 +64,9 @@ class LocalModelActivity : ComponentActivity() {
     }
 }
 
+/** What the notice card under the cards is saying, so it takes the right state colour. */
+private enum class Notice { Done, Setup, Failed }
+
 @Composable
 private fun LocalModelScreen(onBack: () -> Unit) {
     val ctx = LocalContext.current
@@ -75,6 +83,7 @@ private fun LocalModelScreen(onBack: () -> Unit) {
     val whisperLoaded = remember(rev) { MnnWhisperEngine.isModelLoaded() }
     var loadingPath by remember { mutableStateOf<String?>(null) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
+    var notice by remember { mutableStateOf(Notice.Setup) }
     fun refresh() { rev++ }
 
     val pickLauncher = rememberLauncherForActivityResult(
@@ -83,7 +92,7 @@ private fun LocalModelScreen(onBack: () -> Unit) {
         if (uri != null) {
             // 把所选 .gguf 复制到 app 私有目录,拿到绝对路径,方便 JNI 读取
             scope.launch {
-                loadingPath = "正在导入模型..."
+                loadingPath = ctx.getString(R.string.localmodel_importing)
                 errorMsg = null
                 val result = withContext(Dispatchers.IO) {
                     runCatching {
@@ -91,7 +100,7 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                         val dest = java.io.File(ctx.filesDir, "gguf_${System.currentTimeMillis()}_$name")
                         ctx.contentResolver.openInputStream(uri)?.use { input ->
                             dest.outputStream().use { output -> input.copyTo(output) }
-                        } ?: error("无法读取所选文件")
+                        } ?: error(ctx.getString(R.string.localmodel_read_file_failed))
                         dest.absolutePath
                     }
                 }
@@ -101,13 +110,18 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                         KVUtils.setActiveLocalModel(path)
                         val loadRes = LocalModelManager.loadModel(path)
                         if (loadRes.isFailure) {
-                            errorMsg = "模型加载失败: ${loadRes.exceptionOrNull()?.message}"
+                            notice = Notice.Failed
+                            errorMsg = ctx.getString(
+                                R.string.localmodel_load_failed,
+                                loadRes.exceptionOrNull()?.message,
+                            )
                         }
                         loadingPath = null
                         refresh()
                     },
                     onFailure = { e ->
-                        errorMsg = "导入失败: ${e.message}"
+                        notice = Notice.Failed
+                        errorMsg = ctx.getString(R.string.localmodel_import_failed_reason, e.message)
                         loadingPath = null
                         refresh()
                     },
@@ -122,7 +136,8 @@ private fun LocalModelScreen(onBack: () -> Unit) {
     ) { uri: Uri? ->
         if (uri != null) {
             scope.launch {
-                loadingPath = "MNN:正在导入模型..."
+                // "MNN:" 前缀是下方 MNN 卡片判断导入中的标记,不要去掉
+                loadingPath = "MNN: " + ctx.getString(R.string.localmodel_importing)
                 errorMsg = null
                 val result = withContext(Dispatchers.IO) {
                     MnnModelManager.importFromUri(ctx, uri)
@@ -131,10 +146,12 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                 if (dir != null) {
                     // 自动识别类型并提示
                     val type = MnnModelManager.detectType(dir)
-                    errorMsg = "导入成功:${dir.name}(${type.name.lowercase()})"
+                    notice = Notice.Done
+                    errorMsg = ctx.getString(R.string.localmodel_import_done, dir.name, type.name.lowercase())
                     loadingPath = null
                 } else {
-                    errorMsg = err ?: "导入失败"
+                    notice = Notice.Failed
+                    errorMsg = err ?: ctx.getString(R.string.localmodel_import_failed)
                     loadingPath = null
                 }
                 refresh()
@@ -143,7 +160,7 @@ private fun LocalModelScreen(onBack: () -> Unit) {
     }
 
     FeatureScaffold(
-        title = "本地大模型",
+        title = stringResource(R.string.localmodel_title),
         onBack = onBack,
     ) {
         Column(
@@ -152,28 +169,33 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 24.dp),
         ) {
+            val engineLoaded = stringResource(R.string.localmodel_engine_loaded)
+            val engineNotBuilt = stringResource(R.string.localmodel_engine_not_built)
             // ── 卡片 1:引擎状态 + 离线模式开关 ──
             FCard {
-                Text("引擎状态", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.localmodel_engine_status),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
                 StatusRow(
                     icon = if (llamaReady) Icons.Filled.CheckCircle else Icons.Filled.Warning,
                     iconColor = if (llamaReady) FSuccess else FWarning,
                     label = "llama.cpp (libllama-jni.so)",
-                    value = if (llamaReady) "已加载 ✓" else "未编译 ✗",
+                    value = if (llamaReady) engineLoaded else engineNotBuilt,
                 )
                 Spacer(Modifier.height(4.dp))
                 StatusRow(
                     icon = if (mnnReady) Icons.Filled.CheckCircle else Icons.Filled.Warning,
                     iconColor = if (mnnReady) FSuccess else FWarning,
                     label = "MNN (libmnn-jni.so)",
-                    value = if (mnnReady) "已加载 ✓" else "未编译 ✗",
+                    value = if (mnnReady) engineLoaded else engineNotBuilt,
                 )
                 Spacer(Modifier.height(4.dp))
                 StatusRow(
                     icon = Icons.Filled.Folder,
                     iconColor = FPrimary,
-                    label = "已加载模型数",
+                    label = stringResource(R.string.localmodel_loaded_count),
                     value = "${loaded.size}",
                 )
                 Spacer(Modifier.height(12.dp))
@@ -181,23 +203,29 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("离线模式", color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            stringResource(R.string.localmodel_offline_mode),
+                            color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                        )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            "开启后主对话走本地模型,不联网。仅支持纯聊天,无法控制设备。",
-                            color = FSub, fontSize = 11.sp, lineHeight = 15.sp,
+                            stringResource(R.string.localmodel_offline_mode_desc),
+                            color = FSub, fontSize = OctopusType.caption, lineHeight = 16.sp,
                         )
                     }
+                    Spacer(Modifier.width(12.dp))
                     Switch(
                         checked = offlineMode,
                         onCheckedChange = { on ->
                             if (on && !llamaReady && !mnnReady) {
-                                errorMsg = "llama.cpp 与 MNN native 库均未编译,无法开启离线模式。请先运行 build-native.sh 或 build-mnn.sh。"
+                                notice = Notice.Setup
+                                errorMsg = ctx.getString(R.string.localmodel_offline_needs_native)
                                 refresh()
                                 return@Switch
                             }
                             if (on && activePath.isBlank()) {
-                                errorMsg = "请先选择并加载一个 .gguf 或 .mnn 模型。"
+                                notice = Notice.Setup
+                                errorMsg = ctx.getString(R.string.localmodel_offline_needs_model)
                                 refresh()
                                 return@Switch
                             }
@@ -215,10 +243,13 @@ private fun LocalModelScreen(onBack: () -> Unit) {
 
             // ── 卡片 2:活跃模型 + 选择文件 ──
             FCard {
-                Text("活跃模型", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.localmodel_active_model),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
                 if (activePath.isBlank()) {
-                    Text("未设置 — 请选择 .gguf 模型文件", color = FSub, fontSize = 12.sp)
+                    Text(stringResource(R.string.localmodel_active_none), color = FSub, fontSize = 12.sp)
                 } else {
                     Text(
                         activePath.substringAfterLast('/'),
@@ -227,8 +258,8 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                     Spacer(Modifier.height(2.dp))
                     Text(
                         activePath,
-                        color = FMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace,
-                        lineHeight = 14.sp,
+                        color = FMuted, fontSize = OctopusType.caption, fontFamily = FontFamily.Monospace,
+                        lineHeight = 16.sp,
                     )
                 }
                 Spacer(Modifier.height(12.dp))
@@ -238,15 +269,15 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp),
                     ) {
-                        Text("选择 .gguf 文件")
+                        Text(stringResource(R.string.localmodel_pick_gguf))
                     }
                 }
                 if (loadingPath != null) {
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                        EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
                         Spacer(Modifier.width(8.dp))
-                        Text(loadingPath!!, color = FSub, fontSize = 11.sp)
+                        Text(loadingPath!!, color = FSub, fontSize = OctopusType.caption)
                     }
                 }
             }
@@ -254,7 +285,10 @@ private fun LocalModelScreen(onBack: () -> Unit) {
             // ── 卡片 3:已加载模型列表 ──
             if (loaded.isNotEmpty()) {
                 FCard {
-                    Text("已加载模型", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(R.string.localmodel_loaded_models),
+                        color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                    )
                     Spacer(Modifier.height(8.dp))
                     loaded.forEach { handle ->
                         LoadedModelRow(
@@ -286,14 +320,15 @@ private fun LocalModelScreen(onBack: () -> Unit) {
             // ── 卡片 3.5:MNN 模型管理(目录导入)──
             if (mnnReady || mnnModels.isNotEmpty()) {
                 FCard {
-                    Text("MNN 模型目录", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(R.string.localmodel_mnn_title),
+                        color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                    )
                     Spacer(Modifier.height(8.dp))
                     if (mnnModels.isEmpty()) {
                         Text(
-                            "未导入任何 MNN 模型。\n" +
-                                "MNN 模型为目录格式,包含 .mnn 权重 + tokenizer + config。\n" +
-                                "可打包成 .zip 通过 SAF 选择导入,自动解压到 app 私有目录。",
-                            color = FSub, fontSize = 11.sp, lineHeight = 15.sp,
+                            stringResource(R.string.localmodel_mnn_empty),
+                            color = FSub, fontSize = OctopusType.caption, lineHeight = 16.sp,
                         )
                     } else {
                         mnnModels.forEach { info ->
@@ -308,7 +343,10 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                                 onSetActiveWhisper = {
                                     MnnModelManager.setActiveWhisper(info.dir)
                                     val ok = MnnWhisperEngine.loadModel(info.dir.absolutePath)
-                                    if (!ok) errorMsg = "Whisper 模型加载失败(native 返回 0)"
+                                    if (!ok) {
+                                        notice = Notice.Failed
+                                        errorMsg = ctx.getString(R.string.localmodel_whisper_load_failed)
+                                    }
                                     refresh()
                                 },
                                 onDelete = {
@@ -335,14 +373,14 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
                     ) {
-                        Text("导入 .zip / .mnn 模型")
+                        Text(stringResource(R.string.localmodel_import_mnn))
                     }
                     if (loadingPath != null && loadingPath!!.startsWith("MNN:")) {
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                            EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
                             Spacer(Modifier.width(8.dp))
-                            Text(loadingPath!!, color = FSub, fontSize = 11.sp)
+                            Text(loadingPath!!, color = FSub, fontSize = OctopusType.caption)
                         }
                     }
                 }
@@ -351,24 +389,36 @@ private fun LocalModelScreen(onBack: () -> Unit) {
             // ── 卡片 3.6:端侧 ASR(Whisper)开关 ──
             if (mnnReady) {
                 FCard {
-                    Text("端侧 ASR(Whisper)", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(R.string.localmodel_asr_title),
+                        color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                    )
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("使用端侧 Whisper 识别语音", color = FText, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text(
+                                stringResource(R.string.localmodel_asr_switch),
+                                color = FText, fontSize = 14.sp, fontWeight = FontWeight.Medium,
+                            )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                if (whisperLoaded) "已加载: ${whisperPath.substringAfterLast('/')}"
-                                else if (whisperPath.isNotBlank()) "已配置但未加载(点下方按钮加载)"
-                                else "未配置 Whisper 模型(需先在上方导入 whisper-tiny 目录)",
-                                color = FMuted, fontSize = 11.sp,
+                                when {
+                                    whisperLoaded -> stringResource(
+                                        R.string.localmodel_asr_loaded,
+                                        whisperPath.substringAfterLast('/'),
+                                    )
+                                    whisperPath.isNotBlank() -> stringResource(R.string.localmodel_asr_not_loaded)
+                                    else -> stringResource(R.string.localmodel_asr_none)
+                                },
+                                color = FMuted, fontSize = OctopusType.caption,
                             )
                         }
                         Switch(
                             checked = localAsrOn,
                             onCheckedChange = { on ->
                                 if (on && !whisperLoaded) {
-                                    errorMsg = "Whisper 模型未加载,请先导入并加载 whisper 模型目录。"
+                                    notice = Notice.Setup
+                                    errorMsg = ctx.getString(R.string.localmodel_asr_needs_model)
                                     refresh()
                                     return@Switch
                                 }
@@ -379,42 +429,44 @@ private fun LocalModelScreen(onBack: () -> Unit) {
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "开启后「按住说话」和「桌面语音输入」会改用 MNN Whisper 离线识别,\n" +
-                            "不依赖 Google 服务,隐私音频不出设备。\n" +
-                            "Whisper-tiny 中文识别率约 80%,弱于云端,适合无网场景。",
-                        color = FSub, fontSize = 11.sp, lineHeight = 15.sp,
+                        stringResource(R.string.localmodel_asr_desc),
+                        color = FSub, fontSize = OctopusType.caption, lineHeight = 16.sp,
                     )
                 }
             }
 
             // ── 卡片 4:说明 ──
             FCard {
-                Text("使用说明", color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.localmodel_guide_title),
+                    color = FText, fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                )
                 Spacer(Modifier.height(8.dp))
-                BulletLine("llama.cpp 推荐:Qwen2.5-3B-Q4_K_M (~2GB,中文好)")
-                BulletLine("MNN 推荐:Qwen-1.8B-INT8 (~700MB,GPU 加速 30+ tok/s)")
-                BulletLine("Whisper ASR:whisper-tiny (~150MB,中文识别 80%)")
-                BulletLine("性能参考:骁龙 8 Gen 2,llama.cpp ~15 tok/s,MNN ~30 tok/s")
-                BulletLine("需要 6GB+ RAM 设备(3B 模型),4GB+ (1.8B MNN)")
-                BulletLine("首次编译:./build-native.sh (llama) 或 ./build-mnn.sh (MNN)")
+                BulletLine(stringResource(R.string.localmodel_guide_llama))
+                BulletLine(stringResource(R.string.localmodel_guide_mnn))
+                BulletLine(stringResource(R.string.localmodel_guide_whisper))
+                BulletLine(stringResource(R.string.localmodel_guide_speed))
+                BulletLine(stringResource(R.string.localmodel_guide_ram))
+                BulletLine(stringResource(R.string.localmodel_guide_build))
                 Spacer(Modifier.height(8.dp))
                 Divider(color = FBorder, thickness = 1.dp)
                 Spacer(Modifier.height(8.dp))
-                FWarningNote(
-                    "已知限制:\n" +
-                        "• 不支持 function calling — 离线模式仅纯对话,无法控制设备\n" +
-                        "• 不支持视觉 — 截图/图片输入会被忽略\n" +
-                        "• 模型质量低于 GPT-4/Claude — 适合隐私敏感/离线场景",
-                )
+                FWarningNote(stringResource(R.string.localmodel_limits))
             }
 
             // ── 错误提示 ──
             errorMsg?.let { msg ->
                 Spacer(Modifier.height(8.dp))
                 FCard {
-                    Text(msg, color = FWarning, fontSize = 12.sp)
+                    // 状态色:完成 = core,需要设置 = 琥珀,失败 = breach
+                    val tone = when (notice) {
+                        Notice.Done -> FSuccess
+                        Notice.Setup -> FWarning
+                        Notice.Failed -> FError
+                    }
+                    Text(msg, color = tone, fontSize = 12.sp)
                     Spacer(Modifier.height(8.dp))
-                    TextButton(onClick = { errorMsg = null }) { Text("关闭") }
+                    TextButton(onClick = { errorMsg = null }) { Text(stringResource(R.string.common_close)) }
                 }
             }
         }
@@ -456,14 +508,19 @@ private fun LoadedModelRow(
                     modifier = Modifier.weight(1f),
                 )
                 if (isActive) {
-                    FPill("活跃", FPrimary)
+                    FPill(stringResource(R.string.localmodel_badge_active), FPrimary)
                     Spacer(Modifier.width(6.dp))
                 }
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "${formatSize(handle.fileSizeBytes)} · ctx ${handle.contextSize} · 加载于 ${df.format(Date(handle.loadedAt))}",
-                color = FMuted, fontSize = 10.sp,
+                stringResource(
+                    R.string.localmodel_loaded_meta,
+                    formatSize(handle.fileSizeBytes),
+                    handle.contextSize,
+                    df.format(Date(handle.loadedAt)),
+                ),
+                color = FMuted, fontSize = OctopusType.caption,
             )
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -473,14 +530,14 @@ private fun LoadedModelRow(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(6.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                    ) { Text("设为活跃", fontSize = 11.sp) }
+                    ) { Text(stringResource(R.string.localmodel_set_active), fontSize = OctopusType.caption) }
                 }
                 OutlinedButton(
                     onClick = onUnload,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(6.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                ) { Text("卸载", fontSize = 11.sp) }
+                ) { Text(stringResource(R.string.localmodel_unload), fontSize = OctopusType.caption) }
             }
         }
     }
@@ -489,9 +546,9 @@ private fun LoadedModelRow(
 @Composable
 private fun BulletLine(text: String) {
     Row(modifier = Modifier.padding(vertical = 2.dp)) {
-        Text("•", color = FPrimary, fontSize = 11.sp)
+        Text("•", color = FPrimary, fontSize = OctopusType.caption)
         Spacer(Modifier.width(6.dp))
-        Text(text, color = FSub, fontSize = 11.sp, lineHeight = 15.sp)
+        Text(text, color = FSub, fontSize = OctopusType.caption, lineHeight = 16.sp)
     }
 }
 
@@ -531,36 +588,41 @@ private fun MnnModelRow(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "${formatSize(info.sizeBytes)} · ${info.fileCount} 文件 · ${info.type.name.lowercase()}",
-                color = FMuted, fontSize = 10.sp,
+                stringResource(
+                    R.string.localmodel_mnn_meta,
+                    formatSize(info.sizeBytes),
+                    info.fileCount,
+                    info.type.name.lowercase(),
+                ),
+                color = FMuted, fontSize = OctopusType.caption,
             )
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (info.type == MnnModelManager.ModelType.LLM && !isActiveLlm) {
-                    OutlinedButton(
-                        onClick = onSetActiveLlm,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(6.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                    ) { Text("设为 LLM", fontSize = 11.sp) }
+                    MnnRowButton(stringResource(R.string.localmodel_use_as_llm), onSetActiveLlm)
                 }
                 if (info.type == MnnModelManager.ModelType.WHISPER && !isActiveWhisper) {
-                    OutlinedButton(
-                        onClick = onSetActiveWhisper,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(6.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                    ) { Text("加载 Whisper", fontSize = 11.sp) }
+                    MnnRowButton(stringResource(R.string.localmodel_load_whisper), onSetActiveWhisper)
                 }
-                OutlinedButton(
-                    onClick = onDelete,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(6.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                ) { Text("删除", fontSize = 11.sp) }
+                // 删除是破坏性操作:breach
+                MnnRowButton(stringResource(R.string.common_delete), onDelete, FError)
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.MnnRowButton(
+    text: String,
+    onClick: () -> Unit,
+    color: androidx.compose.ui.graphics.Color = FText,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.weight(1f),
+        shape = RoundedCornerShape(6.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+    ) { Text(text, fontSize = OctopusType.caption, color = color) }
 }
 
 private fun formatSize(bytes: Long): String {

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ECHO Universe screen (UniverseScreen.kt / UniverseRepository.kt) -->
+    <string name="universe_title">ECHO Universe</string>
+    <string name="universe_subtitle">我的 Ghost</string>
+    <string name="universe_syncing">同步中</string>
+    <string name="universe_refresh">刷新</string>
+
+    <string name="universe_identity_title">宇宙身份</string>
+    <string name="universe_local_user">本机用户</string>
+    <string name="universe_identity_access">权限</string>
+    <string name="universe_ghost_active">Ghost 活跃</string>
+    <string name="universe_edge_state">边缘态</string>
+    <string name="universe_realms_label">可进入</string>
+    <string name="universe_realm_personal">个人实例</string>
+    <string name="universe_atlas_unchecked">Atlas 权限未检测</string>
+    <string name="universe_atlas_allowed">Atlas 城市事件：可提交，仍需审核</string>
+    <string name="universe_atlas_closed">Atlas 城市事件：未开放</string>
+    <string name="universe_atlas_hint">购买 Realm Pass 或获得审核提升后，可开放更大半径。</string>
+
+    <string name="universe_service_title">ECHO 服务</string>
+    <string name="universe_base_url_label">ECHO 服务地址</string>
+    <string name="universe_runtime_url_label">母体 Runtime HTTP</string>
+
+    <string name="universe_choose_character">选择角色</string>
+    <string name="universe_binding">绑定中</string>
+    <string name="universe_bind_ghost">绑定 Ghost</string>
+
+    <string name="universe_economy_title">数字生命经济</string>
+    <string name="universe_economy_subtitle">Credits · 续命 · Realm 通行证</string>
+    <string name="universe_credits_amount">%1$d cr</string>
+    <string name="universe_ghost_not_renewed">Ghost 未续命</string>
+    <string name="universe_ghost_active_until">Ghost 活跃至 %1$s</string>
+    <string name="universe_ghost_status">Ghost：%1$s</string>
+    <string name="universe_no_realm_pass">暂无 Realm Pass</string>
+    <string name="universe_processing">处理中</string>
+    <string name="universe_monthly_pass">月卡 %1$d</string>
+    <string name="universe_payment_note">付费只购买访问、续命、优先队列或工具，不保证主线 canon 通过。</string>
+
+    <string name="universe_advancing">推进中</string>
+    <string name="universe_advance_day">过一天</string>
+    <string name="universe_open_main_chat">进入主对话</string>
+    <string name="universe_tick_hint">同步 ECHO 生命场 tick 后刷新当前 Ghost。</string>
+    <string name="universe_stat_focus">当前关注</string>
+    <string name="universe_stat_diary">日记</string>
+    <string name="universe_stat_growth">成长</string>
+    <string name="universe_goals">目标</string>
+    <string name="universe_relations">关系</string>
+    <string name="universe_day">第 %1$d 天</string>
+
+    <string name="universe_ghost_chat_title">和 Ghost 对话</string>
+    <string name="universe_chat_me">我</string>
+    <string name="universe_chat_ghost">Ghost</string>
+    <string name="universe_chat_line">%1$s：%2$s</string>
+    <string name="universe_ghost_replying">Ghost 正在回应</string>
+    <string name="universe_input_hint">输入一句话</string>
+    <string name="universe_waiting_reply">等待回应</string>
+    <string name="universe_send_to_host">发送到母体</string>
+    <string name="universe_host_no_response">母体 Runtime 未回应：%1$s</string>
+
+    <string name="universe_empty_title">尚未进入宇宙</string>
+    <string name="universe_empty_hint">还没有绑定 Ghost。在上方选择角色后绑定。</string>
+
+    <string name="universe_error_empty_prompt">输入要对 Ghost 说的话。</string>
+    <string name="universe_error_empty_reply">母体 Runtime 返回了空回复。</string>
+    <string name="universe_error_http">ECHO 请求失败：HTTP %1$d</string>
+    <string name="universe_error_empty_response">ECHO 返回了空响应。</string>
+</resources>

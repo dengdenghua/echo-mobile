@@ -1,5 +1,7 @@
 package com.apk.claw.android.ui.compose.screen
 
+import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.apk.claw.android.account.AccountConfig
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.utils.OctoHttp
@@ -333,7 +335,7 @@ internal object SquarePostApi {
                 val text = resp.body?.string().orEmpty()
                 if (!resp.isSuccessful) throw RuntimeException(serverDetail(text) ?: "HTTP ${resp.code}")
                 val r = gson.fromJson(text, CommentPostResult::class.java)
-                r.comment ?: throw RuntimeException("评论失败")
+                r.comment ?: error(ClawApplication.instance.getString(R.string.square_comment_no_reply))
             }
         }
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 设置 > 本地大模型（LocalModelActivity） -->
+    <string name="localmodel_title">本地大模型</string>
+    <string name="localmodel_engine_status">引擎状态</string>
+    <string name="localmodel_engine_loaded">已加载</string>
+    <string name="localmodel_engine_not_built">未编译</string>
+    <string name="localmodel_loaded_count">已加载模型数</string>
+    <string name="localmodel_offline_mode">离线模式</string>
+    <string name="localmodel_offline_mode_desc">开启后主对话走本地模型，不联网。仅支持纯聊天，Echo 无法控制设备。</string>
+    <string name="localmodel_offline_needs_native">llama.cpp 与 MNN 原生库均未编译，无法开启离线模式。请先运行 build-native.sh 或 build-mnn.sh。</string>
+    <string name="localmodel_offline_needs_model">请先选择并加载一个 .gguf 或 .mnn 模型。</string>
+    <string name="localmodel_active_model">活跃模型</string>
+    <string name="localmodel_active_none">未设置。请选择 .gguf 模型文件。</string>
+    <string name="localmodel_pick_gguf">选择 .gguf 文件</string>
+    <string name="localmodel_importing">正在导入模型…</string>
+    <string name="localmodel_read_file_failed">无法读取所选文件。</string>
+    <string name="localmodel_load_failed">模型加载失败：%1$s</string>
+    <string name="localmodel_import_failed_reason">导入失败：%1$s</string>
+    <string name="localmodel_import_failed">导入失败。</string>
+    <string name="localmodel_import_done">导入成功：%1$s（%2$s）</string>
+    <string name="localmodel_loaded_models">已加载模型</string>
+    <string name="localmodel_badge_active">活跃</string>
+    <string name="localmodel_loaded_meta">%1$s · ctx %2$d · 加载于 %3$s</string>
+    <string name="localmodel_set_active">设为活跃</string>
+    <string name="localmodel_unload">卸载</string>
+    <string name="localmodel_mnn_title">MNN 模型目录</string>
+    <string name="localmodel_mnn_empty">未导入任何 MNN 模型。\nMNN 模型为目录格式，包含 .mnn 权重、tokenizer 和 config。\n可将目录打包成 .zip 后在此导入，会自动解压到应用私有目录。</string>
+    <string name="localmodel_mnn_meta">%1$s · %2$d 个文件 · %3$s</string>
+    <string name="localmodel_use_as_llm">设为 LLM</string>
+    <string name="localmodel_load_whisper">加载 Whisper</string>
+    <string name="localmodel_import_mnn">导入 .zip / .mnn 模型</string>
+    <string name="localmodel_whisper_load_failed">Whisper 模型加载失败（native 返回 0）。</string>
+    <string name="localmodel_asr_title">端侧 ASR（Whisper）</string>
+    <string name="localmodel_asr_switch">使用端侧 Whisper 识别语音</string>
+    <string name="localmodel_asr_loaded">已加载：%1$s</string>
+    <string name="localmodel_asr_not_loaded">已配置，尚未加载</string>
+    <string name="localmodel_asr_none">未配置 Whisper 模型。请先在上方导入 whisper-tiny 目录。</string>
+    <string name="localmodel_asr_needs_model">Whisper 模型未加载。请先导入并加载 Whisper 模型目录。</string>
+    <string name="localmodel_asr_desc" formatted="false">开启后，「按住说话」和桌面语音输入改用 MNN Whisper 离线识别。\n不依赖 Google 服务，音频不离开设备。\nWhisper-tiny 中文识别率约 80%，低于云端识别，适合无网场景。</string>
+    <string name="localmodel_guide_title">使用说明</string>
+    <string name="localmodel_guide_llama">llama.cpp 推荐：Qwen2.5-3B-Q4_K_M（约 2 GB，中文好）</string>
+    <string name="localmodel_guide_mnn">MNN 推荐：Qwen-1.8B-INT8（约 700 MB，GPU 加速 30+ tok/s）</string>
+    <string name="localmodel_guide_whisper" formatted="false">Whisper ASR：whisper-tiny（约 150 MB，中文识别率约 80%）</string>
+    <string name="localmodel_guide_speed">性能参考：骁龙 8 Gen 2，llama.cpp 约 15 tok/s，MNN 约 30 tok/s</string>
+    <string name="localmodel_guide_ram">3B 模型需要 6 GB+ 内存，1.8B MNN 模型需要 4 GB+</string>
+    <string name="localmodel_guide_build">首次编译：./build-native.sh（llama）或 ./build-mnn.sh（MNN）</string>
+    <string name="localmodel_limits">已知限制：\n• 不支持 function calling：离线模式仅支持纯对话，无法控制设备\n• 不支持视觉：截图和图片输入会被忽略\n• 模型质量低于 GPT-4 或 Claude：适合隐私敏感或离线场景</string>
+</resources>

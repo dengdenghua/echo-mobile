@@ -221,12 +221,15 @@ class SettingsViewModel : ViewModel() {
 
     /** 本地模型菜单尾部文字:离线模式开关状态 + 活跃模型名。 */
     private fun getLocalModelTrailingText(): String {
+        val app = ClawApplication.instance
         val path = KVUtils.getActiveLocalModel()
-        val modelName = if (path.isBlank()) "未设置"
-            else path.substringAfterLast('/').take(24)
-        return if (KVUtils.isLlmOfflineMode()) "● 离线 · $modelName"
-            else if (path.isNotBlank()) "$modelName"
-            else "未配置"
+        val unconfigured = app.getString(R.string.common_unconfigured)
+        val modelName = if (path.isBlank()) unconfigured else path.substringAfterLast('/').take(24)
+        return when {
+            KVUtils.isLlmOfflineMode() -> "${app.getString(R.string.status_offline)} · $modelName"
+            path.isNotBlank() -> modelName
+            else -> unconfigured
+        }
     }
 
     fun isDingtalkBound(): Boolean {

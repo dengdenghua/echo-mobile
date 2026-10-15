@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ECHO Universe screen (UniverseScreen.kt / UniverseRepository.kt) -->
+    <string name="universe_title">ECHO Universe</string>
+    <string name="universe_subtitle">내 Ghost</string>
+    <string name="universe_syncing">동기화 중</string>
+    <string name="universe_refresh">새로고침</string>
+
+    <string name="universe_identity_title">유니버스 신분</string>
+    <string name="universe_local_user">이 기기 사용자</string>
+    <string name="universe_identity_access">권한</string>
+    <string name="universe_ghost_active">Ghost 활성</string>
+    <string name="universe_edge_state">엣지 상태</string>
+    <string name="universe_realms_label">입장 가능</string>
+    <string name="universe_realm_personal">개인 인스턴스</string>
+    <string name="universe_atlas_unchecked">Atlas 권한 미확인</string>
+    <string name="universe_atlas_allowed">Atlas 도시 이벤트: 제출 가능, 검토 필요</string>
+    <string name="universe_atlas_closed">Atlas 도시 이벤트: 미개방</string>
+    <string name="universe_atlas_hint">Realm Pass를 구매하거나 검토로 승급하면 더 넓은 반경이 열립니다.</string>
+
+    <string name="universe_service_title">ECHO 서비스</string>
+    <string name="universe_base_url_label">ECHO 기본 URL</string>
+    <string name="universe_runtime_url_label">호스트 런타임 HTTP</string>
+
+    <string name="universe_choose_character">캐릭터 선택</string>
+    <string name="universe_binding">연결 중</string>
+    <string name="universe_bind_ghost">Ghost 연결</string>
+
+    <string name="universe_economy_title">디지털 생명 경제</string>
+    <string name="universe_economy_subtitle">크레딧 · 연장 · Realm 패스</string>
+    <string name="universe_credits_amount">%1$d cr</string>
+    <string name="universe_ghost_not_renewed">Ghost 미연장</string>
+    <string name="universe_ghost_active_until">Ghost 활성: %1$s까지</string>
+    <string name="universe_ghost_status">Ghost: %1$s</string>
+    <string name="universe_no_realm_pass">아직 Realm Pass가 없습니다</string>
+    <string name="universe_processing">처리 중</string>
+    <string name="universe_monthly_pass">월간 %1$d</string>
+    <string name="universe_payment_note">결제로 얻는 것은 접근, 연장, 우선 대기열, 도구뿐이며 canon 채택은 보장되지 않습니다.</string>
+
+    <string name="universe_advancing">진행 중</string>
+    <string name="universe_advance_day">하루 진행</string>
+    <string name="universe_open_main_chat">메인 대화 열기</string>
+    <string name="universe_tick_hint">ECHO 생명장 tick을 동기화한 뒤 현재 Ghost를 새로고침합니다.</string>
+    <string name="universe_stat_focus">집중</string>
+    <string name="universe_stat_diary">일기</string>
+    <string name="universe_stat_growth">성장</string>
+    <string name="universe_goals">목표</string>
+    <string name="universe_relations">관계</string>
+    <string name="universe_day">%1$d일차</string>
+
+    <string name="universe_ghost_chat_title">Ghost와 대화</string>
+    <string name="universe_chat_me">나</string>
+    <string name="universe_chat_ghost">Ghost</string>
+    <string name="universe_chat_line">%1$s: %2$s</string>
+    <string name="universe_ghost_replying">Ghost가 응답 중</string>
+    <string name="universe_input_hint">메시지 입력</string>
+    <string name="universe_waiting_reply">응답 대기 중</string>
+    <string name="universe_send_to_host">호스트로 보내기</string>
+    <string name="universe_host_no_response">호스트 런타임이 응답하지 않았습니다: %1$s</string>
+
+    <string name="universe_empty_title">아직 유니버스에 들어가지 않았습니다</string>
+    <string name="universe_empty_hint">아직 연결된 Ghost가 없습니다. 위에서 캐릭터를 선택해 연결하세요.</string>
+
+    <string name="universe_error_empty_prompt">Ghost에게 할 말을 입력하세요.</string>
+    <string name="universe_error_empty_reply">호스트 런타임이 빈 응답을 반환했습니다.</string>
+    <string name="universe_error_http">ECHO 요청 실패: HTTP %1$d</string>
+    <string name="universe_error_empty_response">ECHO가 빈 응답을 반환했습니다.</string>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 設定 > 高度な機能 > ファイルマネージャー (FileManagerActivity) -->
+    <string name="filemanager_up">1 つ上の階層へ</string>
+    <string name="filemanager_sort_name">名前</string>
+    <string name="filemanager_sort_size">サイズ</string>
+    <string name="filemanager_sort_time">日時</string>
+    <string name="filemanager_show_hidden">隠しファイルを表示</string>
+    <string name="filemanager_hide_hidden">隠しファイルを非表示</string>
+    <string name="filemanager_new_folder">新しいフォルダ</string>
+    <string name="filemanager_paste">ここに貼り付け</string>
+    <string name="filemanager_empty">このフォルダは空です</string>
+    <string name="filemanager_shizuku_unavailable">Shizuku を利用できません</string>
+    <string name="filemanager_load_failed">このフォルダを読み込めませんでした</string>
+    <string name="filemanager_copy">コピー</string>
+    <string name="filemanager_cut">切り取り</string>
+    <string name="filemanager_rename">名前を変更</string>
+    <string name="filemanager_view_content">内容を表示</string>
+    <string name="filemanager_details">詳細</string>
+    <string name="filemanager_copy_ready">%1$s をコピーしました。任意のフォルダに貼り付けできます。</string>
+    <string name="filemanager_cut_ready">%1$s を切り取りました。任意のフォルダに貼り付けできます。</string>
+    <string name="filemanager_copied_here">このフォルダにコピーしました</string>
+    <string name="filemanager_moved_here">このフォルダに移動しました</string>
+    <string name="filemanager_action_failed">操作を完了できませんでした</string>
+    <string name="filemanager_deleted">%1$s を削除しました</string>
+    <string name="filemanager_delete_failed">削除できませんでした</string>
+    <string name="filemanager_info_unavailable">ファイル情報を取得できませんでした</string>
+    <string name="filemanager_folder_name">フォルダ名</string>
+    <string name="filemanager_created">%1$s を作成しました</string>
+    <string name="filemanager_create_failed">フォルダを作成できませんでした</string>
+    <string name="filemanager_new_name">新しい名前</string>
+    <string name="filemanager_renamed">名前を変更しました</string>
+    <string name="filemanager_info_title">ファイル情報</string>
+    <string name="filemanager_content_title">ファイルの内容</string>
+    <string name="filemanager_shizuku_title">ファイルにアクセスするには Shizuku が必要です</string>
+    <string name="filemanager_shizuku_desc">Shizuku はシェル権限で /sdcard/ と /sdcard/Android/data/ にアクセスします。\nEcho がファイルをアップロードすることはありません。</string>
+    <string name="filemanager_authorize">権限を付与</string>
+</resources>

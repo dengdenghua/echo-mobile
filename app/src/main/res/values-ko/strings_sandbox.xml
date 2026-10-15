@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 설정 > Linux 컨테이너 (LinuxSandboxSettingsActivity). 제목은 settings_linux_title 재사용. -->
+    <string name="sandbox_about_title">Linux 컨테이너란</string>
+    <string name="sandbox_about_body">앱에는 PRoot 기반 사용자 공간 Linux 샌드박스가 내장되어 있습니다. Echo가 run_shell 도구를 호출하면 컨테이너에서 실제 Linux 명령(apt·pip 패키지 설치, git, ffmpeg, python 등)을 root 없이 실행합니다.\n\n두 가지 배포판:\n• Alpine: 3 MB, APK에 포함, 처음 사용할 때 자동으로 압축 해제\n• Ubuntu: 28 MB, 사용하기 전에 이 페이지에서 다운로드\n\n보안: 컨테이너 루트 격리, bind mount 허용 목록(Download와 Documents만), UID 격리, HIGH 위험 게이트, 시간 초과 시 강제 종료, 출력 64 KB 제한.</string>
+    <string name="sandbox_alpine_title">Alpine(내장)</string>
+    <string name="sandbox_status">상태</string>
+    <string name="sandbox_ready">준비됨</string>
+    <string name="sandbox_alpine_not_ready">초기화되지 않음. 처음 run_shell을 호출할 때 자동으로 압축 해제됩니다.</string>
+    <string name="sandbox_storage_used">사용 용량: %1$s</string>
+    <string name="sandbox_reset_done">%1$s 컨테이너를 초기화했습니다.</string>
+    <string name="sandbox_reset_failed">초기화 실패: %1$s</string>
+    <string name="sandbox_unknown_error">알 수 없는 오류</string>
+    <string name="sandbox_reset_alpine">Alpine 초기화</string>
+    <string name="sandbox_resetting">초기화 중…</string>
+    <string name="sandbox_ubuntu_title">Ubuntu(다운로드 필요)</string>
+    <string name="sandbox_ubuntu_downloaded">rootfs 다운로드됨. 처음 run_shell을 호출할 때 자동으로 압축 해제됩니다.</string>
+    <string name="sandbox_ubuntu_missing">다운로드 안 됨(28 MB, cdimage.ubuntu.com에서)</string>
+    <string name="sandbox_downloading">다운로드 중… %1$d%%</string>
+    <string name="sandbox_download_done">Ubuntu rootfs를 다운로드했습니다. 이제 run_shell에서 distro=ubuntu를 사용할 수 있습니다.</string>
+    <string name="sandbox_download_failed">다운로드 실패: %1$s</string>
+    <string name="sandbox_download_again">다시 다운로드</string>
+    <string name="sandbox_download_ubuntu">Ubuntu rootfs 다운로드</string>
+    <string name="sandbox_cache_deleted">다운로드한 Ubuntu rootfs를 삭제했습니다.</string>
+    <string name="sandbox_delete_failed">삭제하지 못했습니다.</string>
+    <string name="sandbox_delete_cache">캐시 삭제</string>
+    <string name="sandbox_reset_ubuntu">Ubuntu 초기화(rootfs와 home 삭제)</string>
+    <string name="sandbox_usage_title">사용 방식</string>
+    <string name="sandbox_usage_body">Echo가 run_shell 도구를 호출하면 이 컨테이너를 자동으로 사용합니다:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session(대화형 세션)\n\n기본값은 Alpine(가볍고 빠름)입니다. glibc나 완전한 apt 생태계가 필요하면 Ubuntu가 적합합니다.\nbind mount 허용 목록: /sdcard/Download와 /sdcard/Documents(컨테이너에서 읽기/쓰기 가능).</string>
+</resources>

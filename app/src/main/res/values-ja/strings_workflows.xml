@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Workflows screen (ui/featurescreens/WorkflowsActivity.kt). Keep the same keys in all six locales. -->
+<resources>
+    <string name="workflows_title">ワークフロー</string>
+    <string name="workflows_import">インポート</string>
+    <string name="workflows_new">新規ワークフロー</string>
+    <string name="workflows_empty">ワークフローはまだありません\n右上の + で作成できます。\n\nワークフローは複数のツール・プロンプト・条件を\n再利用できる自動化フローにまとめます。</string>
+    <string name="workflows_header_title">ワークフローの編成</string>
+    <string name="workflows_header_desc">複数のステップ（ツール呼び出し / 自然言語プロンプト / 条件分岐）をつなげて、再利用できるフローにします。${var} で変数を渡し、前のステップの結果を参照できます。</string>
+    <string name="workflows_stats">合計：%1$d · 累計実行：%2$d</string>
+    <string name="workflows_running_title">実行中</string>
+    <string name="workflows_running_message">実行中：%1$s</string>
+    <string name="workflows_schedule_title">予約実行：%1$s</string>
+    <string name="workflows_schedule_desc">毎日または1回だけの実行時刻を設定します。予約を解除するには、両方の欄を空にして保存します。</string>
+    <string name="workflows_schedule_hour">時 (0-23)</string>
+    <string name="workflows_schedule_minute">分 (0-59)</string>
+    <string name="workflows_schedule_daily">毎日繰り返す</string>
+    <string name="workflows_schedule_once">1回だけ実行</string>
+    <string name="workflows_step_count">%1$d ステップ</string>
+    <string name="workflows_run_summary">実行 %1$d 回 · %2$s</string>
+    <string name="workflows_last_run">前回 %1$s</string>
+    <string name="workflows_never_run">未実行</string>
+    <string name="workflows_badge_daily">毎日 %1$s</string>
+    <string name="workflows_badge_once">1回 %1$s</string>
+    <string name="workflows_run">実行</string>
+    <string name="workflows_edit">編集</string>
+    <string name="workflows_schedule">予約</string>
+    <string name="workflows_export">書き出し</string>
+    <string name="workflows_editor_new">新規ワークフロー</string>
+    <string name="workflows_editor_edit">ワークフローを編集</string>
+    <string name="workflows_field_name">名前</string>
+    <string name="workflows_field_description">説明</string>
+    <string name="workflows_steps">ステップ</string>
+    <string name="workflows_step_default_name">ステップ %1$d</string>
+    <string name="workflows_add_step">追加</string>
+    <string name="workflows_no_steps">ステップはまだありません。上の「追加」をタップしてください。</string>
+    <string name="workflows_step_type">種類</string>
+    <string name="workflows_type_tool">ツール</string>
+    <string name="workflows_type_prompt">プロンプト</string>
+    <string name="workflows_type_condition">条件</string>
+    <string name="workflows_tool_name">ツール名</string>
+    <string name="workflows_params_label">パラメーター（${var} で前のステップの出力を参照できます）</string>
+    <string name="workflows_prompt_label">自然言語の指示</string>
+    <string name="workflows_condition_label">条件 → 移動先（1行に1件、形式：式 => stepId）</string>
+    <string name="workflows_condition_example">例：${status} == \"ok\" => step_done\n使える演算子：== != contains > &lt;</string>
+    <string name="workflows_condition_step_ids">使える stepId：%1$s</string>
+    <string name="workflows_output_var_label">出力変数名（任意。後のステップで ${名前} として参照できます）</string>
+    <string name="workflows_result_success">実行完了</string>
+    <string name="workflows_result_failed">実行に失敗しました</string>
+    <string name="workflows_result_summary">所要時間：%1$d ms · ステップ数：%2$d</string>
+    <string name="workflows_result_error">エラー：%1$s</string>
+    <string name="workflows_result_output">最終出力：</string>
+    <string name="workflows_result_logs">ステップログ：</string>
+</resources>

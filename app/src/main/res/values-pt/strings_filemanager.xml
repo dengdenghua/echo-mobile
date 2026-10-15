@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Configurações > Avançado > Gerenciador de arquivos (FileManagerActivity) -->
+    <string name="filemanager_up">Subir um nível</string>
+    <string name="filemanager_sort_name">Nome</string>
+    <string name="filemanager_sort_size">Tamanho</string>
+    <string name="filemanager_sort_time">Data</string>
+    <string name="filemanager_show_hidden">Mostrar arquivos ocultos</string>
+    <string name="filemanager_hide_hidden">Não mostrar arquivos ocultos</string>
+    <string name="filemanager_new_folder">Nova pasta</string>
+    <string name="filemanager_paste">Colar aqui</string>
+    <string name="filemanager_empty">Esta pasta está vazia</string>
+    <string name="filemanager_shizuku_unavailable">O Shizuku não está disponível</string>
+    <string name="filemanager_load_failed">Não foi possível carregar esta pasta</string>
+    <string name="filemanager_copy">Copiar</string>
+    <string name="filemanager_cut">Recortar</string>
+    <string name="filemanager_rename">Renomear</string>
+    <string name="filemanager_view_content">Ver conteúdo</string>
+    <string name="filemanager_details">Detalhes</string>
+    <string name="filemanager_copy_ready">%1$s copiado. Cole em qualquer pasta.</string>
+    <string name="filemanager_cut_ready">%1$s recortado. Cole em qualquer pasta.</string>
+    <string name="filemanager_copied_here">Copiado para esta pasta</string>
+    <string name="filemanager_moved_here">Movido para esta pasta</string>
+    <string name="filemanager_action_failed">Não foi possível concluir a ação</string>
+    <string name="filemanager_deleted">%1$s excluído</string>
+    <string name="filemanager_delete_failed">Não foi possível excluir</string>
+    <string name="filemanager_info_unavailable">Não foi possível ler os detalhes do arquivo</string>
+    <string name="filemanager_folder_name">Nome da pasta</string>
+    <string name="filemanager_created">Pasta %1$s criada</string>
+    <string name="filemanager_create_failed">Não foi possível criar a pasta</string>
+    <string name="filemanager_new_name">Novo nome</string>
+    <string name="filemanager_renamed">Renomeado</string>
+    <string name="filemanager_info_title">Detalhes do arquivo</string>
+    <string name="filemanager_content_title">Conteúdo do arquivo</string>
+    <string name="filemanager_shizuku_title">O Shizuku é necessário para acessar os arquivos</string>
+    <string name="filemanager_shizuku_desc">O Shizuku dá acesso de nível shell a /sdcard/ e /sdcard/Android/data/.\nO Echo não envia seus arquivos.</string>
+    <string name="filemanager_authorize">Conceder acesso</string>
+</resources>

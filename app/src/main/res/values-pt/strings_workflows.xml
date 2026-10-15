@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Workflows screen (ui/featurescreens/WorkflowsActivity.kt). Keep the same keys in all six locales. -->
+<resources>
+    <string name="workflows_title">Fluxos de trabalho</string>
+    <string name="workflows_import">Importar</string>
+    <string name="workflows_new">Novo fluxo de trabalho</string>
+    <string name="workflows_empty">Ainda não há fluxos de trabalho\nToque em + no canto superior direito para criar um.\n\nUm fluxo encadeia ferramentas, prompts e condições\nem uma automação reutilizável.</string>
+    <string name="workflows_header_title">Orquestração de fluxos</string>
+    <string name="workflows_header_desc">Encadeie etapas (chamadas de ferramentas, prompts em linguagem natural, ramificações condicionais) em um fluxo reutilizável. Passe variáveis com ${var} e use resultados de etapas anteriores.</string>
+    <string name="workflows_stats">Fluxos: %1$d · Execuções no total: %2$d</string>
+    <string name="workflows_running_title">Em execução</string>
+    <string name="workflows_running_message">Executando: %1$s</string>
+    <string name="workflows_schedule_title">Agendamento: %1$s</string>
+    <string name="workflows_schedule_desc">Defina um horário diário ou único. Para remover o agendamento, deixe os dois campos vazios e salve.</string>
+    <string name="workflows_schedule_hour">Hora (0-23)</string>
+    <string name="workflows_schedule_minute">Minuto (0-59)</string>
+    <string name="workflows_schedule_daily">Repetir todos os dias</string>
+    <string name="workflows_schedule_once">Executar uma vez</string>
+    <string name="workflows_step_count">Etapas: %1$d</string>
+    <string name="workflows_run_summary">Execuções: %1$d · %2$s</string>
+    <string name="workflows_last_run">Última: %1$s</string>
+    <string name="workflows_never_run">Nunca executado</string>
+    <string name="workflows_badge_daily">Diário %1$s</string>
+    <string name="workflows_badge_once">Uma vez %1$s</string>
+    <string name="workflows_run">Executar</string>
+    <string name="workflows_edit">Editar</string>
+    <string name="workflows_schedule">Agendar</string>
+    <string name="workflows_export">Exportar</string>
+    <string name="workflows_editor_new">Novo fluxo de trabalho</string>
+    <string name="workflows_editor_edit">Editar fluxo de trabalho</string>
+    <string name="workflows_field_name">Nome</string>
+    <string name="workflows_field_description">Descrição</string>
+    <string name="workflows_steps">Etapas</string>
+    <string name="workflows_step_default_name">Etapa %1$d</string>
+    <string name="workflows_add_step">Adicionar</string>
+    <string name="workflows_no_steps">Ainda não há etapas. Toque em Adicionar acima.</string>
+    <string name="workflows_step_type">Tipo</string>
+    <string name="workflows_type_tool">Ferramenta</string>
+    <string name="workflows_type_prompt">Prompt</string>
+    <string name="workflows_type_condition">Condição</string>
+    <string name="workflows_tool_name">Nome da ferramenta</string>
+    <string name="workflows_params_label">Parâmetros (use ${var} para referenciar saídas anteriores)</string>
+    <string name="workflows_prompt_label">Instrução em linguagem natural</string>
+    <string name="workflows_condition_label">Condição → destino (uma por linha: expressão => stepId)</string>
+    <string name="workflows_condition_example">Exemplo: ${status} == \"ok\" => step_done\nOperadores: == != contains > &lt;</string>
+    <string name="workflows_condition_step_ids">stepIds disponíveis: %1$s</string>
+    <string name="workflows_output_var_label">Variável de saída (opcional; as etapas seguintes podem usar ${nome})</string>
+    <string name="workflows_result_success">Execução concluída</string>
+    <string name="workflows_result_failed">A execução falhou</string>
+    <string name="workflows_result_summary">Tempo: %1$d ms · Etapas: %2$d</string>
+    <string name="workflows_result_error">Erro: %1$s</string>
+    <string name="workflows_result_output">Saída final:</string>
+    <string name="workflows_result_logs">Registro de etapas:</string>
+</resources>

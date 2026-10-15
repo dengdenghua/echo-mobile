@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes > Avanzado > Gestor de archivos (FileManagerActivity) -->
+    <string name="filemanager_up">Subir un nivel</string>
+    <string name="filemanager_sort_name">Nombre</string>
+    <string name="filemanager_sort_size">Tamaño</string>
+    <string name="filemanager_sort_time">Fecha</string>
+    <string name="filemanager_show_hidden">Mostrar archivos ocultos</string>
+    <string name="filemanager_hide_hidden">No mostrar archivos ocultos</string>
+    <string name="filemanager_new_folder">Nueva carpeta</string>
+    <string name="filemanager_paste">Pegar aquí</string>
+    <string name="filemanager_empty">Esta carpeta está vacía</string>
+    <string name="filemanager_shizuku_unavailable">Shizuku no está disponible</string>
+    <string name="filemanager_load_failed">No se pudo cargar esta carpeta</string>
+    <string name="filemanager_copy">Copiar</string>
+    <string name="filemanager_cut">Cortar</string>
+    <string name="filemanager_rename">Cambiar nombre</string>
+    <string name="filemanager_view_content">Ver contenido</string>
+    <string name="filemanager_details">Detalles</string>
+    <string name="filemanager_copy_ready">Se copió %1$s. Pégalo en cualquier carpeta.</string>
+    <string name="filemanager_cut_ready">Se cortó %1$s. Pégalo en cualquier carpeta.</string>
+    <string name="filemanager_copied_here">Copiado en esta carpeta</string>
+    <string name="filemanager_moved_here">Movido a esta carpeta</string>
+    <string name="filemanager_action_failed">No se pudo completar la acción</string>
+    <string name="filemanager_deleted">Se eliminó %1$s</string>
+    <string name="filemanager_delete_failed">No se pudo eliminar</string>
+    <string name="filemanager_info_unavailable">No se pudieron leer los detalles del archivo</string>
+    <string name="filemanager_folder_name">Nombre de la carpeta</string>
+    <string name="filemanager_created">Se creó %1$s</string>
+    <string name="filemanager_create_failed">No se pudo crear la carpeta</string>
+    <string name="filemanager_new_name">Nuevo nombre</string>
+    <string name="filemanager_renamed">Nombre cambiado</string>
+    <string name="filemanager_info_title">Detalles del archivo</string>
+    <string name="filemanager_content_title">Contenido del archivo</string>
+    <string name="filemanager_shizuku_title">Se necesita Shizuku para acceder a los archivos</string>
+    <string name="filemanager_shizuku_desc">Shizuku da acceso de nivel shell a /sdcard/ y /sdcard/Android/data/.\nEcho no sube tus archivos.</string>
+    <string name="filemanager_authorize">Conceder acceso</string>
+</resources>
