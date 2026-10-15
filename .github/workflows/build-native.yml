@@ -74,6 +74,10 @@ jobs:
       matrix:
         abi: ${{ fromJSON(needs.plan.outputs.abis) }}
 
+    env:
+      # Same default as build-native.sh, which built the committed jniLibs/.
+      NDK_VERSION: 27.0.12077973
+
     steps:
       - uses: actions/checkout@v4
 
@@ -83,12 +87,14 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      # `packages` is split on spaces only. A YAML block list reached sdkmanager as one
+      # argument ("ndk;27.0.12077973\ncmake;3.22.1"), which it could not find, and the step
+      # exited 1. build-native.sh runs the runner's own CMake from PATH, so the SDK cmake
+      # package was never used and is not installed.
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: |
-            ndk;27.0.12077973
-            cmake;3.22.1
+          packages: ndk;${{ env.NDK_VERSION }}
 
       - name: Install Ninja
         run: sudo apt-get update && sudo apt-get install -y ninja-build
@@ -96,10 +102,11 @@ jobs:
       - name: Resolve NDK root
         id: ndk
         run: |
-          NDK_ROOT="$ANDROID_HOME/ndk/27.0.12077973"
+          cmake --version | head -1
+          NDK_ROOT="$ANDROID_HOME/ndk/$NDK_VERSION"
           # android-actions/setup-android 把 SDK 装在 $ANDROID_SDK_ROOT,与 $ANDROID_HOME 等价
           if [ ! -d "$NDK_ROOT" ] && [ -n "$ANDROID_SDK_ROOT" ]; then
-            NDK_ROOT="$ANDROID_SDK_ROOT/ndk/27.0.12077973"
+            NDK_ROOT="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION"
           fi
           echo "NDK_ROOT=$NDK_ROOT" >> "$GITHUB_ENV"
           echo "ANDROID_HOME=${ANDROID_SDK_ROOT:-$ANDROID_HOME}" >> "$GITHUB_ENV"
