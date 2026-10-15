@@ -520,6 +520,7 @@
     <string name="routine_alarm_busy_give_up_text">\"%1$s\" was triggered, but Echo is still busy after multiple retries</string>
     <string name="browser_loading_text">Loading...</string>
     <string name="browser_engine_chip_description">Switch search engine</string>
+    <string name="browser_engine_ask_ai">Ask AI</string>
     <string name="browser_url_hint">Search or enter URL</string>
     <string name="browser_ai_operate_toast">Operating current page...</string>
     <string name="browser_refresh_button">Refresh</string>

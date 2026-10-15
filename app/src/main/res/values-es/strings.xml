@@ -520,6 +520,7 @@
     <string name="routine_alarm_busy_give_up_text">\"%1$s\" se activó, pero Echo sigue ocupado tras varios reintentos</string>
     <string name="browser_loading_text">Cargando...</string>
     <string name="browser_engine_chip_description">Cambiar motor de búsqueda</string>
+    <string name="browser_engine_ask_ai">Preguntar a la IA</string>
     <string name="browser_url_hint">Buscar o introducir URL</string>
     <string name="browser_ai_operate_toast">Operando la página actual...</string>
     <string name="browser_refresh_button">Refrescar</string>

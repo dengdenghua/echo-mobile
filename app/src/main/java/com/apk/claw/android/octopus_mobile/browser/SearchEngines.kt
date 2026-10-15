@@ -33,19 +33,32 @@ data class SearchEngine(
 }
 
 object SearchEngines {
+    /**
+     * The desktop AI 浏览器's engines, in its order (百度, Google, Bing), so the phone and both desktops offer
+     * the same choice. The desktop's fourth entry, GitHub, searches code rather than the web and is left out
+     * on the phone.
+     */
     val ALL = listOf(
+        SearchEngine("baidu", "百度", "百", "https://www.baidu.com/s?wd=", "https://www.baidu.com"),
         SearchEngine("google", "Google", "G", "https://www.google.com/search?q=", "https://www.google.com"),
         SearchEngine("bing", "Bing", "b", "https://www.bing.com/search?q=", "https://www.bing.com"),
-        SearchEngine("baidu", "百度", "百", "https://www.baidu.com/s?wd=", "https://www.baidu.com"),
-        SearchEngine("duckduckgo", "DuckDuckGo", "D", "https://duckduckgo.com/?q=", "https://duckduckgo.com"),
-        // AI 搜索引擎:对话式回答 + 引用来源,适合复杂问题。
-        SearchEngine("perplexity", "Perplexity", "P", "https://www.perplexity.ai/search?q=", "https://www.perplexity.ai"),
-        SearchEngine("kimi", "Kimi", "K", "https://kimi.moonshot.cn/search?q=", "https://kimi.moonshot.cn"),
-        SearchEngine("tongyi", "通义千问", "通", "https://tongyi.aliyun.com/qianwen?query=", "https://tongyi.aliyun.com"),
     )
 
+    /** The desktop's default: the first engine. */
     val DEFAULT = ALL[0]
 
+    /**
+     * 问 AI: the box's text is answered in the browser by the agent instead of opening a results page, like
+     * the desktop start page's 问 AI. It is stored as the engine choice, next to the three engines.
+     */
+    const val AI_ID = "ai"
+
+    /** Choices from before the list followed the desktop. Each of them answered with the agent: 问 AI. */
+    private val LEGACY_AI_IDS = setOf("perplexity", "kimi", "tongyi")
+
+    fun isAi(id: String?): Boolean = id == AI_ID || id in LEGACY_AI_IDS
+
+    /** A web engine; 问 AI and engines that are no longer offered fall back to [DEFAULT]. */
     fun byId(id: String?): SearchEngine = ALL.firstOrNull { it.id == id } ?: DEFAULT
 
     /** 任一引擎能从该 url 解出关键词则返回，否则 null（用于地址栏 omnibox 显示） */

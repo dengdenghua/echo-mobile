@@ -244,9 +244,10 @@ fun BrowserScreen(
             if (isUrlLike(t)) {
                 navigate(t)
             } else {
-                val engine = com.apk.claw.android.octopus_mobile.browser.SearchEngines.byId(KVUtils.getSearchEngine())
-                val isAiEngine = engine.id in setOf("perplexity", "kimi", "tongyi")
-                if (isAiEngine) {
+                val choice = KVUtils.getSearchEngine()
+                val engine = SearchEngines.byId(choice)
+                // 问 AI (and the old AI "engines", which all answered this way): the agent answers here.
+                if (SearchEngines.isAi(choice)) {
                     messages.clear()
                     messages.add(ChatMsg(isUser = true, text = t))
                     messages.add(ChatMsg(isUser = false, text = context.getString(R.string.browser_thinking_status)))
@@ -306,6 +307,7 @@ fun BrowserScreen(
                         onClose = onClose,
                         onMenu = { showMenu = true },
                         onShowTabs = { showTabs = true },
+                        onOpenUrl = { url -> navigate(url) },
                         tabCount = tabs.size,
                         embedded = embedded,
                     )
@@ -677,18 +679,65 @@ private fun BrowserWebViewContainer(engine: BrowserEngine) {
     )
 }
 
-// ── P1-1: 首页极简化（参考 vivo 浏览器首页：留白+插画+胶囊搜索框+底部胶囊导航） ──
+// ── P1-1: 首页 —— 与桌面 AI 浏览器起始页同一结构 ──
+// ECHO 标志 → 搜索框 → 引擎选择 → 常用网站，块与块之间用桌面起始页的同一间距（18）。桌面的扩展、侧栏、
+// 书签栏等只属于桌面，不搬到手机。
+
+/** The desktop start page's gap between its blocks (search box, chips, sites). */
+private val START_GAP = 18.dp
+
+/** Room above the mark, as a share of the free height (the desktop's start page sits high too). */
+private const val START_TOP_WEIGHT = 0.2f
+
+/** Tiles in the 常用网站 grid: two rows of four, like the desktop's eight sites. */
+private const val START_SITE_COUNT = 8
+private const val START_SITE_COLUMNS = 4
+
+private data class HostVisits(val url: String, val host: String, val count: Int, val last: Long)
+
+private fun startHostOf(url: String): String? =
+    runCatching { Uri.parse(url).host?.removePrefix("www.") }.getOrNull()?.takeIf { it.isNotBlank() }
+
+/** Web pages in history, one entry per host with its visit count and last visit (the desktop's top sites). */
+private fun visitsByHost(history: List<HistoryEntry>): List<HostVisits> =
+    history
+        .filter { it.url.startsWith("http://") || it.url.startsWith("https://") }
+        .mapNotNull { entry ->
+            val uri = runCatching { Uri.parse(entry.url) }.getOrNull()
+            val host = startHostOf(entry.url)
+            if (uri == null || host == null) null else Triple(host, "${uri.scheme}://${uri.host}/", entry.visitedTs)
+        }
+        .groupBy { it.first }
+        .map { (host, visits) -> HostVisits(visits.first().second, host, visits.size, visits.maxOf { it.third }) }
+        .sortedWith(compareByDescending<HostVisits> { it.count }.thenByDescending { it.last })
+
+/**
+ * One tile per site for the start page: the user's 常用网站 (added from a page's 收藏 dialog) first, then the
+ * most visited hosts in history, one tile per host, by visits then recency (the desktop's top sites).
+ */
+internal fun startPageSites(
+    shortcuts: List<CommonSiteItem>,
+    history: List<HistoryEntry>,
+    limit: Int = START_SITE_COUNT,
+): List<CommonSiteItem> {
+    val candidates = shortcuts.mapNotNull { site -> startHostOf(site.url)?.let { it to site } } +
+        visitsByHost(history).map { it.host to CommonSiteItem(it.url, it.host) }
+    return candidates.distinctBy { it.first }.map { it.second }.take(limit)
+}
 
 @Composable
+@Suppress("LongMethod") // 首页一屏:标志、搜索框、引擎、常用网站和两种模式的导航按钮
 private fun BrowserHomeOverlay(
     onActivateSearch: () -> Unit,
     onClose: () -> Unit,
     onMenu: () -> Unit = {},
     onShowTabs: () -> Unit = {},
+    onOpenUrl: (String) -> Unit = {},
     tabCount: Int,
     embedded: Boolean = false,
 ) {
-    val engineId = remember { KVUtils.getSearchEngine() }
+    var engineId by remember { mutableStateOf(KVUtils.getSearchEngine()) }
+    val sites = remember { startPageSites(CommonSiteStore.getAll(), HistoryStore.getAll()) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -734,25 +783,20 @@ private fun BrowserHomeOverlay(
                         )
                     }
                 }
-                Spacer(Modifier.weight(0.3f))
+                Spacer(Modifier.weight(START_TOP_WEIGHT))
+            } else {
+                Spacer(Modifier.weight(START_TOP_WEIGHT))
             }
 
             // The ECHO mark, quiet: no glow, no animation. The brand kit has one file per ground, so the mark
             // follows the in-app theme switch as well as the system one.
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painter = painterResource(
-                        if (OctopusColors.isLight) R.drawable.ic_echo_mark_core_snow else R.drawable.ic_echo_mark_core,
-                    ),
-                    contentDescription = stringResource(R.string.echo_wordmark_label),
-                    modifier = Modifier.size(56.dp),
-                )
-            }
+            Image(
+                painter = painterResource(
+                    if (OctopusColors.isLight) R.drawable.ic_echo_mark_core_snow else R.drawable.ic_echo_mark_core,
+                ),
+                contentDescription = stringResource(R.string.echo_wordmark_label),
+                modifier = Modifier.size(56.dp),
+            )
 
             Spacer(Modifier.height(32.dp))
 
@@ -790,6 +834,22 @@ private fun BrowserHomeOverlay(
                 }
             }
 
+            Spacer(Modifier.height(START_GAP))
+
+            // 引擎选择：桌面同一组引擎（百度、Google、Bing）加「问 AI」，中性字形，选中的描 core 边。
+            StartEngineRow(
+                selectedId = engineId,
+                onSelect = { id ->
+                    KVUtils.setSearchEngine(id)
+                    engineId = id
+                },
+            )
+
+            if (sites.isNotEmpty()) {
+                Spacer(Modifier.height(START_GAP + 6.dp))
+                StartSiteGrid(sites = sites, onOpen = onOpenUrl)
+            }
+
             Spacer(Modifier.weight(1f))
 
             // 非嵌入模式（独立 Activity）：底部胶囊导航条
@@ -804,6 +864,76 @@ private fun BrowserHomeOverlay(
                 )
             } else {
                 Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+/** The engine choice under the search box: one chip per engine, then 问 AI. */
+@Composable
+private fun StartEngineRow(selectedId: String, onSelect: (String) -> Unit) {
+    val description = stringResource(R.string.browser_engine_chip_description)
+    val choices = SearchEngines.ALL.map { it.id to it.label } +
+        (SearchEngines.AI_ID to stringResource(R.string.browser_engine_ask_ai))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        choices.forEach { (id, label) ->
+            val selected = if (id == SearchEngines.AI_ID) SearchEngines.isAi(selectedId) else id == selectedId
+            Row(
+                modifier = Modifier
+                    .clip(OctopusShape.capsule)
+                    .border(
+                        1.dp,
+                        if (selected) OctopusColors.Accent else OctopusColors.Border,
+                        OctopusShape.capsule,
+                    )
+                    .clickable(onClickLabel = description) { onSelect(id) }
+                    .padding(start = 4.dp, end = 10.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                EngineGlyph(engineId = id)
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    color = if (selected) OctopusColors.TextPrimary else OctopusColors.TextSecondary,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+/** 常用网站: the desktop start page's site tiles, four to a row. */
+@Composable
+private fun StartSiteGrid(sites: List<CommonSiteItem>, onOpen: (String) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
+    ) {
+        Text(
+            text = stringResource(R.string.browser_home_common_sites),
+            fontSize = 12.sp,
+            color = OctopusColors.TextMuted,
+            modifier = Modifier.padding(start = OctopusSpacing.xs),
+        )
+        sites.chunked(START_SITE_COLUMNS).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.sm),
+            ) {
+                row.forEach { site ->
+                    CommonSiteTile(
+                        title = site.title,
+                        url = site.url,
+                        onClick = { onOpen(site.url) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                repeat(START_SITE_COLUMNS - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }
@@ -1054,7 +1184,7 @@ private fun BrowserSearchOverlay(
  */
 @Composable
 private fun EngineGlyph(engineId: String, modifier: Modifier = Modifier, selected: Boolean = false) {
-    val engine = remember(engineId) { SearchEngines.byId(engineId) }
+    val tag = remember(engineId) { if (SearchEngines.isAi(engineId)) "AI" else SearchEngines.byId(engineId).tag }
     Box(
         modifier = modifier
             .size(24.dp)
@@ -1064,10 +1194,11 @@ private fun EngineGlyph(engineId: String, modifier: Modifier = Modifier, selecte
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = engine.tag,
-            fontSize = 13.sp,
+            text = tag,
+            fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = OctopusColors.TextPrimary,
+            maxLines = 1,
         )
     }
 }
@@ -1098,20 +1229,22 @@ private fun SearchEngineSheet(
                 color = OctopusColors.TextMuted,
                 modifier = Modifier.padding(bottom = OctopusSpacing.md),
             )
-            com.apk.claw.android.octopus_mobile.browser.SearchEngines.ALL.forEach { engine ->
-                val selected = engine.id == currentId
+            val choices = SearchEngines.ALL.map { it.id to it.label } +
+                (SearchEngines.AI_ID to stringResource(R.string.browser_engine_ask_ai))
+            choices.forEach { (id, label) ->
+                val selected = if (id == SearchEngines.AI_ID) SearchEngines.isAi(currentId) else id == currentId
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(OctopusShape.medium)
-                        .clickable { onSelect(engine.id) }
+                        .clickable { onSelect(id) }
                         .padding(horizontal = OctopusSpacing.sm, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    EngineGlyph(engineId = engine.id, selected = selected)
+                    EngineGlyph(engineId = id, selected = selected)
                     Spacer(Modifier.width(OctopusSpacing.lg))
                     Text(
-                        text = engine.label,
+                        text = label,
                         fontSize = 16.sp,
                         color = OctopusColors.TextPrimary,
                         modifier = Modifier.weight(1f),
@@ -1188,18 +1321,21 @@ private fun CommonSiteTile(title: String, url: String, onClick: () -> Unit, modi
             .clickable(onClick = onClick)
             .padding(vertical = OctopusSpacing.sm),
     ) {
+        // The desktop start page's site tile: a 44 rounded square on a neutral ground with a hairline, the
+        // site's first letter in ink (no favicon, no network).
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .clip(CircleShape)
-                .background(OctopusColors.SurfaceVariant),
+                .clip(RoundedCornerShape(12.dp))
+                .background(OctopusColors.SurfaceVariant)
+                .border(1.dp, OctopusColors.Border, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = title.take(1),
-                fontSize = 18.sp,
+                text = title.take(1).uppercase(Locale.getDefault()),
+                fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = OctopusColors.Primary,
+                color = OctopusColors.TextPrimary,
             )
         }
         Spacer(Modifier.height(6.dp))
@@ -1264,7 +1400,11 @@ private fun BrowserResultOverlay(
                 EngineGlyph(engineId = engineId)
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = SearchEngines.byId(engineId).label,
+                    text = if (SearchEngines.isAi(engineId)) {
+                        stringResource(R.string.browser_engine_ask_ai)
+                    } else {
+                        SearchEngines.byId(engineId).label
+                    },
                     fontSize = 13.sp,
                     color = OctopusColors.TextSecondary,
                 )

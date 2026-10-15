@@ -520,6 +520,7 @@
     <string name="routine_alarm_busy_give_up_text">「%1$s」到点，但 Echo 多次重试后仍在忙</string>
     <string name="browser_loading_text">加载中…</string>
     <string name="browser_engine_chip_description">切换搜索引擎</string>
+    <string name="browser_engine_ask_ai">问 AI</string>
     <string name="browser_url_hint">搜索或输入网址</string>
     <string name="browser_ai_operate_toast">让 AI 操作此页…</string>
     <string name="browser_refresh_button">刷新</string>

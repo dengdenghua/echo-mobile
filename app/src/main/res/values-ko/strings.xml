@@ -520,6 +520,7 @@
     <string name="routine_alarm_busy_give_up_text">\"%1$s\"이(가) 트리거되었지만 여러 번 재시도 후에도 Echo가 여전히 사용 중입니다</string>
     <string name="browser_loading_text">로드 중...</string>
     <string name="browser_engine_chip_description">검색 엔진 전환</string>
+    <string name="browser_engine_ask_ai">AI에게 묻기</string>
     <string name="browser_url_hint">검색 또는 URL 입력</string>
     <string name="browser_ai_operate_toast">현재 페이지 조작 중...</string>
     <string name="browser_refresh_button">새로고침</string>

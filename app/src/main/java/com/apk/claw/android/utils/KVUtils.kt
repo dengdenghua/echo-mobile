@@ -387,7 +387,8 @@ object KVUtils {
     // ==================== 搜索引擎 ====================
     private const val KEY_SEARCH_ENGINE = "KEY_SEARCH_ENGINE"
 
-    fun getSearchEngine(): String = getString(KEY_SEARCH_ENGINE, "google")
+    // Default: 百度, the desktop AI 浏览器's first engine (SearchEngines.DEFAULT).
+    fun getSearchEngine(): String = getString(KEY_SEARCH_ENGINE, "baidu")
 
     fun setSearchEngine(id: String) = putString(KEY_SEARCH_ENGINE, id)
 
