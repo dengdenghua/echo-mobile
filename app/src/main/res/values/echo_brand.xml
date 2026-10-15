@@ -6,4 +6,6 @@
     <color name="echo_ground_graphite">#090A0C</color>
     <color name="echo_ink_graphite">#EEF1F4</color>
     <color name="echo_ink_muted_graphite">#9AA3AE</color>
+    <!-- What the drawn wordmark says, for screen readers. The brand name is ECHO in every language. -->
+    <string name="echo_wordmark_label" translatable="false">ECHO</string>
 </resources>

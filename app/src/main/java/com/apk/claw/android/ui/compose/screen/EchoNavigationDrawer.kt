@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -69,8 +70,12 @@ internal fun EchoNavigationDrawer(
                 modifier = Modifier.size(32.dp).clip(OctopusShape.medium)
                     .background(colorResource(R.color.echo_icon_background)))
             Spacer(Modifier.width(12.dp))
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f))
+            // The drawn ECHO wordmark, never the name typeset in a font. Monochrome ink: the tile beside it
+            // already carries the Echo Core, and ink follows the in-app theme switch.
+            Box(Modifier.weight(1f)) {
+                Image(painterResource(R.drawable.ic_echo_wordmark), stringResource(R.string.echo_wordmark_label),
+                    modifier = Modifier.height(16.dp), colorFilter = ColorFilter.tint(OctopusColors.TextPrimary))
+            }
             IconButton(enabled = !isRunning, onClick = onNewChat) {
                 Icon(Icons.Filled.Edit, stringResource(R.string.chat_new))
             }

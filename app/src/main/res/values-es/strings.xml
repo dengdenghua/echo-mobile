@@ -1120,7 +1120,6 @@
     <string name="feat_explore_circle_avatar">Avatar de %1$s</string>
 
     <!-- Brand header -->
-    <string name="browser_brand_name">Echo</string>
     <string name="browser_brand_slogan">Reimaginando la navegación inteligente</string>
 
     <!-- Voice assistant overlay -->

@@ -24,23 +24,21 @@
             <ImageView
                 android:layout_width="84dp"
                 android:layout_height="84dp"
-                android:contentDescription="@string/browser_brand_name"
+                android:importantForAccessibility="no"
                 android:src="@drawable/ic_launcher" />
 
-            <TextView
+            <!-- The drawn ECHO wordmark; the brand name is never typeset in a font. -->
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:letterSpacing="0.02"
-                android:text="@string/browser_brand_name"
-                android:textColor="@color/colorBrandPrimary"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="20dp"
+                android:contentDescription="@string/echo_wordmark_label"
+                android:src="@drawable/ic_echo_wordmark" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="14dp"
                 android:text="@string/account_login_tip"
                 android:textColor="@color/colorTextSecondary"
                 android:textSize="13sp" />

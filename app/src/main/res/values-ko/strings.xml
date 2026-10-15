@@ -1120,7 +1120,6 @@
     <string name="feat_explore_circle_avatar">%1$s 아바타</string>
 
     <!-- Brand header -->
-    <string name="browser_brand_name">Echo</string>
     <string name="browser_brand_slogan">스마트 브라우징 재구상</string>
 
     <!-- Voice assistant overlay -->

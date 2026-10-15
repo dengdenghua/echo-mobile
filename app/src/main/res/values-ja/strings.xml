@@ -944,7 +944,6 @@
     <string name="feat_explore_circle_avatar">%1$s アバター</string>
 
     <!-- ブランドヘッダー -->
-    <string name="browser_brand_name">Echo</string>
     <string name="browser_brand_slogan">AIで再定義するブラウジング</string>
 
     <!-- 音声アシスタントオーバーレイ -->
