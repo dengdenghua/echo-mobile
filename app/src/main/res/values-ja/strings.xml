@@ -1281,7 +1281,7 @@
     <string name="post_detail_send">送信</string>
     <string name="square_search_title">検索</string>
     <string name="square_search_hint">遊び方・チュートリアル・作品を検索</string>
-    <string name="square_search_empty">キーワードを入力してコミュニティを検索</string>
+    <string name="square_search_empty">キーワードを入力して広場を検索</string>
     <string name="square_search_no_result">関連するコンテンツが見つかりませんでした</string>
     <string name="square_search_loading">検索中…</string>
     <string name="square_search_failed">検索に失敗しました。しばらくしてから再試行してください</string>
@@ -1669,9 +1669,9 @@
 
     <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
     <string name="account_local_mode_use">アカウントなしで使う</string>
-    <string name="account_local_mode_hint">アカウントなしでも、自分で設定したモデルとのチャット、モデル設定、自分の Echo との接続が使えます。クレジット、コミュニティ、クラウド機能にはアカウントが必要です。</string>
+    <string name="account_local_mode_hint">アカウントなしでも、自分で設定したモデルとのチャット、モデル設定、自分の Echo との接続が使えます。クレジット、広場、クラウド機能にはアカウントが必要です。</string>
     <string name="account_local_mode_title">ローカルモード · 未ログイン</string>
-    <string name="account_local_mode_desc">ログインするとクレジットと会員、コミュニティ、音声通話、クラウド同期が使えます</string>
+    <string name="account_local_mode_desc">ログインするとクレジットと会員、広場、音声通話、クラウド同期が使えます</string>
     <string name="account_local_mode_short">ローカルモード</string>
     <string name="account_local_mode_drawer_hint">未ログイン · タップしてログイン</string>
     <string name="account_gate_title">ログインすると使えます</string>
@@ -1917,7 +1917,7 @@
     <string name="hub_browse_square_apps">広場のアプリを見る</string>
     <string name="create_post_published_pending">投稿しました。審査後に公開されます。</string>
     <string name="square_apps_title">広場のアプリ</string>
-    <string name="square_apps_empty">審査済みのコミュニティアプリはまだ広場にありません。</string>
+    <string name="square_apps_empty">審査済みのアプリはまだ広場にありません。</string>
     <string name="square_apps_download_failed">ダウンロードできませんでした。ネットワーク接続を確認して、もう一度お試しください。</string>
     <string name="square_apps_installed_toast">「%1$s」をインストールしました。Hub の「アプリ」から開けます。</string>
     <string name="square_apps_installing">インストール中…</string>

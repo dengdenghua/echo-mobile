@@ -1661,9 +1661,9 @@
 
     <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
     <string name="account_local_mode_use">不登录使用</string>
-    <string name="account_local_mode_hint">不登录也能用：对话（用你自己配置的模型）、模型设置、连接你自己的 Echo。积分、社区和云端功能登录后可用。</string>
+    <string name="account_local_mode_hint">不登录也能用：对话（用你自己配置的模型）、模型设置、连接你自己的 Echo。积分、广场和云端功能登录后可用。</string>
     <string name="account_local_mode_title">本地模式 · 未登录</string>
-    <string name="account_local_mode_desc">登录后可用：积分与会员、社区互动、语音通话、云同步</string>
+    <string name="account_local_mode_desc">登录后可用：积分与会员、广场互动、语音通话、云同步</string>
     <string name="account_local_mode_short">本地模式</string>
     <string name="account_local_mode_drawer_hint">未登录 · 点此登录</string>
     <string name="account_gate_title">登录后可用</string>
@@ -1909,7 +1909,7 @@
     <string name="hub_browse_square_apps">浏览广场小程序</string>
     <string name="create_post_published_pending">发布成功，等待审核</string>
     <string name="square_apps_title">广场小程序</string>
-    <string name="square_apps_empty">广场上还没有审核通过的社区小程序。</string>
+    <string name="square_apps_empty">广场上还没有审核通过的小程序。</string>
     <string name="square_apps_download_failed">下载失败，请检查网络连接后重试。</string>
     <string name="square_apps_installed_toast">已安装「%1$s」，可在 HUB 的「应用」里打开</string>
     <string name="square_apps_installing">安装中…</string>

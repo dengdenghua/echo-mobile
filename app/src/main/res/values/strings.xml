@@ -1325,7 +1325,7 @@
 
     <string name="square_search_title">Search</string>
     <string name="square_search_hint">Search ideas, tutorials, works</string>
-    <string name="square_search_empty">Enter a keyword to search the square</string>
+    <string name="square_search_empty">Enter a keyword to search the Square</string>
     <string name="square_search_no_result">No results found</string>
     <string name="square_search_loading">Searching…</string>
     <string name="square_search_failed">Search failed, please retry later</string>
@@ -1674,9 +1674,9 @@
 
     <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
     <string name="account_local_mode_use">Use without an account</string>
-    <string name="account_local_mode_hint">Without an account you can still chat with a model you set up yourself, change model settings and connect your own Echo. Credits, the community and cloud features need an account.</string>
+    <string name="account_local_mode_hint">Without an account you can still chat with a model you set up yourself, change model settings and connect your own Echo. Credits, the Square and cloud features need an account.</string>
     <string name="account_local_mode_title">Local mode · not signed in</string>
-    <string name="account_local_mode_desc">Sign in for credits and membership, the community, voice calls and cloud sync</string>
+    <string name="account_local_mode_desc">Sign in for credits and membership, the Square, voice calls and cloud sync</string>
     <string name="account_local_mode_short">Local mode</string>
     <string name="account_local_mode_drawer_hint">Not signed in · tap to sign in</string>
     <string name="account_gate_title">Sign in to use this</string>
@@ -1922,7 +1922,7 @@
     <string name="hub_browse_square_apps">Browse apps in the Square</string>
     <string name="create_post_published_pending">Posted. It appears after review.</string>
     <string name="square_apps_title">Square apps</string>
-    <string name="square_apps_empty">No reviewed community apps in the Square yet.</string>
+    <string name="square_apps_empty">No reviewed apps in the Square yet.</string>
     <string name="square_apps_download_failed">Download failed. Check your network connection and try again.</string>
     <string name="square_apps_installed_toast">Installed %1$s. Open it from Apps in the Hub.</string>
     <string name="square_apps_installing">Installing…</string>

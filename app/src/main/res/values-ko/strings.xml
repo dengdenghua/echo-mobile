@@ -1663,9 +1663,9 @@
 
     <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
     <string name="account_local_mode_use">계정 없이 사용</string>
-    <string name="account_local_mode_hint">계정 없이도 직접 설정한 모델로 대화하고, 모델 설정을 바꾸고, 내 Echo에 연결할 수 있습니다. 크레딧, 커뮤니티, 클라우드 기능은 계정이 필요합니다.</string>
+    <string name="account_local_mode_hint">계정 없이도 직접 설정한 모델로 대화하고, 모델 설정을 바꾸고, 내 Echo에 연결할 수 있습니다. 크레딧, 광장, 클라우드 기능은 계정이 필요합니다.</string>
     <string name="account_local_mode_title">로컬 모드 · 로그인 안 함</string>
-    <string name="account_local_mode_desc">로그인하면 크레딧과 멤버십, 커뮤니티, 음성 통화, 클라우드 동기화를 쓸 수 있습니다</string>
+    <string name="account_local_mode_desc">로그인하면 크레딧과 멤버십, 광장, 음성 통화, 클라우드 동기화를 쓸 수 있습니다</string>
     <string name="account_local_mode_short">로컬 모드</string>
     <string name="account_local_mode_drawer_hint">로그인 안 함 · 눌러서 로그인</string>
     <string name="account_gate_title">로그인 후 사용할 수 있습니다</string>
@@ -1911,7 +1911,7 @@
     <string name="hub_browse_square_apps">광장 앱 둘러보기</string>
     <string name="create_post_published_pending">게시했습니다. 검토 후 공개됩니다.</string>
     <string name="square_apps_title">광장 앱</string>
-    <string name="square_apps_empty">아직 광장에 검토된 커뮤니티 앱이 없습니다.</string>
+    <string name="square_apps_empty">아직 광장에 검토된 앱이 없습니다.</string>
     <string name="square_apps_download_failed">다운로드하지 못했습니다. 네트워크 연결을 확인한 뒤 다시 시도하세요.</string>
     <string name="square_apps_installed_toast">%1$s 설치를 마쳤습니다. 허브의 앱에서 열 수 있습니다.</string>
     <string name="square_apps_installing">설치 중…</string>

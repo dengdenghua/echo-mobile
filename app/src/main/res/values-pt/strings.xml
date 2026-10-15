@@ -1325,7 +1325,7 @@
 
     <string name="square_search_title">Buscar</string>
     <string name="square_search_hint">Buscar ideias, tutoriais, obras</string>
-    <string name="square_search_empty">Digite uma palavra-chave para buscar na praça</string>
+    <string name="square_search_empty">Digite uma palavra-chave para buscar na Praça</string>
     <string name="square_search_no_result">Nenhum resultado encontrado</string>
     <string name="square_search_loading">Buscando…</string>
     <string name="square_search_failed">Falha na busca, tente novamente mais tarde</string>
@@ -1664,9 +1664,9 @@
 
     <!-- Local mode (不登录使用) and 「登录后可用」 prompts -->
     <string name="account_local_mode_use">Usar sem conta</string>
-    <string name="account_local_mode_hint">Sem conta você ainda pode conversar com um modelo configurado por você, mudar as configurações do modelo e conectar seu próprio Echo. Créditos, comunidade e recursos na nuvem precisam de uma conta.</string>
+    <string name="account_local_mode_hint">Sem conta você ainda pode conversar com um modelo configurado por você, mudar as configurações do modelo e conectar seu próprio Echo. Créditos, a Praça e recursos na nuvem precisam de uma conta.</string>
     <string name="account_local_mode_title">Modo local · sem login</string>
-    <string name="account_local_mode_desc">Entre para créditos e assinatura, comunidade, chamadas de voz e sincronização na nuvem</string>
+    <string name="account_local_mode_desc">Entre para créditos e assinatura, a Praça, chamadas de voz e sincronização na nuvem</string>
     <string name="account_local_mode_short">Modo local</string>
     <string name="account_local_mode_drawer_hint">Sem login · toque para entrar</string>
     <string name="account_gate_title">Entre para usar isto</string>
@@ -1912,7 +1912,7 @@
     <string name="hub_browse_square_apps">Explorar apps na Praça</string>
     <string name="create_post_published_pending">Publicado. Aparece depois da revisão.</string>
     <string name="square_apps_title">Apps da Praça</string>
-    <string name="square_apps_empty">Ainda não há apps da comunidade revisados na Praça.</string>
+    <string name="square_apps_empty">Ainda não há apps revisados na Praça.</string>
     <string name="square_apps_download_failed">Não foi possível baixar. Verifique sua conexão e tente novamente.</string>
     <string name="square_apps_installed_toast">%1$s instalado. Abra em Apps no Hub.</string>
     <string name="square_apps_installing">Instalando…</string>
