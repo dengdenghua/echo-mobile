@@ -3,7 +3,7 @@
   "type": "tool",
   "name": "查询出口 IP",
   "version": "1.0.0",
-  "description": "tool 示例(声明式 HTTP):返回当前出口公网 IP(JSON)。演示无 dex/无沙箱的可执行插件。",
+  "description": "示例工具：查询这台手机当前的出口公网 IP。",
   "author": "ECHO",
   "tool_name": "get_my_ip",
   "tool_params": [],

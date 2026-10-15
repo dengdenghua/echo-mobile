@@ -3,7 +3,7 @@
   "type": "mini-app",
   "name": "示例小程序·我的 IP",
   "version": "1.0.0",
-  "description": "mini-app 示例:H5 小程序,通过 octopus.callTool 桥查出口 IP;并声明可被 Agent 调用的动作(refresh / set_note)演示 app_action 双工架构。",
+  "description": "示例小程序：查看这台手机当前的出口 IP。Echo 也能替你刷新它，或在页面上留一句提示。",
   "author": "ECHO",
   "page": "index.html",
   "allow_tools": ["get_my_ip"],

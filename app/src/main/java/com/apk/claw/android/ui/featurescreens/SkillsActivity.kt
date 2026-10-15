@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
@@ -190,7 +191,10 @@ private fun PromptSkillCard(
                 Text(name, color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 if (desc.isNotBlank()) {
                     Spacer(Modifier.height(2.dp))
-                    Text(desc, color = FSub, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 2)
+                    Text(
+                        desc, color = FSub, fontSize = 12.sp, lineHeight = 16.sp,
+                        maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             SkillSwitch(enabled, onToggle)
@@ -228,7 +232,10 @@ private fun ToolCard(
                 }
                 if (desc.isNotBlank()) {
                     Spacer(Modifier.height(2.dp))
-                    Text(desc, color = FSub, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 2)
+                    Text(
+                        desc, color = FSub, fontSize = 12.sp, lineHeight = 16.sp,
+                        maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             Spacer(Modifier.width(8.dp))
