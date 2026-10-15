@@ -3461,7 +3461,7 @@ private fun ClarifyFormCard(
                                 color = if (selected) PrimaryColor else SurfaceDeepColor,
                                 border = BorderStroke(
                                     1.dp,
-                                    if (selected) PrimaryColor else BorderColor.copy(alpha = 0.5f),
+                                    if (selected) PrimaryColor else OctopusColors.BorderHigh,
                                 ),
                             ) {
                                 Text(

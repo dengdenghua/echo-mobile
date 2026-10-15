@@ -932,7 +932,7 @@ private fun ChannelStatusChip(name: String, connected: Boolean, modifier: Modifi
         color = if (connected) SuccessColor.copy(alpha = 0.10f) else SurfaceVariantColor,
         border = BorderStroke(
             1.dp,
-            if (connected) SuccessColor.copy(alpha = 0.20f) else BorderColor.copy(alpha = 0.6f),
+            if (connected) SuccessColor.copy(alpha = 0.20f) else OctopusColors.BorderHigh,
         ),
         modifier = modifier,
     ) {
@@ -1099,7 +1099,8 @@ private fun IconBubble(icon: ImageVector, tint: Color) {
 @Composable
 private fun SettingsDivider() {
     Spacer(Modifier.height(OctopusSpacing.md))
-    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderColor.copy(alpha = 0.65f)))
+    // The line token is already translucent: copy(alpha = …) would replace its 8% with 65% ink.
+    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderColor))
     Spacer(Modifier.height(OctopusSpacing.md))
 }
 

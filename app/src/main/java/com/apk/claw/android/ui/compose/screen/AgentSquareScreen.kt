@@ -160,7 +160,8 @@ private fun CategoryTabs() {
             Surface(
                 shape = OctopusShape.capsule,
                 color = if (isSelected) OctopusColors.Primary else OctopusColors.SurfaceDeep.copy(alpha = 0.5f),
-                border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, OctopusColors.Border.copy(alpha = 0.6f)),
+                border = if (isSelected) null
+                else androidx.compose.foundation.BorderStroke(1.dp, OctopusColors.BorderHigh),
                 modifier = Modifier.clickable { selected = index }.tvFocusable(),
             ) {
                 Text(

@@ -216,7 +216,7 @@ private fun GroupCard(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun RowDivider() {
-    Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp).height(0.6.dp).background(FBorder.copy(alpha = 0.6f)))
+    Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp).height(0.6.dp).background(FBorder))
 }
 
 @Composable

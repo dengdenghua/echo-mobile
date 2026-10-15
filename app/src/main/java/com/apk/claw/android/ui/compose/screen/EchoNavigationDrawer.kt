@@ -110,7 +110,12 @@ internal fun EchoNavigationDrawer(
                         )
                     }
                 }
-                item { HorizontalDivider(Modifier.padding(horizontal = 12.dp, vertical = 14.dp), color = OctopusColors.Border.copy(alpha = .18f)) }
+                item {
+                    HorizontalDivider(
+                        Modifier.padding(horizontal = 12.dp, vertical = 14.dp),
+                        color = OctopusColors.Border,
+                    )
+                }
             }
             val pinned = matches.filter { it.pinned }
             val recent = matches.filterNot { it.pinned }
@@ -127,7 +132,7 @@ internal fun EchoNavigationDrawer(
                     modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
             }
         }
-        HorizontalDivider(color = OctopusColors.Border.copy(alpha = .18f))
+        HorizontalDivider(color = OctopusColors.Border)
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             // 账户一行(与桌面端底部账户菜单一致):昵称 + 会员与订阅,齿轮进入设置。
             // 未登录(本地模式):显示「本地模式 · 点此登录」,点了直接去登录页。

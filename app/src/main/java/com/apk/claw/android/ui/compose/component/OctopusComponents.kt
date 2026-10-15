@@ -240,7 +240,8 @@ fun OctopusPill(
             )
             .border(
                 1.dp,
-                if (selected) tint.copy(alpha = 0.55f) else tint.copy(alpha = 0.45f),
+                // Tints are neutral now, so the selected pill is marked with core (ECHO: core = selected).
+                if (selected) OctopusColors.Accent else tint.copy(alpha = 0.45f),
                 OctopusShape.capsule,
             )
             .clickable(
@@ -257,7 +258,7 @@ fun OctopusPill(
         Spacer(Modifier.width(OctopusSpacing.xs))
         Text(
             text,
-            color = if (selected) tint else OctopusColors.TextSecondary,
+            color = if (selected) OctopusColors.TextPrimary else OctopusColors.TextSecondary,
             fontSize = OctopusType.label,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -288,8 +289,8 @@ fun OctopusTextPill(
             )
             .border(
                 1.dp,
-                // 未选中也给清晰的描边，避免胶囊在渐变玻璃上"隐形"
-                if (selected) tint.copy(alpha = 0.55f) else tint.copy(alpha = 0.45f),
+                // 未选中也给清晰的描边，避免胶囊在渐变玻璃上"隐形"；选中用 core 描边（tint 已是中性色，靠它分不出选中）
+                if (selected) OctopusColors.Accent else tint.copy(alpha = 0.45f),
                 OctopusShape.capsule,
             )
             .clickable(
@@ -303,9 +304,9 @@ fun OctopusTextPill(
     ) {
         Text(
             text,
-            // 选中=同色高亮；未选中=高对比深色文字（同色字压同色底对比太低、会看不清）
-            color = if (selected) tint else OctopusColors.TextSecondary,
-            fontSize = OctopusType.tag,
+            // 选中=ink；未选中=次级文字。中文不小于 12sp（caption）。
+            color = if (selected) OctopusColors.TextPrimary else OctopusColors.TextSecondary,
+            fontSize = OctopusType.caption,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
         )

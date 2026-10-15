@@ -475,7 +475,7 @@ private fun StepEditor(
     Surface(
         shape = OctopusShape.small,
         color = FSurface2.copy(alpha = 0.4f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, FBorder.copy(alpha = 0.5f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, FBorder),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
