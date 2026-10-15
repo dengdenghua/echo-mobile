@@ -250,9 +250,12 @@ object OctopusBackground {
 /**
  * 统一的字号阶梯（sp）。token 取值与现有 UI 实际字号一一对齐，迁移为纯别名、零视觉变化。
  *
- * - micro      = 9sp （极小徽章，如「已就绪」状态点）
- * - tag        = 10sp（标签、计数、底部导航选中文字）
+ * - micro      = 12sp（极小徽章，如「已就绪」状态点）
+ * - tag        = 12sp（标签、计数、底部导航选中文字）
  * - caption    = 12sp（辅助说明、副标题）
+ *
+ * ECHO 字号从 caption 12 起，中文不再出现 8–11 的字号，所以 micro / tag 和 caption 同为 12sp；
+ * 名字保留，是为了不动几十处调用。
  * - label      = 13sp（次要正文、分区标签）
  * - body       = 14sp（正文）
  * - bodyStrong = 15sp（强调正文）
@@ -265,8 +268,8 @@ object OctopusBackground {
  * - display    = 26sp（空状态 Hero 标题）
  */
 object OctopusType {
-    val micro = 9.sp
-    val tag = 10.sp
+    val micro = 12.sp
+    val tag = 12.sp
     val caption = 12.sp
     val label = 13.sp
     val body = 14.sp

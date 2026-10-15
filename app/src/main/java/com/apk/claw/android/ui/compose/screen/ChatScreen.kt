@@ -1207,7 +1207,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
                                     ?.lastOrNull()?.asJsonObject?.get("content")?.asString.orEmpty()
                                 RemoteTaskProgress(execution.progress.value)
                                 Text(execution.connectionIssue.value ?: taskPrompt,
-                                    fontSize = 11.sp, color = TextMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    fontSize = 12.sp, color = TextMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                             IconButton(onClick = { DeviceExecutionStore.cancel(execution) },
                                 enabled = execution.taskStatus.value != "cancelling") {
@@ -2042,7 +2042,7 @@ private fun HomeTinyStat(label: String, value: String, ok: Boolean, modifier: Mo
         shape = OctopusShape.small, color = EchoChatStyle.softSurface,
     ) {
         Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(label, color = TextMuted, fontSize = 11.sp, maxLines = 1)
+            Text(label, color = TextMuted, fontSize = 12.sp, maxLines = 1)
             Spacer(Modifier.width(6.dp))
             Text(value, color = if (ok) TextPrimary else TextMuted, fontSize = 12.sp,
                 fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis,
