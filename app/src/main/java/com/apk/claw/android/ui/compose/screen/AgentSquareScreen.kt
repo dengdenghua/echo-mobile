@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -51,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.formatCompactCount
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusThemeStyle
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -182,11 +183,9 @@ private fun AgentFeed(
     local: List<AgentPost>,
     onOpenPost: (String) -> Unit,
 ) {
-    // 加载中且无本地内容 → 居中转圈；否则本地技能在前 + 服务端目录在后，合成一个瀑布流。
+    // 加载中且无本地内容 → 顶部一条 core 进度线；否则本地技能在前 + 服务端目录在后，合成一个瀑布流。
     if (remote == null && local.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = OctopusColors.Primary)
-        }
+        EchoLoadingPanel(Modifier.fillMaxSize())
         return
     }
     val posts = local + (remote ?: emptyList())
@@ -375,9 +374,5 @@ internal fun AgentPostCard(post: AgentPost, onClick: () -> Unit = {}) {
     }
 }
 
-/** 数值缩写:<1k 直显,>=1k 用 1.2w 形式。 */
-private fun formatCount(count: Int): String = when {
-    count < 1000 -> count.toString()
-    count < 10000 -> String.format("%.1fk", count / 1000.0)
-    else -> String.format("%.1fw", count / 10000.0)
-}
+/** 数值缩写:按界面语言(1.2万 / 12K),见 [formatCompactCount]。 */
+private fun formatCount(count: Int): String = formatCompactCount(count)

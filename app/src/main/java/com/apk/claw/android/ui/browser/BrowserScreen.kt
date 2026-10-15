@@ -18,6 +18,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -76,6 +77,8 @@ import com.apk.claw.android.octopus_mobile.browser.BrowserEngineFactory
 import com.apk.claw.android.octopus_mobile.browser.EngineEvent
 import com.apk.claw.android.octopus_mobile.browser.SearchEngines
 import com.apk.claw.android.tool.ToolRegistry
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -325,10 +328,8 @@ fun BrowserScreen(
             }
 
             if (isLoading && pageState is BrowserPage.Webview) {
-                LinearProgressIndicator(
+                EchoProgressLine(
                     progress = { progress.coerceIn(0, 100) / 100f },
-                    modifier = Modifier.fillMaxWidth().height(2.dp),
-                    color = OctopusColors.Primary,
                     trackColor = Color.Transparent,
                 )
             }
@@ -379,10 +380,12 @@ fun BrowserScreen(
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp),
         ) {
-            // 底部浮动工具栏（胶囊样式，与首页/Tab 风格一致）
+            // 底部浮动工具栏（胶囊样式，与首页/Tab 风格一致）。它浮在任意网页之上，是悬浮层：
+            // 保留 shadow-raised，再加一条发丝线，白底网页上也看得清边。
             Surface(
                 shape = RoundedCornerShape(28.dp),
                 color = OctopusColors.Surface,
+                border = BorderStroke(1.dp, OctopusColors.Border),
                 shadowElevation = 4.dp,
             ) {
                 Row(
@@ -708,13 +711,14 @@ private fun BrowserHomeOverlay(
                     BrowserCapsuleButton(onClick = onShowTabs, modifier = Modifier.size(40.dp)) {
                         Box(
                             modifier = Modifier
-                                .size(20.dp)
-                                .border(1.2.dp, OctopusColors.TextSecondary, RoundedCornerShape(4.dp)),
+                                .defaultMinSize(minWidth = 22.dp, minHeight = 22.dp)
+                                .border(1.2.dp, OctopusColors.TextSecondary, RoundedCornerShape(4.dp))
+                                .padding(horizontal = 3.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = if (tabCount > 99) "99+" else "$tabCount",
-                                fontSize = 10.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = OctopusColors.TextSecondary,
                             )
@@ -760,7 +764,8 @@ private fun BrowserHomeOverlay(
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
                 color = OctopusColors.Surface,
-                shadowElevation = 2.dp,
+                // 与页面同层:不用阴影,用 line-strong 描边(可交互控件)
+                border = BorderStroke(1.dp, OctopusColors.BorderHigh),
             ) {
                 Row(
                     modifier = Modifier
@@ -815,7 +820,8 @@ private fun BottomCapsuleBar(
         modifier = modifier,
         shape = RoundedCornerShape(28.dp),
         color = OctopusColors.Surface,
-        shadowElevation = 8.dp,
+        border = BorderStroke(1.dp, OctopusColors.Border),
+        shadowElevation = 4.dp,
         tonalElevation = 0.dp,
     ) {
         Row(
@@ -1079,6 +1085,7 @@ private fun SearchEngineSheet(
         sheetState = sheetState,
         containerColor = OctopusColors.Surface,
     ) {
+        EchoSheetSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1162,7 +1169,7 @@ private fun HistoryRow(title: String, subtitle: String, onClick: () -> Unit) {
             if (subtitle.isNotEmpty()) {
                 Text(
                     text = subtitle,
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = OctopusColors.TextMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1436,7 +1443,7 @@ private fun ChatBubble(
                     msg.sources.take(3).forEach { url ->
                         Text(
                             text = domainOf(url),
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = OctopusColors.TextMuted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -1657,6 +1664,7 @@ private fun BrowserReaderSheet(
         sheetState = sheetState,
         containerColor = OctopusColors.Surface,
     ) {
+        EchoSheetSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1711,6 +1719,7 @@ private fun BrowserMenuSheet(
         sheetState = sheetState,
         containerColor = OctopusColors.Surface,
     ) {
+        EchoSheetSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1772,6 +1781,7 @@ private fun BrowserTimelineSheet(
         sheetState = sheetState,
         containerColor = OctopusColors.Surface,
     ) {
+        EchoSheetSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1813,7 +1823,7 @@ private fun BrowserTimelineSheet(
                             )
                             Text(
                                 text = domainOf(entry.url),
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 color = OctopusColors.TextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -1844,6 +1854,7 @@ private fun BrowserTabsSheet(
         sheetState = sheetState,
         containerColor = OctopusColors.Surface,
     ) {
+        EchoSheetSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1890,7 +1901,7 @@ private fun BrowserTabsSheet(
                             if (tab.url.isNotEmpty()) {
                                 Text(
                                     text = domainOf(tab.url),
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     color = OctopusColors.TextSecondary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -1953,6 +1964,7 @@ private fun BrowserAiSheet(
         sheetState = sheetState,
         containerColor = OctopusColors.Surface,
     ) {
+        EchoSheetSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2052,14 +2064,15 @@ private fun BrowserAiSheet(
                         .padding(horizontal = OctopusSpacing.lg, vertical = 10.dp),
                 )
                 Spacer(Modifier.width(OctopusSpacing.sm))
+                // 次要动作:描边按钮。琥珀色只给审批/风险,不给普通按钮。
                 Text(
                     text = stringResource(R.string.browser_execute_button),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = OctopusColors.OnPrimary,
+                    color = OctopusColors.TextPrimary,
                     modifier = Modifier
                         .clip(OctopusShape.capsule)
-                        .background(OctopusColors.Warning)
+                        .border(1.dp, OctopusColors.BorderHigh, OctopusShape.capsule)
                         .clickable {
                             if (question.isNotBlank()) {
                                 onDismiss(); onRunAgent(question)
@@ -2070,10 +2083,7 @@ private fun BrowserAiSheet(
             }
 
             if (thinking) {
-                CircularProgressIndicator(
-                    modifier = Modifier.padding(top = OctopusSpacing.lg).size(20.dp),
-                    color = OctopusColors.Primary,
-                )
+                EchoProgressLine(Modifier.padding(top = OctopusSpacing.lg))
             } else if (answer.isNotBlank()) {
                 Text(
                     text = answer,

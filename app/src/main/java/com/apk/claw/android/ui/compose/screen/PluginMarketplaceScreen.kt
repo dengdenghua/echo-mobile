@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -49,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.registry.PluginRegistryStore
 import com.apk.claw.android.registry.RegistryAsset
 import com.apk.claw.android.registry.RegistryClient
@@ -165,9 +165,7 @@ fun PluginMarketplaceScreen(onBack: () -> Unit) {
 
         // 列表
         when {
-            loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = tint)
-            }
+            loading -> EchoLoadingPanel(Modifier.fillMaxSize())
             filtered.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     stringResource(if (loadFailed) R.string.plugin_marketplace_load_failed else R.string.plugin_marketplace_empty),

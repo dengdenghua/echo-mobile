@@ -24,12 +24,14 @@
             android:orientation="vertical">
 
             <!-- Wallet card -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -114,7 +116,7 @@
                         android:text="@string/account_daily_claim"
                         android:textSize="14sp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- 对话档位:单档 qwen3.5-flash 后整段隐藏(服务端 FORCE_MODEL 锁定,UI 无需让用户选档) -->
             <TextView
@@ -129,14 +131,16 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:visibility="gone"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -187,7 +191,7 @@
                         android:textColor="@color/colorTextSecondary"
                         android:textSize="12sp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Recharge -->
             <TextView
@@ -220,13 +224,15 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -312,7 +318,7 @@
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.apk.claw.android.widget.KButton
                 android:id="@+id/btnLogout"

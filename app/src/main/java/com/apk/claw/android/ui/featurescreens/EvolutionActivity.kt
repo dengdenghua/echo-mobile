@@ -50,7 +50,10 @@ fun EvolutionScreen(onBack: () -> Unit) {
                             if (!l.tag.isNullOrBlank()) { FPill(l.tag!!, FPrimary); Spacer(Modifier.width(6.dp)) }
                             FPill(l.source, FMuted)
                             Spacer(Modifier.weight(1f))
-                            Text(stringResource(R.string.evolution_hit_count, l.hitCount), color = FMuted, fontSize = 10.sp)
+                            Text(
+                                stringResource(R.string.evolution_hit_count, l.hitCount),
+                                color = FMuted, fontSize = 12.sp,
+                            )
                         }
                         Spacer(Modifier.height(6.dp))
                         Text(l.content, color = FText, fontSize = 14.sp, lineHeight = 19.sp)
@@ -71,7 +74,12 @@ fun EvolutionScreen(onBack: () -> Unit) {
                             FPill(c.phase.name, FWarning)
                         }
                         Spacer(Modifier.height(4.dp))
-                        Text(stringResource(R.string.evolution_canary_stats, c.sampleCount, c.successCount, c.failureCount), color = FMuted, fontSize = 10.sp)
+                        Text(
+                            stringResource(
+                                R.string.evolution_canary_stats, c.sampleCount, c.successCount, c.failureCount,
+                            ),
+                            color = FMuted, fontSize = 12.sp,
+                        )
                     }
                 }
             }
@@ -93,6 +101,6 @@ private fun EffBar(value: Double) {
             )
         }
         Spacer(Modifier.width(8.dp))
-        Text(stringResource(R.string.evolution_effectiveness, (v * 100).toInt()), color = FMuted, fontSize = 10.sp)
+        Text(stringResource(R.string.evolution_effectiveness, (v * 100).toInt()), color = FMuted, fontSize = 12.sp)
     }
 }

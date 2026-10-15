@@ -2,6 +2,8 @@
 
 package com.apk.claw.android.plugin
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,7 +13,9 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import com.apk.claw.android.R
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -88,7 +92,9 @@ class MiniAppActivity : AppCompatActivity() {
                 progress = 0
                 visibility = View.VISIBLE
                 elevation = 8f
-                alpha = 0.85f
+                // 页面加载 = 一条细的 core 线,没有底轨
+                progressTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorSuccessPrimary))
+                progressBackgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
             }
             progressBar = pb
 

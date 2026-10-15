@@ -53,7 +53,10 @@ fun VideoLibraryScreen(onBack: () -> Unit) {
             list.isEmpty() -> FEmpty(stringResource(R.string.videolibrary_no_files))
             else -> LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(vertical = 6.dp)) {
                 item {
-                    Text(stringResource(R.string.videolibrary_count, list.size), color = FMuted, fontSize = 11.sp, modifier = Modifier.padding(start = 16.dp, bottom = 4.dp))
+                    Text(
+                        stringResource(R.string.videolibrary_count, list.size),
+                        color = FMuted, fontSize = 12.sp, modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
+                    )
                 }
                 items(list, key = { it.path }) { f ->
                     FCard {
@@ -72,7 +75,7 @@ fun VideoLibraryScreen(onBack: () -> Unit) {
                                 Text(f.name, color = FText, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1)
                                 Text(
                                     MediaScanner.formatSize(f.sizeBytes) + " · " + f.extension.uppercase() + (if (f.isBluRay) stringResource(R.string.videolibrary_bluray_label) else ""),
-                                    color = FMuted, fontSize = 10.sp,
+                                    color = FMuted, fontSize = 12.sp,
                                 )
                             }
                             Text("▶", color = FPrimary, fontSize = 14.sp)

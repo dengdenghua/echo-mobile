@@ -736,7 +736,7 @@ private fun InteractionLessonsCard(tick: Int, onReset: () -> Unit) {
                                     .padding(4.dp),
                             )
                             Text(
-                                stringResource(R.string.common_delete), color = FWarning, fontSize = 12.sp,
+                                stringResource(R.string.common_delete), color = FError, fontSize = 12.sp,
                                 modifier = Modifier
                                     .clickable { InteractionLedger.removeManualRule(l.title); onReset() }
                                     .padding(4.dp),
@@ -830,7 +830,7 @@ private fun UserMemoryCard(tick: Int, onReset: () -> Unit) {
                     }
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        stringResource(R.string.common_delete), color = FWarning, fontSize = 12.sp,
+                        stringResource(R.string.common_delete), color = FError, fontSize = 12.sp,
                         modifier = Modifier
                             .clickable { store.removeMemory(m.id); onReset() }
                             .padding(4.dp),

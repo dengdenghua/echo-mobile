@@ -114,8 +114,8 @@ fun FCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         shape = OctopusShape.large,
         color = OctopusBackground.cardSurface,
+        // 同层卡片:实底 + 发丝线,不用阴影(BRAND.md:不用阴影来分隔同一层的东西)
         border = BorderStroke(1.dp, OctopusBackground.cardBorder),
-        shadowElevation = 8.dp,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp), content = content)

@@ -194,7 +194,7 @@ fun TvLauncherCard(
             )
             if (item.subtitle.isNotBlank()) {
                 Text(
-                    item.subtitle, color = Holo.TextSecondary, fontSize = 11.sp,
+                    item.subtitle, color = Holo.TextSecondary, fontSize = 12.sp,
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -205,7 +205,7 @@ fun TvLauncherCard(
                 Modifier.align(Alignment.TopEnd).padding(6.dp).clip(CircleShape)
                     .background(Holo.Accent).padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
-                Text(badge, color = Holo.OnAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(badge, color = Holo.OnAccent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

@@ -37,7 +37,6 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.FiberManualRecord
 import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -51,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -58,6 +58,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoButtonBusyLine
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -160,9 +162,7 @@ private fun VoiceSettingsScreen(onClose: () -> Unit) {
             }
         }
         if (loading) {
-            Box(Modifier.fillMaxWidth().height(240.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = OctopusColors.Primary)
-            }
+            EchoLoadingPanel(Modifier.padding(top = OctopusSpacing.sm))
             return@Column
         }
         Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
@@ -302,16 +302,15 @@ private fun SaveButton(saving: Boolean, onClick: () -> Unit) {
             .padding(vertical = OctopusSpacing.md),
         contentAlignment = Alignment.Center,
     ) {
-        if (saving) {
-            CircularProgressIndicator(color = OctopusColors.OnPrimary, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-        } else {
-            Text(
-                stringResource(R.string.common_save),
-                color = OctopusColors.OnPrimary,
-                fontSize = OctopusType.bodyLg,
-                fontWeight = FontWeight.Medium,
-            )
-        }
+        // 保存中:文字留位(透明)保持按钮高度,上面压一段细线
+        Text(
+            stringResource(R.string.common_save),
+            color = OctopusColors.OnPrimary,
+            fontSize = OctopusType.bodyLg,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.alpha(if (saving) 0f else 1f),
+        )
+        if (saving) EchoButtonBusyLine(OctopusColors.OnPrimary)
     }
 }
 

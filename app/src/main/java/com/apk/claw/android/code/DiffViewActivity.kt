@@ -270,7 +270,7 @@ private fun FileChangeHeader(fc: FileChange) {
     val path = fc.newPath ?: fc.oldPath ?: "(unknown)"
     val (tag, tagColor) = when {
         fc.isNew -> "NEW" to OctopusColors.Success
-        fc.isDeleted -> "DEL" to OctopusColors.Warning
+        fc.isDeleted -> "DEL" to OctopusColors.Error
         fc.isRenamed -> "REN" to OctopusColors.Info
         else -> "MOD" to OctopusColors.Primary
     }
@@ -287,7 +287,7 @@ private fun FileChangeHeader(fc: FileChange) {
             Text(
                 tag,
                 color = tagColor,
-                fontSize = 10.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             )
@@ -323,7 +323,7 @@ private fun HunkCard(
             Text(
                 hunk.header,
                 color = OctopusColors.TextSecondary,
-                fontSize = 11.sp,
+                fontSize = 12.sp,
                 fontFamily = FontFamily.Monospace,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -413,7 +413,7 @@ private fun DiffLineRow(line: DiffLine) {
         Text(
             text = line.oldLineNumber?.toString() ?: "",
             color = OctopusColors.TextTertiary,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
             modifier = Modifier.width(32.dp),
             textAlign = TextAlign.Right,
@@ -423,7 +423,7 @@ private fun DiffLineRow(line: DiffLine) {
         Text(
             text = line.newLineNumber?.toString() ?: "",
             color = OctopusColors.TextTertiary,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
             modifier = Modifier.width(32.dp),
             textAlign = TextAlign.Right,

@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VerticalAlignBottom
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -60,6 +59,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
 import com.apk.claw.android.ui.browser.UserscriptStore
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -130,11 +131,7 @@ fun UserscriptStoreScreen(onBack: () -> Unit) {
             )
             IconButton(onClick = { showInstallUrlDialog = true }, enabled = !downloading) {
                 if (downloading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = OctopusColors.Primary,
-                    )
+                    EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
                 } else {
                     Icon(
                         Icons.Filled.Add,

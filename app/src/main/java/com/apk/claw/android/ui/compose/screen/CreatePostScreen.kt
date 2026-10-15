@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -60,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoButtonBusyLine
 import com.apk.claw.android.account.AccountFeature
 import com.apk.claw.android.ui.account.SignInPrompt
 import com.apk.claw.android.ui.compose.component.OctopusTextPill
@@ -230,11 +230,7 @@ fun CreatePostScreen(
                 modifier = Modifier.tvFocusable(),
             ) {
                 if (publishing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(14.dp),
-                        strokeWidth = 2.dp,
-                        color = OctopusColors.OnPrimary,
-                    )
+                    EchoButtonBusyLine(OctopusColors.OnPrimary)
                     Spacer(Modifier.width(OctopusSpacing.xs))
                     Text(
                         stringResource(R.string.create_post_publishing),

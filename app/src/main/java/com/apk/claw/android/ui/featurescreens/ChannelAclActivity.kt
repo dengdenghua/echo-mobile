@@ -82,7 +82,7 @@ fun ChannelAclScreen(onBack: () -> Unit) {
                         Text(
                             "关闭后,任何能给机器人发消息的人都能完全控制本机(读发短信、外传文件、任意操作)。" +
                                 "除非你有不上报发送者标识的特殊通道,否则请保持开启。",
-                            color = if (aclOn) FMuted else FWarning, fontSize = 10.sp, lineHeight = 14.sp,
+                            color = if (aclOn) FMuted else FWarning, fontSize = 12.sp, lineHeight = 16.sp,
                         )
                     }
                     Spacer(Modifier.width(8.dp))
@@ -125,7 +125,7 @@ fun ChannelAclScreen(onBack: () -> Unit) {
             if (!aclOn) {
                 Text(
                     "访问控制已关闭,下列名单当前不生效。",
-                    color = FWarning, fontSize = 11.sp,
+                    color = FWarning, fontSize = 12.sp,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 )
             }
@@ -161,7 +161,7 @@ fun ChannelAclScreen(onBack: () -> Unit) {
             Text(
                 "配对方式:在对应 IM 渠道给机器人发送 /pair <6位码>。配对码 10 分钟过期,配对成功后立即失效。" +
                     "清空名单后需刷新配对码重新绑定。",
-                color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                color = FMuted, fontSize = 12.sp, lineHeight = 16.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
         }

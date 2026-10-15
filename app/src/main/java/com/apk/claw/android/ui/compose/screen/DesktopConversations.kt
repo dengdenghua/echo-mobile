@@ -10,6 +10,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle
 import com.apk.claw.android.utils.OctoHttp
 import com.google.gson.JsonParser
@@ -115,6 +117,7 @@ internal fun DesktopConversationsSheet(initialEnvironment: DotEnvironment, onDis
         finally { busy = false }
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        EchoSheetSystemBars()
         Column(Modifier.fillMaxWidth().heightIn(max = 650.dp).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(selected?.title ?: stringResource(R.string.dot_history_title), style = MaterialTheme.typography.titleMedium,
@@ -129,7 +132,7 @@ internal fun DesktopConversationsSheet(initialEnvironment: DotEnvironment, onDis
             } else TextButton(enabled = !busy, onClick = { selected = null; page = null }) { Text(stringResource(R.string.dot_history_back)) }
             Text(stringResource(R.string.dot_history_readonly), style = MaterialTheme.typography.bodySmall)
             error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(vertical = 12.dp)) }
-            if (busy) LinearProgressIndicator(Modifier.fillMaxWidth().padding(vertical = 8.dp))
+            if (busy) EchoProgressLine(Modifier.padding(vertical = 8.dp))
             LazyColumn(Modifier.fillMaxWidth().weight(1f, fill = false), contentPadding = PaddingValues(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (selected == null) {

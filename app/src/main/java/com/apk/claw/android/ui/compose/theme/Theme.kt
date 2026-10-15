@@ -43,8 +43,9 @@ fun OctopusTheme(
         inversePrimary = OctopusColors.PrimaryVariant,
         secondary = OctopusColors.Accent,
         onSecondary = OctopusColors.OnPrimary,
-        secondaryContainer = OctopusColors.SuccessContainer,
-        onSecondaryContainer = OctopusColors.SuccessOnContainer,
+        // Tonal buttons, selected filter chips: a neutral step up, not a core tint (core marks, it does not fill).
+        secondaryContainer = OctopusColors.ContainerHigh,
+        onSecondaryContainer = OctopusColors.TextPrimary,
         tertiary = OctopusColors.Warning,
         onTertiary = OctopusColors.OnPrimary,
         tertiaryContainer = OctopusColors.WarningContainer,
@@ -81,8 +82,9 @@ fun OctopusTheme(
         inversePrimary = OctopusColors.PrimaryVariant,
         secondary = OctopusColors.Accent,
         onSecondary = OctopusColors.OnPrimary,
-        secondaryContainer = OctopusColors.SuccessContainer,
-        onSecondaryContainer = OctopusColors.SuccessOnContainer,
+        // Tonal buttons, selected filter chips: a neutral step up, not a core tint (core marks, it does not fill).
+        secondaryContainer = OctopusColors.ContainerHigh,
+        onSecondaryContainer = OctopusColors.TextPrimary,
         tertiary = OctopusColors.Warning,
         onTertiary = OctopusColors.OnPrimary,
         tertiaryContainer = OctopusColors.WarningContainer,

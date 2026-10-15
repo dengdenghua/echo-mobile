@@ -103,7 +103,7 @@ fun CloudDriveScreen(onBack: () -> Unit) {
                                 Spacer(Modifier.width(10.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(m.name, color = FText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                                    Text(m.baseUrl, color = FMuted, fontSize = 10.sp, maxLines = 1)
+                                    Text(m.baseUrl, color = FMuted, fontSize = 12.sp, maxLines = 1)
                                 }
                                 Icon(
                                     Icons.Outlined.Close,
@@ -121,7 +121,7 @@ fun CloudDriveScreen(onBack: () -> Unit) {
             }
         } else {
             // 路径面包屑
-            Text(pathStack.last(), color = FMuted, fontSize = 11.sp, maxLines = 1,
+            Text(pathStack.last(), color = FMuted, fontSize = 12.sp, maxLines = 1,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
             val list = entries
             when {
@@ -162,7 +162,7 @@ fun CloudDriveScreen(onBack: () -> Unit) {
                                 Spacer(Modifier.width(10.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(e.name, color = if (playable) FText else FMuted, fontSize = 14.sp, maxLines = 1)
-                                    Text(MediaScanner.formatSize(e.size), color = FMuted, fontSize = 10.sp)
+                                    Text(MediaScanner.formatSize(e.size), color = FMuted, fontSize = 12.sp)
                                 }
                                 if (playable) Text("▶", color = FPrimary, fontSize = 14.sp)
                             }

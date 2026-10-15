@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.registry.CommunitySquareApi
 import com.apk.claw.android.registry.RegistryClient
 import com.apk.claw.android.registry.mobileFit
@@ -71,7 +71,7 @@ private val KindIconGap = 6.dp
 private val CardIconBox = 40.dp
 private val CardIconSize = 20.dp
 private val CategoryFontSize = 12.sp
-private val TagFontSize = 11.sp
+private val TagFontSize = 12.sp
 private const val COUNT_K = 1000
 
 /** 货架三类。 */
@@ -182,9 +182,7 @@ private fun MarketContent(
     onRetry: () -> Unit,
 ) {
     when {
-        state.loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-            CircularProgressIndicator(color = kind.tint)
-        }
+        state.loading -> EchoLoadingPanel(Modifier.fillMaxSize())
         state.failed -> LoadFailedState(
             title = stringResource(R.string.market_load_failed),
             message = stringResource(R.string.market_load_failed_desc),

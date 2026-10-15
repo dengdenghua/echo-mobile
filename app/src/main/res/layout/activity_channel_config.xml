@@ -46,12 +46,14 @@
                 android:textStyle="bold" />
 
             <!-- 第一个输入框卡片 -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etInput1"
@@ -65,7 +67,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- 第二个输入框标题 -->
             <TextView
@@ -80,12 +82,14 @@
                 android:textStyle="bold" />
 
             <!-- 第二个输入框卡片（密码样式 + 眼睛图标） -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -115,7 +119,7 @@
                         android:contentDescription="@null"
                         android:src="@drawable/ic_visibility_off" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- 保存按钮 -->
             <com.apk.claw.android.widget.KButton

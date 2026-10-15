@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.apk.claw.android.octopus_mobile.workspace.FsEntry
 import com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceCache
 import com.apk.claw.android.octopus_mobile.workspace.RemoteWorkspaceManager
@@ -126,7 +127,7 @@ fun RemoteWorkspaceScreen(onBack: () -> Unit) {
         }
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
-            if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+            if (busy) EchoProgressLine()
             error?.let {
                 Text("! $it", color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(12.dp))
@@ -244,7 +245,7 @@ private fun FileBrowser(mount: RemoteWorkspaceMounts.Mount) {
                 pathStack = pathStack.dropLast(1); load(pathStack.last())
             }) { Text("< Parent dir") }
         }
-        if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+        if (busy) EchoProgressLine()
         error?.let { Text("! $it", color = MaterialTheme.colorScheme.error) }
         entries?.let { list ->
             if (list.isEmpty()) {

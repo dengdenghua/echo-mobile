@@ -40,7 +40,6 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.RecordVoiceOver
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -63,10 +62,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLineCenteredWidth
 import com.apk.claw.android.account.AccountFeature
 import com.apk.claw.android.account.AccountGate
 import com.apk.claw.android.ui.account.LoginActivity
 import com.apk.claw.android.ui.account.SignInRequiredPanel
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.apk.claw.android.ui.compose.screen.ChatMessage
 import com.apk.claw.android.ui.compose.screen.ChatStore
 import com.apk.claw.android.ui.compose.screen.SessionStore
@@ -256,7 +257,7 @@ private fun callSubtitle(state: VoiceState, seconds: Int, stats: VoiceStats): St
 @Composable
 private fun ConnectingView() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        CircularProgressIndicator(color = OctopusColors.Primary)
+        EchoProgressLine(Modifier.width(EchoProgressLineCenteredWidth))
         Spacer(Modifier.height(OctopusSpacing.lg))
         Text(stringResource(R.string.voice_call_connecting), color = OctopusColors.TextSecondary, fontSize = OctopusType.body)
     }

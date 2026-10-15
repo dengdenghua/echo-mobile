@@ -8,10 +8,10 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.Gravity
 import android.view.View
-import android.widget.ProgressBar
 import android.widget.TextView
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
+import com.apk.claw.android.widget.EchoProgressLineView
 import com.lzf.easyfloat.EasyFloat
 import com.lzf.easyfloat.enums.ShowPattern
 import com.lzf.easyfloat.enums.SidePattern
@@ -90,8 +90,7 @@ object LiveControlOverlay {
                             setStroke(dp(1), cBorder)
                         }
                         view.findViewById<TextView>(R.id.lcStep)?.setTextColor(cText)
-                        view.findViewById<ProgressBar>(R.id.lcSpinner)?.indeterminateTintList =
-                            android.content.res.ColorStateList.valueOf(cPrimary)
+                        view.findViewById<EchoProgressLineView>(R.id.lcSpinner)?.lineColor = cPrimary
                         view.findViewById<TextView>(R.id.lcStop)?.apply {
                             setTextColor(cDanger)
                             background = GradientDrawable().apply {
@@ -166,7 +165,7 @@ object LiveControlOverlay {
     private fun applyStep(step: String, running: Boolean, tint: Int = cPrimary) {
         val view = EasyFloat.getFloatView(TAG) ?: return
         view.findViewById<TextView>(R.id.lcStep)?.text = step
-        view.findViewById<ProgressBar>(R.id.lcSpinner)?.visibility = if (running) View.VISIBLE else View.GONE
+        view.findViewById<EchoProgressLineView>(R.id.lcSpinner)?.visibility = if (running) View.VISIBLE else View.GONE
         if (!running) {
             view.findViewById<TextView>(R.id.lcStep)?.setTextColor(tint)
         } else {

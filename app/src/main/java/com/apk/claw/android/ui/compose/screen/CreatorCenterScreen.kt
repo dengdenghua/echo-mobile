@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.account.AccountRepository
 import com.apk.claw.android.account.CreatorAsset
 import com.apk.claw.android.account.CreatorDashboardData
@@ -130,9 +130,7 @@ fun CreatorCenterScreen(
         CreatorTopBar(onBack = onBack, onReload = { reload() })
 
         when {
-            loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryColor)
-            }
+            loading -> EchoLoadingPanel(Modifier.fillMaxSize())
             loadFailed -> EmptyState(
                 message = stringResource(R.string.creator_center_load_failed),
                 actionText = stringResource(R.string.creator_center_retry),

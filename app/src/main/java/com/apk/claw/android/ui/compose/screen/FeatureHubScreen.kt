@@ -45,7 +45,6 @@ import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Weekend
 import androidx.compose.material.icons.filled.Whatshot
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -74,6 +73,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
 import com.apk.claw.android.ui.compose.component.LoadFailedState
 import com.apk.claw.android.ui.compose.component.OctopusCard
 import com.apk.claw.android.ui.compose.component.OctopusPill
@@ -312,10 +313,7 @@ private fun ExploreTab(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(OctopusIconSize.medium),
-                        strokeWidth = 2.dp,
-                    )
+                    EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
                     Spacer(Modifier.width(OctopusSpacing.sm))
                     Text(
                         stringResource(R.string.browser_loading_text),

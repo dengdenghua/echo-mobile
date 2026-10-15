@@ -119,6 +119,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.apk.claw.android.BuildConfig
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoDrawerNavigationBar
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
 import com.apk.claw.android.account.AccountConfig
 import com.apk.claw.android.agent.AgentActionRecorder
 import com.apk.claw.android.octopus_mobile.ControlTarget
@@ -996,6 +998,8 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
     var showDesktopConversations by remember { mutableStateOf(false) }
     if (showDesktopConversations) DesktopConversationsSheet(dotEnvironment) { showDesktopConversations = false }
 
+    // 3 键导航:抽屉打开时导航栏透明,遮罩一直盖到底(否则 Snow 下抽屉底部留一条没变暗的浅色带)
+    EchoDrawerNavigationBar(drawerState)
     ModalNavigationDrawer(
         drawerState = drawerState,
         scrimColor = OverlayDimColor,
@@ -1489,6 +1493,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
     if (moreMenuOpen) {
         ModalBottomSheet(onDismissRequest = { moreMenuOpen = false; conversationOptionsExpanded = false },
             containerColor = BackgroundColor) {
+            EchoSheetSystemBars()
             Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
                 Text(sessions.firstOrNull { it.id == currentId }?.shownTitle(newChatTitle) ?: newChatTitle,
                     style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -1550,6 +1555,7 @@ fun ChatScreen(onOpenSettings: () -> Unit = {}) {
     }
     if (showBackgroundTasks) {
         ModalBottomSheet(onDismissRequest = { showBackgroundTasks = false }, containerColor = BackgroundColor) {
+            EchoSheetSystemBars()
             Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp)) {
                 Text(stringResource(R.string.echo_background_tasks, DeviceExecutionStore.active().size),
                     style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(12.dp))
@@ -3331,8 +3337,8 @@ private fun DiffLine(line: String) {
 }
 
 private const val DIFF_MAX_LINES = 50
-private val DIFF_LINE_FONT = 11.sp
-private val DIFF_TRUNCATED_FONT = 10.sp
+private val DIFF_LINE_FONT = 12.sp
+private val DIFF_TRUNCATED_FONT = 12.sp
 private val ARTIFACT_BTN_GAP = 4.dp
 private val ARTIFACT_IMG_MAX_HEIGHT = 240.dp
 private val DIFF_TRUNCATED_GAP = 4.dp
@@ -3396,8 +3402,8 @@ private fun ClarifyFormCard(
             .padding(bottom = OctopusSpacing.xs),
         shape = OctopusShape.xl,
         color = PrimaryColor.copy(alpha = 0.06f),
-        border = BorderStroke(1.dp, PrimaryColor.copy(alpha = 0.25f)),
-        shadowElevation = 2.dp,
+        // 与对话同层:不用阴影,用 line-strong 描边
+        border = BorderStroke(1.dp, OctopusColors.BorderHigh),
     ) {
         Column(modifier = Modifier.padding(OctopusSpacing.md)) {
             // 标题行：图标 + 标题 + 关闭按钮

@@ -65,7 +65,7 @@ fun MultiWindowScreen(onBack: () -> Unit) {
                 FPill(if (shizukuOk) stringResource(R.string.multiwindow_available) else stringResource(R.string.multiwindow_unauthorized), if (shizukuOk) FSuccess else FWarning)
             }
             Spacer(Modifier.height(4.dp))
-            Text(stringResource(R.string.multiwindow_instruction), color = FMuted, fontSize = 10.sp)
+            Text(stringResource(R.string.multiwindow_instruction), color = FMuted, fontSize = 12.sp)
         }
 
         toast?.let {
@@ -93,7 +93,7 @@ fun MultiWindowScreen(onBack: () -> Unit) {
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(app.label, color = FText, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                                Text(app.pkg, color = FMuted, fontSize = 10.sp)
+                                Text(app.pkg, color = FMuted, fontSize = 12.sp)
                             }
                             Text("⊞", color = FPrimary, fontSize = 18.sp)
                         }

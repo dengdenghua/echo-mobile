@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import kotlinx.coroutines.CancellationException
@@ -99,19 +102,21 @@ internal fun RemoteArtifactCard(artifact: ChatMessage.Artifact) {
                 Column(Modifier.weight(1f)) {
                     Text(artifact.title, color = EchoChatStyle.text, fontSize = 13.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(Formatter.formatShortFileSize(context, source.size), color = EchoChatStyle.muted, fontSize = 11.sp)
+                    Text(Formatter.formatShortFileSize(context, source.size), color = EchoChatStyle.muted,
+                        fontSize = 12.sp)
                 }
-                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                if (busy) EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TextButton(onClick = { fetch(true) }, enabled = !busy) { Text(stringResource(R.string.chat_artifact_preview)) }
                 TextButton(onClick = { fetch(false) }, enabled = !busy) { Text(stringResource(R.string.dot_delivery_save)) }
             }
-            error?.let { Text(it, fontSize = 11.sp, color = MaterialTheme.colorScheme.error) }
+            error?.let { Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.error) }
         }
     }
     previewFile?.let { file ->
         ModalBottomSheet(onDismissRequest = { previewFile = null }, containerColor = EchoChatStyle.background) {
+            EchoSheetSystemBars()
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
                 Text(source.name, style = MaterialTheme.typography.titleMedium,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -157,7 +162,7 @@ private fun RemoteTextPreview(file: File) {
     Text(text ?: stringResource(R.string.dot_delivery_loading), color = EchoChatStyle.text, fontSize = 13.sp,
         modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp).verticalScroll(rememberScrollState()))
     if (file.length() > 128 * 1024) Text(stringResource(R.string.dot_delivery_text_excerpt),
-        color = EchoChatStyle.muted, fontSize = 11.sp)
+        color = EchoChatStyle.muted, fontSize = 12.sp)
 }
 
 private data class PdfPage(val bitmap: Bitmap?, val count: Int, val failed: Boolean = false)

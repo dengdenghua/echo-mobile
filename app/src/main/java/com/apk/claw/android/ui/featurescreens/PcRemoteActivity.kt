@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.appViewModel
 import com.apk.claw.android.octopus_mobile.ConnectionState
 import com.apk.claw.android.octopus_mobile.H264Decoder
@@ -246,7 +247,15 @@ private fun PcRemoteScreen(onBack: () -> Unit) {
             Spacer(Modifier.width(4.dp))
             Text(stringResource(R.string.settings_pc_remote_desktop_title), color = Color.White, fontSize = 14.sp)
             Spacer(Modifier.weight(1f))
-            Text(if (frames > 0) stringResource(R.string.pcremote_frame_count, frames) else if (connected) stringResource(R.string.pcremote_status_connected) else stringResource(R.string.pcremote_status_disconnected), color = Color(0xFF8AB4F8), fontSize = 11.sp)
+            Text(
+                when {
+                    frames > 0 -> stringResource(R.string.pcremote_frame_count, frames)
+                    connected -> stringResource(R.string.pcremote_status_connected)
+                    else -> stringResource(R.string.pcremote_status_disconnected)
+                },
+                // telemetry on the always-dark remote screen: ink-muted (Graphite), not an off-palette blue
+                color = OctopusColors.TextFixedWhiteSecondary, fontSize = 12.sp,
+            )
             Spacer(Modifier.width(12.dp))
             Text("⌫", color = Color.White, fontSize = 16.sp,
                 modifier = Modifier.pointerInput(Unit) {

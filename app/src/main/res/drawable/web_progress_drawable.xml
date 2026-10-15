@@ -10,7 +10,8 @@
     <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <solid android:color="@color/colorBrandPrimary" />
+                <!-- core:页面加载进度是一条细的 core 线 -->
+                <solid android:color="@color/colorSuccessPrimary" />
             </shape>
         </clip>
     </item>

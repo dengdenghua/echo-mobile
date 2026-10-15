@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.apk.claw.android.update.AppUpdater
 import com.apk.claw.android.update.InstallVerdict
 import kotlinx.coroutines.launch
@@ -65,7 +65,7 @@ private fun UpdateDialog(u: AppUpdater.UpdateInfo) {
                 Text(u.notes.ifBlank { stringResource(R.string.update_default_notes) })
                 progress?.let { p ->
                     Spacer(Modifier.height(12.dp))
-                    LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth())
+                    EchoProgressLine(progress = { p })
                     Text(stringResource(R.string.update_downloading_progress, (p * PERCENT_MAX).toInt()))
                 }
             }

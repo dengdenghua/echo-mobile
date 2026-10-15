@@ -6,6 +6,12 @@
         <attr name="cardSubtitle" format="string" />
     </declare-styleable>
 
+    <!-- ECHO loading line (widget/EchoProgressLineView) -->
+    <declare-styleable name="EchoProgressLineView">
+        <attr name="echoLineColor" format="color" />
+        <attr name="echoTrackColor" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="KButton">
         <attr name="btnBackground" format="color" />
         <attr name="btnTextColor" format="color" />

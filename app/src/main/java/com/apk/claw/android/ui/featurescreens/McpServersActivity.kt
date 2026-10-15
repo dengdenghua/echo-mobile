@@ -163,7 +163,7 @@ private fun McpServerCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(cfg.name.ifBlank { cfg.id }, color = FText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(6.dp))
-                    Text(cfg.id, color = FMuted, fontSize = 10.sp)
+                    Text(cfg.id, color = FMuted, fontSize = 12.sp)
                 }
                 Spacer(Modifier.height(2.dp))
                 Text(
@@ -172,7 +172,7 @@ private fun McpServerCard(
                 )
                 if (connected && toolCount > 0) {
                     Spacer(Modifier.height(2.dp))
-                    Text("$toolCount 个工具", color = FPrimary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text("$toolCount 个工具", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
             }
             Switch(
@@ -246,7 +246,7 @@ private fun McpServerEditDialog(
                 )
                 Text(
                     "仅字母/数字/下划线/中划线,作为工具名前缀 mcp_<id>_<tool>",
-                    color = FMuted, fontSize = 10.sp,
+                    color = FMuted, fontSize = 12.sp,
                 )
                 OutlinedTextField(
                     value = name,
@@ -281,7 +281,7 @@ private fun McpServerEditDialog(
                         )
                         Text(
                             "例:npx\n@modelcontextprotocol/server-filesystem\n/sdcard/Download",
-                            color = FMuted, fontSize = 10.sp, lineHeight = 14.sp,
+                            color = FMuted, fontSize = 12.sp, lineHeight = 16.sp,
                         )
                         OutlinedTextField(
                             value = envText,

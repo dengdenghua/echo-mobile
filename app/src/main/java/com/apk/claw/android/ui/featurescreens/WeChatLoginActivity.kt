@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -22,6 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLineCenteredWidth
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
 import com.apk.claw.android.channel.ChannelManager
 import com.apk.claw.android.channel.wechat.WeChatApiClient
 import com.apk.claw.android.utils.KVUtils
@@ -102,14 +104,14 @@ private fun WeChatLoginScreen(onBack: () -> Unit) {
                     }
                     PrimaryButton(stringResource(if (alreadyLinked) R.string.wechat_login_relogin else R.string.wechat_login_get_qr)) { startLogin() }
                 }
-                is QrUi.Loading -> CircularProgressIndicator(color = FPrimary)
+                is QrUi.Loading -> EchoProgressLine(Modifier.width(EchoProgressLineCenteredWidth))
                 is QrUi.Show -> {
                     Surface(shape = RoundedCornerShape(12.dp), color = androidx.compose.ui.graphics.Color.White) {
                         Image(bitmap = s.bmp.asImageBitmap(), contentDescription = null, modifier = Modifier.size(240.dp).padding(8.dp))
                     }
                     Spacer(Modifier.height(16.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(color = FPrimary, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
+                        EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.wechat_login_waiting), color = FMuted, fontSize = 13.sp)
                     }
@@ -120,7 +122,10 @@ private fun WeChatLoginScreen(onBack: () -> Unit) {
                     PrimaryButton(stringResource(R.string.wechat_login_done)) { onBack() }
                 }
                 is QrUi.Failed -> {
-                    Text(stringResource(R.string.wechat_login_failed), color = FWarning, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 19.sp)
+                    Text(
+                        stringResource(R.string.wechat_login_failed),
+                        color = FError, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 19.sp,
+                    )
                     Spacer(Modifier.height(20.dp))
                     PrimaryButton(stringResource(R.string.wechat_login_get_qr)) { startLogin() }
                 }

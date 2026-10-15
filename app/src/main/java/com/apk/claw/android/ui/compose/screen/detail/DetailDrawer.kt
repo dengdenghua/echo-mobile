@@ -7,8 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
 import com.apk.claw.android.ui.compose.theme.OctopusColors
-import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.compose.theme.OctopusSpacing
 
 /**
@@ -39,8 +39,8 @@ fun DetailDrawer(
         onDismissRequest = onClose,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = currentPane is ToolsDetailPane),
         containerColor = OctopusColors.Surface,
-        shape = OctopusShape.medium,
     ) {
+        EchoSheetSystemBars()
         Column(modifier = Modifier.fillMaxWidth().padding(OctopusSpacing.md)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

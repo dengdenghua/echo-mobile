@@ -82,15 +82,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- 旋转的进度环 -->
-            <ProgressBar
+            <!-- 运行中:一段细线(品牌不用旋转圈),颜色跟单色气泡上的文字走 -->
+            <com.apk.claw.android.widget.EchoProgressLineView
                 android:id="@+id/progressRunning"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="24dp"
+                android:layout_height="2dp"
                 android:layout_gravity="center"
-                android:indeterminate="true"
-                android:indeterminateTint="@color/colorBrandOnPrimary"
-                style="@style/Widget.AppCompat.ProgressBar" />
+                app:echoLineColor="@color/colorBrandOnPrimary"
+                app:echoTrackColor="@color/colorFillPrimary" />
 
             <!-- 渠道 Logo -->
             <com.google.android.material.imageview.ShapeableImageView
@@ -110,10 +109,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|bottom"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="6dp"
                 android:text="1"
                 android:textColor="@color/colorBrandOnPrimary"
-                android:textSize="10sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
         </FrameLayout>

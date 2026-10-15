@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.RGBLuminanceSource
@@ -139,7 +140,7 @@ internal fun DotRemoteConnectionDialog(environment: DotEnvironment, onDismiss: (
                         Text(stringResource(R.string.dot_pair_image))
                     }
                 }
-                if (decoding || binding) LinearProgressIndicator(Modifier.fillMaxWidth())
+                if (decoding || binding) EchoProgressLine()
                 if (showInvitation) {
                     OutlinedTextField(invitation, enabled = !binding, onValueChange = { invitation = it; issue = null },
                         modifier = Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.dot_pair_invitation)) },

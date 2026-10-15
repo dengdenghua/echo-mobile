@@ -10,11 +10,10 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <ProgressBar
+    <com.apk.claw.android.widget.EchoProgressLineView
         android:id="@+id/lcSpinner"
-        style="?android:attr/progressBarStyleSmall"
         android:layout_width="18dp"
-        android:layout_height="18dp" />
+        android:layout_height="2dp" />
 
     <TextView
         android:id="@+id/lcStep"

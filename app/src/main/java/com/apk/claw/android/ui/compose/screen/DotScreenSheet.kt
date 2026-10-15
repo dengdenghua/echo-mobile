@@ -37,6 +37,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLineCenteredWidth
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -47,6 +50,9 @@ import java.util.Date
 
 /** The remote screen viewport stays graphite in both themes, like a video frame (ECHO `ground` graphite). */
 private val ScreenGround = Color(0xFF101216)
+
+/** The hairline track under the loading line on the always-dark frame. */
+private const val FRAME_TRACK_ALPHA = 0.16f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +105,7 @@ internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironmen
     }
     @Composable
     fun content(full: Boolean) {
+        EchoSheetSystemBars()
         Column(Modifier.fillMaxWidth().then(if (full) Modifier.fillMaxHeight().statusBarsPadding().navigationBarsPadding()
             else Modifier.heightIn(max = 680.dp)).padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -121,7 +128,7 @@ internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironmen
                     Icon(Icons.Filled.Close, stringResource(R.string.common_close), tint = Style.muted)
                 }
             }
-            Text(stringResource(R.string.dot_screen_observe_only), color = Style.muted, fontSize = 11.sp)
+            Text(stringResource(R.string.dot_screen_observe_only), color = Style.muted, fontSize = 12.sp)
             Spacer(Modifier.height(12.dp))
             Box(Modifier.fillMaxWidth().then(if (full) Modifier.weight(1f) else Modifier.height(340.dp))
                 .clip(OctopusShape.large).background(ScreenGround), contentAlignment = Alignment.Center) {
@@ -143,7 +150,8 @@ internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironmen
                             modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = zoom, scaleY = zoom,
                                 translationX = pan.x, translationY = pan.y), contentScale = ContentScale.Fit)
                     }
-                } else if (fetching) CircularProgressIndicator(Modifier.size(28.dp), color = OctopusColors.TextFixedWhitePrimary, strokeWidth = 2.dp)
+                } else if (fetching) EchoProgressLine(Modifier.width(EchoProgressLineCenteredWidth),
+                    trackColor = OctopusColors.TextFixedWhitePrimary.copy(alpha = FRAME_TRACK_ALPHA))
                 else Text(stringResource(issue ?: R.string.dot_screen_loading),
                     color = OctopusColors.TextFixedWhitePrimary,
                     fontSize = 13.sp, modifier = Modifier.padding(20.dp))
@@ -152,7 +160,7 @@ internal fun DotScreenSheet(member: DotMember, initialEnvironment: DotEnvironmen
                 modifier = Modifier.padding(top = 10.dp)) }
             if (capturedAt != 0L) Text(stringResource(R.string.dot_screen_last_frame,
                 DateFormat.getTimeInstance(DateFormat.MEDIUM).format(Date(capturedAt))),
-                color = Style.muted, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
+                color = Style.muted, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { automatic = !automatic }) {
                     Icon(if (automatic) Icons.Filled.Pause else Icons.Filled.PlayArrow,

@@ -10,11 +10,11 @@
     android:paddingHorizontal="28dp"
     android:paddingVertical="24dp">
 
-    <ProgressBar
+    <!-- ECHO 加载:一条细的 core 线,不用转圈 -->
+    <com.apk.claw.android.widget.EchoProgressLineView
         android:id="@+id/progressBar"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:indeterminateTint="@color/colorBrandPrimary" />
+        android:layout_width="96dp"
+        android:layout_height="2dp" />
 
     <TextView
         android:id="@+id/tvMessage"

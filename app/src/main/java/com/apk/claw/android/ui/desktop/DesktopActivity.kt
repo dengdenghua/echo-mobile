@@ -59,7 +59,6 @@ import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -89,6 +88,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
 import com.apk.claw.android.appViewModel
 import com.apk.claw.android.base.KeepAliveBack
 import com.apk.claw.android.octopus_mobile.ConnectionState
@@ -851,7 +851,7 @@ private fun ChatContent(convo: List<DeskMsg>, running: Boolean, toolNote: String
 private fun ThinkingRow(toolNote: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ThinkingDots()
-        Text(toolNote.ifBlank { "思考中…" }, color = Holo.Accent, fontSize = 10.sp)
+        Text(toolNote.ifBlank { "思考中…" }, color = Holo.Accent, fontSize = 12.sp)
     }
 }
 
@@ -1125,13 +1125,12 @@ private fun DesktopMonitor(
             if (loading) {
                 Text(
                     stringResource(R.string.desktop_opening_host, hostOf(currentUrl)),
-                    color = Holo.Accent, fontSize = 11.sp,
+                    color = Holo.Accent, fontSize = 12.sp,
                     modifier = Modifier.fillMaxWidth().background(Holo.Panel)
                         .padding(horizontal = 12.dp, vertical = 2.dp),
                 )
-                LinearProgressIndicator(
+                EchoProgressLine(
                     progress = { (progress.coerceIn(0, 100)) / 100f },
-                    modifier = Modifier.fillMaxWidth().height(2.dp),
                     color = Holo.Accent,
                     trackColor = Color.Transparent,
                 )
@@ -1236,7 +1235,7 @@ private fun DesktopTabStrip(engine: BrowserEngine, onNavigate: (String) -> Unit)
                 Text(
                     t.title.ifBlank { newTabLabel }.take(16),
                     color = if (active) Holo.TextHud else Holo.TextSecondary,
-                    fontSize = 11.sp, maxLines = 1,
+                    fontSize = 12.sp, maxLines = 1,
                 )
                 Text(
                     "×", color = Holo.TextSecondary, fontSize = 13.sp,

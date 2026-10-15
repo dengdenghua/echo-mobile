@@ -200,17 +200,17 @@ fun HudStrip(
         Text(
             if (live) "LIVE" else "IDLE",
             color = if (live) Holo.Live else Holo.AccentDim,
-            fontSize = 10.sp, fontFamily = FontFamily.Monospace,
+            fontSize = 12.sp, fontFamily = FontFamily.Monospace,
         )
         Text(
             urlOrIdle,
-            color = Holo.TextHud, fontSize = 10.sp, fontFamily = FontFamily.Monospace,
+            color = Holo.TextHud, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
             maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         HoloDot(connColor)
-        Text(connLabel, color = Holo.TextHud, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Text(timeText, color = Holo.Accent, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Text(connLabel, color = Holo.TextHud, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        Text(timeText, color = Holo.Accent, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
     }
 }
 
@@ -452,7 +452,7 @@ fun HoloChip(text: String, onClick: (() -> Unit)? = null) {
         .border(1.dp, Holo.Border, RoundedCornerShape(8.dp))
     val m = if (onClick != null) base.clickable(onClick = onClick) else base
     Text(
-        text, color = Holo.Accent, fontSize = 10.sp, fontFamily = FontFamily.Monospace,
+        text, color = Holo.Accent, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
         modifier = m.padding(horizontal = 10.dp, vertical = 5.dp),
     )
 }
@@ -463,7 +463,7 @@ private fun ThreeViewThumb(label: String, resId: Int) {
         Box(Modifier.size(width = 48.dp, height = 84.dp).holoGlass(8.dp)) {
             HoloFigure(resId, Modifier.fillMaxSize())
         }
-        Text(label, color = Holo.AccentDim, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+        Text(label, color = Holo.AccentDim, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
     }
 }
 
@@ -489,14 +489,20 @@ fun CharacterHud(modifier: Modifier = Modifier) {
                         Text(c.zh, color = Holo.Accent, fontSize = 30.sp, fontWeight = FontWeight.Bold)
                         Column {
                             Text("${c.name} · ${c.codename}", color = Holo.TextHud, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-                            Text("${c.faction}  ${c.rank}级  ${c.role}", color = Holo.AccentDim, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                            Text(
+                                "${c.faction}  ${c.rank}级  ${c.role}",
+                                color = Holo.AccentDim, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
+                            )
                         }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         HoloDot(Holo.Accent)
-                        Text("${c.status} · 外观 ${c.apparentAge}", color = Holo.TextHud, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                        Text(
+                            "${c.status} · 外观 ${c.apparentAge}",
+                            color = Holo.TextHud, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
+                        )
                     }
-                    Text("“${c.quote}”", color = Holo.TextHud.copy(alpha = 0.8f), fontSize = 11.sp)
+                    Text("“${c.quote}”", color = Holo.TextHud.copy(alpha = 0.8f), fontSize = 12.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         c.abilities.forEach { HoloChip("⚡ $it") }
                         HoloChip("切换角色 ›") { CharacterRegistry.next() }
@@ -506,7 +512,7 @@ fun CharacterHud(modifier: Modifier = Modifier) {
                     Modifier.fillMaxWidth().holoGlass(14.dp).padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text("技能 · 插件", color = Holo.Accent, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                    Text("技能 · 插件", color = Holo.Accent, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HoloChip("技能库") {
                             runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) }

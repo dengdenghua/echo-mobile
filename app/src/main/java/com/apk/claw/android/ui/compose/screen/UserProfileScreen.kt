@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -52,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.formatCompactCount
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.account.AccountStore
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -131,10 +132,7 @@ fun UserProfileScreen(
     ) {
         ProfileTopBar(name = profile?.user?.nickname.orEmpty(), onBack = onBack)
         when {
-            loading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator(color = OctopusColors.Primary) }
+            loading -> EchoLoadingPanel(Modifier.fillMaxSize())
             failed -> CenterText(stringResource(R.string.user_profile_load_failed))
             else -> {
                 val u = profile?.user
@@ -409,8 +407,4 @@ private fun ProfilePostCard(post: AgentPost, onClick: () -> Unit) {
     }
 }
 
-private fun formatCount(n: Int): String = when {
-    n >= 10000 -> String.format(java.util.Locale.US, "%.1fw", n / 10000.0)
-    n >= 1000 -> String.format(java.util.Locale.US, "%.1fk", n / 1000.0)
-    else -> n.toString()
-}
+private fun formatCount(n: Int): String = formatCompactCount(n)

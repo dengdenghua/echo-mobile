@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 
@@ -50,6 +51,7 @@ internal fun DotDeviceSheet(member: DotMember, initialEnvironment: DotEnvironmen
     }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Style.background,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        EchoSheetSystemBars()
         Column(Modifier.fillMaxWidth().heightIn(max = 650.dp).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

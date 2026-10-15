@@ -34,12 +34,14 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <Spinner
                     android:id="@+id/spProvider"
@@ -47,7 +49,7 @@
                     android:layout_height="48dp"
                     android:background="@null"
                     android:paddingHorizontal="12dp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:id="@+id/tvProviderDesc"
@@ -79,13 +81,15 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardApiKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etApiKey"
@@ -100,7 +104,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -113,12 +117,14 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etBaseUrl"
@@ -133,7 +139,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -146,12 +152,14 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etModelName"
@@ -166,7 +174,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- ── 视觉模型（look_at_screen 用，可选） ── -->
             <View
@@ -205,12 +213,14 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etVisionApiKey"
@@ -225,7 +235,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -238,12 +248,14 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etVisionBaseUrl"
@@ -258,7 +270,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -271,12 +283,14 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/colorContainerBrighten"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/colorBorderBase"
+                app:strokeWidth="1dp">
 
                 <EditText
                     android:id="@+id/etVisionModelName"
@@ -291,7 +305,7 @@
                     android:textColor="@color/colorTextPrimary"
                     android:textColorHint="@color/colorTextTertiary"
                     android:textSize="15sp" />
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- ── API Key 池 ── -->
             <View

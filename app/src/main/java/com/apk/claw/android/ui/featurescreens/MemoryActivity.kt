@@ -66,7 +66,7 @@ fun MemoryScreen(onBack: () -> Unit) {
             LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(vertical = 6.dp)) {
                 item {
                     Text(stringResource(R.string.memory_count_info, items.size),
-                        color = FMuted, fontSize = 11.sp, modifier = Modifier.padding(start = 16.dp, bottom = 4.dp))
+                        color = FMuted, fontSize = 12.sp, modifier = Modifier.padding(start = 16.dp, bottom = 4.dp))
                 }
                 items(items, key = { it.id }) { m ->
                     FCard {
@@ -86,7 +86,10 @@ fun MemoryScreen(onBack: () -> Unit) {
                         Spacer(Modifier.height(6.dp))
                         Text(m.content, color = FText, fontSize = 14.sp, lineHeight = 19.sp)
                         Spacer(Modifier.height(4.dp))
-                        Text(stringResource(R.string.memory_source_reference_count, m.source, m.referenceCount), color = FMuted, fontSize = 10.sp)
+                        Text(
+                            stringResource(R.string.memory_source_reference_count, m.source, m.referenceCount),
+                            color = FMuted, fontSize = 12.sp,
+                        )
                     }
                 }
             }

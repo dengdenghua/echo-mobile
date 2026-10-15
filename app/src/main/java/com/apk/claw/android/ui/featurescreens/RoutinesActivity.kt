@@ -123,7 +123,7 @@ private fun SummaryMetric(label: String, value: String, tint: Color, modifier: M
             .padding(vertical = OctopusSpacing.sm),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(label, color = FMuted, fontSize = 10.sp, maxLines = 1)
+        Text(label, color = FMuted, fontSize = 12.sp, maxLines = 1)
         Text(value, color = tint, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }

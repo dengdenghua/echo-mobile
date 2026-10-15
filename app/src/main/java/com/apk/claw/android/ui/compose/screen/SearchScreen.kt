@@ -26,7 +26,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -54,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.formatCompactCount
+import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusIconSize
@@ -170,12 +171,7 @@ private fun SearchResults(q: String, onOpenPost: (String) -> Unit) {
         }
     }
     when (state) {
-        SearchUiState.Loading -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(color = OctopusColors.Primary)
-        }
+        SearchUiState.Loading -> EchoLoadingPanel(Modifier.fillMaxSize())
         SearchUiState.Failed -> EmptyState(text = stringResource(R.string.square_search_failed))
         is SearchUiState.Success -> {
             val posts = (state as SearchUiState.Success).posts
@@ -296,8 +292,4 @@ private fun SearchPostCard(post: AgentPost, onClick: () -> Unit) {
     }
 }
 
-private fun formatCount(n: Int): String = when {
-    n >= 10000 -> String.format(java.util.Locale.US, "%.1fw", n / 10000.0)
-    n >= 1000 -> String.format(java.util.Locale.US, "%.1fk", n / 1000.0)
-    else -> n.toString()
-}
+private fun formatCount(n: Int): String = formatCompactCount(n)
