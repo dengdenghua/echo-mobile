@@ -1909,7 +1909,7 @@
     <string name="personas_new_title">キャラクターカードを作成</string>
     <string name="personas_edit_title">キャラクターカードを編集</string>
     <string name="personas_field_name">名前</string>
-    <string name="personas_field_avatar">アバター（絵文字または 1 文字）</string>
+    <string name="personas_field_avatar">モノグラム（空欄なら名前の頭文字）</string>
     <string name="personas_field_prompt">人格設定（systemPrompt）</string>
     <string name="personas_field_greeting">あいさつ（新しいチャットの最初のメッセージ）</string>
     <string name="personas_field_style">話し方のヒント（styleHint）</string>

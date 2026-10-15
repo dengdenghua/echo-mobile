@@ -29,8 +29,19 @@ internal object DotRoster {
         DotMember("aoi", "Zero", "零", "学术与深度研究", "Academic research", R.drawable.dot_zero),
         DotMember("admin", "Leon", "莱昂", "系统与小队管理", "System & squad", R.drawable.dot_leon),
     )
-    var activeCharacter by mutableStateOf(KVUtils.getString(CHARACTER_KEY, "general"))
+    var activeCharacter by mutableStateOf(KVUtils.getString(CHARACTER_KEY, defaultCharacter()))
         private set
+
+    /**
+     * A fresh install opens on Echo, the phone's own assistant. Someone who already chatted with Eve while she
+     * was the default (sessions saved under her id) keeps opening on Eve.
+     */
+    private fun defaultCharacter(): String =
+        if (SessionStore.index().any { it.charKey() == LEGACY_DEFAULT }) LEGACY_DEFAULT
+        else SessionStore.CHARACTER_DEFAULT
+
+    /** Eve's id: the default character before Echo. */
+    private const val LEGACY_DEFAULT = "general"
     fun find(id: String): DotMember? = members.firstOrNull { it.agentId == id }
     fun select(id: String) {
         activeCharacter = id

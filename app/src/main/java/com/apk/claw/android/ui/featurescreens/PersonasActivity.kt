@@ -42,6 +42,7 @@ import com.apk.claw.android.octopus_mobile.persona.Persona
 import com.apk.claw.android.octopus_mobile.persona.PersonaPromptBuilder
 import com.apk.claw.android.octopus_mobile.persona.PersonaStore
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
+import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
 import com.apk.claw.android.ui.compose.theme.EchoFieldColors
 import com.apk.claw.android.ui.compose.component.PersonaAvatar
@@ -169,7 +170,7 @@ private fun PersonasScreen(onBack: () -> Unit) {
     if (adding) {
         PersonaEditorDialog(
             initial = Persona(
-                id = "", name = "", avatar = "🤖",
+                id = "", name = "", avatar = "",
                 systemPrompt = "", greeting = "", styleHint = "",
                 isBuiltin = false, createdAt = System.currentTimeMillis(),
             ),
@@ -183,6 +184,14 @@ private fun PersonasScreen(onBack: () -> Unit) {
     }
 }
 
+private const val ACTIVE_BORDER_ALPHA = .5f
+
+/** Four buttons share a card row (user cards add Delete): tight padding keeps each label on one line. */
+private val CardButtonPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
+
+/** The first character (code point) of [s], or "" — a monogram is one letter. */
+private fun firstCodePoint(s: String): String = if (s.isEmpty()) "" else s.substring(0, s.offsetByCodePoints(0, 1))
+
 @Composable
 private fun PersonaCard(
     persona: Persona,
@@ -192,29 +201,19 @@ private fun PersonaCard(
     onDelete: () -> Unit,
     onExport: () -> Unit,
 ) {
+    // 使用中的卡 = core 描边 + core 徽标(core 只做选中标记),底色与其他卡相同
     Surface(
         shape = OctopusShape.large,
-        color = if (isActive) FPrimary.copy(alpha = 0.08f) else OctopusBackground.cardSurface,
+        color = OctopusBackground.cardSurface,
         border = androidx.compose.foundation.BorderStroke(
-            1.dp, if (isActive) FPrimary.copy(alpha = 0.5f) else OctopusBackground.cardBorder,
+            1.dp,
+            if (isActive) OctopusColors.Accent.copy(alpha = ACTIVE_BORDER_ALPHA) else OctopusBackground.cardBorder,
         ),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (persona.avatar.isBlank()) {
-                    PersonaAvatar(persona, 44.dp)
-                } else {
-                    Surface(
-                        shape = CircleShape,
-                        color = FPrimary.copy(alpha = 0.15f),
-                        modifier = Modifier.size(44.dp),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(persona.avatar, fontSize = 22.sp)
-                        }
-                    }
-                }
+                PersonaAvatar(persona, 44.dp)
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -225,12 +224,12 @@ private fun PersonaCard(
                         }
                         if (isActive) {
                             Spacer(Modifier.width(6.dp))
-                            FPill(stringResource(R.string.personas_active_badge), FPrimary)
+                            FPill(stringResource(R.string.personas_active_badge), OctopusColors.Accent)
                         }
                     }
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        persona.systemPrompt.take(60) + if (persona.systemPrompt.length > 60) "…" else "",
+                        persona.systemPrompt,
                         color = FSub, fontSize = 12.sp, maxLines = 2,
                         overflow = TextOverflow.Ellipsis, lineHeight = 16.sp,
                     )
@@ -239,21 +238,28 @@ private fun PersonaCard(
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 if (!isActive) {
-                    FilledTonalButton(onClick = onActivate, modifier = Modifier.weight(1f)) {
+                    FilledTonalButton(
+                        onClick = onActivate,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = CardButtonPadding,
+                    ) {
                         Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.personas_activate), fontSize = 12.sp)
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.personas_activate), fontSize = 12.sp, maxLines = 1)
                     }
                 }
-                TextButton(onClick = onEdit, modifier = Modifier.weight(1f)) {
+                TextButton(onClick = onEdit, modifier = Modifier.weight(1f), contentPadding = CardButtonPadding) {
                     Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.personas_edit), fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.personas_edit), fontSize = 12.sp, maxLines = 1)
                 }
-                TextButton(onClick = onExport, modifier = Modifier.weight(1f)) {
+                TextButton(onClick = onExport, modifier = Modifier.weight(1f), contentPadding = CardButtonPadding) {
                     Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.personas_export), fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.personas_export), fontSize = 12.sp, maxLines = 1)
                 }
                 if (!persona.isBuiltin) {
-                    TextButton(onClick = onDelete, modifier = Modifier.weight(1f)) {
+                    TextButton(onClick = onDelete, modifier = Modifier.weight(1f), contentPadding = CardButtonPadding) {
                         // Delete is destructive: breach, not warning amber.
                         Icon(
                             Icons.Filled.Delete, contentDescription = null,
@@ -287,7 +293,8 @@ private fun PersonaEditorDialog(
                 if (name.isNotBlank()) {
                     onSave(initial.copy(
                         name = name.trim(),
-                        avatar = avatar.trim().ifEmpty { if (initial.id == PersonaStore.ECHO_ID) "" else "🤖" }.take(2),
+                        // 头像字:只留一个字(按码点),emoji 会被 Persona.monogram() 跳过
+                        avatar = firstCodePoint(avatar.trim()),
                         systemPrompt = systemPrompt.trim(),
                         greeting = greeting.trim(),
                         styleHint = styleHint.trim(),

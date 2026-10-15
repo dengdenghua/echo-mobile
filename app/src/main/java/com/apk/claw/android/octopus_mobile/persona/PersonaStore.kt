@@ -1,6 +1,8 @@
 package com.apk.claw.android.octopus_mobile.persona
 
 import android.content.Context
+import androidx.annotation.StringRes
+import com.apk.claw.android.R
 import com.apk.claw.android.utils.KVUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,7 +19,10 @@ data class Persona(
     val id: String,
     /** 角色名（如"Echo"/"傲娇助手"） */
     val name: String,
-    /** 头像 emoji 或 URL；空串表示用 ECHO 标志（内置 Echo 角色） */
+    /**
+     * 头像字：一个字母或汉字，画在头像方块上（见 [monogram]）。空串用名字的第一个字。
+     * 旧版本存的是 emoji；emoji 不再画出来（BRAND.md：不用 emoji 当图标）。
+     */
     val avatar: String,
     /** 人设描述：性格、说话风格、背景故事 */
     val systemPrompt: String,
@@ -41,14 +46,25 @@ data class Persona(
         put("createdAt", createdAt)
     }
 
-    /** 列表、消息前缀里用的「头像 + 名字」；没有 emoji 头像（Echo）时只显示名字。 */
-    fun label(): String = if (avatar.isBlank()) name else "$avatar $name"
+    /** 列表、消息前缀里用的称呼。头像不再是 emoji，所以就是名字。 */
+    fun label(): String = name
+
+    /**
+     * 头像方块上的字：[avatar] 里的第一个字母或汉字（用户可以自己挑），否则名字的第一个字，大写。
+     * emoji 和符号会被跳过，所以旧的 emoji 头像会落到名字首字上。
+     */
+    fun monogram(): String = (avatar.firstLetterOrDigit() ?: name.firstLetterOrDigit() ?: "?").uppercase()
+
+    /** 名字、人设、开场白、风格是否与 [other] 一致（判断内置角色有没有被用户改过）。 */
+    internal fun sameText(other: Persona): Boolean =
+        name == other.name && systemPrompt == other.systemPrompt &&
+            greeting == other.greeting && styleHint == other.styleHint
 
     companion object {
         fun fromJson(json: JSONObject): Persona = Persona(
             id = json.optString("id", UUID.randomUUID().toString()),
             name = json.optString("name", "未命名"),
-            avatar = json.optString("avatar", "🤖"),
+            avatar = json.optString("avatar", ""),
             systemPrompt = json.optString("systemPrompt", ""),
             greeting = json.optString("greeting", ""),
             styleHint = json.optString("styleHint", ""),
@@ -56,6 +72,17 @@ data class Persona(
             createdAt = json.optLong("createdAt", System.currentTimeMillis()),
         )
     }
+}
+
+/** 第一个字母、数字或汉字（按码点走，emoji 不算）。 */
+private fun String.firstLetterOrDigit(): String? {
+    var i = 0
+    while (i < length) {
+        val cp = codePointAt(i)
+        if (Character.isLetterOrDigit(cp)) return String(Character.toChars(cp))
+        i += Character.charCount(cp)
+    }
+    return null
 }
 
 /*
@@ -80,16 +107,39 @@ internal fun migrateLegacyPersona(p: Persona): Persona {
 }
 
 /**
- * 角色卡管理：CRUD + 导入导出 + 持久化（KVUtils）。
+ * 一张存储里的内置角色卡是否还是默认文案（跟随应用语言）。
+ *
+ * - 新版本存卡时写 `followsDefault`，有就以它为准。
+ * - 旧版本存的卡没有这个字段：与旧版本写入的中文原文 [legacy] 一致，就当没改过。
+ * - 其余情况（用户改过名字、人设、开场白或风格）原样保留，不再跟随语言。
  */
+internal fun followsBuiltinDefault(stored: Persona, legacy: Persona?, flag: Boolean?): Boolean = when {
+    !stored.isBuiltin -> false
+    flag != null -> flag
+    else -> legacy != null && stored.sameText(legacy)
+}
+
+/**
+ * 角色卡管理：CRUD + 导入导出 + 持久化（KVUtils）。
+ *
+ * 内置角色（Echo、傲娇助手、专业顾问）的文案在 `strings_personas.xml` 里，六种语言都有；
+ * 用户没改过的内置卡按当前应用语言显示，也按当前语言注入给 Agent。
+ */
+@Suppress("TooManyFunctions")
 object PersonaStore {
     private const val KEY_LIST = "persona_list_v1"
     private const val KEY_ACTIVE = "persona_active_v1"
+    private const val KEY_FOLLOWS_DEFAULT = "followsDefault"
 
     /** 内置 Echo 角色的 id。沿用旧 id，老用户的激活角色与独立历史不丢。 */
     const val ECHO_ID = "builtin-octo"
+    const val TSUNDERE_ID = "builtin-tsundere"
+    const val PRO_ID = "builtin-pro"
 
-    /** 内置 Echo 角色：应用自己的人设。头像为空串，界面上画 ECHO 标志。 */
+    /**
+     * 内置 Echo 角色的中文原文（旧版本写进存储的就是这段，用来识别未改动的卡）。
+     * 界面和 Agent 用的是 [list] 返回的、按当前语言本地化后的版本。头像为空串，界面上画 ECHO 标志。
+     */
     val ECHO = Persona(
         id = ECHO_ID,
         name = "Echo",
@@ -102,30 +152,68 @@ object PersonaStore {
         createdAt = 0,
     )
 
-    /** 内置角色（首次启动时自动注入） */
+    /** 内置角色（首次启动时自动注入）。这里是旧版本存储里的中文原文；显示时换成当前语言。 */
     private val BUILTIN = listOf(
         ECHO,
         Persona(
-            id = "builtin-tsundere",
+            id = TSUNDERE_ID,
             name = "傲娇助手",
             avatar = "😺",
-            systemPrompt = "你是一个傲娇的 AI 助手。嘴上不饶人，但每次都会把事情做好。说话带点小脾气，但内心关心用户。常用'哼'、'才不是'、'笨蛋'等口头禅，但不会真的拒绝用户的要求。",
+            systemPrompt = "你是一个傲娇的 AI 助手。嘴上不饶人，但每次都会把事情做好。说话带点小脾气，但内心关心用户。" +
+                "常用'哼'、'才不是'、'笨蛋'等口头禅，但不会真的拒绝用户的要求。",
             greeting = "哼，又有事找我？说吧，本小姐勉强听一下。",
             styleHint = "傲娇语气，嘴硬心软。",
             isBuiltin = true,
             createdAt = 0,
         ),
         Persona(
-            id = "builtin-pro",
+            id = PRO_ID,
             name = "专业顾问",
             avatar = "🎯",
-            systemPrompt = "你是一位严谨的专业顾问。回答基于事实，不编造，不确定时明确说明。给出建议时列出优缺点，必要时引用来源。语言正式、结构清晰、逻辑严密。",
+            systemPrompt = "你是一位严谨的专业顾问。回答基于事实，不编造，不确定时明确说明。给出建议时列出优缺点，" +
+                "必要时引用来源。语言正式、结构清晰、逻辑严密。",
             greeting = "您好，请描述您的问题，我会给出专业分析。",
             styleHint = "正式、结构化、基于事实。",
             isBuiltin = true,
             createdAt = 0,
         ),
     )
+
+    /** 内置角色在当前语言下的文案。 */
+    private class BuiltinText(
+        @StringRes val name: Int,
+        @StringRes val prompt: Int,
+        @StringRes val greeting: Int,
+        @StringRes val style: Int,
+    )
+
+    private val BUILTIN_TEXT = mapOf(
+        ECHO_ID to BuiltinText(
+            R.string.persona_echo_name, R.string.persona_echo_prompt,
+            R.string.persona_echo_greeting, R.string.persona_echo_style,
+        ),
+        TSUNDERE_ID to BuiltinText(
+            R.string.persona_tsundere_name, R.string.persona_tsundere_prompt,
+            R.string.persona_tsundere_greeting, R.string.persona_tsundere_style,
+        ),
+        PRO_ID to BuiltinText(
+            R.string.persona_pro_name, R.string.persona_pro_prompt,
+            R.string.persona_pro_greeting, R.string.persona_pro_style,
+        ),
+    )
+
+    /** 内置角色 [id] 在当前应用语言下的默认卡；不是内置角色返回 null。 */
+    fun builtinDefault(context: Context, id: String): Persona? {
+        val legacy = BUILTIN.firstOrNull { it.id == id }
+        val text = BUILTIN_TEXT[id]
+        return if (legacy == null || text == null) legacy else legacy.copy(
+            name = context.getString(text.name),
+            avatar = "",
+            systemPrompt = context.getString(text.prompt),
+            greeting = context.getString(text.greeting),
+            styleHint = context.getString(text.style),
+        )
+    }
 
     /**
      * 独立对话历史：每个 Persona 维护自己的最近 N 条对话记录。
@@ -184,61 +272,77 @@ object PersonaStore {
         fun clearAll(context: Context, personaId: String) = clear(context, personaId)
     }
 
-    private var cache: MutableList<Persona>? = null
+    /** 存储里的一张卡；[followsDefault] 为 true 的内置卡读取时换成当前语言的默认文案。 */
+    private class Stored(val persona: Persona, val followsDefault: Boolean)
 
-    fun list(context: Context): List<Persona> {
-        cache?.let { return it.toList() }
+    private var cache: MutableList<Stored>? = null
+
+    private fun stored(): MutableList<Stored> {
+        cache?.let { return it }
         val raw = KVUtils.getString(KEY_LIST, "") ?: ""
+        val fresh = { BUILTIN.map { Stored(it, followsDefault = true) }.toMutableList() }
         val list = if (raw.isEmpty()) {
-            BUILTIN.toMutableList()
+            fresh()
         } else {
             try {
                 val arr = JSONArray(raw)
                 val loaded = (0 until arr.length()).map {
-                    migrateLegacyPersona(Persona.fromJson(arr.getJSONObject(it)))
+                    val json = arr.getJSONObject(it)
+                    val p = migrateLegacyPersona(Persona.fromJson(json))
+                    val flag = if (json.has(KEY_FOLLOWS_DEFAULT)) json.optBoolean(KEY_FOLLOWS_DEFAULT) else null
+                    Stored(p, followsBuiltinDefault(p, BUILTIN.firstOrNull { b -> b.id == p.id }, flag))
                 }
                 // 确保内置角色存在（升级时新增的内置角色会被补齐）
-                val missing = BUILTIN.filter { b -> loaded.none { it.id == b.id } }
-                (loaded + missing).toMutableList()
+                val missing = BUILTIN.filter { b -> loaded.none { it.persona.id == b.id } }
+                (loaded + missing.map { Stored(it, followsDefault = true) }).toMutableList()
             } catch (_: Throwable) {
-                BUILTIN.toMutableList()
+                fresh()
             }
         }
         cache = list
-        return list.toList()
+        return list
     }
+
+    private fun shown(context: Context, s: Stored): Persona =
+        if (s.followsDefault) builtinDefault(context, s.persona.id) ?: s.persona else s.persona
+
+    fun list(context: Context): List<Persona> = stored().map { shown(context, it) }
 
     fun get(context: Context, id: String): Persona? = list(context).firstOrNull { it.id == id }
 
     fun save(context: Context, persona: Persona): Persona {
-        val list = list(context).toMutableList()
-        val idx = list.indexOfFirst { it.id == persona.id }
+        val list = stored()
+        val idx = list.indexOfFirst { it.persona.id == persona.id }
         val saved = if (persona.id.isBlank() || idx < 0) {
             persona.copy(id = persona.id.ifBlank { UUID.randomUUID().toString() }, createdAt = System.currentTimeMillis())
         } else {
             // 不允许覆盖内置角色的 isBuiltin
-            if (list[idx].isBuiltin) persona.copy(isBuiltin = true) else persona
+            if (list[idx].persona.isBuiltin) persona.copy(isBuiltin = true) else persona
         }
-        if (idx >= 0) list[idx] = saved else list.add(saved)
-        persist(context, list)
+        // 内置卡原样保存（没改文案）时继续跟随应用语言
+        val follows = saved.isBuiltin && builtinDefault(context, saved.id)?.sameText(saved) == true
+        val entry = Stored(saved, follows)
+        if (idx >= 0) list[idx] = entry else list.add(entry)
+        persist(list)
         return saved
     }
 
     fun delete(context: Context, id: String): Boolean {
-        val list = list(context).toMutableList()
-        val target = list.firstOrNull { it.id == id } ?: return false
-        if (target.isBuiltin) return false // 内置不可删
-        list.removeAll { it.id == id }
-        persist(context, list)
+        val list = stored()
+        val target = list.firstOrNull { it.persona.id == id } ?: return false
+        if (target.persona.isBuiltin) return false // 内置不可删
+        list.removeAll { it.persona.id == id }
+        persist(list)
         if (getActive(context) == id) setActive(context, null)
         // 清理该角色的独立对话历史
         History.clear(context, id)
         return true
     }
 
+    /** 当前激活的角色 id。从没选过（全新安装）或清除后，默认是 Echo。 */
     fun getActive(context: Context): String? {
         val v = KVUtils.getString(KEY_ACTIVE, "")
-        return v.ifEmpty { null }
+        return v.ifEmpty { ECHO_ID }
     }
 
     fun setActive(context: Context, id: String?) {
@@ -299,9 +403,10 @@ object PersonaStore {
         }
     }
 
+    /** 当前激活的角色；激活的卡被删掉或找不到时回到 Echo。 */
     fun getActivePersona(context: Context): Persona? {
-        val id = getActive(context) ?: return null
-        return get(context, id)
+        val id = getActive(context) ?: ECHO_ID
+        return get(context, id) ?: get(context, ECHO_ID)
     }
 
     /** 导出为 JSON 字符串（可分享/导入） */
@@ -319,9 +424,13 @@ object PersonaStore {
         }
     }
 
-    private fun persist(context: Context, list: List<Persona>) {
+    private fun persist(list: List<Stored>) {
         val arr = JSONArray()
-        list.forEach { arr.put(it.toJson()) }
+        list.forEach { s ->
+            val json = s.persona.toJson()
+            if (s.persona.isBuiltin) json.put(KEY_FOLLOWS_DEFAULT, s.followsDefault)
+            arr.put(json)
+        }
         KVUtils.putString(KEY_LIST, arr.toString())
         cache = list.toMutableList()
     }

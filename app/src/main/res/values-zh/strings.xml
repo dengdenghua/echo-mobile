@@ -1901,7 +1901,7 @@
     <string name="personas_new_title">新建角色卡</string>
     <string name="personas_edit_title">编辑角色卡</string>
     <string name="personas_field_name">名字</string>
-    <string name="personas_field_avatar">头像（emoji 或单个字符）</string>
+    <string name="personas_field_avatar">头像字（留空用名字首字）</string>
     <string name="personas_field_prompt">人设描述（systemPrompt）</string>
     <string name="personas_field_greeting">开场白（新对话的第一条消息）</string>
     <string name="personas_field_style">说话风格提示（styleHint）</string>

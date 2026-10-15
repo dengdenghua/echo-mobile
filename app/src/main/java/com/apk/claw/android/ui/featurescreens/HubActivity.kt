@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.apk.claw.android.R
 import com.apk.claw.android.ui.compose.screen.DotMember
 import com.apk.claw.android.ui.compose.screen.DotRoster
+import com.apk.claw.android.ui.compose.screen.SessionStore
 import com.apk.claw.android.ui.compose.screen.dotSpecialty
 import com.apk.claw.android.ui.compose.theme.OctopusBackground
 import com.apk.claw.android.ui.compose.theme.OctopusColors
@@ -141,6 +143,13 @@ private fun ColumnScope.HubAgents(onChatWith: (String) -> Unit) {
     val ctx = LocalContext.current
     val active = DotRoster.activeCharacter
     LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(bottom = 16.dp)) {
+        // Echo:手机自己的默认助手,在这台手机上执行;全新安装时就是它
+        item { FSectionTitle(stringResource(R.string.persona_echo_name)) }
+        item {
+            HubEchoRow(selected = active == SessionStore.CHARACTER_DEFAULT) {
+                onChatWith(SessionStore.CHARACTER_DEFAULT)
+            }
+        }
         item { FSectionTitle(stringResource(R.string.dot_header)) }
         items(DotRoster.members, key = { it.agentId }) { member ->
             HubDotRow(member, selected = member.agentId == active) { onChatWith(member.agentId) }
@@ -204,6 +213,56 @@ private fun HubDotRow(member: DotMember, selected: Boolean, onClick: () -> Unit)
 
 private const val SELECTED_BORDER_ALPHA = .5f
 
+/** The Echo row: the ECHO mark on its graphite tile, "Echo", and what it does. */
+@Composable
+private fun HubEchoRow(selected: Boolean, onClick: () -> Unit) {
+    val name = stringResource(R.string.persona_echo_name)
+    Surface(
+        onClick = onClick,
+        shape = OctopusShape.large,
+        color = if (selected) OctopusColors.ContainerHigh else OctopusBackground.cardSurface,
+        border = BorderStroke(
+            1.dp,
+            if (selected) OctopusColors.Accent.copy(alpha = SELECTED_BORDER_ALPHA) else OctopusBackground.cardBorder,
+        ),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    ) {
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painterResource(R.drawable.ic_echo_foreground),
+                contentDescription = null,
+                modifier = Modifier.size(44.dp).clip(CircleShape)
+                    .background(colorResource(R.color.echo_icon_background)),
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(name, color = FText, fontSize = OctopusType.bodyStrong, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.hub_echo_desc),
+                    color = FMuted,
+                    fontSize = OctopusType.caption,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (selected) {
+                Icon(
+                    Icons.Filled.Check,
+                    stringResource(R.string.dot_selected),
+                    tint = OctopusColors.Accent,
+                    modifier = Modifier.size(18.dp),
+                )
+            } else {
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    stringResource(R.string.dot_chat_with, name),
+                    tint = FMuted,
+                )
+            }
+        }
+    }
+}
+
 /** 去广场挑选更多应用的入口按钮(顶栏右侧)。 */
 @Composable
 internal fun MiniAppMarketAction() {
@@ -211,7 +270,7 @@ internal fun MiniAppMarketAction() {
     IconButton(onClick = {
         ctx.startActivity(android.content.Intent(ctx, MiniAppMarketplaceActivity::class.java))
     }) {
-        Icon(Icons.Filled.Public, contentDescription = "浏览广场小程序", tint = FText)
+        Icon(Icons.Filled.Public, contentDescription = stringResource(R.string.hub_browse_square_apps), tint = FText)
     }
 }
 

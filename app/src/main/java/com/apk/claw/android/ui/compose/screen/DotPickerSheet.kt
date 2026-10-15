@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apk.claw.android.R
+import com.apk.claw.android.ui.compose.component.EchoProgressLine
+import com.apk.claw.android.ui.compose.component.EchoProgressLineInlineWidth
+import com.apk.claw.android.ui.compose.component.EchoSheetSystemBars
 import com.apk.claw.android.ui.compose.theme.EchoChatStyle as Style
 import com.apk.claw.android.ui.compose.theme.OctopusColors
 import com.apk.claw.android.ui.compose.theme.OctopusShape
@@ -54,6 +58,7 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
         } finally { loading = false }
     }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Style.background, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    EchoSheetSystemBars()
     Column(Modifier.fillMaxWidth().height((androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * .82f).dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -99,13 +104,20 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
                 }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
+                // Echo 不是 Dot 成员,但要能从这里回到它(全新安装默认就是 Echo)
+                EchoChoiceRow(active = DotRoster.activeCharacter == SessionStore.CHARACTER_DEFAULT) {
+                    DotRoster.select(SessionStore.CHARACTER_DEFAULT); onOpenChat(SessionStore.CHARACTER_DEFAULT)
+                }
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.dot_members), color = Style.text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                     Text(stringResource(R.string.dot_member_count, DotRoster.members.size), color = Style.muted, fontSize = 12.sp)
                 }
             }
             items(DotRoster.members, key = { it.agentId }) { member ->
-                val active = selected.agentId == member.agentId
+                // 只有真正在用的成员打勾;当前是 Echo 时,成员里没有一个是选中的
+                val active = DotRoster.activeCharacter == member.agentId
                 Surface(
                     onClick = { DotRoster.select(member.agentId) }, shape = OctopusShape.large,
                     color = if (active) Style.accentSurface else Style.surface,
@@ -118,15 +130,18 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
                             if (active) Icon(Icons.Filled.Check, stringResource(R.string.dot_selected), Modifier.size(18.dp), tint = Style.accent)
                         }
                         Text(member.name, color = Style.text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                        Text(dotSpecialty(member), color = Style.muted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (installed?.contains(member.agentId) == false) Text(stringResource(R.string.dot_not_installed), color = Style.muted, fontSize = 10.sp)
+                        Text(dotSpecialty(member), color = Style.muted, fontSize = 12.sp, maxLines = 1,
+                            overflow = TextOverflow.Ellipsis)
+                        if (installed?.contains(member.agentId) == false) {
+                            Text(stringResource(R.string.dot_not_installed), color = Style.muted, fontSize = 12.sp)
+                        }
                     }
                 }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Surface(onClick = { if (connectionIssue != null) showConnection = true else refresh++ }, shape = OctopusShape.large, color = Style.softSurface) {
                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        if (loading) CircularProgressIndicator(Modifier.size(16.dp), color = Style.accent, strokeWidth = 2.dp)
+                        if (loading) EchoProgressLine(Modifier.width(EchoProgressLineInlineWidth))
                         else Icon(if (connectionIssue != null) Icons.Filled.Link else Icons.Filled.Refresh, null, Modifier.size(16.dp), tint = Style.muted)
                         Text(stringResource(if (loading) R.string.dot_connecting else connectionIssue ?: R.string.dot_connected), color = Style.muted, fontSize = 12.sp)
                     }
@@ -136,6 +151,30 @@ internal fun DotPickerSheet(onDismiss: () -> Unit, onOpenChat: (String) -> Unit)
     }
     }
     if (showConnection) DotConnectionDialog(environment, onDismiss = { showConnection = false }, onSaved = { showConnection = false; refresh++ })
+}
+
+/** "Echo · Default assistant": the way back to the phone's own assistant from the Dot squad. */
+@Composable
+private fun EchoChoiceRow(active: Boolean, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick, shape = OctopusShape.large,
+        color = if (active) Style.accentSurface else Style.surface,
+        border = BorderStroke(1.dp, if (active) Style.accent.copy(alpha = .5f) else Style.border),
+    ) {
+        Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Image(painterResource(R.drawable.ic_echo_foreground), null,
+                Modifier.size(44.dp).clip(CircleShape).background(colorResource(R.color.echo_icon_background)))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.persona_echo_name), color = Style.text, fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.hub_echo_desc), color = Style.muted, fontSize = 12.sp,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            if (active) Icon(Icons.Filled.Check, stringResource(R.string.dot_selected), Modifier.size(18.dp), tint = Style.accent)
+            else Text(stringResource(R.string.dot_echo_choose), color = Style.muted, fontSize = 13.sp)
+        }
+    }
 }
 
 @Composable

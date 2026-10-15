@@ -45,7 +45,7 @@ class PersonaTest {
         val minimal = JSONObject().put("name", "x")
         val p = Persona.fromJson(minimal)
         assertEquals("x", p.name)
-        assertEquals("🤖", p.avatar) // default
+        assertEquals("", p.avatar) // default: no avatar letter, the monogram uses the name
         assertFalse(p.isBuiltin)
     }
 
@@ -104,7 +104,33 @@ class PersonaTest {
         assertTrue(echo.systemPrompt.startsWith("你是 Echo"))
         assertFalse(echo.systemPrompt.contains("Octo"))
         assertEquals("Echo", echo.label())
-        assertEquals("🤖 测试助手", samplePersona().label())
+        // 头像不再是 emoji,称呼就是名字
+        assertEquals("测试助手", samplePersona().label())
+    }
+
+    @Test
+    fun `the monogram skips emoji and uses the picked letter or the name`() {
+        assertEquals("测", samplePersona().monogram()) // 🤖 is not a letter
+        assertEquals("K", samplePersona().copy(avatar = "k").monogram())
+        assertEquals("A", samplePersona().copy(name = "  ada", avatar = "").monogram())
+        assertEquals("?", samplePersona().copy(name = "🙂", avatar = "🙂").monogram())
+    }
+
+    @Test
+    fun `an untouched builtin card follows the app language, an edited one does not`() {
+        val legacy = Persona(
+            id = PersonaStore.PRO_ID, name = "专业顾问", avatar = "🎯",
+            systemPrompt = "严谨", greeting = "您好", styleHint = "正式",
+            isBuiltin = true, createdAt = 0,
+        )
+        // 旧版本存的卡没有 followsDefault:与旧原文一致就跟随语言
+        assertTrue(followsBuiltinDefault(legacy, legacy, flag = null))
+        assertFalse(followsBuiltinDefault(legacy.copy(name = "我的顾问"), legacy, flag = null))
+        // 新版本写下的标记优先
+        assertFalse(followsBuiltinDefault(legacy, legacy, flag = false))
+        assertTrue(followsBuiltinDefault(legacy.copy(greeting = "你好"), legacy, flag = true))
+        // 用户自己的卡永远原样保留
+        assertFalse(followsBuiltinDefault(samplePersona(), null, flag = true))
     }
 
     @Test

@@ -1904,7 +1904,7 @@
     <string name="personas_new_title">Novo cartão de personagem</string>
     <string name="personas_edit_title">Editar cartão de personagem</string>
     <string name="personas_field_name">Nome</string>
-    <string name="personas_field_avatar">Avatar (um emoji ou um caractere)</string>
+    <string name="personas_field_avatar">Monograma (vazio: inicial do nome)</string>
     <string name="personas_field_prompt">Persona (system prompt)</string>
     <string name="personas_field_greeting">Saudação (primeira mensagem de um novo chat)</string>
     <string name="personas_field_style">Dica de estilo de fala</string>

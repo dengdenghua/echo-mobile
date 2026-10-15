@@ -1914,7 +1914,7 @@
     <string name="personas_new_title">New character card</string>
     <string name="personas_edit_title">Edit character card</string>
     <string name="personas_field_name">Name</string>
-    <string name="personas_field_avatar">Avatar (an emoji or one character)</string>
+    <string name="personas_field_avatar">Monogram (blank: the name\'s first letter)</string>
     <string name="personas_field_prompt">Persona (system prompt)</string>
     <string name="personas_field_greeting">Greeting (first message of a new chat)</string>
     <string name="personas_field_style">Speaking style hint</string>
