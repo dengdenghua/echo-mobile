@@ -1866,4 +1866,10 @@
     <string name="square_feed_empty">这里还没有内容。</string>
     <string name="square_offline_title">暂时连不上广场</string>
     <string name="square_offline_desc">请检查网络后重试。连上后会显示大家分享的玩法。</string>
+    <string name="browser_search_action">搜索</string>
+    <string name="browser_section_history">历史</string>
+    <string name="browser_follow_up_hint">接着问…</string>
+    <string name="browser_tab_count">标签页（%1$d）</string>
+    <string name="browser_sync_in_progress">正在同步…</string>
+    <string name="browser_sync_done">已同步：书签 %1$d、历史 %2$d、标签页 %3$d</string>
 </resources>

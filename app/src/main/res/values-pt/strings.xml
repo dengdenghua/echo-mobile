@@ -1869,4 +1869,10 @@
     <string name="square_feed_empty">Ainda não há nada aqui.</string>
     <string name="square_offline_title">Não foi possível acessar a Praça</string>
     <string name="square_offline_desc">Verifique sua conexão e tente novamente. Quando você estiver conectado, as ideias que as pessoas compartilham aparecem aqui.</string>
+    <string name="browser_search_action">Pesquisar</string>
+    <string name="browser_section_history">Histórico</string>
+    <string name="browser_follow_up_hint">Faça outra pergunta…</string>
+    <string name="browser_tab_count">Abas (%1$d)</string>
+    <string name="browser_sync_in_progress">Sincronizando…</string>
+    <string name="browser_sync_done">Sincronizado: favoritos %1$d, histórico %2$d, abas %3$d</string>
 </resources>

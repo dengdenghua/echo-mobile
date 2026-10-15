@@ -1874,4 +1874,10 @@
     <string name="square_feed_empty">まだ何もありません。</string>
     <string name="square_offline_title">広場に接続できません</string>
     <string name="square_offline_desc">ネットワークを確認して、もう一度お試しください。接続すると、みんなが共有したアイデアがここに表示されます。</string>
+    <string name="browser_search_action">検索</string>
+    <string name="browser_section_history">履歴</string>
+    <string name="browser_follow_up_hint">続けて質問…</string>
+    <string name="browser_tab_count">タブ（%1$d）</string>
+    <string name="browser_sync_in_progress">同期中…</string>
+    <string name="browser_sync_done">同期しました：ブックマーク %1$d、履歴 %2$d、タブ %3$d</string>
 </resources>

@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.SpanStyle
@@ -518,13 +519,13 @@ fun BrowserScreen(
                     if (!BrowserSync.isReady()) {
                         SignInPrompt.show(context, AccountFeature.CLOUD_SYNC)
                     } else {
-                        Toast.makeText(context, "正在同步…", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, R.string.browser_sync_in_progress, Toast.LENGTH_SHORT).show()
                         syncScope.launch {
                             val r = BrowserSync.syncAll(context)
                             val msg = if (r.notLoggedIn) {
                                 context.getString(R.string.account_gate_cloud_sync)
                             } else {
-                                "已同步 ${r.bookmarks} 个书签 / ${r.history} 条历史 / ${r.tabs} 个标签"
+                                context.getString(R.string.browser_sync_done, r.bookmarks, r.history, r.tabs)
                             }
                             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         }
@@ -732,28 +733,21 @@ private fun BrowserHomeOverlay(
                 Spacer(Modifier.weight(0.3f))
             }
 
-            // 轻量插画：一个漂浮的圆形+弧形，抽象星球/气泡感，零资源
+            // The ECHO mark, quiet: no glow, no animation. The brand kit has one file per ground, so the mark
+            // follows the in-app theme switch as well as the system one.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp),
+                    .height(160.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Canvas(modifier = Modifier.size(180.dp)) {
-                    drawCircle(
-                        color = OctopusColors.ContainerBase,
-                        radius = 78.dp.toPx(),
-                        center = center,
-                    )
-                    drawArc(
-                        color = OctopusColors.BorderHigh,
-                        startAngle = -30f,
-                        sweepAngle = 120f,
-                        useCenter = false,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 10.dp.toPx()),
-                        size = size,
-                    )
-                }
+                Image(
+                    painter = painterResource(
+                        if (OctopusColors.isLight) R.drawable.ic_echo_mark_core_snow else R.drawable.ic_echo_mark_core,
+                    ),
+                    contentDescription = stringResource(R.string.echo_wordmark_label),
+                    modifier = Modifier.size(56.dp),
+                )
             }
 
             Spacer(Modifier.height(32.dp))
@@ -985,9 +979,10 @@ private fun BrowserSearchOverlay(
             }
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "搜索",
+                text = stringResource(R.string.browser_search_action),
                 fontSize = 16.sp,
-                color = OctopusColors.Accent,
+                // Muted until there is something to search, like any disabled action.
+                color = if (text.isNotBlank()) OctopusColors.Accent else OctopusColors.TextMuted,
                 modifier = Modifier
                     .clickable(enabled = text.trim().isNotEmpty()) { onSubmit(text.trim()) }
                     .padding(horizontal = 6.dp, vertical = 10.dp),
@@ -1004,7 +999,7 @@ private fun BrowserSearchOverlay(
             // 历史记录
             val recent = history.take(8)
             if (recent.isNotEmpty()) {
-                Section("历史")
+                Section(stringResource(R.string.browser_section_history))
                 recent.forEach { entry ->
                     HistoryRow(title = entry.title.ifBlank { entry.url }, subtitle = domainOf(entry.url)) {
                         onOpenUrl(entry.url)
@@ -1015,7 +1010,7 @@ private fun BrowserSearchOverlay(
 
             // 常用网站
             if (commonSites.isNotEmpty()) {
-                Section("常用网站")
+                Section(stringResource(R.string.browser_home_common_sites))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(OctopusSpacing.md),
@@ -1046,26 +1041,29 @@ private fun BrowserSearchOverlay(
     }
 }
 
+/**
+ * A search engine's glyph: its tag letter (no favicon, no network) in ink on a neutral tile. Engines are not
+ * told apart by their own brand colours, since ECHO colour only carries state; the selected engine gets a
+ * core outline.
+ */
 @Composable
-private fun EngineGlyph(engineId: String) {
-    // 用 tag 首字代替 favicon（和 SearchEngine.tag 一致，避免加载网络图标）
-    val engine = remember(engineId) { com.apk.claw.android.octopus_mobile.browser.SearchEngines.byId(engineId) }
-    val color = when (engineId) {
-        "google" -> Color(0xFF4285F4)
-        "bing" -> Color(0xFF008373)
-        "baidu" -> Color(0xFF2932E1)
-        "duckduckgo" -> Color(0xFFDE5833)
-        "perplexity" -> Color(0xFF20B8CD)
-        "kimi" -> Color(0xFF7B61FF)
-        "tongyi" -> Color(0xFF6236FF)
-        else -> Color(0xFF3B82F6)
+private fun EngineGlyph(engineId: String, modifier: Modifier = Modifier, selected: Boolean = false) {
+    val engine = remember(engineId) { SearchEngines.byId(engineId) }
+    Box(
+        modifier = modifier
+            .size(24.dp)
+            .clip(OctopusShape.small)
+            .background(OctopusColors.ContainerHigh)
+            .border(1.dp, if (selected) OctopusColors.Accent else OctopusColors.Border, OctopusShape.small),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = engine.tag,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = OctopusColors.TextPrimary,
+        )
     }
-    Text(
-        text = engine.tag,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
-        color = color,
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1088,7 +1086,7 @@ private fun SearchEngineSheet(
                 .padding(bottom = OctopusSpacing.xxl),
         ) {
             Text(
-                text = "切换搜索引擎",
+                text = stringResource(R.string.browser_engine_chip_description),
                 fontSize = 15.sp,
                 color = OctopusColors.TextMuted,
                 modifier = Modifier.padding(bottom = OctopusSpacing.md),
@@ -1103,7 +1101,7 @@ private fun SearchEngineSheet(
                         .padding(horizontal = OctopusSpacing.sm, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    EngineGlyph(engineId = engine.id)
+                    EngineGlyph(engineId = engine.id, selected = selected)
                     Spacer(Modifier.width(OctopusSpacing.lg))
                     Text(
                         text = engine.label,
@@ -1317,7 +1315,7 @@ private fun BrowserResultOverlay(
                             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                                 if (followText.isEmpty()) {
                                     Text(
-                                        text = "接着问…",
+                                        text = stringResource(R.string.browser_follow_up_hint),
                                         fontSize = 14.sp,
                                         color = OctopusColors.TextMuted,
                                     )
@@ -1387,16 +1385,12 @@ private fun ChatBubble(
         horizontalArrangement = arrangement,
     ) {
         if (!msg.isUser) {
-            Box(
+            EngineGlyph(
+                engineId = engineId,
                 modifier = Modifier
                     .padding(top = 4.dp, end = 8.dp)
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(OctopusColors.SurfaceVariant),
-                contentAlignment = Alignment.Center,
-            ) {
-                EngineGlyph(engineId = engineId)
-            }
+                    .size(28.dp),
+            )
         }
 
         Column(
@@ -1462,17 +1456,18 @@ private fun ChatBubble(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(start = 4.dp),
                 ) {
-                    BubbleAction(icon = Icons.Default.ContentCopy, text = "复制") {
+                    BubbleAction(icon = Icons.Default.ContentCopy, text = stringResource(R.string.cd_copy)) {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("answer", msg.text))
-                        Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.browser_copied), Toast.LENGTH_SHORT).show()
                     }
-                    BubbleAction(icon = Icons.Default.Share, text = "分享") {
+                    BubbleAction(icon = Icons.Default.Share, text = stringResource(R.string.browser_menu_share)) {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_TEXT, msg.text)
                         }
-                        runCatching { context.startActivity(Intent.createChooser(shareIntent, "分享回答")) }
+                        val chooserTitle = context.getString(R.string.browser_share_chooser)
+                        runCatching { context.startActivity(Intent.createChooser(shareIntent, chooserTitle)) }
                     }
                 }
             }
@@ -1491,7 +1486,7 @@ private fun BubbleAction(icon: ImageVector, text: String, onClick: () -> Unit) {
     ) {
         Icon(icon, contentDescription = null, tint = OctopusColors.TextMuted, modifier = Modifier.size(14.dp))
         Spacer(Modifier.width(4.dp))
-        Text(text, fontSize = 11.sp, color = OctopusColors.TextMuted)
+        Text(text, fontSize = 12.sp, color = OctopusColors.TextMuted)
     }
 }
 
@@ -1861,7 +1856,7 @@ private fun BrowserTabsSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "${tabs.size} 个标签",
+                    text = stringResource(R.string.browser_tab_count, tabs.size),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = OctopusColors.TextPrimary,
@@ -1973,7 +1968,7 @@ private fun BrowserAiSheet(
             if (pageText.isNullOrBlank()) {
                 Text(
                     text = stringResource(R.string.browser_accessibility_warning),
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = OctopusColors.Warning,
                     modifier = Modifier.padding(top = OctopusSpacing.sm),
                 )

@@ -1869,4 +1869,10 @@
     <string name="square_feed_empty">Aún no hay nada aquí.</string>
     <string name="square_offline_title">No se puede conectar con la Plaza</string>
     <string name="square_offline_desc">Comprueba tu conexión e inténtalo de nuevo. Cuando te conectes, aquí aparecerán las ideas que comparte la gente.</string>
+    <string name="browser_search_action">Buscar</string>
+    <string name="browser_section_history">Historial</string>
+    <string name="browser_follow_up_hint">Haz otra pregunta…</string>
+    <string name="browser_tab_count">Pestañas (%1$d)</string>
+    <string name="browser_sync_in_progress">Sincronizando…</string>
+    <string name="browser_sync_done">Sincronizado: marcadores %1$d, historial %2$d, pestañas %3$d</string>
 </resources>

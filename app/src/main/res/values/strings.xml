@@ -1879,4 +1879,10 @@
     <string name="square_feed_empty">Nothing here yet.</string>
     <string name="square_offline_title">Can\'t reach the Square</string>
     <string name="square_offline_desc">Check your network and try again. Ideas people share show up here once you\'re connected.</string>
+    <string name="browser_search_action">Search</string>
+    <string name="browser_section_history">History</string>
+    <string name="browser_follow_up_hint">Ask a follow-up…</string>
+    <string name="browser_tab_count">Tabs (%1$d)</string>
+    <string name="browser_sync_in_progress">Syncing…</string>
+    <string name="browser_sync_done">Synced: bookmarks %1$d, history %2$d, tabs %3$d</string>
 </resources>

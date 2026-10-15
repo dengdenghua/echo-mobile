@@ -1868,4 +1868,10 @@
     <string name="square_feed_empty">아직 내용이 없습니다.</string>
     <string name="square_offline_title">광장에 연결할 수 없습니다</string>
     <string name="square_offline_desc">네트워크를 확인한 뒤 다시 시도하세요. 연결되면 사람들이 공유한 아이디어가 여기에 표시됩니다.</string>
+    <string name="browser_search_action">검색</string>
+    <string name="browser_section_history">기록</string>
+    <string name="browser_follow_up_hint">이어서 질문…</string>
+    <string name="browser_tab_count">탭 (%1$d)</string>
+    <string name="browser_sync_in_progress">동기화 중…</string>
+    <string name="browser_sync_done">동기화됨: 북마크 %1$d, 기록 %2$d, 탭 %3$d</string>
 </resources>
