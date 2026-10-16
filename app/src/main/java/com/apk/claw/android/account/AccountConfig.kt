@@ -32,8 +32,11 @@ object AccountConfig {
             KVUtils.putString(KEY_BASE_URL, v.trim())
         }
 
-    /** App 首拉 /config 之前的默认技能中心域名（兜底用，服务端下发后即被覆盖）。 */
-    const val DEFAULT_SQUARE_BASE_URL = "https://club.octoapk.com"
+    /**
+     * App 首拉 /config 之前的默认技能中心域名（兜底用，服务端下发后即被覆盖）。
+     * 与桌面端（ECHO AI / ECHO OS 的广场代理默认值）及广场服务端 /config 下发的地址保持一致。
+     */
+    const val DEFAULT_SQUARE_BASE_URL = "https://ai.echo-age.com"
 
     /**
      * 广场 / 技能中心(skill hub)独立域名。优先级：

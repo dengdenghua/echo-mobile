@@ -982,7 +982,7 @@ private fun formatCount(n: Int): String = formatCompactCount(n)
 /** 帖子分享二维码 Dialog:生成帖子直达链接的 QR。 */
 @Composable
 private fun ShareQrDialog(postId: String, onDismiss: () -> Unit) {
-    val shareUrl = "https://club.octoapk.com/p/$postId"
+    val shareUrl = com.apk.claw.android.account.AccountConfig.squareBaseUrl.trim().trimEnd('/') + "/p/$postId"
     val qrBitmap = remember(shareUrl) { generateQrBitmap(shareUrl, 400) }
     AlertDialog(
         onDismissRequest = onDismiss,

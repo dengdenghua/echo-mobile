@@ -3926,6 +3926,7 @@ async def square_publish(body: dict[str, Any], u: sqlite3.Row = Depends(actor)) 
 def app_config(request: Request) -> dict[str, Any]:
     """App 启动配置(公开)。技能中心(skill hub)子域名由服务端生成：
     默认把请求主域 api.<root> 自动派生为 club.<root>；可用环境变量 SQUARE_BASE_URL 覆盖。
+    没有 Host 时回退到 App 内置的默认广场 https://ai.echo-age.com（与桌面端一致）。
     后台改一处，全网 App 下次进广场即切换，无需发版。"""
     env = (os.environ.get("SQUARE_BASE_URL") or "").strip()
     if env:
@@ -3933,7 +3934,7 @@ def app_config(request: Request) -> dict[str, Any]:
     else:
         host = (request.headers.get("host") or "").split(":")[0]
         root = host[4:] if host.startswith("api.") else host
-        square = f"https://club.{root}" if root else "https://club.octoapk.com"
+        square = f"https://club.{root}" if root else "https://ai.echo-age.com"
     return {"squareBaseUrl": square}
 
 
