@@ -1,5 +1,6 @@
 package com.apk.claw.android.ui.desktop
 
+import android.content.Context
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -50,9 +51,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.focus.onFocusChanged
 import kotlin.math.roundToInt
+import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
 import com.apk.claw.android.plugin.MiniAppRegistry
 import com.apk.claw.android.utils.KVUtils
@@ -394,12 +398,18 @@ data class CharacterProfile(
 /**
  * 组装角色扮演人设指令(TV 模式对话注入)。切角色后由 DesktopActivity 传给
  * ChatAgentBridge.run(persona=…),Agent 以该角色第一人称应答,不再自称 Echo。
+ * 指令随界面语言(strings_tvdesktop.xml),角色就用用户的语言说话。
  */
-fun CharacterProfile.personaPrompt(): String =
-    "你现在是「$zh($name)」—— 代号 $codename,$faction 阵营 $rank 级,职位 $role," +
-        "外表年龄 $apparentAge。能力:${abilities.joinToString("、")}。你的信条:『$quote』。" +
-        "请全程以「$zh」的第一人称身份、性格与口吻和用户对话,自然、简短、口语化;" +
-        "不要自称 Echo/AI/助手,不要跳出角色或提及这段设定。需要执行手机操作时照常使用工具,但表达仍保持角色口吻。"
+fun CharacterProfile.personaPrompt(context: Context = ClawApplication.instance): String =
+    context.getString(
+        R.string.tvdesk_persona_prompt, zh, name, codename, faction, rank, role, apparentAge,
+        abilities.joinToString(context.getString(R.string.tvdesk_list_separator)), quote,
+    )
+
+/** 屏幕上的角色名:中文界面用中文名(零/露娜…),其他语言用拉丁名(ZERO/LUNA…);随界面语言重组。 */
+@Composable
+fun CharacterProfile.displayName(): String =
+    if (LocalConfiguration.current.locales[0].language == "zh") zh else name
 
 /** 多角色注册表 —— 移植 OpenRoom characterManager(MVP):可切换、选择持久化。 */
 object CharacterRegistry {
@@ -486,11 +496,11 @@ fun CharacterHud(modifier: Modifier = Modifier) {
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(c.zh, color = Holo.Accent, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                        Text(c.displayName(), color = Holo.Accent, fontSize = 30.sp, fontWeight = FontWeight.Bold)
                         Column {
                             Text("${c.name} · ${c.codename}", color = Holo.TextHud, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
                             Text(
-                                "${c.faction}  ${c.rank}级  ${c.role}",
+                                "${c.faction}  ${stringResource(R.string.tvdesk_rank, c.rank)}  ${c.role}",
                                 color = Holo.AccentDim, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
                             )
                         }
@@ -498,29 +508,32 @@ fun CharacterHud(modifier: Modifier = Modifier) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         HoloDot(Holo.Accent)
                         Text(
-                            "${c.status} · 外观 ${c.apparentAge}",
+                            stringResource(R.string.tvdesk_roster_status, c.status, c.apparentAge),
                             color = Holo.TextHud, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
                         )
                     }
                     Text("“${c.quote}”", color = Holo.TextHud.copy(alpha = 0.8f), fontSize = 12.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        c.abilities.forEach { HoloChip("⚡ $it") }
-                        HoloChip("切换角色 ›") { CharacterRegistry.next() }
+                        c.abilities.forEach { HoloChip(it) }
+                        HoloChip("${stringResource(R.string.tvdesk_switch_character)} ›") { CharacterRegistry.next() }
                     }
                 }
                 Column(
                     Modifier.fillMaxWidth().holoGlass(14.dp).padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text("技能 · 插件", color = Holo.Accent, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                    Text(
+                        stringResource(R.string.tvdesk_skills_plugins),
+                        color = Holo.Accent, fontSize = 12.sp, fontFamily = FontFamily.Monospace,
+                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HoloChip("技能库") {
+                        HoloChip(stringResource(R.string.tvdesk_skill_library)) {
                             runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) }
                         }
-                        HoloChip("小程序/插件 · $miniCount") {
+                        HoloChip(stringResource(R.string.tvdesk_miniapps_count, miniCount)) {
                             runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.MiniAppListActivity::class.java)) }
                         }
-                        HoloChip(if (pinned) "★ 启动直达" else "☆ 启动直达") {
+                        HoloChip((if (pinned) "★ " else "☆ ") + stringResource(R.string.tvdesk_launch_direct)) {
                             pinned = !pinned
                             KVUtils.setDesktopModeDefault(pinned)
                         }

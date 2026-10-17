@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.appcompat.app.AppCompatActivity
@@ -100,6 +101,7 @@ import com.apk.claw.android.plugin.MiniAppRegistry
 import com.apk.claw.android.ui.compose.screen.AgentSquareScreen
 import com.apk.claw.android.ui.compose.screen.ChatScreen
 import com.apk.claw.android.ui.compose.screen.DiscoverScreen
+import com.apk.claw.android.ui.featurescreens.SkillsActivity
 import com.apk.claw.android.ui.voice.VoiceCallActivity
 import com.apk.claw.android.ui.device.DeviceListActivity
 import com.apk.claw.android.utils.KVUtils
@@ -315,7 +317,7 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
         if (t.isEmpty() || running) return@fn
         convo.add(DeskMsg(seq++, fromUser = true, text = t))
         if (!com.apk.claw.android.ui.compose.screen.ChatAgentBridge.isConfigured()) {
-            convo.add(DeskMsg(seq++, fromUser = false, text = "请先配置模型(顶部「技能」旁或设置 → 模型),再和我对话。"))
+            convo.add(DeskMsg(seq++, fromUser = false, text = ctx.getString(R.string.tvdesk_reply_no_model)))
             persistConvo()
             return@fn
         }
@@ -348,14 +350,16 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
             prompt = t,
             conversationContext = convContext,
             // TV 模式角色扮演:注入当前角色人设,切角色即换人应答(否则永远一口 Octopus 腔)。
-            persona = character.personaPrompt(),
-            onTool = { _, name, _, _ -> toolNote = "· 使用 $name" },
+            persona = character.personaPrompt(ctx),
+            onTool = { _, name, _, _ -> toolNote = ctx.getString(R.string.tvdesk_tool_note, name) },
             onText = { tok -> buf.append(tok); put(buf.toString()) },
             onDone = { ans ->
                 put(ans.ifBlank { buf.toString() }); running = false; toolNote = ""
                 persistConvo()
             },
-            onError = { e -> put("⚠️ $e"); running = false; toolNote = ""; persistConvo() },
+            onError = { e ->
+                put(ctx.getString(R.string.tvdesk_error, e)); running = false; toolNote = ""; persistConvo()
+            },
         )
     }
     val stop = { com.apk.claw.android.ui.compose.screen.ChatAgentBridge.cancel(); running = false; toolNote = "" }
@@ -396,7 +400,7 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                 if (sceneUrl != null) {
                     coil.compose.AsyncImage(
                         model = sceneUrl,
-                        contentDescription = character.zh,
+                        contentDescription = character.displayName(),
                         contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                         modifier = Modifier.matchParentSize(),
                     )
@@ -408,34 +412,39 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                 // ── 数据填充 ── 不 remember:角色切换/新装小程序即时反映(列表小,重建无开销)。
                 val featuredItems = listOf(
                     TvFeaturedItem(
-                        "f1", character.zh, "${character.codename} · ${character.role}",
+                        "f1", character.displayName(), "${character.codename} · ${character.role}",
                         listOf(Holo.Surface2, Holo.Panel),
                         action = { openWindow(WinContent.Chat) },
                     ),
                     TvFeaturedItem(
-                        "f2", "广场热门", "发现有趣的 Agent 与对话",
+                        "f2", stringResource(R.string.tvdesk_square_hot),
+                        stringResource(R.string.tvdesk_feat_square_sub),
                         listOf(Holo.Surface2, Holo.Panel),
                         action = { openWindow(WinContent.Square) },
                     ),
                     TvFeaturedItem(
-                        "f3", "小程序中心", "扩展 Echo 的能力边界",
+                        "f3", stringResource(R.string.tvdesk_feat_miniapps),
+                        stringResource(R.string.tvdesk_feat_miniapps_sub),
                         listOf(Holo.Surface2, Holo.Panel),
                         action = { openWindow(WinContent.Discover) },
                     ),
                 )
                 val quickActions = listOf(
                     TvLauncherItem(
-                        "qa_chat", "对话", "和 ${character.zh} 聊聊",
+                        "qa_chat", stringResource(R.string.tvdesk_qa_chat),
+                        stringResource(R.string.tvdesk_qa_chat_sub, character.displayName()),
                         icon = Icons.Filled.ChatBubbleOutline, accentColor = Holo.TextHud,
                         action = { openWindow(WinContent.Chat) },
                     ),
                     TvLauncherItem(
-                        "qa_square", "广场", "Agent 广场",
+                        "qa_square", stringResource(R.string.tvdesk_square),
+                        stringResource(R.string.tvdesk_qa_square_sub),
                         icon = Icons.Filled.Explore, accentColor = Holo.TextHud,
                         action = { openWindow(WinContent.Square) },
                     ),
                     TvLauncherItem(
-                        "qa_desktop", "桌面", "系统桌面",
+                        "qa_desktop", stringResource(R.string.tvdesk_qa_desktop),
+                        stringResource(R.string.tvdesk_qa_desktop_sub),
                         icon = Icons.Filled.DesktopWindows, accentColor = Holo.TextHud,
                         action = {
                             val home = android.content.Intent(android.content.Intent.ACTION_MAIN)
@@ -445,7 +454,8 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                         },
                     ),
                     TvLauncherItem(
-                        "qa_settings", "设置", "应用设置",
+                        "qa_settings", stringResource(R.string.tvdesk_qa_settings),
+                        stringResource(R.string.tvdesk_qa_settings_sub),
                         icon = Icons.Filled.Settings, accentColor = Holo.TextHud,
                         action = {
                             runCatching {
@@ -456,39 +466,15 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                         },
                     ),
                 )
-                val squareItems = listOf(
-                    TvLauncherItem("sq1", "热门 Agent", "广场精选", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, badge = "热", action = { openWindow(WinContent.Square) }),
-                    TvLauncherItem("sq2", "新上线", "本周新品", icon = Icons.Filled.PushPin, accentColor = Holo.TextHud, badge = "新", action = { openWindow(WinContent.Square) }),
-                    TvLauncherItem("sq3", "创作灵感", "找点灵感", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }),
-                    TvLauncherItem("sq4", "效率工具", "提效合集", icon = Icons.Filled.Devices, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }),
-                )
+                val squareItems = squareRowItems { openWindow(WinContent.Square) }
                 // 小程序:读 MiniAppRegistry(不 remember,新装即时出现);空态给一个去广场的入口。
-                val miniAppItems = MiniAppRegistry.all().let { all ->
-                    if (all.isEmpty()) {
-                        listOf(TvLauncherItem("ma_empty", "去广场安装", "暂无小程序", icon = Icons.Filled.Apps, accentColor = Holo.TextHud, action = { openWindow(WinContent.Square) }))
-                    } else {
-                        all.map { m ->
-                            TvLauncherItem(
-                                id = "ma_${m.id}", title = m.name.ifBlank { m.id }, subtitle = "小程序",
-                                icon = Icons.Filled.Apps, accentColor = Holo.TextHud,
-                                action = { openWindow(WinContent.Mini(m.id, m.name)) },
-                            )
-                        }
-                    }
+                val miniAppItems = miniAppRowItems(openWindow)
+                val skillItems = skillRowItems {
+                    runCatching { ctx.startActivity(android.content.Intent(ctx, SkillsActivity::class.java)) }
                 }
-                val skillItems = listOf(
-                    TvLauncherItem("sk1", "对话增强", "更自然的对话", icon = Icons.Filled.ChatBubbleOutline, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                    TvLauncherItem("sk2", "图像生成", "文字变图片", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                    TvLauncherItem("sk3", "代码助手", "编程好帮手", icon = Icons.Filled.Keyboard, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                    TvLauncherItem("sk4", "语音识别", "说说话就行", icon = Icons.Filled.Mic, accentColor = Holo.TextHud, action = { runCatching { ctx.startActivity(android.content.Intent(ctx, com.apk.claw.android.ui.featurescreens.SkillsActivity::class.java)) } }),
-                )
-                val mediaItems = listOf(
-                    TvLauncherItem("md1", "视频", "在线视频", icon = Icons.Filled.Videocam, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
-                    TvLauncherItem("md2", "音乐", "听点音乐", icon = Icons.Filled.Mic, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
-                    TvLauncherItem("md3", "图片", "图库浏览", icon = Icons.Filled.AutoAwesome, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
-                    TvLauncherItem("md4", "资讯", "新闻阅读", icon = Icons.Filled.Language, accentColor = Holo.TextHud, action = { openWindow(WinContent.Discover) }),
-                )
+                val mediaItems = mediaRowItems { openWindow(WinContent.Discover) }
                 val installedApps = rememberInstalledApps(ctx)
+                val launch: (TvLauncherItem) -> Unit = { it.action() }
                 // 多行卡片瀑布:Banner + 各分类行,每行横向独立滚动。
                 androidx.compose.foundation.lazy.LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -496,12 +482,17 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 24.dp),
                 ) {
                     item { TvFeaturedBanner(featuredItems, onItemClick = { it.action() }) }
-                    item { TvLauncherRow("快捷入口", quickActions, onItemClick = { it.action() }, firstItemFocus = firstIconFocus) }
-                    item { TvLauncherRow("广场热门", squareItems, onItemClick = { it.action() }) }
-                    item { TvLauncherRow("小程序", miniAppItems, onItemClick = { it.action() }) }
-                    item { TvLauncherRow("技能", skillItems, onItemClick = { it.action() }) }
-                    item { TvLauncherRow("媒体", mediaItems, onItemClick = { it.action() }) }
-                    item { TvLauncherRow("应用", installedApps, onItemClick = { it.action() }) }
+                    item {
+                        TvLauncherRow(
+                            stringResource(R.string.tvdesk_row_quick), quickActions,
+                            onItemClick = launch, firstItemFocus = firstIconFocus,
+                        )
+                    }
+                    item { TvLauncherRow(stringResource(R.string.tvdesk_square_hot), squareItems, launch) }
+                    item { TvLauncherRow(stringResource(R.string.tvdesk_row_miniapps), miniAppItems, launch) }
+                    item { TvLauncherRow(stringResource(R.string.tvdesk_row_skills), skillItems, launch) }
+                    item { TvLauncherRow(stringResource(R.string.tvdesk_row_media), mediaItems, launch) }
+                    item { TvLauncherRow(stringResource(R.string.tvdesk_row_apps), installedApps, launch) }
                 }
                 // 极简顶栏:浮在右上(满屏 / 分屏左区均对齐)。
                 TvTopChrome(
@@ -598,13 +589,83 @@ private fun DesktopWorkspace(engine: BrowserEngine) {
 }
 
 /** 全屏内容层的标题。 */
+@Composable
 private fun contentTitle(kind: WinContent, name: String): String = when (kind) {
-    WinContent.Chat -> "对话 · $name"
-    WinContent.Character -> "角色档案 · $name"
-    WinContent.Discover -> "发现"
-    WinContent.Square -> "广场"
+    WinContent.Chat -> stringResource(R.string.tvdesk_title_chat, name)
+    WinContent.Character -> stringResource(R.string.tvdesk_title_profile, name)
+    WinContent.Discover -> stringResource(R.string.tvdesk_title_discover)
+    WinContent.Square -> stringResource(R.string.tvdesk_square)
     is WinContent.Mini -> kind.name
 }
+
+/** 一张启动器磁贴:标题/副标题/角标取自 strings_tvdesktop.xml,统一 TextHud 着色。 */
+@Composable
+private fun tvTile(
+    id: String,
+    @StringRes title: Int,
+    @StringRes subtitle: Int,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    @StringRes badge: Int? = null,
+    action: () -> Unit,
+): TvLauncherItem = TvLauncherItem(
+    id, stringResource(title), stringResource(subtitle), icon = icon, accentColor = Holo.TextHud,
+    badge = badge?.let { stringResource(it) }, action = action,
+)
+
+/** 「广场热门」行:四张入口卡,都打开广场。 */
+@Composable
+private fun squareRowItems(open: () -> Unit): List<TvLauncherItem> = listOf(
+    tvTile(
+        "sq1", R.string.tvdesk_sq_hot, R.string.tvdesk_sq_hot_sub, Icons.Filled.AutoAwesome,
+        badge = R.string.tvdesk_badge_hot, action = open,
+    ),
+    tvTile(
+        "sq2", R.string.tvdesk_sq_new, R.string.tvdesk_sq_new_sub, Icons.Filled.PushPin,
+        badge = R.string.tvdesk_badge_new, action = open,
+    ),
+    tvTile("sq3", R.string.tvdesk_sq_ideas, R.string.tvdesk_sq_ideas_sub, Icons.Filled.AutoAwesome, action = open),
+    tvTile("sq4", R.string.tvdesk_sq_tools, R.string.tvdesk_sq_tools_sub, Icons.Filled.Devices, action = open),
+)
+
+/** 「小程序」行:每个已装小程序一张卡;一个都没有时给一张「去广场安装」。 */
+@Composable
+private fun miniAppRowItems(openWindow: (WinContent) -> Unit): List<TvLauncherItem> {
+    val all = MiniAppRegistry.all()
+    val label = stringResource(R.string.tvdesk_miniapp)
+    return if (all.isEmpty()) {
+        listOf(
+            tvTile("ma_empty", R.string.tvdesk_ma_install, R.string.tvdesk_ma_none, Icons.Filled.Apps) {
+                openWindow(WinContent.Square)
+            },
+        )
+    } else {
+        all.map { m ->
+            TvLauncherItem(
+                id = "ma_${m.id}", title = m.name.ifBlank { m.id }, subtitle = label,
+                icon = Icons.Filled.Apps, accentColor = Holo.TextHud,
+                action = { openWindow(WinContent.Mini(m.id, m.name)) },
+            )
+        }
+    }
+}
+
+/** 「技能」行:四张技能卡,都打开技能页。 */
+@Composable
+private fun skillRowItems(open: () -> Unit): List<TvLauncherItem> = listOf(
+    tvTile("sk1", R.string.tvdesk_sk_chat, R.string.tvdesk_sk_chat_sub, Icons.Filled.ChatBubbleOutline, action = open),
+    tvTile("sk2", R.string.tvdesk_sk_image, R.string.tvdesk_sk_image_sub, Icons.Filled.AutoAwesome, action = open),
+    tvTile("sk3", R.string.tvdesk_sk_code, R.string.tvdesk_sk_code_sub, Icons.Filled.Keyboard, action = open),
+    tvTile("sk4", R.string.tvdesk_sk_voice, R.string.tvdesk_sk_voice_sub, Icons.Filled.Mic, action = open),
+)
+
+/** 「媒体」行:四张媒体卡,都打开发现页。 */
+@Composable
+private fun mediaRowItems(open: () -> Unit): List<TvLauncherItem> = listOf(
+    tvTile("md1", R.string.tvdesk_md_video, R.string.tvdesk_md_video_sub, Icons.Filled.Videocam, action = open),
+    tvTile("md2", R.string.tvdesk_md_music, R.string.tvdesk_md_music_sub, Icons.Filled.Mic, action = open),
+    tvTile("md3", R.string.tvdesk_md_photos, R.string.tvdesk_md_photos_sub, Icons.Filled.AutoAwesome, action = open),
+    tvTile("md4", R.string.tvdesk_md_news, R.string.tvdesk_md_news_sub, Icons.Filled.Language, action = open),
+)
 
 // ── 布局/动画常量(top-level 具名:满足 MagicNumber 豁免) ──
 private const val TV_SCENE_EVERY = 3                // 连环画:每几轮对话才生成新一格壁纸(节流,省算力/额度)
@@ -619,11 +680,12 @@ private val TvWallScrim = listOf(Color(0x40000000), Color(0x00000000), Color(0x0
 @Composable
 private fun CcTile(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
+    @StringRes labelRes: Int,
     active: Boolean = false,
     danger: Boolean = false,
     onClick: () -> Unit,
 ) {
+    val label = stringResource(labelRes)
     val tint = when {
         danger -> Holo.Live
         active -> Holo.Accent
@@ -688,16 +750,18 @@ private fun TvTopChrome(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CcTile(Icons.Filled.Devices, "设备切换") { onDeviceSwitch(); menu = false }
-                        CcTile(Icons.Filled.Person, "切换角色") { CharacterRegistry.next(); menu = false }
+                        CcTile(Icons.Filled.Devices, R.string.tvdesk_cc_devices) { onDeviceSwitch(); menu = false }
+                        CcTile(Icons.Filled.Person, R.string.tvdesk_switch_character) {
+                            CharacterRegistry.next(); menu = false
+                        }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CcTile(
                             Icons.Filled.AutoAwesome,
-                            if (sceneOn) "场景 开" else "场景 关",
+                            if (sceneOn) R.string.tvdesk_cc_scene_on else R.string.tvdesk_cc_scene_off,
                             active = sceneOn,
                         ) { onToggleScene() }
-                        CcTile(Icons.Filled.Close, "退出竖屏", danger = true) { onExit(); menu = false }
+                        CcTile(Icons.Filled.Close, R.string.tvdesk_cc_exit, danger = true) { onExit(); menu = false }
                     }
                 }
             }
@@ -730,7 +794,7 @@ private val TvOverlayScrim = Color(0xE6060708)
 @Composable
 private fun TvIconBtn(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    desc: String,
+    @StringRes desc: Int,
     onClick: () -> Unit,
     active: Boolean = false,
 ) {
@@ -741,7 +805,7 @@ private fun TvIconBtn(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            icon, contentDescription = desc,
+            icon, contentDescription = stringResource(desc),
             tint = if (active) Holo.Accent else Holo.TextHud, modifier = Modifier.size(16.dp),
         )
     }
@@ -765,12 +829,12 @@ private fun TvContentPanel(
             modifier = Modifier.fillMaxWidth().height(34.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TvIconBtn(Icons.Filled.Close, "返回", onClose)
+            TvIconBtn(Icons.Filled.Close, R.string.tvdesk_back, onClose)
             Spacer(Modifier.width(8.dp))
             Text(title, color = Holo.TextHud, fontSize = 14.sp, maxLines = 1, modifier = Modifier.weight(1f))
             TvIconBtn(
                 Icons.Filled.PushPin,
-                if (pinned) "取消停靠" else "停靠右侧",
+                if (pinned) R.string.tvdesk_undock else R.string.tvdesk_dock_right,
                 onTogglePin,
                 active = pinned,
             )
@@ -806,7 +870,7 @@ private fun ChatContent(convo: List<DeskMsg>, running: Boolean, toolNote: String
                         .aspectRatio(0.5f, matchHeightConstraintsFirst = true),
                 )
                 Text(
-                    CharacterRegistry.current.zh, color = Holo.Accent,
+                    CharacterRegistry.current.displayName(), color = Holo.Accent,
                     fontSize = 15.sp, fontWeight = FontWeight.Medium,
                     modifier = Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 6.dp),
                 )
@@ -819,7 +883,7 @@ private fun ChatContent(convo: List<DeskMsg>, running: Boolean, toolNote: String
                     // 空态:小气泡(不占满、不做大灰块),像角色发来的第一句。
                     Box(Modifier.fillMaxSize().padding(12.dp), contentAlignment = Alignment.TopStart) {
                         Text(
-                            "点下面的输入框,和我说点什么。",
+                            stringResource(R.string.tvdesk_chat_empty),
                             color = Holo.TextHud, fontSize = 13.sp,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
@@ -851,7 +915,7 @@ private fun ChatContent(convo: List<DeskMsg>, running: Boolean, toolNote: String
 private fun ThinkingRow(toolNote: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ThinkingDots()
-        Text(toolNote.ifBlank { "思考中…" }, color = Holo.Accent, fontSize = 12.sp)
+        Text(toolNote.ifBlank { stringResource(R.string.tvdesk_thinking) }, color = Holo.Accent, fontSize = 12.sp)
     }
 }
 
@@ -907,7 +971,12 @@ private fun DialogBubble(m: DeskMsg) {
 /** 快捷回复气泡:居中 + 自动换行(窄栏 dock 放不下就往下另起一行)。 */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-private fun ReplyQuickPrompts(prompts: List<String>, onSend: (String) -> Unit) {
+private fun ReplyQuickPrompts(onSend: (String) -> Unit) {
+    val prompts = listOf(
+        stringResource(R.string.tvdesk_quick_capabilities),
+        stringResource(R.string.tvdesk_quick_open_page),
+        stringResource(R.string.tvdesk_quick_today),
+    )
     androidx.compose.foundation.layout.FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -945,7 +1014,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
             ctx, android.Manifest.permission.RECORD_AUDIO,
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
-    val quick = remember { listOf("你能做什么?", "帮我打开一个网页", "整理一下今天的信息") }
+    val actionDesc = stringResource(if (running) R.string.tvdesk_stop else R.string.tvdesk_send)
     val charName = CharacterRegistry.current.name
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -954,7 +1023,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
     ) {
         // 快捷回复气泡(运行中隐藏,避免误触)。
         if (!running) {
-            ReplyQuickPrompts(quick, onSend)
+            ReplyQuickPrompts(onSend)
         }
         if (voiceMode) {
             // 收起的小圆气泡语音模式:按住麦克风说话、松手发送;上方显示实时识别文本。
@@ -994,7 +1063,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                     decorationBox = { inner ->
                         if (input.isEmpty()) {
                             Text(
-                                "$charName 在等你回复…",
+                                stringResource(R.string.tvdesk_reply_hint, charName),
                                 color = Holo.OnAction.copy(alpha = 0.6f), fontSize = 14.sp, maxLines = 1,
                             )
                         }
@@ -1011,7 +1080,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        Icons.Filled.Call, contentDescription = "实时语音通话",
+                        Icons.Filled.Call, contentDescription = stringResource(R.string.tvdesk_voice_call),
                         tint = Holo.OnAction.copy(alpha = 0.8f), modifier = Modifier.size(20.dp),
                     )
                 }
@@ -1024,7 +1093,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        Icons.Filled.Mic, contentDescription = "语音输入",
+                        Icons.Filled.Mic, contentDescription = stringResource(R.string.tvdesk_voice_input),
                         tint = Holo.OnAction.copy(alpha = 0.8f), modifier = Modifier.size(20.dp),
                     )
                 }
@@ -1039,7 +1108,7 @@ private fun DesktopReplyBar(running: Boolean, onSend: (String) -> Unit, onStop: 
                 ) {
                     Icon(
                         if (running) Icons.Filled.Stop else Icons.Filled.ArrowUpward,
-                        contentDescription = if (running) "停止" else "发送",
+                        contentDescription = actionDesc,
                         tint = Holo.Accent, modifier = Modifier.size(20.dp),
                     )
                 }
@@ -1057,6 +1126,8 @@ private fun VoiceBubbleInput(
     onRelease: () -> Unit,
     onExitVoice: () -> Unit,
 ) {
+    val keyboardDesc = stringResource(R.string.tvdesk_keyboard)
+    val holdDesc = stringResource(R.string.tvdesk_hold_to_talk)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1070,7 +1141,7 @@ private fun VoiceBubbleInput(
             )
         } else {
             Text(
-                if (listening) "正在聆听…松手发送" else "按住说话",
+                if (listening) stringResource(R.string.tvdesk_listening) else holdDesc,
                 color = Holo.TextSecondary, fontSize = 12.sp,
             )
         }
@@ -1083,7 +1154,7 @@ private fun VoiceBubbleInput(
                 Modifier.size(40.dp).clip(CircleShape).background(Holo.Surface2)
                     .holoFocus(CircleShape).clickable(onClick = onExitVoice),
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.Keyboard, contentDescription = "键盘", tint = Holo.TextHud, modifier = Modifier.size(20.dp)) }
+            ) { Icon(Icons.Filled.Keyboard, keyboardDesc, tint = Holo.TextHud, modifier = Modifier.size(20.dp)) }
             // 大圆麦克风气泡:按住说话,松手发送。识别中变红。
             Box(
                 Modifier.size(if (listening) 64.dp else 56.dp).clip(CircleShape)
@@ -1099,7 +1170,7 @@ private fun VoiceBubbleInput(
                         )
                     },
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.Mic, contentDescription = "按住说话", tint = Holo.OnAccent, modifier = Modifier.size(28.dp)) }
+            ) { Icon(Icons.Filled.Mic, holdDesc, tint = Holo.OnAccent, modifier = Modifier.size(28.dp)) }
         }
     }
 }

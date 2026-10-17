@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV desktop launcher (ui/desktop/DesktopActivity.kt, DesktopHolo.kt, TvLauncherComposables.kt).
+     Keep the same keys in all six locales. Tile labels sit on a 140 dp card: keep them short. -->
+<resources>
+    <!-- Featured banner and row titles -->
+    <string name="tvdesk_square_hot">広場の人気</string>
+    <string name="tvdesk_feat_square_sub">面白いエージェントや会話を見つけよう</string>
+    <string name="tvdesk_feat_miniapps">ミニアプリセンター</string>
+    <string name="tvdesk_feat_miniapps_sub">Echo にできることを広げよう</string>
+    <string name="tvdesk_row_quick">クイックアクセス</string>
+    <string name="tvdesk_row_miniapps">ミニアプリ</string>
+    <string name="tvdesk_row_skills">スキル</string>
+    <string name="tvdesk_row_media">メディア</string>
+    <string name="tvdesk_row_apps">アプリ</string>
+
+    <!-- Quick access tiles -->
+    <string name="tvdesk_qa_chat">チャット</string>
+    <string name="tvdesk_qa_chat_sub">%1$s と話す</string>
+    <string name="tvdesk_square">広場</string>
+    <string name="tvdesk_qa_square_sub">エージェント広場</string>
+    <string name="tvdesk_qa_desktop">デスクトップ</string>
+    <string name="tvdesk_qa_desktop_sub">ホーム画面</string>
+    <string name="tvdesk_qa_settings">設定</string>
+    <string name="tvdesk_qa_settings_sub">アプリの設定</string>
+
+    <!-- Square row -->
+    <string name="tvdesk_sq_hot">人気エージェント</string>
+    <string name="tvdesk_sq_hot_sub">広場のおすすめ</string>
+    <string name="tvdesk_badge_hot">人気</string>
+    <string name="tvdesk_sq_new">新着</string>
+    <string name="tvdesk_sq_new_sub">今週の新着</string>
+    <string name="tvdesk_badge_new">新着</string>
+    <string name="tvdesk_sq_ideas">創作のヒント</string>
+    <string name="tvdesk_sq_ideas_sub">ひらめきを探す</string>
+    <string name="tvdesk_sq_tools">効率化ツール</string>
+    <string name="tvdesk_sq_tools_sub">効率アップ集</string>
+
+    <!-- Mini apps row -->
+    <string name="tvdesk_miniapp">ミニアプリ</string>
+    <string name="tvdesk_ma_install">広場で入手</string>
+    <string name="tvdesk_ma_none">ミニアプリなし</string>
+
+    <!-- Skills row -->
+    <string name="tvdesk_sk_chat">会話強化</string>
+    <string name="tvdesk_sk_chat_sub">より自然な会話</string>
+    <string name="tvdesk_sk_image">画像生成</string>
+    <string name="tvdesk_sk_image_sub">文章を画像に</string>
+    <string name="tvdesk_sk_code">コード支援</string>
+    <string name="tvdesk_sk_code_sub">プログラミングの相棒</string>
+    <string name="tvdesk_sk_voice">音声認識</string>
+    <string name="tvdesk_sk_voice_sub">話すだけでOK</string>
+
+    <!-- Media row -->
+    <string name="tvdesk_md_video">動画</string>
+    <string name="tvdesk_md_video_sub">オンライン動画</string>
+    <string name="tvdesk_md_music">音楽</string>
+    <string name="tvdesk_md_music_sub">音楽を聴く</string>
+    <string name="tvdesk_md_photos">写真</string>
+    <string name="tvdesk_md_photos_sub">ギャラリーを見る</string>
+    <string name="tvdesk_md_news">ニュース</string>
+    <string name="tvdesk_md_news_sub">ニュースを読む</string>
+
+    <!-- Installed apps row: fallback label when an app has no name -->
+    <string name="tvdesk_app">アプリ</string>
+
+    <!-- Content panel titles and buttons -->
+    <string name="tvdesk_title_chat">チャット · %1$s</string>
+    <string name="tvdesk_title_profile">プロフィール · %1$s</string>
+    <string name="tvdesk_title_discover">発見</string>
+    <string name="tvdesk_back">戻る</string>
+    <string name="tvdesk_dock_right">右側にドッキング</string>
+    <string name="tvdesk_undock">ドッキング解除</string>
+
+    <!-- Control center -->
+    <string name="tvdesk_cc_devices">デバイス切替</string>
+    <string name="tvdesk_switch_character">キャラ切替</string>
+    <string name="tvdesk_cc_scene_on">シーン オン</string>
+    <string name="tvdesk_cc_scene_off">シーン オフ</string>
+    <string name="tvdesk_cc_exit">縦画面に戻る</string>
+
+    <!-- Chat -->
+    <string name="tvdesk_chat_empty">下の入力欄から話しかけてね。</string>
+    <string name="tvdesk_thinking">考え中…</string>
+    <string name="tvdesk_tool_note">· %1$s を使用中</string>
+    <string name="tvdesk_error">エラー：%1$s</string>
+    <string name="tvdesk_reply_no_model">先にモデルを設定してください(上部の「スキル」の横、または 設定 → モデル)。それから話しましょう。</string>
+    <string name="tvdesk_quick_capabilities">何ができるの？</string>
+    <string name="tvdesk_quick_open_page">Webページを開いて</string>
+    <string name="tvdesk_quick_today">今日の情報をまとめて</string>
+    <string name="tvdesk_reply_hint">%1$s が返事を待っています…</string>
+    <string name="tvdesk_voice_call">リアルタイム音声通話</string>
+    <string name="tvdesk_voice_input">音声入力</string>
+    <string name="tvdesk_send">送信</string>
+    <string name="tvdesk_stop">停止</string>
+    <string name="tvdesk_listening">聞き取り中…離すと送信</string>
+    <string name="tvdesk_hold_to_talk">押したまま話す</string>
+    <string name="tvdesk_keyboard">キーボード</string>
+
+    <!-- Character profile (rank letters, status and ages are data and stay as they are) -->
+    <string name="tvdesk_rank">%1$sランク</string>
+    <string name="tvdesk_roster_status">%1$s · 外見年齢 %2$s</string>
+    <string name="tvdesk_skills_plugins">スキル · プラグイン</string>
+    <string name="tvdesk_skill_library">スキルライブラリ</string>
+    <string name="tvdesk_miniapps_count">ミニアプリ/プラグイン · %1$d</string>
+    <string name="tvdesk_launch_direct">起動時に開く</string>
+
+    <!-- Role-play persona sent to the model in TV mode. %1$s Chinese name, %2$s Latin name, %3$s codename,
+         %4$s faction, %5$s rank, %6$s role, %7$s apparent age, %8$s abilities, %9$s creed. -->
+    <string name="tvdesk_list_separator">、</string>
+    <string name="tvdesk_persona_prompt">あなたは今から「%2$s(%1$s)」です。コードネームは %3$s、%4$s 陣営の %5$s ランク、役職は %6$s、見た目の年齢は %7$s。能力：%8$s。あなたの信条：『%9$s』。最初から最後まで「%2$s」として一人称で、その人物らしい性格と口調でユーザーと話してください。自然に、短く、話し言葉で。自分のことを Echo・AI・アシスタントと呼ばず、役から外れたりこの設定に触れたりしないでください。スマホの操作が必要なときはいつも通りツールを使い、話し方は役のままにしてください。</string>
+</resources>

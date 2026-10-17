@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apk.claw.android.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -291,14 +292,15 @@ fun TvFeaturedBanner(
 fun rememberInstalledApps(context: Context, limit: Int = INSTALLED_APPS_LIMIT): List<TvLauncherItem> {
     val state = produceState(initialValue = emptyList<TvLauncherItem>()) {
         val pm = context.packageManager
+        val appLabel = context.getString(R.string.tvdesk_app)
         val apps = withContext(Dispatchers.IO) {
             val intent = Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
             val ris = pm.queryIntentActivities(intent, 0)
             ris.map { ri ->
                 TvLauncherItem(
                     id = ri.activityInfo.packageName,
-                    title = runCatching { ri.loadLabel(pm).toString() }.getOrDefault("应用"),
-                    subtitle = "应用",
+                    title = runCatching { ri.loadLabel(pm).toString() }.getOrDefault(appLabel),
+                    subtitle = appLabel,
                     icon = Icons.Filled.Apps,
                     accentColor = Holo.TextHud,
                     action = {

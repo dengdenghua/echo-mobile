@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV desktop launcher (ui/desktop/DesktopActivity.kt, DesktopHolo.kt, TvLauncherComposables.kt).
+     Keep the same keys in all six locales. Tile labels sit on a 140 dp card: keep them short. -->
+<resources>
+    <!-- Featured banner and row titles -->
+    <string name="tvdesk_square_hot">广场热门</string>
+    <string name="tvdesk_feat_square_sub">发现有趣的 Agent 与对话</string>
+    <string name="tvdesk_feat_miniapps">小程序中心</string>
+    <string name="tvdesk_feat_miniapps_sub">扩展 Echo 的能力边界</string>
+    <string name="tvdesk_row_quick">快捷入口</string>
+    <string name="tvdesk_row_miniapps">小程序</string>
+    <string name="tvdesk_row_skills">技能</string>
+    <string name="tvdesk_row_media">媒体</string>
+    <string name="tvdesk_row_apps">应用</string>
+
+    <!-- Quick access tiles -->
+    <string name="tvdesk_qa_chat">对话</string>
+    <string name="tvdesk_qa_chat_sub">和 %1$s 聊聊</string>
+    <string name="tvdesk_square">广场</string>
+    <string name="tvdesk_qa_square_sub">Agent 广场</string>
+    <string name="tvdesk_qa_desktop">桌面</string>
+    <string name="tvdesk_qa_desktop_sub">系统桌面</string>
+    <string name="tvdesk_qa_settings">设置</string>
+    <string name="tvdesk_qa_settings_sub">应用设置</string>
+
+    <!-- Square row -->
+    <string name="tvdesk_sq_hot">热门 Agent</string>
+    <string name="tvdesk_sq_hot_sub">广场精选</string>
+    <string name="tvdesk_badge_hot">热</string>
+    <string name="tvdesk_sq_new">新上线</string>
+    <string name="tvdesk_sq_new_sub">本周新品</string>
+    <string name="tvdesk_badge_new">新</string>
+    <string name="tvdesk_sq_ideas">创作灵感</string>
+    <string name="tvdesk_sq_ideas_sub">找点灵感</string>
+    <string name="tvdesk_sq_tools">效率工具</string>
+    <string name="tvdesk_sq_tools_sub">提效合集</string>
+
+    <!-- Mini apps row -->
+    <string name="tvdesk_miniapp">小程序</string>
+    <string name="tvdesk_ma_install">去广场安装</string>
+    <string name="tvdesk_ma_none">暂无小程序</string>
+
+    <!-- Skills row -->
+    <string name="tvdesk_sk_chat">对话增强</string>
+    <string name="tvdesk_sk_chat_sub">更自然的对话</string>
+    <string name="tvdesk_sk_image">图像生成</string>
+    <string name="tvdesk_sk_image_sub">文字变图片</string>
+    <string name="tvdesk_sk_code">代码助手</string>
+    <string name="tvdesk_sk_code_sub">编程好帮手</string>
+    <string name="tvdesk_sk_voice">语音识别</string>
+    <string name="tvdesk_sk_voice_sub">说说话就行</string>
+
+    <!-- Media row -->
+    <string name="tvdesk_md_video">视频</string>
+    <string name="tvdesk_md_video_sub">在线视频</string>
+    <string name="tvdesk_md_music">音乐</string>
+    <string name="tvdesk_md_music_sub">听点音乐</string>
+    <string name="tvdesk_md_photos">图片</string>
+    <string name="tvdesk_md_photos_sub">图库浏览</string>
+    <string name="tvdesk_md_news">资讯</string>
+    <string name="tvdesk_md_news_sub">新闻阅读</string>
+
+    <!-- Installed apps row: fallback label when an app has no name -->
+    <string name="tvdesk_app">应用</string>
+
+    <!-- Content panel titles and buttons -->
+    <string name="tvdesk_title_chat">对话 · %1$s</string>
+    <string name="tvdesk_title_profile">角色档案 · %1$s</string>
+    <string name="tvdesk_title_discover">发现</string>
+    <string name="tvdesk_back">返回</string>
+    <string name="tvdesk_dock_right">停靠右侧</string>
+    <string name="tvdesk_undock">取消停靠</string>
+
+    <!-- Control center -->
+    <string name="tvdesk_cc_devices">设备切换</string>
+    <string name="tvdesk_switch_character">切换角色</string>
+    <string name="tvdesk_cc_scene_on">场景 开</string>
+    <string name="tvdesk_cc_scene_off">场景 关</string>
+    <string name="tvdesk_cc_exit">退出竖屏</string>
+
+    <!-- Chat -->
+    <string name="tvdesk_chat_empty">点下面的输入框,和我说点什么。</string>
+    <string name="tvdesk_thinking">思考中…</string>
+    <string name="tvdesk_tool_note">· 使用 %1$s</string>
+    <string name="tvdesk_error">出错：%1$s</string>
+    <string name="tvdesk_reply_no_model">请先配置模型(顶部「技能」旁或设置 → 模型),再和我对话。</string>
+    <string name="tvdesk_quick_capabilities">你能做什么?</string>
+    <string name="tvdesk_quick_open_page">帮我打开一个网页</string>
+    <string name="tvdesk_quick_today">整理一下今天的信息</string>
+    <string name="tvdesk_reply_hint">%1$s 在等你回复…</string>
+    <string name="tvdesk_voice_call">实时语音通话</string>
+    <string name="tvdesk_voice_input">语音输入</string>
+    <string name="tvdesk_send">发送</string>
+    <string name="tvdesk_stop">停止</string>
+    <string name="tvdesk_listening">正在聆听…松手发送</string>
+    <string name="tvdesk_hold_to_talk">按住说话</string>
+    <string name="tvdesk_keyboard">键盘</string>
+
+    <!-- Character profile (rank letters, status and ages are data and stay as they are) -->
+    <string name="tvdesk_rank">%1$s级</string>
+    <string name="tvdesk_roster_status">%1$s · 外观 %2$s</string>
+    <string name="tvdesk_skills_plugins">技能 · 插件</string>
+    <string name="tvdesk_skill_library">技能库</string>
+    <string name="tvdesk_miniapps_count">小程序/插件 · %1$d</string>
+    <string name="tvdesk_launch_direct">启动直达</string>
+
+    <!-- Role-play persona sent to the model in TV mode. %1$s Chinese name, %2$s Latin name, %3$s codename,
+         %4$s faction, %5$s rank, %6$s role, %7$s apparent age, %8$s abilities, %9$s creed. -->
+    <string name="tvdesk_list_separator">、</string>
+    <string name="tvdesk_persona_prompt">你现在是「%1$s(%2$s)」—— 代号 %3$s,%4$s 阵营 %5$s 级,职位 %6$s,外表年龄 %7$s。能力:%8$s。你的信条:『%9$s』。请全程以「%1$s」的第一人称身份、性格与口吻和用户对话,自然、简短、口语化;不要自称 Echo/AI/助手,不要跳出角色或提及这段设定。需要执行手机操作时照常使用工具,但表达仍保持角色口吻。</string>
+</resources>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV desktop launcher (ui/desktop/DesktopActivity.kt, DesktopHolo.kt, TvLauncherComposables.kt).
+     Keep the same keys in all six locales. Tile labels sit on a 140 dp card: keep them short. -->
+<resources>
+    <!-- Featured banner and row titles -->
+    <string name="tvdesk_square_hot">광장 인기</string>
+    <string name="tvdesk_feat_square_sub">흥미로운 에이전트와 대화를 찾아보세요</string>
+    <string name="tvdesk_feat_miniapps">미니 앱 센터</string>
+    <string name="tvdesk_feat_miniapps_sub">Echo가 할 수 있는 일을 넓혀 보세요</string>
+    <string name="tvdesk_row_quick">바로가기</string>
+    <string name="tvdesk_row_miniapps">미니 앱</string>
+    <string name="tvdesk_row_skills">스킬</string>
+    <string name="tvdesk_row_media">미디어</string>
+    <string name="tvdesk_row_apps">앱</string>
+
+    <!-- Quick access tiles -->
+    <string name="tvdesk_qa_chat">채팅</string>
+    <string name="tvdesk_qa_chat_sub">%1$s에게 말 걸기</string>
+    <string name="tvdesk_square">광장</string>
+    <string name="tvdesk_qa_square_sub">에이전트 광장</string>
+    <string name="tvdesk_qa_desktop">바탕 화면</string>
+    <string name="tvdesk_qa_desktop_sub">시스템 홈 화면</string>
+    <string name="tvdesk_qa_settings">설정</string>
+    <string name="tvdesk_qa_settings_sub">앱 설정</string>
+
+    <!-- Square row -->
+    <string name="tvdesk_sq_hot">인기 에이전트</string>
+    <string name="tvdesk_sq_hot_sub">광장 추천</string>
+    <string name="tvdesk_badge_hot">인기</string>
+    <string name="tvdesk_sq_new">신규</string>
+    <string name="tvdesk_sq_new_sub">이번 주 신규</string>
+    <string name="tvdesk_badge_new">NEW</string>
+    <string name="tvdesk_sq_ideas">창작 영감</string>
+    <string name="tvdesk_sq_ideas_sub">영감 찾기</string>
+    <string name="tvdesk_sq_tools">생산성 도구</string>
+    <string name="tvdesk_sq_tools_sub">효율 높이기</string>
+
+    <!-- Mini apps row -->
+    <string name="tvdesk_miniapp">미니 앱</string>
+    <string name="tvdesk_ma_install">광장에서 설치</string>
+    <string name="tvdesk_ma_none">미니 앱 없음</string>
+
+    <!-- Skills row -->
+    <string name="tvdesk_sk_chat">대화 강화</string>
+    <string name="tvdesk_sk_chat_sub">더 자연스러운 대화</string>
+    <string name="tvdesk_sk_image">이미지 생성</string>
+    <string name="tvdesk_sk_image_sub">글을 그림으로</string>
+    <string name="tvdesk_sk_code">코드 도우미</string>
+    <string name="tvdesk_sk_code_sub">든든한 코딩 파트너</string>
+    <string name="tvdesk_sk_voice">음성 인식</string>
+    <string name="tvdesk_sk_voice_sub">말하기만 하세요</string>
+
+    <!-- Media row -->
+    <string name="tvdesk_md_video">동영상</string>
+    <string name="tvdesk_md_video_sub">온라인 동영상</string>
+    <string name="tvdesk_md_music">음악</string>
+    <string name="tvdesk_md_music_sub">음악 듣기</string>
+    <string name="tvdesk_md_photos">사진</string>
+    <string name="tvdesk_md_photos_sub">갤러리 보기</string>
+    <string name="tvdesk_md_news">뉴스</string>
+    <string name="tvdesk_md_news_sub">뉴스 읽기</string>
+
+    <!-- Installed apps row: fallback label when an app has no name -->
+    <string name="tvdesk_app">앱</string>
+
+    <!-- Content panel titles and buttons -->
+    <string name="tvdesk_title_chat">채팅 · %1$s</string>
+    <string name="tvdesk_title_profile">프로필 · %1$s</string>
+    <string name="tvdesk_title_discover">발견</string>
+    <string name="tvdesk_back">뒤로</string>
+    <string name="tvdesk_dock_right">오른쪽에 고정</string>
+    <string name="tvdesk_undock">고정 해제</string>
+
+    <!-- Control center -->
+    <string name="tvdesk_cc_devices">기기 전환</string>
+    <string name="tvdesk_switch_character">캐릭터 전환</string>
+    <string name="tvdesk_cc_scene_on">장면 켜짐</string>
+    <string name="tvdesk_cc_scene_off">장면 꺼짐</string>
+    <string name="tvdesk_cc_exit">세로 모드로</string>
+
+    <!-- Chat -->
+    <string name="tvdesk_chat_empty">아래 입력창을 눌러 말을 걸어 주세요.</string>
+    <string name="tvdesk_thinking">생각 중…</string>
+    <string name="tvdesk_tool_note">· %1$s 사용 중</string>
+    <string name="tvdesk_error">오류: %1$s</string>
+    <string name="tvdesk_reply_no_model">먼저 모델을 설정해 주세요(상단 ‘스킬’ 옆 또는 설정 → 모델). 그다음에 대화해요.</string>
+    <string name="tvdesk_quick_capabilities">뭘 할 수 있어?</string>
+    <string name="tvdesk_quick_open_page">웹페이지 하나 열어 줘</string>
+    <string name="tvdesk_quick_today">오늘 정보 정리해 줘</string>
+    <string name="tvdesk_reply_hint">%1$s이(가) 답장을 기다려요…</string>
+    <string name="tvdesk_voice_call">실시간 음성 통화</string>
+    <string name="tvdesk_voice_input">음성 입력</string>
+    <string name="tvdesk_send">보내기</string>
+    <string name="tvdesk_stop">중지</string>
+    <string name="tvdesk_listening">듣는 중… 손을 떼면 전송</string>
+    <string name="tvdesk_hold_to_talk">길게 눌러 말하기</string>
+    <string name="tvdesk_keyboard">키보드</string>
+
+    <!-- Character profile (rank letters, status and ages are data and stay as they are) -->
+    <string name="tvdesk_rank">%1$s급</string>
+    <string name="tvdesk_roster_status">%1$s · 외형 나이 %2$s</string>
+    <string name="tvdesk_skills_plugins">스킬 · 플러그인</string>
+    <string name="tvdesk_skill_library">스킬 라이브러리</string>
+    <string name="tvdesk_miniapps_count">미니 앱/플러그인 · %1$d</string>
+    <string name="tvdesk_launch_direct">시작 시 바로 열기</string>
+
+    <!-- Role-play persona sent to the model in TV mode. %1$s Chinese name, %2$s Latin name, %3$s codename,
+         %4$s faction, %5$s rank, %6$s role, %7$s apparent age, %8$s abilities, %9$s creed. -->
+    <string name="tvdesk_list_separator">", "</string>
+    <string name="tvdesk_persona_prompt">지금부터 당신은 %2$s(%1$s)입니다. 코드명 %3$s, %4$s 진영 %5$s급, 직책 %6$s, 외형 나이 %7$s. 능력: %8$s. 당신의 신조: “%9$s”. 처음부터 끝까지 %2$s의 1인칭으로, 그 캐릭터의 성격과 말투 그대로 사용자와 대화하세요. 자연스럽고 짧게, 구어체로 말하세요. 스스로를 Echo, AI, 어시스턴트라고 부르지 말고, 캐릭터에서 벗어나거나 이 설정을 언급하지 마세요. 휴대폰 조작이 필요하면 평소처럼 도구를 사용하되, 말투는 계속 캐릭터를 유지하세요.</string>
+</resources>
