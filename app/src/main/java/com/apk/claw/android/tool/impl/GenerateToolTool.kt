@@ -162,7 +162,8 @@ class GenerateToolTool : BaseTool() {
 
     /** 从 url 模板抽 host(先去掉 {{...}} 占位,再解析)。 */
     private fun hostOf(urlTpl: String): String {
-        val u = urlTpl.replace(Regex("\\{\\{[^}]*}}"), "x")
+        // Closing braces escaped: Android's ICU regex rejects a bare "}" (the JVM accepts it).
+        val u = urlTpl.replace(Regex("\\{\\{[^}]*\\}\\}"), "x")
         return runCatching { android.net.Uri.parse(u).host ?: "" }.getOrDefault("")
     }
 
