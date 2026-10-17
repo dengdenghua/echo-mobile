@@ -3,12 +3,18 @@
 <resources>
     <string name="devicetasks_title">跨端任务</string>
     <string name="devicetasks_intro">与电脑共享任务进度和结果。手机可操作本机，以及设备中心明确授权的其他设备。</string>
-    <string name="devicetasks_empty">暂无可显示的任务</string>
+    <string name="devicetasks_empty">还没有跨端任务。在上方选择目标设备、写下任务内容并生成执行计划；你确认计划后，Echo 才会执行。</string>
+    <string name="devicetasks_loading">正在从设备中心加载任务</string>
+    <string name="devicetasks_load_failed">无法加载任务</string>
+    <string name="devicetasks_section_new">新建任务</string>
+    <string name="devicetasks_section_tasks">任务列表</string>
+    <string name="devicetasks_target_device">目标设备</string>
+    <string name="devicetasks_no_devices">暂无可用设备。设备中心授权后，设备会显示在这里。</string>
     <string name="devicetasks_multi_device">多设备接续</string>
     <string name="devicetasks_task_label">任务内容</string>
     <string name="devicetasks_generate_plan">生成执行计划</string>
     <string name="devicetasks_source_computer">电脑</string>
-    <string name="devicetasks_status_progress">%1$s · 已确认 %2$s 步</string>
+    <string name="devicetasks_steps_confirmed">已确认 %1$d / %2$d 步</string>
     <string name="devicetasks_status_planning">正在生成计划</string>
     <string name="devicetasks_status_awaiting_handoff">等待阶段交接</string>
     <string name="devicetasks_status_awaiting_approval">等待确认</string>

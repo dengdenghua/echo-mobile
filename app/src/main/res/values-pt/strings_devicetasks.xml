@@ -3,12 +3,18 @@
 <resources>
     <string name="devicetasks_title">Tarefas entre dispositivos</string>
     <string name="devicetasks_intro">Compartilhe o progresso e os resultados das tarefas com o seu computador. Este telefone pode agir sobre si mesmo e sobre outros dispositivos que a central de dispositivos autorizou explicitamente.</string>
-    <string name="devicetasks_empty">Nenhuma tarefa para mostrar</string>
+    <string name="devicetasks_empty">Ainda não há tarefas entre dispositivos. Escolha um dispositivo de destino acima, descreva a tarefa e gere um plano. O Echo só executa depois que você confirma o plano.</string>
+    <string name="devicetasks_loading">Carregando tarefas da central de dispositivos</string>
+    <string name="devicetasks_load_failed">Não foi possível carregar as tarefas</string>
+    <string name="devicetasks_section_new">Nova tarefa</string>
+    <string name="devicetasks_section_tasks">Tarefas</string>
+    <string name="devicetasks_target_device">Dispositivo de destino</string>
+    <string name="devicetasks_no_devices">Nenhum dispositivo disponível. Eles aparecem aqui quando a central de dispositivos os autoriza.</string>
     <string name="devicetasks_multi_device">Continuar em vários dispositivos</string>
     <string name="devicetasks_task_label">Tarefa</string>
     <string name="devicetasks_generate_plan">Gerar plano</string>
     <string name="devicetasks_source_computer">Computador</string>
-    <string name="devicetasks_status_progress">%1$s · %2$s etapas confirmadas</string>
+    <string name="devicetasks_steps_confirmed">%1$d / %2$d etapas confirmadas</string>
     <string name="devicetasks_status_planning">Gerando o plano</string>
     <string name="devicetasks_status_awaiting_handoff">Aguardando a passagem de fase</string>
     <string name="devicetasks_status_awaiting_approval">Aguardando confirmação</string>

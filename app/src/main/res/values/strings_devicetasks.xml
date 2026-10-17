@@ -3,12 +3,18 @@
 <resources>
     <string name="devicetasks_title">Cross-device tasks</string>
     <string name="devicetasks_intro">Share task progress and results with your computer. This phone can act on itself and on other devices the device hub has explicitly allowed.</string>
-    <string name="devicetasks_empty">No tasks to show</string>
+    <string name="devicetasks_empty">No cross-device tasks yet. Pick a target device above, describe the task and generate a plan. Echo runs it only after you confirm the plan.</string>
+    <string name="devicetasks_loading">Loading tasks from the device hub</string>
+    <string name="devicetasks_load_failed">Couldn\'t load tasks</string>
+    <string name="devicetasks_section_new">New task</string>
+    <string name="devicetasks_section_tasks">Tasks</string>
+    <string name="devicetasks_target_device">Target device</string>
+    <string name="devicetasks_no_devices">No devices are available. Devices appear here once the device hub allows them.</string>
     <string name="devicetasks_multi_device">Multi-device handoff</string>
     <string name="devicetasks_task_label">Task</string>
     <string name="devicetasks_generate_plan">Generate plan</string>
     <string name="devicetasks_source_computer">Computer</string>
-    <string name="devicetasks_status_progress">%1$s · %2$s steps confirmed</string>
+    <string name="devicetasks_steps_confirmed">%1$d / %2$d steps confirmed</string>
     <string name="devicetasks_status_planning">Generating plan</string>
     <string name="devicetasks_status_awaiting_handoff">Waiting for handoff</string>
     <string name="devicetasks_status_awaiting_approval">Waiting for confirmation</string>

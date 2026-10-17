@@ -3,12 +3,18 @@
 <resources>
     <string name="devicetasks_title">デバイス間タスク</string>
     <string name="devicetasks_intro">タスクの進捗と結果をパソコンと共有します。このスマートフォンは自身と、デバイスハブが明示的に許可した他のデバイスを操作できます。</string>
-    <string name="devicetasks_empty">表示できるタスクはありません</string>
+    <string name="devicetasks_empty">デバイス間タスクはまだありません。上で対象デバイスを選び、タスク内容を入力して実行計画を作成してください。計画を確認するまで Echo は実行しません。</string>
+    <string name="devicetasks_loading">デバイスハブからタスクを読み込んでいます</string>
+    <string name="devicetasks_load_failed">タスクを読み込めませんでした</string>
+    <string name="devicetasks_section_new">新しいタスク</string>
+    <string name="devicetasks_section_tasks">タスク一覧</string>
+    <string name="devicetasks_target_device">対象デバイス</string>
+    <string name="devicetasks_no_devices">利用できるデバイスがありません。デバイスハブが許可すると、ここに表示されます。</string>
     <string name="devicetasks_multi_device">複数デバイスで引き継ぐ</string>
     <string name="devicetasks_task_label">タスク内容</string>
     <string name="devicetasks_generate_plan">実行計画を作成</string>
     <string name="devicetasks_source_computer">パソコン</string>
-    <string name="devicetasks_status_progress">%1$s · %2$s ステップ確認済み</string>
+    <string name="devicetasks_steps_confirmed">%1$d / %2$d ステップ確認済み</string>
     <string name="devicetasks_status_planning">計画を作成中</string>
     <string name="devicetasks_status_awaiting_handoff">段階の引き継ぎ待ち</string>
     <string name="devicetasks_status_awaiting_approval">確認待ち</string>
