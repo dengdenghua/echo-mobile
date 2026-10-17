@@ -46,4 +46,13 @@
     <string name="localmodel_guide_ram">3B 모델은 RAM 6 GB 이상, 1.8B MNN 모델은 4 GB 이상 필요</string>
     <string name="localmodel_guide_build">첫 빌드: ./build-native.sh(llama) 또는 ./build-mnn.sh(MNN)</string>
     <string name="localmodel_limits">알려진 제한:\n• function calling 미지원: 오프라인 모드는 채팅만 가능하며 기기를 제어할 수 없습니다\n• 비전 미지원: 스크린샷과 이미지 입력은 무시됩니다\n• GPT-4나 Claude보다 품질이 낮음: 개인정보 보호나 오프라인 사용에 적합</string>
+    <!-- MNN import reasons (tool/localmodel/MnnModelManager.importFromUri). -->
+    <string name="localmodel_err_name_taken">이름이 %1$s인 모델이 이미 설치되어 있습니다.</string>
+    <string name="localmodel_err_not_mnn">MNN 모델이 아닙니다. embedding, encoder 또는 decoder .mnn 파일을 찾지 못했습니다.</string>
+    <!-- Load reasons (tool/localmodel/LocalModelManager.loadModel), shown after localmodel_load_failed. -->
+    <string name="localmodel_err_no_engine">이 빌드에는 기기 내 모델 엔진이 없습니다(네이티브 라이브러리가 로드되지 않음).</string>
+    <string name="localmodel_err_missing">모델 파일 또는 폴더를 찾을 수 없습니다: %1$s</string>
+    <string name="localmodel_err_format">알 수 없는 모델 형식입니다(.gguf 파일 또는 MNN 폴더를 사용하세요): %1$s</string>
+    <string name="localmodel_err_engine_unavailable">%1$s 엔진을 사용할 수 없습니다(네이티브 라이브러리가 로드되지 않음).</string>
+    <string name="localmodel_err_load">엔진이 모델을 로드하지 못했습니다(메모리 부족 또는 파일 손상?). 엔진: %1$s</string>
 </resources>

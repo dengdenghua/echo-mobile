@@ -35,4 +35,14 @@
     <string name="filemanager_shizuku_title">需要 Shizuku 才能访问文件系统</string>
     <string name="filemanager_shizuku_desc">Shizuku 提供 shell 级权限，可访问 /sdcard/ 和 /sdcard/Android/data/。\nEcho 不会上传你的文件。</string>
     <string name="filemanager_authorize">去授权</string>
+    <!-- file_ops errors (tool/impl/FileOpsTool.kt) and tool-gate outcomes shown by the file manager. -->
+    <string name="fileops_err_path_denied">拒绝访问：%1$s 不在 /sdcard 下或属于受保护路径（%2$s）。</string>
+    <string name="fileops_err_source_required">%1$s 需要提供源路径。</string>
+    <string name="fileops_err_shizuku">Shizuku 不可用。请启动 Shizuku 并允许 Echo 使用。</string>
+    <string name="fileops_err_copy">无法将 %1$s 复制到 %2$s</string>
+    <string name="fileops_err_move">无法将 %1$s 移动到 %2$s</string>
+    <string name="fileops_err_delete">无法删除 %1$s</string>
+    <string name="fileops_err_mkdir">无法创建文件夹 %1$s</string>
+    <string name="filemanager_err_not_approved">未执行：操作被拒绝、等待超时或已撤销。</string>
+    <string name="filemanager_err_blocked">Echo 的安全设置拦截了此操作。</string>
 </resources>

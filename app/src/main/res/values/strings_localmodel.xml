@@ -46,4 +46,13 @@
     <string name="localmodel_guide_ram">Needs 6 GB+ RAM for 3B models, 4 GB+ for 1.8B MNN models</string>
     <string name="localmodel_guide_build">First build: ./build-native.sh (llama) or ./build-mnn.sh (MNN)</string>
     <string name="localmodel_limits">Known limits:\n• No function calling: offline mode is chat only and can\'t control the device\n• No vision: screenshots and images are ignored\n• Lower quality than GPT-4 or Claude: best for private or offline use</string>
+    <!-- MNN import reasons (tool/localmodel/MnnModelManager.importFromUri). -->
+    <string name="localmodel_err_name_taken">A model named %1$s is already installed.</string>
+    <string name="localmodel_err_not_mnn">Not an MNN model: no embedding, encoder or decoder .mnn file was found.</string>
+    <!-- Load reasons (tool/localmodel/LocalModelManager.loadModel), shown after localmodel_load_failed. -->
+    <string name="localmodel_err_no_engine">This build has no on-device model engine (native libraries not loaded).</string>
+    <string name="localmodel_err_missing">Model file or folder not found: %1$s</string>
+    <string name="localmodel_err_format">Unknown model format (use a .gguf file or an MNN folder): %1$s</string>
+    <string name="localmodel_err_engine_unavailable">The %1$s engine isn\'t available (native library not loaded).</string>
+    <string name="localmodel_err_load">The engine returned no model (out of memory or a damaged file?). Engine: %1$s</string>
 </resources>

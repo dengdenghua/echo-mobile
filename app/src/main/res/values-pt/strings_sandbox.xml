@@ -27,4 +27,10 @@
     <string name="sandbox_reset_ubuntu">Redefinir Ubuntu (apaga rootfs e home)</string>
     <string name="sandbox_usage_title">Como o Echo usa</string>
     <string name="sandbox_usage_body">O Echo usa este contêiner quando chama a ferramenta run_shell:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session (sessão interativa)\n\nAlpine é o padrão (leve e rápido). Ubuntu serve quando você precisa de glibc ou do ecossistema completo do apt.\nLista de permissões de bind mount: /sdcard/Download e /sdcard/Documents (leitura e escrita dentro do contêiner).</string>
+    <!-- Reasons from LinuxSandbox.reset / downloadUbuntuRootfs / deleteUbuntuRootfsDownload, shown after the failed prefix. -->
+    <string name="sandbox_err_not_started">O contêiner Linux ainda não foi iniciado.</string>
+    <string name="sandbox_err_not_configured">Esta versão não tem uma fonte de download do Ubuntu.</string>
+    <string name="sandbox_err_sha_list">Não foi possível obter a lista de checksums (%1$s).</string>
+    <string name="sandbox_err_sha_missing">A lista de checksums não tem uma entrada para %1$s.</string>
+    <string name="sandbox_err_sha_mismatch">O arquivo está corrompido (checksum não confere). Tente novamente.</string>
 </resources>

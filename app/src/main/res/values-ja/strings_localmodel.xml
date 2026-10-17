@@ -46,4 +46,13 @@
     <string name="localmodel_guide_ram">3B モデルには 6 GB 以上、1.8B の MNN モデルには 4 GB 以上の RAM が必要です</string>
     <string name="localmodel_guide_build">初回ビルド: ./build-native.sh（llama）または ./build-mnn.sh（MNN）</string>
     <string name="localmodel_limits">既知の制限:\n• function calling 非対応: オフラインモードはチャットのみで、端末を操作できません\n• 画像認識非対応: スクリーンショットや画像は無視されます\n• 品質は GPT-4 や Claude より低め: プライバシー重視やオフラインでの利用向け</string>
+    <!-- MNN import reasons (tool/localmodel/MnnModelManager.importFromUri). -->
+    <string name="localmodel_err_name_taken">同じ名前のモデル（%1$s）がすでにインストールされています。</string>
+    <string name="localmodel_err_not_mnn">MNN モデルではありません：embedding・encoder・decoder の .mnn ファイルが見つかりません。</string>
+    <!-- Load reasons (tool/localmodel/LocalModelManager.loadModel), shown after localmodel_load_failed. -->
+    <string name="localmodel_err_no_engine">このビルドには端末内モデルのエンジンがありません（ネイティブライブラリ未読み込み）。</string>
+    <string name="localmodel_err_missing">モデルのファイルまたはフォルダが見つかりません：%1$s</string>
+    <string name="localmodel_err_format">モデル形式を認識できません（.gguf ファイルか MNN フォルダを使用してください）：%1$s</string>
+    <string name="localmodel_err_engine_unavailable">%1$s エンジンを利用できません（ネイティブライブラリ未読み込み）。</string>
+    <string name="localmodel_err_load">エンジンがモデルを読み込めませんでした（メモリ不足かファイル破損の可能性）。エンジン：%1$s</string>
 </resources>

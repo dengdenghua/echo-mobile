@@ -27,4 +27,10 @@
     <string name="sandbox_reset_ubuntu">Restablecer Ubuntu (borra rootfs y home)</string>
     <string name="sandbox_usage_title">Cómo lo usa Echo</string>
     <string name="sandbox_usage_body">Echo usa este contenedor cuando llama a la herramienta run_shell:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session (sesión interactiva)\n\nAlpine es la opción predeterminada (ligera y rápida). Ubuntu sirve cuando necesitas glibc o el ecosistema completo de apt.\nLista de permitidos para bind mount: /sdcard/Download y /sdcard/Documents (lectura y escritura dentro del contenedor).</string>
+    <!-- Reasons from LinuxSandbox.reset / downloadUbuntuRootfs / deleteUbuntuRootfsDownload, shown after the failed prefix. -->
+    <string name="sandbox_err_not_started">El contenedor Linux aún no se ha iniciado.</string>
+    <string name="sandbox_err_not_configured">Esta versión no tiene una fuente de descarga de Ubuntu.</string>
+    <string name="sandbox_err_sha_list">No se pudo obtener la lista de sumas de verificación (%1$s).</string>
+    <string name="sandbox_err_sha_missing">La lista de sumas de verificación no incluye %1$s.</string>
+    <string name="sandbox_err_sha_mismatch">El archivo está dañado (la suma de verificación no coincide). Inténtalo de nuevo.</string>
 </resources>

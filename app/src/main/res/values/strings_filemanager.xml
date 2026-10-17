@@ -35,4 +35,14 @@
     <string name="filemanager_shizuku_title">Shizuku is needed to access files</string>
     <string name="filemanager_shizuku_desc">Shizuku gives shell-level access to /sdcard/ and /sdcard/Android/data/.\nEcho doesn\'t upload your files.</string>
     <string name="filemanager_authorize">Grant access</string>
+    <!-- file_ops errors (tool/impl/FileOpsTool.kt) and tool-gate outcomes shown by the file manager. -->
+    <string name="fileops_err_path_denied">Access denied: %1$s is outside /sdcard or protected (%2$s).</string>
+    <string name="fileops_err_source_required">A source path is required for %1$s.</string>
+    <string name="fileops_err_shizuku">Shizuku is not available. Start Shizuku and allow Echo to use it.</string>
+    <string name="fileops_err_copy">Couldn\'t copy %1$s to %2$s</string>
+    <string name="fileops_err_move">Couldn\'t move %1$s to %2$s</string>
+    <string name="fileops_err_delete">Couldn\'t delete %1$s</string>
+    <string name="fileops_err_mkdir">Couldn\'t create the folder %1$s</string>
+    <string name="filemanager_err_not_approved">Not done: the action was declined, timed out or undone.</string>
+    <string name="filemanager_err_blocked">Echo\'s safety settings blocked this action.</string>
 </resources>

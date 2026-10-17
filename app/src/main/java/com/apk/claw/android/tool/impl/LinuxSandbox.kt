@@ -2,6 +2,9 @@ package com.apk.claw.android.tool.impl
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.StringRes
+import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.apk.claw.android.agent.CancellationToken
 import com.apk.claw.android.octopus_mobile.safety.SsrfSafeHttp
 import com.apk.claw.android.tool.ToolErr
@@ -245,7 +248,7 @@ object LinuxSandbox {
     @Suppress("TooGenericExceptionCaught")
     fun reset(distro: Distro = Distro.ALPINE): ToolResult {
         val ctx = contextRef
-            ?: return ToolResult.error("LinuxSandbox 未初始化", ToolErr.INTERNAL)
+            ?: return ToolResult.error(uiText(R.string.sandbox_err_not_started), ToolErr.INTERNAL)
         val containerDir = File(ctx.filesDir, distro.dirName)
         return try {
             containerDir.deleteRecursively()
@@ -253,7 +256,8 @@ object LinuxSandbox {
             Log.i(TAG, "Linux container reset (${distro.name}): ${containerDir.absolutePath}")
             ToolResult.success("${distro.displayName} 容器已重置,下次调用 run_shell 将重新初始化。")
         } catch (e: Exception) {
-            ToolResult.error("重置失败: ${e.message}", ToolErr.INTERNAL)
+            // 设置页会加上「重置失败:」前缀,这里只给原因
+            ToolResult.error(e.message ?: uiText(R.string.sandbox_unknown_error), ToolErr.INTERNAL)
         }
     }
 
@@ -296,13 +300,13 @@ object LinuxSandbox {
         progress: ((percent: Int) -> Unit)? = null,
     ): ToolResult {
         val ctx = contextRef
-            ?: return ToolResult.error("LinuxSandbox 未初始化", ToolErr.INTERNAL)
+            ?: return ToolResult.error(uiText(R.string.sandbox_err_not_started), ToolErr.INTERNAL)
         val url = Distro.UBUNTU.downloadUrl
-            ?: return ToolResult.error("Ubuntu rootfs 下载地址未配置", ToolErr.INTERNAL)
+            ?: return ToolResult.error(uiText(R.string.sandbox_err_not_configured), ToolErr.INTERNAL)
         val fileName = Distro.UBUNTU.rootfsFileName
-            ?: return ToolResult.error("Ubuntu rootfs 文件名未配置", ToolErr.INTERNAL)
+            ?: return ToolResult.error(uiText(R.string.sandbox_err_not_configured), ToolErr.INTERNAL)
         val shaUrl = Distro.UBUNTU.sha256Url
-            ?: return ToolResult.error("Ubuntu SHA256SUMS 地址未配置", ToolErr.INTERNAL)
+            ?: return ToolResult.error(uiText(R.string.sandbox_err_not_configured), ToolErr.INTERNAL)
 
         val downloadsDir = File(ctx.filesDir, UBUNTU_DOWNLOADS_DIR_NAME)
         downloadsDir.mkdirs()
@@ -318,12 +322,12 @@ object LinuxSandbox {
             // 1. 下载 SHA256SUMS 并提取目标文件的 SHA
             val shaContent = downloadText(shaUrl)
                 ?: return ToolResult.error(
-                    "无法下载 SHA256SUMS: $shaUrl",
+                    uiText(R.string.sandbox_err_sha_list, shaUrl),
                     ToolErr.UPSTREAM,
                 )
             val expectedSha = extractShaFromSums(shaContent, fileName)
                 ?: return ToolResult.error(
-                    "SHA256SUMS 中未找到 $fileName",
+                    uiText(R.string.sandbox_err_sha_missing, fileName),
                     ToolErr.INTERNAL,
                 )
 
@@ -334,10 +338,8 @@ object LinuxSandbox {
             val actualSha = sha256Hex(tarFile.readBytes()).lowercase()
             if (actualSha != expectedSha.lowercase()) {
                 tarFile.delete()
-                return ToolResult.error(
-                    "Ubuntu rootfs SHA256 校验失败:expected=$expectedSha actual=$actualSha",
-                    ToolErr.INTERNAL,
-                )
+                Log.w(TAG, "Ubuntu rootfs SHA256 mismatch: expected=$expectedSha actual=$actualSha")
+                return ToolResult.error(uiText(R.string.sandbox_err_sha_mismatch), ToolErr.INTERNAL)
             }
 
             // 4. 写 SHA 文件(供 extractUbuntuRootfsFromFilesDir 二次校验)
@@ -349,7 +351,8 @@ object LinuxSandbox {
             Log.e(TAG, "downloadUbuntuRootfs failed", e)
             // 清理半下载文件
             if (tarFile.exists() && tarFile.length() < 1_000_000) tarFile.delete()
-            ToolResult.error("Ubuntu rootfs 下载失败: ${e.message}", ToolErr.UPSTREAM)
+            // 设置页会加上「下载失败:」前缀,这里只给原因
+            ToolResult.error(e.message ?: uiText(R.string.sandbox_unknown_error), ToolErr.UPSTREAM)
         }
     }
 
@@ -359,16 +362,23 @@ object LinuxSandbox {
      */
     fun deleteUbuntuRootfsDownload(): ToolResult {
         val ctx = contextRef
-            ?: return ToolResult.error("LinuxSandbox 未初始化", ToolErr.INTERNAL)
+            ?: return ToolResult.error(uiText(R.string.sandbox_err_not_started), ToolErr.INTERNAL)
         val downloadsDir = File(ctx.filesDir, UBUNTU_DOWNLOADS_DIR_NAME)
         return try {
             downloadsDir.deleteRecursively()
             Log.i(TAG, "Ubuntu rootfs download deleted: ${downloadsDir.absolutePath}")
             ToolResult.success("Ubuntu rootfs 下载缓存已删除。")
         } catch (e: Exception) {
-            ToolResult.error("删除失败: ${e.message}", ToolErr.INTERNAL)
+            ToolResult.error(e.message ?: uiText(R.string.sandbox_delete_failed), ToolErr.INTERNAL)
         }
     }
+
+    /**
+     * Text for results the settings page shows (reset / download / delete), in the app language.
+     * The run_shell results that only Echo reads stay as they are.
+     */
+    private fun uiText(@StringRes id: Int, vararg args: Any): String =
+        (contextRef ?: ClawApplication.instance).getString(id, *args)
 
     // ── 内部实现 ──────────────────────────────────────────────────────────
 

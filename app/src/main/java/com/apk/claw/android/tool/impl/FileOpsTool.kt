@@ -1,5 +1,8 @@
 package com.apk.claw.android.tool.impl
 
+import androidx.annotation.StringRes
+import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.safety.PathGuard
 import com.apk.claw.android.shizuku.ShizukuShellService
 import com.apk.claw.android.tool.BaseTool
@@ -53,49 +56,49 @@ class FileOpsTool : BaseTool() {
         // 路径安全检查 —— 限制在 /sdcard 沙箱内，拦截 /system /proc 及其他 App 私有目录、路径遍历。
         if (source.isNotEmpty()) {
             val v = PathGuard.underSdcard(source)
-            if (!v.allow) return ToolResult.error("Access denied: source 越界或敏感 (${v.reason})。仅允许 /sdcard 下的路径。")
+            if (!v.allow) return ToolResult.error(text(R.string.fileops_err_path_denied, source, v.reason))
         }
         if (destination.isNotEmpty()) {
             val v = PathGuard.underSdcard(destination)
-            if (!v.allow) return ToolResult.error("Access denied: destination 越界或敏感 (${v.reason})。仅允许 /sdcard 下的路径。")
+            if (!v.allow) return ToolResult.error(text(R.string.fileops_err_path_denied, destination, v.reason))
         }
 
         return when (action) {
             "copy" -> {
-                if (source.isEmpty()) return ToolResult.error("source is required for copy.")
+                if (source.isEmpty()) return ToolResult.error(text(R.string.fileops_err_source_required, action))
                 val dest = requireString(params, "destination")
                 val ok = ShizukuShellService.copyFile(source, dest)
-                    ?: return ToolResult.error("Shizuku not available.")
+                    ?: return ToolResult.error(text(R.string.fileops_err_shizuku))
                 if (ok) ToolResult.success("Copied: $source -> $dest")
-                else ToolResult.error("Failed to copy $source to $dest")
+                else ToolResult.error(text(R.string.fileops_err_copy, source, dest))
             }
             "move" -> {
-                if (source.isEmpty()) return ToolResult.error("source is required for move.")
+                if (source.isEmpty()) return ToolResult.error(text(R.string.fileops_err_source_required, action))
                 val dest = requireString(params, "destination")
                 val ok = ShizukuShellService.moveFile(source, dest)
-                    ?: return ToolResult.error("Shizuku not available.")
+                    ?: return ToolResult.error(text(R.string.fileops_err_shizuku))
                 if (ok) ToolResult.success("Moved: $source -> $dest")
-                else ToolResult.error("Failed to move $source to $dest")
+                else ToolResult.error(text(R.string.fileops_err_move, source, dest))
             }
             "delete" -> {
-                if (source.isEmpty()) return ToolResult.error("source is required for delete.")
+                if (source.isEmpty()) return ToolResult.error(text(R.string.fileops_err_source_required, action))
                 val ok = ShizukuShellService.deleteFile(source)
-                    ?: return ToolResult.error("Shizuku not available.")
+                    ?: return ToolResult.error(text(R.string.fileops_err_shizuku))
                 if (ok) ToolResult.success("Deleted: $source")
-                else ToolResult.error("Failed to delete $source")
+                else ToolResult.error(text(R.string.fileops_err_delete, source))
             }
             "mkdir" -> {
-                if (source.isEmpty()) return ToolResult.error("source (directory path) is required for mkdir.")
+                if (source.isEmpty()) return ToolResult.error(text(R.string.fileops_err_source_required, action))
                 val ok = ShizukuShellService.createDirectory(source)
-                    ?: return ToolResult.error("Shizuku not available.")
+                    ?: return ToolResult.error(text(R.string.fileops_err_shizuku))
                 if (ok) ToolResult.success("Created directory: $source")
-                else ToolResult.error("Failed to create directory $source")
+                else ToolResult.error(text(R.string.fileops_err_mkdir, source))
             }
             "read" -> {
-                if (source.isEmpty()) return ToolResult.error("source is required for read.")
+                if (source.isEmpty()) return ToolResult.error(text(R.string.fileops_err_source_required, action))
                 val maxLines = optionalInt(params, "max_lines", 100)
                 val content = ShizukuShellService.readFile(source, maxLines)
-                    ?: return ToolResult.error("Shizuku not available.")
+                    ?: return ToolResult.error(text(R.string.fileops_err_shizuku))
                 if (content.startsWith("Error:")) {
                     ToolResult.error(content)
                 } else {
@@ -105,6 +108,9 @@ class FileOpsTool : BaseTool() {
             else -> ToolResult.error("Unknown action: $action. Use 'copy', 'move', 'delete', 'mkdir', or 'read'.")
         }
     }
+
+    /** Errors reach the file manager's toasts as well as Echo, so they follow the app language. */
+    private fun text(@StringRes id: Int, vararg args: Any): String = ClawApplication.instance.getString(id, *args)
 
     override fun getDescriptionEN(): String = """
         Perform file operations using Shizuku shell access.

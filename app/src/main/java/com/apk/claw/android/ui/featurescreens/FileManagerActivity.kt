@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -57,6 +58,7 @@ import com.apk.claw.android.octopus_mobile.files.LsParser.FileType
 import com.apk.claw.android.octopus_mobile.files.LsParser.SortMode
 import com.apk.claw.android.shizuku.ShizukuManager
 import com.apk.claw.android.shizuku.ShizukuShellService
+import com.apk.claw.android.tool.ToolErr
 import com.apk.claw.android.tool.ToolRegistry
 import com.apk.claw.android.tool.ToolResult
 import com.apk.claw.android.ui.compose.component.EchoLoadingPanel
@@ -207,7 +209,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                             )
                         }
                         val msg = when {
-                            !r.isSuccess -> r.error ?: ctx.getString(R.string.filemanager_action_failed)
+                            !r.isSuccess -> fileOpsFailure(ctx, r, R.string.filemanager_action_failed)
                             mode == "copy" -> ctx.getString(R.string.filemanager_copied_here)
                             else -> ctx.getString(R.string.filemanager_moved_here)
                         }
@@ -287,7 +289,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                     val msg = if (r.isSuccess) {
                         ctx.getString(R.string.filemanager_deleted, entry.name)
                     } else {
-                        r.error ?: ctx.getString(R.string.filemanager_delete_failed)
+                        fileOpsFailure(ctx, r, R.string.filemanager_delete_failed)
                     }
                     toast(ctx, msg)
                     selectedEntry = null
@@ -311,7 +313,8 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                             mapOf("action" to "read", "source" to entry.path, "max_lines" to 500),
                         )
                     }
-                    textPreview = if (r.isSuccess) r.data else r.error
+                    textPreview =
+                        if (r.isSuccess) r.data else fileOpsFailure(ctx, r, R.string.filemanager_action_failed)
                     selectedEntry = null
                 }
             },
@@ -336,7 +339,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                     val msg = if (r.isSuccess) {
                         ctx.getString(R.string.filemanager_created, name)
                     } else {
-                        r.error ?: ctx.getString(R.string.filemanager_create_failed)
+                        fileOpsFailure(ctx, r, R.string.filemanager_create_failed)
                     }
                     toast(ctx, msg)
                     loadDir(currentPath)
@@ -368,7 +371,7 @@ private fun FileManagerScreen(onBack: () -> Unit) {
                         val msg = if (r.isSuccess) {
                             ctx.getString(R.string.filemanager_renamed)
                         } else {
-                            r.error ?: ctx.getString(R.string.filemanager_action_failed)
+                            fileOpsFailure(ctx, r, R.string.filemanager_action_failed)
                         }
                         toast(ctx, msg)
                         loadDir(currentPath)
@@ -693,6 +696,17 @@ private fun parentOf(path: String): String {
     if (idx <= 0) return "/"  // 已到根
     return trimmed.substring(0, idx)
 }
+
+/**
+ * A failed file_ops call in the reader's language. Declined / timed-out / undone approvals and safety
+ * blocks come from the tool gate (by error code); the tool's own errors are already localized.
+ */
+private fun fileOpsFailure(ctx: android.content.Context, r: ToolResult, @StringRes fallback: Int): String =
+    when (r.errorCode) {
+        ToolErr.PERMISSION -> ctx.getString(R.string.filemanager_err_not_approved)
+        ToolErr.BLOCKED -> ctx.getString(R.string.filemanager_err_blocked)
+        else -> r.error ?: ctx.getString(fallback)
+    }
 
 private fun toast(ctx: android.content.Context, msg: String) {
     Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()

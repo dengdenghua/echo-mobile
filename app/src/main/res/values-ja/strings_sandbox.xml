@@ -27,4 +27,10 @@
     <string name="sandbox_reset_ubuntu">Ubuntu をリセット（rootfs と home を削除）</string>
     <string name="sandbox_usage_title">使い方</string>
     <string name="sandbox_usage_body">Echo が run_shell ツールを呼び出すと、このコンテナが自動で使われます:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session（対話型セッション）\n\n既定は Alpine（軽量で高速）。glibc や apt の完全なエコシステムが必要な場合は Ubuntu が適しています。\nbind mount の許可リスト: /sdcard/Download と /sdcard/Documents（コンテナ内で読み書き可能）。</string>
+    <!-- Reasons from LinuxSandbox.reset / downloadUbuntuRootfs / deleteUbuntuRootfsDownload, shown after the failed prefix. -->
+    <string name="sandbox_err_not_started">Linux コンテナはまだ起動していません。</string>
+    <string name="sandbox_err_not_configured">このビルドには Ubuntu のダウンロード元が設定されていません。</string>
+    <string name="sandbox_err_sha_list">チェックサム一覧を取得できませんでした（%1$s）。</string>
+    <string name="sandbox_err_sha_missing">チェックサム一覧に %1$s がありません。</string>
+    <string name="sandbox_err_sha_mismatch">ファイルが破損しています（チェックサム不一致）。もう一度お試しください。</string>
 </resources>

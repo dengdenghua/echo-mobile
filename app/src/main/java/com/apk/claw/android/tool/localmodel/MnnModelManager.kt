@@ -3,6 +3,7 @@ package com.apk.claw.android.tool.localmodel
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.apk.claw.android.R
 import com.apk.claw.android.utils.KVUtils
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -105,9 +106,14 @@ object MnnModelManager {
             val name = queryFileName(ctx, uri) ?: "model_${System.currentTimeMillis()}"
             val targetDir = File(getRootDir(ctx), name.substringBeforeLast('.'))
             if (targetDir.exists()) {
-                return@withContext null to "同名模型已存在: ${targetDir.name}"
+                return@withContext null to ctx.getString(R.string.localmodel_err_name_taken, targetDir.name)
             }
             targetDir.mkdirs()
+            // The file could not be read: remove the empty folder so a retry is not refused as a duplicate
+            val readFailed = {
+                targetDir.deleteRecursively()
+                ctx.getString(R.string.localmodel_read_file_failed)
+            }
 
             when (name.lowercase().substringAfterLast('.', "")) {
                 "zip" -> {
@@ -115,7 +121,7 @@ object MnnModelManager {
                     val tmpZip = File(targetDir.parentFile, "_tmp_$name.zip")
                     ctx.contentResolver.openInputStream(uri)?.use { input ->
                         tmpZip.outputStream().use { input.copyTo(it) }
-                    } ?: return@withContext null to "无法读取文件"
+                    } ?: return@withContext null to readFailed()
                     unzip(tmpZip, targetDir)
                     tmpZip.delete()
                 }
@@ -123,13 +129,13 @@ object MnnModelManager {
                     // 单个 .mnn 文件
                     ctx.contentResolver.openInputStream(uri)?.use { input ->
                         File(targetDir, name).outputStream().use { input.copyTo(it) }
-                    } ?: return@withContext null to "无法读取文件"
+                    } ?: return@withContext null to readFailed()
                 }
                 else -> {
                     // 不识别扩展名,但尝试复制
                     ctx.contentResolver.openInputStream(uri)?.use { input ->
                         File(targetDir, name).outputStream().use { input.copyTo(it) }
-                    } ?: return@withContext null to "无法读取文件"
+                    } ?: return@withContext null to readFailed()
                 }
             }
 
@@ -137,13 +143,14 @@ object MnnModelManager {
             val type = detectType(targetDir)
             if (type == ModelType.UNKNOWN) {
                 targetDir.deleteRecursively()
-                return@withContext null to "导入的模型格式不识别(目录内无 embedding/encoder/decoder .mnn 文件)"
+                return@withContext null to ctx.getString(R.string.localmodel_err_not_mnn)
             }
             Log.i(TAG, "Model imported: ${targetDir.name} (type=$type)")
             targetDir to null
         } catch (e: Exception) {
             Log.e(TAG, "Import failed", e)
-            null to (e.message ?: "导入失败")
+            null to (e.message?.let { ctx.getString(R.string.localmodel_import_failed_reason, it) }
+                ?: ctx.getString(R.string.localmodel_import_failed))
         }
     }
 

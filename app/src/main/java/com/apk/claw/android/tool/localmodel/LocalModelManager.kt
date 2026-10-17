@@ -1,6 +1,9 @@
 package com.apk.claw.android.tool.localmodel
 
 import android.util.Log
+import androidx.annotation.StringRes
+import com.apk.claw.android.ClawApplication
+import com.apk.claw.android.R
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -88,6 +91,9 @@ object LocalModelManager {
         }
     }
 
+    /** Load errors reach the local-model screen and Echo, so they follow the app language. */
+    private fun text(@StringRes id: Int, vararg args: Any): String = ClawApplication.instance.getString(id, *args)
+
     /**
      * 加载模型。
      * @param modelPath 模型文件/目录绝对路径(.gguf 文件 / .mnn 目录)
@@ -102,25 +108,21 @@ object LocalModelManager {
         gpuLayers: Int = 0,
     ): Result<ModelHandle> {
         if (!hasAnyEngineAvailable()) {
-            return Result.failure(IllegalStateException(
-                "本地模型引擎未就绪(libllama-jni.so / libmnn-jni.so 均未加载)。" +
-                    "需要编译 native 库,详见 build-native.sh / build-mnn.sh。",
-            ))
+            // libllama-jni.so / libmnn-jni.so 均未加载:需要编译 native 库,详见 build-native.sh / build-mnn.sh
+            return Result.failure(IllegalStateException(text(R.string.localmodel_err_no_engine)))
         }
 
         val file = File(modelPath)
         if (!file.exists()) {
-            return Result.failure(IllegalArgumentException("模型文件/目录不存在: $modelPath"))
+            return Result.failure(IllegalArgumentException(text(R.string.localmodel_err_missing, modelPath)))
         }
 
         val engine = selectEngineForPath(modelPath)
-            ?: return Result.failure(IllegalArgumentException(
-                "无法识别模型格式(支持 .gguf 文件 / .mnn 目录)。路径: $modelPath",
-            ))
+            ?: return Result.failure(IllegalArgumentException(text(R.string.localmodel_err_format, modelPath)))
 
         if (!engine.isAvailable()) {
             return Result.failure(IllegalStateException(
-                "引擎 ${engine.displayName} 不可用(native 库未加载)。",
+                text(R.string.localmodel_err_engine_unavailable, engine.displayName),
             ))
         }
 
@@ -130,9 +132,7 @@ object LocalModelManager {
         return try {
             val ptr = engine.loadModel(modelPath, contextSize, gpuLayers)
             if (ptr == 0L) {
-                return Result.failure(IllegalStateException(
-                    "模型加载失败(内存不足?文件损坏?引擎=${engine.id})",
-                ))
+                return Result.failure(IllegalStateException(text(R.string.localmodel_err_load, engine.id)))
             }
             val sizeBytes = if (file.isDirectory) {
                 file.walkTopDown().filter { it.isFile }.sumOf { it.length() }

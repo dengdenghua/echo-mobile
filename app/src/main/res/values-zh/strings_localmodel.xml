@@ -46,4 +46,13 @@
     <string name="localmodel_guide_ram">3B 模型需要 6 GB+ 内存，1.8B MNN 模型需要 4 GB+</string>
     <string name="localmodel_guide_build">首次编译：./build-native.sh（llama）或 ./build-mnn.sh（MNN）</string>
     <string name="localmodel_limits">已知限制：\n• 不支持 function calling：离线模式仅支持纯对话，无法控制设备\n• 不支持视觉：截图和图片输入会被忽略\n• 模型质量低于 GPT-4 或 Claude：适合隐私敏感或离线场景</string>
+    <!-- MNN import reasons (tool/localmodel/MnnModelManager.importFromUri). -->
+    <string name="localmodel_err_name_taken">已安装同名模型：%1$s。</string>
+    <string name="localmodel_err_not_mnn">不是 MNN 模型：没有找到 embedding、encoder 或 decoder 的 .mnn 文件。</string>
+    <!-- Load reasons (tool/localmodel/LocalModelManager.loadModel), shown after localmodel_load_failed. -->
+    <string name="localmodel_err_no_engine">此版本没有可用的本地模型引擎（native 库未加载）。</string>
+    <string name="localmodel_err_missing">找不到模型文件或目录：%1$s</string>
+    <string name="localmodel_err_format">无法识别的模型格式（支持 .gguf 文件或 MNN 目录）：%1$s</string>
+    <string name="localmodel_err_engine_unavailable">%1$s 引擎不可用（native 库未加载）。</string>
+    <string name="localmodel_err_load">引擎未能加载模型（内存不足或文件损坏？）。引擎：%1$s</string>
 </resources>

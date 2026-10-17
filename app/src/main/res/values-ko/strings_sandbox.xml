@@ -27,4 +27,10 @@
     <string name="sandbox_reset_ubuntu">Ubuntu 초기화(rootfs와 home 삭제)</string>
     <string name="sandbox_usage_title">사용 방식</string>
     <string name="sandbox_usage_body">Echo가 run_shell 도구를 호출하면 이 컨테이너를 자동으로 사용합니다:\n• run_shell command=\"ls -la /\"\n• run_shell command=\"apt install -y jq\" distro=ubuntu\n• run_shell_session(대화형 세션)\n\n기본값은 Alpine(가볍고 빠름)입니다. glibc나 완전한 apt 생태계가 필요하면 Ubuntu가 적합합니다.\nbind mount 허용 목록: /sdcard/Download와 /sdcard/Documents(컨테이너에서 읽기/쓰기 가능).</string>
+    <!-- Reasons from LinuxSandbox.reset / downloadUbuntuRootfs / deleteUbuntuRootfsDownload, shown after the failed prefix. -->
+    <string name="sandbox_err_not_started">Linux 컨테이너가 아직 시작되지 않았습니다.</string>
+    <string name="sandbox_err_not_configured">이 빌드에는 Ubuntu 다운로드 소스가 없습니다.</string>
+    <string name="sandbox_err_sha_list">체크섬 목록을 가져오지 못했습니다(%1$s).</string>
+    <string name="sandbox_err_sha_missing">체크섬 목록에 %1$s 항목이 없습니다.</string>
+    <string name="sandbox_err_sha_mismatch">파일이 손상되었습니다(체크섬 불일치). 다시 시도하세요.</string>
 </resources>

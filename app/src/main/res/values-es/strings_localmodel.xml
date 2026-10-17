@@ -46,4 +46,13 @@
     <string name="localmodel_guide_ram">Requiere 6 GB+ de RAM para modelos 3B y 4 GB+ para modelos MNN 1.8B</string>
     <string name="localmodel_guide_build">Primera compilación: ./build-native.sh (llama) o ./build-mnn.sh (MNN)</string>
     <string name="localmodel_limits">Limitaciones conocidas:\n• Sin function calling: el modo sin conexión es solo chat y no puede controlar el dispositivo\n• Sin visión: se ignoran las capturas y las imágenes\n• Menor calidad que GPT-4 o Claude: ideal para uso privado o sin conexión</string>
+    <!-- MNN import reasons (tool/localmodel/MnnModelManager.importFromUri). -->
+    <string name="localmodel_err_name_taken">Ya hay un modelo instalado con el nombre %1$s.</string>
+    <string name="localmodel_err_not_mnn">No es un modelo MNN: no se encontró ningún archivo .mnn de embedding, encoder o decoder.</string>
+    <!-- Load reasons (tool/localmodel/LocalModelManager.loadModel), shown after localmodel_load_failed. -->
+    <string name="localmodel_err_no_engine">Esta versión no tiene un motor de modelos en el dispositivo (bibliotecas nativas no cargadas).</string>
+    <string name="localmodel_err_missing">No se encontró el archivo o la carpeta del modelo: %1$s</string>
+    <string name="localmodel_err_format">Formato de modelo desconocido (usa un archivo .gguf o una carpeta MNN): %1$s</string>
+    <string name="localmodel_err_engine_unavailable">El motor %1$s no está disponible (biblioteca nativa no cargada).</string>
+    <string name="localmodel_err_load">El motor no cargó el modelo (¿falta memoria o el archivo está dañado?). Motor: %1$s</string>
 </resources>
