@@ -41,9 +41,9 @@
     <string name="workflows_tool_name">Nome da ferramenta</string>
     <string name="workflows_params_label">Parâmetros (use ${var} para referenciar saídas anteriores)</string>
     <string name="workflows_prompt_label">Instrução em linguagem natural</string>
-    <string name="workflows_condition_label">Condição → destino (uma por linha: expressão => stepId)</string>
-    <string name="workflows_condition_example">Exemplo: ${status} == \"ok\" => step_done\nOperadores: == != contains > &lt;</string>
-    <string name="workflows_condition_step_ids">stepIds disponíveis: %1$s</string>
+    <string name="workflows_condition_label">Condição → etapa de destino (uma por linha: expressão => nome da etapa)</string>
+    <string name="workflows_condition_example">Exemplo: ${status} == \"ok\" => Enviar relatório\nOperadores: == != >= &lt;= > &lt; contains · #3 também indica a etapa 3</string>
+    <string name="workflows_condition_step_ids">Etapas: %1$s</string>
     <string name="workflows_output_var_label">Variável de saída (opcional; as etapas seguintes podem usar ${nome})</string>
     <string name="workflows_result_success">Execução concluída</string>
     <string name="workflows_result_failed">A execução falhou</string>
@@ -51,4 +51,17 @@
     <string name="workflows_result_error">Erro: %1$s</string>
     <string name="workflows_result_output">Saída final:</string>
     <string name="workflows_result_logs">Registro de etapas:</string>
+    <!-- Engine (WorkflowEngine.kt) and scheduled-run notifications (WorkflowAlarmReceiver.kt). -->
+    <string name="workflow_err_step_failed">A etapa \"%1$s\" falhou: %2$s</string>
+    <string name="workflow_err_branch_target">nenhuma etapa se chama \"%1$s\". Use o nome ou o número de uma etapa (#3).</string>
+    <string name="workflow_err_loop">Parado após %1$d etapas: os ramos de condição ficaram em loop.</string>
+    <string name="workflow_err_tool_failed">A ferramenta %1$s falhou</string>
+    <string name="workflow_prompt_empty_reply">(O modelo não retornou texto)</string>
+    <string name="workflow_log_branch_to">Ir para %1$s</string>
+    <string name="workflow_log_branch_none">Nenhuma condição atendida; seguindo para a próxima etapa</string>
+    <string name="workflow_alarm_done_title">Fluxo de trabalho concluído</string>
+    <string name="workflow_alarm_failed_title">O fluxo de trabalho falhou</string>
+    <string name="workflow_alarm_done_text">\"%1$s\" concluído (%2$d etapas, %3$d s)</string>
+    <string name="workflow_alarm_failed_text">\"%1$s\": %2$s (%3$d etapas, %4$d s)</string>
+    <string name="workflow_alarm_crashed_text">\"%1$s\" falhou: %2$s</string>
 </resources>

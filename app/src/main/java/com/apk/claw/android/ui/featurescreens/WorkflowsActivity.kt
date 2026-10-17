@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.workflow.Workflow
+import com.apk.claw.android.octopus_mobile.workflow.WorkflowBranches
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowContext
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowEngine
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowResult
@@ -460,7 +461,8 @@ private fun WorkflowEditorDialog(
                         id = initial.id.ifBlank { UUID.randomUUID().toString() },
                         name = name.trim(),
                         description = description.trim(),
-                        steps = steps.toList(),
+                        // Branches are typed as step names; they are stored as step ids so a rename keeps them.
+                        steps = WorkflowBranches.withStepIds(steps.toList()),
                     ))
                 }
             }) { Text(stringResource(R.string.common_save)) }
@@ -506,7 +508,7 @@ private fun WorkflowEditorDialog(
                     StepEditor(
                         step = step,
                         index = idx,
-                        allStepNames = steps.map { it.name },
+                        allSteps = steps.toList(),
                         onChange = { newStep -> steps[idx] = newStep },
                         onRemove = { steps.removeAt(idx) },
                     )
@@ -526,14 +528,10 @@ private fun WorkflowEditorDialog(
 private fun StepEditor(
     step: WorkflowStep,
     index: Int,
-    allStepNames: List<String>,
+    allSteps: List<WorkflowStep>,
     onChange: (WorkflowStep) -> Unit,
     onRemove: () -> Unit,
 ) {
-    val toolNames = remember {
-        ToolRegistry.getInstance().getAllTools().map { it.getName() }.sorted()
-    }
-
     Surface(
         shape = OctopusShape.small,
         color = FSurface2.copy(alpha = 0.4f),
@@ -541,135 +539,155 @@ private fun StepEditor(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("#${index + 1}", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.width(8.dp))
-                FTextField(step.name, modifier = Modifier.weight(1f)) { onChange(step.copy(name = it)) }
-                IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
-                    Icon(
-                        Icons.Filled.Delete, contentDescription = stringResource(R.string.common_delete),
-                        tint = FError, modifier = Modifier.size(16.dp),
-                    )
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            // Type 选择：标签放在芯片上方，译文较长时三个芯片仍能排在一行
-            FLabel(stringResource(R.string.workflows_step_type))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                WorkflowStep.StepType.values().forEach { t ->
-                    FilterChip(
-                        selected = step.type == t,
-                        onClick = { onChange(step.copy(type = t)) },
-                        label = { Text(stepTypeLabel(t), fontSize = OctopusType.caption) },
-                        modifier = Modifier.padding(end = 4.dp),
-                    )
-                }
-            }
+            StepHeader(step, index, onChange, onRemove)
             Spacer(Modifier.height(6.dp))
             when (step.type) {
-                WorkflowStep.StepType.TOOL -> {
-                    FLabel(stringResource(R.string.workflows_tool_name))
-                    // 下拉选择工具
-                    var expanded by remember { mutableStateOf(false) }
-                    Box {
-                        OutlinedTextField(
-                            value = step.content,
-                            onValueChange = { onChange(step.copy(content = it)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp, color = FText),
-                            shape = OctopusShape.small,
-                            trailingIcon = {
-                                IconButton(onClick = { expanded = true }, modifier = Modifier.size(20.dp)) {
-                                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(14.dp), tint = FSub)
-                                }
-                            },
-                            colors = EchoFieldColors.outlined(),
-                        )
-                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                            toolNames.forEach { n ->
-                                DropdownMenuItem(
-                                    text = { Text(n, fontSize = 12.sp) },
-                                    onClick = { onChange(step.copy(content = n)); expanded = false },
-                                )
-                            }
-                        }
-                    }
-                    // 工具参数编辑：选中工具后显示该工具声明的参数 schema，
-                    // 让用户填值（支持 ${var} 模板引用前序步骤输出）。
-                    if (step.content.isNotBlank() && toolNames.contains(step.content)) {
-                        Spacer(Modifier.height(6.dp))
-                        val tool = remember(step.content) {
-                            runCatching { ToolRegistry.getInstance().getTool(step.content) }.getOrNull()
-                        }
-                        val params = tool?.getParameters() ?: emptyList()
-                        if (params.isNotEmpty()) {
-                            FLabel(stringResource(R.string.workflows_params_label))
-                            params.forEach { p ->
-                                val current = step.params[p.name] ?: ""
-                                FParamField(
-                                    label = "${p.name} (${p.type})" + if (p.isRequired) " *" else "",
-                                    value = current,
-                                    onChange = { v ->
-                                        val newMap = step.params.toMutableMap()
-                                        if (v.isBlank()) newMap.remove(p.name) else newMap[p.name] = v
-                                        onChange(step.copy(params = newMap))
-                                    },
-                                )
-                                Spacer(Modifier.height(4.dp))
-                            }
-                        }
-                    }
-                }
+                WorkflowStep.StepType.TOOL -> ToolStepFields(step, onChange)
                 WorkflowStep.StepType.PROMPT -> {
                     FLabel(stringResource(R.string.workflows_prompt_label))
                     FTextField(step.content, minLines = 2) { onChange(step.copy(content = it)) }
                 }
-                WorkflowStep.StepType.CONDITION -> {
-                    FLabel(stringResource(R.string.workflows_condition_label))
-                    Text(
-                        stringResource(R.string.workflows_condition_example),
-                        color = FMuted, fontSize = OctopusType.caption, lineHeight = 16.sp,
-                        modifier = Modifier.padding(start = 2.dp, bottom = 4.dp),
-                    )
-                    // 把 branches Map 转成可编辑的多行文本
-                    val branchesText = remember(step.branches) {
-                        step.branches.entries.joinToString("\n") { (expr, target) -> "$expr => $target" }
-                    }
-                    var textState by remember(branchesText) { mutableStateOf(branchesText) }
-                    OutlinedTextField(
-                        value = textState,
-                        onValueChange = { newText ->
-                            textState = newText
-                            val parsed = newText.lines()
-                                .mapNotNull { line ->
-                                    val arrow = line.indexOf("=>")
-                                    if (arrow < 0) null
-                                    else line.substring(0, arrow).trim() to line.substring(arrow + 2).trim()
-                                }
-                                .filter { it.first.isNotEmpty() && it.second.isNotEmpty() }
-                                .toMap()
-                            if (parsed != step.branches) {
-                                onChange(step.copy(branches = parsed))
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3,
-                        textStyle = androidx.compose.ui.text.TextStyle(fontSize = OctopusType.caption, color = FText),
-                        shape = OctopusShape.small,
-                        colors = EchoFieldColors.outlined(),
-                    )
-                    // 显示所有可选 stepId（同 workflow 内的其他 step）作为提示
-                    Text(
-                        stringResource(R.string.workflows_condition_step_ids, allStepNames.take(8).joinToString(" · ")),
-                        color = FMuted, fontSize = OctopusType.caption, lineHeight = 16.sp,
-                        modifier = Modifier.padding(start = 2.dp, top = 2.dp),
-                    )
-                }
+                WorkflowStep.StepType.CONDITION -> ConditionStepFields(step, index, allSteps, onChange)
             }
             Spacer(Modifier.height(6.dp))
             FLabel(stringResource(R.string.workflows_output_var_label))
             FTextField(step.outputVar ?: "") { onChange(step.copy(outputVar = it.ifBlank { null })) }
         }
+    }
+}
+
+/** Step number, name, delete, and the type chips. */
+@Composable
+private fun StepHeader(step: WorkflowStep, index: Int, onChange: (WorkflowStep) -> Unit, onRemove: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("#${index + 1}", color = FPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.width(8.dp))
+        FTextField(step.name, modifier = Modifier.weight(1f)) { onChange(step.copy(name = it)) }
+        IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
+            Icon(
+                Icons.Filled.Delete, contentDescription = stringResource(R.string.common_delete),
+                tint = FError, modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+    Spacer(Modifier.height(6.dp))
+    // Type 选择：标签放在芯片上方，译文较长时三个芯片仍能排在一行
+    FLabel(stringResource(R.string.workflows_step_type))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        WorkflowStep.StepType.values().forEach { t ->
+            FilterChip(
+                selected = step.type == t,
+                onClick = { onChange(step.copy(type = t)) },
+                label = { Text(stepTypeLabel(t), fontSize = OctopusType.caption) },
+                modifier = Modifier.padding(end = 4.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToolStepFields(step: WorkflowStep, onChange: (WorkflowStep) -> Unit) {
+    val toolNames = remember {
+        ToolRegistry.getInstance().getAllTools().map { it.getName() }.sorted()
+    }
+    FLabel(stringResource(R.string.workflows_tool_name))
+    // 下拉选择工具
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        OutlinedTextField(
+            value = step.content,
+            onValueChange = { onChange(step.copy(content = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp, color = FText),
+            shape = OctopusShape.small,
+            trailingIcon = {
+                IconButton(onClick = { expanded = true }, modifier = Modifier.size(20.dp)) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(14.dp), tint = FSub)
+                }
+            },
+            colors = EchoFieldColors.outlined(),
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            toolNames.forEach { n ->
+                DropdownMenuItem(
+                    text = { Text(n, fontSize = 12.sp) },
+                    onClick = { onChange(step.copy(content = n)); expanded = false },
+                )
+            }
+        }
+    }
+    // 工具参数编辑：选中工具后显示该工具声明的参数 schema，
+    // 让用户填值（支持 ${var} 模板引用前序步骤输出）。
+    if (step.content.isNotBlank() && toolNames.contains(step.content)) {
+        Spacer(Modifier.height(6.dp))
+        ToolParamFields(step, onChange)
+    }
+}
+
+@Composable
+private fun ToolParamFields(step: WorkflowStep, onChange: (WorkflowStep) -> Unit) {
+    val tool = remember(step.content) {
+        runCatching { ToolRegistry.getInstance().getTool(step.content) }.getOrNull()
+    }
+    val params = tool?.getParameters() ?: emptyList()
+    if (params.isEmpty()) return
+    FLabel(stringResource(R.string.workflows_params_label))
+    params.forEach { p ->
+        val current = step.params[p.name] ?: ""
+        FParamField(
+            label = "${p.name} (${p.type})" + if (p.isRequired) " *" else "",
+            value = current,
+            onChange = { v ->
+                val newMap = step.params.toMutableMap()
+                if (v.isBlank()) newMap.remove(p.name) else newMap[p.name] = v
+                onChange(step.copy(params = newMap))
+            },
+        )
+        Spacer(Modifier.height(4.dp))
+    }
+}
+
+/**
+ * Branch lines "expression => step". Targets are shown and typed as step names (or #N); they are
+ * stored as step ids when the workflow is saved ([WorkflowBranches.withStepIds]).
+ */
+@Composable
+private fun ConditionStepFields(
+    step: WorkflowStep,
+    index: Int,
+    allSteps: List<WorkflowStep>,
+    onChange: (WorkflowStep) -> Unit,
+) {
+    FLabel(stringResource(R.string.workflows_condition_label))
+    Text(
+        stringResource(R.string.workflows_condition_example),
+        color = FMuted, fontSize = OctopusType.caption, lineHeight = 16.sp,
+        modifier = Modifier.padding(start = 2.dp, bottom = 4.dp),
+    )
+    // Built once per step; after that the field keeps the user's own typing instead of reformatting it.
+    var textState by remember(step.id) { mutableStateOf(WorkflowBranches.format(allSteps, step.branches)) }
+    OutlinedTextField(
+        value = textState,
+        onValueChange = { newText ->
+            textState = newText
+            val parsed = WorkflowBranches.parse(newText)
+            if (parsed != step.branches) onChange(step.copy(branches = parsed))
+        },
+        modifier = Modifier.fillMaxWidth(),
+        minLines = 3,
+        textStyle = androidx.compose.ui.text.TextStyle(fontSize = OctopusType.caption, color = FText),
+        shape = OctopusShape.small,
+        colors = EchoFieldColors.outlined(),
+    )
+    // The other steps a branch can go to, as "#N name"
+    val targets = allSteps.indices.filter { it != index }
+        .joinToString(" · ") { WorkflowBranches.describe(allSteps, it) }
+    if (targets.isNotEmpty()) {
+        Text(
+            stringResource(R.string.workflows_condition_step_ids, targets),
+            color = FMuted, fontSize = OctopusType.caption, lineHeight = 16.sp,
+            modifier = Modifier.padding(start = 2.dp, top = 2.dp),
+        )
     }
 }
 
@@ -682,10 +700,6 @@ private fun stepTypeLabel(type: WorkflowStep.StepType): String = stringResource(
         WorkflowStep.StepType.CONDITION -> R.string.workflows_type_condition
     },
 )
-
-/** 把 step 列表的 name 转成可选 stepId 提示（用于 CONDITION branches 编辑） */
-private fun List<WorkflowStep>.allIdsHint(): String =
-    take(8).joinToString(" · ") { it.name }
 
 @Composable
 private fun FParamField(label: String, value: String, onChange: (String) -> Unit) {

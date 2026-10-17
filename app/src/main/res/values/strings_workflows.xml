@@ -41,9 +41,9 @@
     <string name="workflows_tool_name">Tool name</string>
     <string name="workflows_params_label">Parameters (use ${var} to reference earlier output)</string>
     <string name="workflows_prompt_label">Natural-language instruction</string>
-    <string name="workflows_condition_label">Condition → target (one per line: expression => stepId)</string>
-    <string name="workflows_condition_example">Example: ${status} == \"ok\" => step_done\nOperators: == != contains > &lt;</string>
-    <string name="workflows_condition_step_ids">Available stepIds: %1$s</string>
+    <string name="workflows_condition_label">Condition → step to go to (one per line: expression => step name)</string>
+    <string name="workflows_condition_example">Example: ${status} == \"ok\" => Send report\nOperators: == != >= &lt;= > &lt; contains · #3 also means step 3</string>
+    <string name="workflows_condition_step_ids">Steps: %1$s</string>
     <string name="workflows_output_var_label">Output variable (optional; later steps can use ${name})</string>
     <string name="workflows_result_success">Run complete</string>
     <string name="workflows_result_failed">Run failed</string>
@@ -51,4 +51,17 @@
     <string name="workflows_result_error">Error: %1$s</string>
     <string name="workflows_result_output">Final output:</string>
     <string name="workflows_result_logs">Step log:</string>
+    <!-- Engine (WorkflowEngine.kt) and scheduled-run notifications (WorkflowAlarmReceiver.kt). -->
+    <string name="workflow_err_step_failed">Step \"%1$s\" failed: %2$s</string>
+    <string name="workflow_err_branch_target">no step is called \"%1$s\". Use a step name or number (#3).</string>
+    <string name="workflow_err_loop">Stopped after %1$d steps: the condition branches kept looping.</string>
+    <string name="workflow_err_tool_failed">Tool %1$s failed</string>
+    <string name="workflow_prompt_empty_reply">(The model returned no text)</string>
+    <string name="workflow_log_branch_to">Go to %1$s</string>
+    <string name="workflow_log_branch_none">No condition held; going on to the next step</string>
+    <string name="workflow_alarm_done_title">Workflow finished</string>
+    <string name="workflow_alarm_failed_title">Workflow failed</string>
+    <string name="workflow_alarm_done_text">\"%1$s\" finished (%2$d steps, %3$d s)</string>
+    <string name="workflow_alarm_failed_text">\"%1$s\": %2$s (%3$d steps, %4$d s)</string>
+    <string name="workflow_alarm_crashed_text">\"%1$s\" failed: %2$s</string>
 </resources>

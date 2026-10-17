@@ -8,12 +8,14 @@ import androidx.core.app.NotificationCompat
 import com.apk.claw.android.ClawApplication
 import com.apk.claw.android.R
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowEngine
+import com.apk.claw.android.octopus_mobile.workflow.WorkflowResult
 import com.apk.claw.android.octopus_mobile.workflow.WorkflowStore
 import com.apk.claw.android.utils.XLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 /**
  * 工作流定时到点接收器 —— [WorkflowScheduler] 注册的闹钟触发此处。
@@ -57,24 +59,33 @@ class WorkflowAlarmReceiver : BroadcastReceiver() {
             } catch (e: Throwable) {
                 XLog.e(TAG, "workflow ${wf.id} crashed", e)
                 notify(context, wf.id.hashCode(),
-                    context.getString(R.string.routine_alarm_skipped_title),
-                    "「${wf.name}」执行失败：${e.message ?: e.javaClass.simpleName}")
+                    context.getString(R.string.workflow_alarm_failed_title),
+                    context.getString(
+                        R.string.workflow_alarm_crashed_text, wf.name, e.message ?: e.javaClass.simpleName,
+                    ))
                 return@launch
             }
-            // 更新运行次数
-            WorkflowStore.save(context, wf.copy(
+            // 更新运行次数：从存储重新读取，以免把上面已清除的一次性定时写回去
+            val latest = WorkflowStore.get(context, wf.id) ?: wf
+            WorkflowStore.save(context, latest.copy(
                 lastRunAt = startMs,
-                runCount = wf.runCount + 1,
+                runCount = latest.runCount + 1,
             ))
-            val title = if (result.success) "工作流完成"
-                else context.getString(R.string.routine_alarm_skipped_title)
-            val summary = buildString {
-                append("「${wf.name}」")
-                append(if (result.success) "✓ " else "✗ ")
-                append(if (result.success) "完成" else (result.error ?: "失败"))
-                append("（${result.logs.size} 步，${result.durationMs / 1000}s）")
-            }
-            notify(context, wf.id.hashCode(), title, summary)
+            val title = resultTitle(context, result.success)
+            notify(context, wf.id.hashCode(), title, resultText(context, wf.name, result))
+        }
+    }
+
+    private fun resultTitle(ctx: Context, success: Boolean): String =
+        ctx.getString(if (success) R.string.workflow_alarm_done_title else R.string.workflow_alarm_failed_title)
+
+    private fun resultText(ctx: Context, name: String, result: WorkflowResult): String {
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(result.durationMs).toInt()
+        return if (result.success) {
+            ctx.getString(R.string.workflow_alarm_done_text, name, result.logs.size, seconds)
+        } else {
+            val reason = result.error ?: ctx.getString(R.string.workflows_result_failed)
+            ctx.getString(R.string.workflow_alarm_failed_text, name, reason, result.logs.size, seconds)
         }
     }
 

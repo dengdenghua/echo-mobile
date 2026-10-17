@@ -41,9 +41,9 @@
     <string name="workflows_tool_name">Nombre de la herramienta</string>
     <string name="workflows_params_label">Parámetros (usa ${var} para referirte a salidas anteriores)</string>
     <string name="workflows_prompt_label">Instrucción en lenguaje natural</string>
-    <string name="workflows_condition_label">Condición → destino (una por línea: expresión => stepId)</string>
-    <string name="workflows_condition_example">Ejemplo: ${status} == \"ok\" => step_done\nOperadores: == != contains > &lt;</string>
-    <string name="workflows_condition_step_ids">stepId disponibles: %1$s</string>
+    <string name="workflows_condition_label">Condición → paso al que ir (una por línea: expresión => nombre del paso)</string>
+    <string name="workflows_condition_example">Ejemplo: ${status} == \"ok\" => Enviar informe\nOperadores: == != >= &lt;= > &lt; contains · #3 también indica el paso 3</string>
+    <string name="workflows_condition_step_ids">Pasos: %1$s</string>
     <string name="workflows_output_var_label">Variable de salida (opcional; los pasos siguientes pueden usar ${nombre})</string>
     <string name="workflows_result_success">Ejecución completada</string>
     <string name="workflows_result_failed">La ejecución falló</string>
@@ -51,4 +51,17 @@
     <string name="workflows_result_error">Error: %1$s</string>
     <string name="workflows_result_output">Salida final:</string>
     <string name="workflows_result_logs">Registro de pasos:</string>
+    <!-- Engine (WorkflowEngine.kt) and scheduled-run notifications (WorkflowAlarmReceiver.kt). -->
+    <string name="workflow_err_step_failed">El paso \"%1$s\" falló: %2$s</string>
+    <string name="workflow_err_branch_target">ningún paso se llama \"%1$s\". Usa el nombre o el número de un paso (#3).</string>
+    <string name="workflow_err_loop">Detenido tras %1$d pasos: las ramas de condición entraban en bucle.</string>
+    <string name="workflow_err_tool_failed">La herramienta %1$s falló</string>
+    <string name="workflow_prompt_empty_reply">(El modelo no devolvió texto)</string>
+    <string name="workflow_log_branch_to">Ir a %1$s</string>
+    <string name="workflow_log_branch_none">No se cumplió ninguna condición; se sigue con el siguiente paso</string>
+    <string name="workflow_alarm_done_title">Flujo de trabajo completado</string>
+    <string name="workflow_alarm_failed_title">El flujo de trabajo falló</string>
+    <string name="workflow_alarm_done_text">\"%1$s\" completado (%2$d pasos, %3$d s)</string>
+    <string name="workflow_alarm_failed_text">\"%1$s\": %2$s (%3$d pasos, %4$d s)</string>
+    <string name="workflow_alarm_crashed_text">\"%1$s\" falló: %2$s</string>
 </resources>

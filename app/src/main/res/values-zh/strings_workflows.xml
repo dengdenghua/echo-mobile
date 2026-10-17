@@ -36,14 +36,14 @@
     <string name="workflows_no_steps">还没有步骤，点上方「添加」</string>
     <string name="workflows_step_type">类型</string>
     <string name="workflows_type_tool">工具</string>
-    <string name="workflows_type_prompt">Prompt</string>
+    <string name="workflows_type_prompt">提示词</string>
     <string name="workflows_type_condition">条件</string>
     <string name="workflows_tool_name">工具名</string>
     <string name="workflows_params_label">参数（支持 ${var} 引用前序输出）</string>
     <string name="workflows_prompt_label">自然语言指令</string>
-    <string name="workflows_condition_label">条件 → 跳转目标（每行一条，格式：表达式 => stepId）</string>
-    <string name="workflows_condition_example">示例：${status} == \"ok\" => step_done\n支持运算符：== != contains > &lt;</string>
-    <string name="workflows_condition_step_ids">可选 stepId：%1$s</string>
+    <string name="workflows_condition_label">条件 → 跳转到的步骤（每行一条，格式：表达式 => 步骤名）</string>
+    <string name="workflows_condition_example">示例：${status} == \"ok\" => 发送报告\n运算符：== != >= &lt;= > &lt; contains · 也可写步骤序号，如 #3</string>
+    <string name="workflows_condition_step_ids">可跳转的步骤：%1$s</string>
     <string name="workflows_output_var_label">输出变量名（可选，后续步骤可用 ${名称} 引用）</string>
     <string name="workflows_result_success">运行成功</string>
     <string name="workflows_result_failed">运行失败</string>
@@ -51,4 +51,17 @@
     <string name="workflows_result_error">错误：%1$s</string>
     <string name="workflows_result_output">最终输出：</string>
     <string name="workflows_result_logs">步骤日志：</string>
+    <!-- Engine (WorkflowEngine.kt) and scheduled-run notifications (WorkflowAlarmReceiver.kt). -->
+    <string name="workflow_err_step_failed">步骤「%1$s」失败：%2$s</string>
+    <string name="workflow_err_branch_target">没有名为「%1$s」的步骤。请填写步骤名或序号（如 #3）。</string>
+    <string name="workflow_err_loop">已执行 %1$d 步，自动停止：条件分支一直在循环。</string>
+    <string name="workflow_err_tool_failed">工具 %1$s 执行失败</string>
+    <string name="workflow_prompt_empty_reply">（模型没有返回内容）</string>
+    <string name="workflow_log_branch_to">跳转到 %1$s</string>
+    <string name="workflow_log_branch_none">没有满足的条件，继续下一步</string>
+    <string name="workflow_alarm_done_title">工作流已完成</string>
+    <string name="workflow_alarm_failed_title">工作流运行失败</string>
+    <string name="workflow_alarm_done_text">「%1$s」已完成（%2$d 步，%3$d 秒）</string>
+    <string name="workflow_alarm_failed_text">「%1$s」：%2$s（%3$d 步，%4$d 秒）</string>
+    <string name="workflow_alarm_crashed_text">「%1$s」运行失败：%2$s</string>
 </resources>

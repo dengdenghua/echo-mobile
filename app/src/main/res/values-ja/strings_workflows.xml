@@ -41,9 +41,9 @@
     <string name="workflows_tool_name">ツール名</string>
     <string name="workflows_params_label">パラメーター（${var} で前のステップの出力を参照できます）</string>
     <string name="workflows_prompt_label">自然言語の指示</string>
-    <string name="workflows_condition_label">条件 → 移動先（1行に1件、形式：式 => stepId）</string>
-    <string name="workflows_condition_example">例：${status} == \"ok\" => step_done\n使える演算子：== != contains > &lt;</string>
-    <string name="workflows_condition_step_ids">使える stepId：%1$s</string>
+    <string name="workflows_condition_label">条件 → 移動先のステップ（1行に1件、形式：式 => ステップ名）</string>
+    <string name="workflows_condition_example">例：${status} == \"ok\" => レポート送信\n演算子：== != >= &lt;= > &lt; contains ・ #3 のように番号でも指定できます</string>
+    <string name="workflows_condition_step_ids">ステップ：%1$s</string>
     <string name="workflows_output_var_label">出力変数名（任意。後のステップで ${名前} として参照できます）</string>
     <string name="workflows_result_success">実行完了</string>
     <string name="workflows_result_failed">実行に失敗しました</string>
@@ -51,4 +51,17 @@
     <string name="workflows_result_error">エラー：%1$s</string>
     <string name="workflows_result_output">最終出力：</string>
     <string name="workflows_result_logs">ステップログ：</string>
+    <!-- Engine (WorkflowEngine.kt) and scheduled-run notifications (WorkflowAlarmReceiver.kt). -->
+    <string name="workflow_err_step_failed">ステップ「%1$s」が失敗しました：%2$s</string>
+    <string name="workflow_err_branch_target">「%1$s」という名前のステップはありません。ステップ名か番号（#3）を指定してください。</string>
+    <string name="workflow_err_loop">%1$d ステップ実行後に停止しました：条件分岐がループし続けています。</string>
+    <string name="workflow_err_tool_failed">ツール %1$s が失敗しました</string>
+    <string name="workflow_prompt_empty_reply">（モデルから応答がありませんでした）</string>
+    <string name="workflow_log_branch_to">%1$s へ移動</string>
+    <string name="workflow_log_branch_none">一致する条件がないため、次のステップへ進みます</string>
+    <string name="workflow_alarm_done_title">ワークフローが完了しました</string>
+    <string name="workflow_alarm_failed_title">ワークフローが失敗しました</string>
+    <string name="workflow_alarm_done_text">「%1$s」が完了しました（%2$d ステップ、%3$d 秒）</string>
+    <string name="workflow_alarm_failed_text">「%1$s」：%2$s（%3$d ステップ、%4$d 秒）</string>
+    <string name="workflow_alarm_crashed_text">「%1$s」が失敗しました：%2$s</string>
 </resources>

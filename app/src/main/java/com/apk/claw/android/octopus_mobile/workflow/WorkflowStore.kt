@@ -63,6 +63,14 @@ data class WorkflowStep(
 
 /** 工作流执行上下文：步骤间变量传递 */
 class WorkflowContext {
+    companion object {
+        /**
+         * `${name}`. The closing brace is escaped on purpose: Android's ICU regex rejects a bare `}`
+         * ("Syntax error in regexp pattern"), which made every step fail on a device while the JVM tests passed.
+         */
+        val VARIABLE = Regex("\\$\\{(\\w+)\\}")
+    }
+
     val variables: MutableMap<String, String> = mutableMapOf()
     val logs: MutableList<StepLog> = mutableListOf()
 
@@ -77,8 +85,7 @@ class WorkflowContext {
 
     fun resolveTemplate(text: String): String {
         // 替换 ${varName} 为上下文变量值
-        val regex = Regex("\\$\\{(\\w+)}")
-        return regex.replace(text) { m ->
+        return VARIABLE.replace(text) { m ->
             variables[m.groupValues[1]] ?: m.value
         }
     }
