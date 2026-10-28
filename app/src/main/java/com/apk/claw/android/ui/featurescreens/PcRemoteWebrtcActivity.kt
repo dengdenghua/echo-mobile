@@ -2,105 +2,182 @@ package com.apk.claw.android.ui.featurescreens
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.webkit.ConsoleMessage
+import android.os.Handler
+import android.os.Looper
 import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import com.apk.claw.android.R
 import com.apk.claw.android.appViewModel
+import com.apk.claw.android.octopus_mobile.ConnectionState
 import com.apk.claw.android.octopus_mobile.Envelope
-import com.apk.claw.android.utils.XLog
+import com.apk.claw.android.octopus_mobile.OctopusMobileClient
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 
-/**
- * 母体远程桌面（WebRTC 版）—— 用系统 WebView 的 Chromium WebRTC,绕开 GeckoView 的 org.webrtc 冲突。
- *
- * 一个本地 HTML 页(assets/pc_remote.html)跑 JS RTCPeerConnection:收视频轨→<video>,
- * 触摸→DataChannel。信令经 JS 桥转给现有 [com.apk.claw.android.octopus_mobile.OctopusMobileClient] WS:
- *   JS Android.request() → 原生发 webrtc/request
- *   母体 webrtc/offer(经 WS) → 原生 evaluateJavascript window.onOffer(sdp)
- *   JS Android.answer(sdp) → 原生发 webrtc/answer
- * 媒体+输入随后走 WebRTC P2P(STUN 打洞)。前提:母体侧运行 pc_remote_webrtc.py。
- */
+/** One remote-desktop entry, using the existing paired device socket. */
 class PcRemoteWebrtcActivity : ComponentActivity() {
     private lateinit var webView: WebView
-    private var wsListener: ((String) -> Unit)? = null
-    private val client get() = appViewModel.octopusClient
+    private val handler = Handler(Looper.getMainLooper())
+    @Volatile
+    private var observedClient: OctopusMobileClient? = null
+    private var listener: ((String) -> Unit)? = null
+    private var pageReady = false
+    @Volatile
+    private var isForeground = false
+    @Volatile
+    private var requestId: String? = null
+    private val permitted = setOf(
+        "remote_desktop/status", "webrtc/request", "webrtc/answer", "webrtc/candidate",
+        "remote_desktop/stop", "remote_desktop/input",
+    )
+    private val received = setOf(
+        "remote_desktop/status", "remote_desktop/error", "remote_desktop/stopped", "webrtc/offer",
+        "remote_desktop/relay", "remote_desktop/frame", "remote_desktop/inputAck",
+    )
+    private companion object {
+        const val MAX_RECEIVE_CHARS = 500_000
+        const val MAX_SIGNAL_CHARS = 150_000
+    }
+    private val poll = object : Runnable {
+        override fun run() {
+            if (!isForeground) return
+            syncClient()
+            handler.postDelayed(this, 1000)
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyFeatureChrome()
-        // 部分设备的系统 WebView 组件缺失/正在更新时,WebView(this) 会抛异常。
-        // 捕获后优雅退出(提示用户),而不是让 Activity 崩溃。
         webView = try {
             WebView(this).apply {
                 settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.mediaPlaybackRequiresUserGesture = false  // 自动播放远端视频
-                webChromeClient = object : WebChromeClient() {
-                    override fun onConsoleMessage(m: ConsoleMessage): Boolean {
-                        XLog.i("PcWebRTC-JS", "${m.message()} @${m.lineNumber()}")
-                        return true
+                settings.mediaPlaybackRequiresUserGesture = false
+                settings.allowFileAccess = false
+                settings.allowContentAccess = false
+                webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean = true
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        pageReady = true
+                        syncClient()
+                        if (isForeground) evaluateJavascript("window.remoteResume && window.remoteResume()", null)
                     }
                 }
                 addJavascriptInterface(Bridge(), "Android")
                 loadUrl("file:///android_asset/pc_remote.html")
             }
-        } catch (e: Throwable) {
-            XLog.e("PcWebRTC", "WebView 初始化失败", e)
+        } catch (_: Exception) {
             android.widget.Toast.makeText(this, getString(R.string.pc_remote_webrtc_webview_unavailable), android.widget.Toast.LENGTH_LONG).show()
             finish()
             return
         }
         setContentView(webView)
+    }
 
-        // WS → JS：把母体的 webrtc/offer 喂给页面
-        val c = client
-        if (c != null) {
-            val l: (String) -> Unit = { text ->
-                if (text.contains("\"webrtc/offer\"")) {
-                    runCatching {
-                        val sdp = JSONObject(text).getJSONObject("params").getString("sdp")
-                        runOnUiThread {
-                            webView.evaluateJavascript("window.onOffer(${JSONObject.quote(sdp)})", null)
+    private fun evaluate(script: String) {
+        if (pageReady && ::webView.isInitialized) webView.evaluateJavascript(script, null)
+    }
+
+    private fun syncClient() {
+        val current = appViewModel.octopusClient
+        if (observedClient !== current) {
+            stopSession()
+            listener?.let { observedClient?.removeMessageListener(it) }
+            observedClient = current
+            evaluate("window.remoteConnection(false)")
+            val callback: (String) -> Unit = { text ->
+                if (text.length <= MAX_RECEIVE_CHARS) runCatching {
+                    val message = JSONObject(text)
+                    if (message.optString("method") in received ||
+                        (message.has("error") && message.optString("id").startsWith("remote-"))) {
+                        handler.post {
+                            if (observedClient === current && isForeground) {
+                                evaluate("window.remoteSignal(JSON.parse(${JSONObject.quote(text)}))")
+                            }
                         }
                     }
                 }
             }
-            wsListener = l
-            c.addMessageListener(l)
+            listener = callback
+            current?.addMessageListener(callback)
         }
+        evaluate("window.remoteConnection(${current?.currentState() == ConnectionState.ONLINE})")
     }
 
-    /** JS → 原生：信令出口（在 WebRTC/JS 线程被调用，转发到 WS）。 */
+    private fun stopSession() {
+        val id = requestId ?: return
+        observedClient?.send(Envelope.Request(method = "remote_desktop/stop", params = mapOf("requestId" to id)))
+        requestId = null
+    }
+
     inner class Bridge {
         @JavascriptInterface
-        fun request() {
-            client?.send(Envelope.Request(method = "webrtc/request", params = emptyMap()))
-        }
+        fun ready() { handler.post { syncClient() } }
 
         @JavascriptInterface
-        fun answer(sdp: String) {
-            client?.send(Envelope.Request(method = "webrtc/answer", params = mapOf("sdp" to sdp, "type" to "answer")))
+        fun signal(json: String): Boolean {
+            if (json.length > MAX_SIGNAL_CHARS || !isForeground) return false
+            return runCatching {
+                val message = JSONObject(json)
+                val method = message.getString("method")
+                require(method in permitted)
+                val paramsType = object : TypeToken<Map<String, Any?>>() {}.type
+                val params: Map<String, Any?> = Gson().fromJson(
+                    message.optJSONObject("params")?.toString() ?: "{}", paramsType,
+                )
+                val client = checkNotNull(observedClient)
+                check(client.currentState() == ConnectionState.ONLINE)
+                handler.post {
+                    if (isForeground && observedClient === client && client.currentState() == ConnectionState.ONLINE) {
+                        if (method == "webrtc/request") requestId = params["requestId"] as? String
+                        client.send(Envelope.Request(
+                            id = "remote-" + java.util.UUID.randomUUID(), method = method, params = params,
+                        ))
+                    }
+                }
+                true
+            }.getOrDefault(false)
         }
 
         @JavascriptInterface
         fun reconnect() {
-            // 重试时先把底层 tentacle WS 拉起来(母体曾不可达时它可能已停止重连)
-            runCatching { com.apk.claw.android.appViewModel.connectRuntime() }
+            handler.post {
+                if (appViewModel.octopusClient?.currentState() != ConnectionState.ONLINE) appViewModel.connectRuntime()
+                syncClient()
+            }
         }
 
         @JavascriptInterface
-        fun back() {
-            runOnUiThread { finish() }
-        }
+        fun back() { handler.post { finish() } }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        isForeground = true
+        handler.post(poll)
+        evaluate("window.remoteResume && window.remoteResume()")
+    }
+
+    override fun onStop() {
+        isForeground = false
+        evaluate("window.remotePause && window.remotePause()")
+        stopSession()
+        handler.removeCallbacks(poll)
+        super.onStop()
     }
 
     override fun onDestroy() {
-        wsListener?.let { client?.removeMessageListener(it) }
-        runCatching { webView.destroy() }
+        handler.removeCallbacksAndMessages(null)
+        listener?.let { observedClient?.removeMessageListener(it) }
+        if (::webView.isInitialized) {
+            webView.removeJavascriptInterface("Android")
+            webView.destroy()
+        }
         super.onDestroy()
     }
 }

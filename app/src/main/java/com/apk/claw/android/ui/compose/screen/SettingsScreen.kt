@@ -538,7 +538,9 @@ fun SettingsScreen(onMessage: (String) -> Unit = {}, onNavigateToCreatorCenter: 
                     }
                     SettingsDivider()
                     ClickableSettingsRow(Icons.Filled.GraphicEq, stringResource(R.string.settings_remote_lan_title), "") {
-                        context.startActivity(Intent(context, com.apk.claw.android.ui.featurescreens.PcRemoteActivity::class.java))
+                        context.startActivity(Intent(
+                            context, com.apk.claw.android.ui.featurescreens.PcRemoteWebrtcActivity::class.java,
+                        ))
                     }
                     SettingsDivider()
                     ClickableSettingsRow(

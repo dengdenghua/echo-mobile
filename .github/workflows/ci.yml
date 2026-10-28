@@ -38,6 +38,12 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Remote desktop protocol tests
+        run: node --test scripts/test-remote-desktop.cjs
+
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug
 
