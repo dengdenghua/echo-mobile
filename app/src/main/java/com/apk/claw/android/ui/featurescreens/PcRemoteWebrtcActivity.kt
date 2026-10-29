@@ -1,9 +1,17 @@
 package com.apk.claw.android.ui.featurescreens
 
 import android.annotation.SuppressLint
+import android.app.PictureInPictureParams
+import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Rational
+import android.view.inputmethod.InputMethodManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -41,6 +49,8 @@ class PcRemoteWebrtcActivity : ComponentActivity() {
     private companion object {
         const val MAX_RECEIVE_CHARS = 500_000
         const val MAX_SIGNAL_CHARS = 150_000
+        const val MINI_ASPECT_WIDTH = 16
+        const val MINI_ASPECT_HEIGHT = 9
     }
     private val poll = object : Runnable {
         override fun run() {
@@ -57,6 +67,7 @@ class PcRemoteWebrtcActivity : ComponentActivity() {
         webView = try {
             WebView(this).apply {
                 settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
                 settings.mediaPlaybackRequiresUserGesture = false
                 settings.allowFileAccess = false
                 settings.allowContentAccess = false
@@ -154,6 +165,64 @@ class PcRemoteWebrtcActivity : ComponentActivity() {
 
         @JavascriptInterface
         fun back() { handler.post { finish() } }
+
+        @JavascriptInterface
+        fun showKeyboard() {
+            handler.post {
+                if (isForeground && !isMiniPlayer()) {
+                    webView.requestFocus()
+                    (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                        .showSoftInput(webView, InputMethodManager.SHOW_IMPLICIT)
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun hideKeyboard() {
+            handler.post {
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .hideSoftInputFromWindow(webView.windowToken, 0)
+            }
+        }
+
+        @JavascriptInterface
+        fun setFullscreen(enabled: Boolean) {
+            handler.post {
+                requestedOrientation = if (enabled) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                    else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
+
+        @JavascriptInterface
+        fun supportsMiniPlayer(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+
+        @JavascriptInterface
+        fun miniPlayer() {
+            handler.post {
+                if (!supportsMiniPlayer() || !isForeground) return@post
+                hideKeyboard()
+                webView.evaluateJavascript("window.remoteMini && window.remoteMini(true)") {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val entered = runCatching {
+                            enterPictureInPictureMode(
+                                PictureInPictureParams.Builder()
+                                    .setAspectRatio(Rational(MINI_ASPECT_WIDTH, MINI_ASPECT_HEIGHT))
+                                    .build(),
+                            )
+                        }.getOrDefault(false)
+                        if (!entered) evaluate("window.remoteMini && window.remoteMini(false)")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isMiniPlayer(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isInPictureInPictureMode
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        evaluate("window.remoteMini && window.remoteMini($isInPictureInPictureMode)")
     }
 
     override fun onStart() {

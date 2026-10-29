@@ -17,6 +17,10 @@
       this.pulse = null;
       this.firstFrame = false;
       this.counter = 0;
+      this.preferences = { quality: 'auto' };
+      this.viewOnly = false;
+      this.statsTimer = null;
+      this.lastVideo = null;
     }
     show(state, detail) { this.options.onState(state, detail || {}); }
     signal(method, params) { return this.options.sendSignal(method, params || {}); }
@@ -46,6 +50,7 @@
       if (p.requestId && p.requestId !== this.requestId &&
           !(message.method === 'remote_desktop/stopped' && p.reason === 'operator_stopped')) return;
       if (message.method === 'remote_desktop/status') {
+        if (this.options.onHostStatus) this.options.onHostStatus(p);
         this.permission = p.permission || 'denied';
         if (p.state !== 'ready') { this.cleanup(true); this.show(p.state); }
         else if (!this.requestId && !this.timer) this.request();
@@ -67,7 +72,7 @@
       } else if (message.method === 'remote_desktop/frame') {
         if (this.sessionId === p.sessionId && this.options.onImage) this.options.onImage(p);
       } else if (message.method === 'remote_desktop/inputAck') {
-        if (this.sessionId === p.sessionId && p.type === 'pong') this.lastPong = Date.now();
+        if (this.sessionId === p.sessionId && p.type === 'pong') this.pong();
         if (this.sessionId === p.sessionId && p.type === 'inputAck' && this.options.onInputAck) this.options.onInputAck(p);
       } else if (message.method === 'remote_desktop/error') {
         this.cleanup(true);
@@ -85,7 +90,7 @@
       this.attempt++;
       this.requestId = Date.now().toString(36) + '-' + (++this.counter) + '-' + Math.random().toString(36).slice(2);
       this.show('connecting');
-      this.signal('webrtc/request', { requestId: this.requestId, transport: this.attempt > 1 ? 'relay' : 'webrtc' });
+      this.signal('webrtc/request', { requestId: this.requestId, transport: this.attempt > 1 ? 'relay' : 'webrtc', quality: this.preferences.quality });
       this.timer = setTimeout(() => this.retry('first_frame_timeout'), 20000);
     }
     async accept(offer) {
@@ -128,7 +133,7 @@
           if (!current()) return;
           try {
             const ack = JSON.parse(event.data);
-            if (ack.type === 'pong') this.lastPong = Date.now();
+            if (ack.type === 'pong') this.pong();
             if (ack.type === 'inputAck' && this.options.onInputAck) this.options.onInputAck(ack);
           } catch (_) { /* Ignore malformed packets; never evaluate peer content. */ }
         };
@@ -159,7 +164,11 @@
     }
     heartbeat() {
       if (Date.now() - this.lastPong > 15000) { this.retry('heartbeat_timeout'); return; }
-      if (this.dc && this.dc.readyState === 'open') this.dc.send(JSON.stringify({action: 'ping', sessionId: this.sessionId}));
+      if (this.dc && this.dc.readyState === 'open') { this.lastPing = Date.now(); this.dc.send(JSON.stringify({action: 'ping', sessionId: this.sessionId})); }
+    }
+    pong() {
+      this.lastPong = Date.now();
+      if (this.lastPing && this.options.onStats) this.options.onStats({ rtt: this.lastPong - this.lastPing });
     }
     frameReady() { this.firstFrame = true; this.connected(); }
     connected() {
@@ -167,9 +176,34 @@
       clearTimeout(this.timer); this.timer = null;
       this.show('connected', { permission: this.permission, transport: this.pc ? 'webrtc' : 'relay' });
       this.attempt = 0;
+      if (!this.statsTimer) this.statsTimer = setInterval(() => { void this.statistics(); }, 2000);
+    }
+    reconfigure(preferences) {
+      if (!['auto', 'smooth', 'sharp', 'saver'].includes(preferences.quality)) return;
+      this.preferences.quality = preferences.quality;
+      if (this.active && this.online) {
+        const relay = this.firstFrame && !this.pc && !!this.dc;
+        this.cleanup(true); this.attempt = relay ? 1 : 0; this.refresh();
+      }
+    }
+    async statistics() {
+      const pc = this.pc;
+      if (!this.firstFrame || !pc || !pc.getStats || !this.options.onStats) return;
+      try {
+        const stats = await pc.getStats();
+        if (this.pc !== pc || !this.active) return;
+        const values = Array.from(stats.values());
+        const video = values.find(s => s.type === 'inbound-rtp' && (s.kind === 'video' || s.mediaType === 'video'));
+        const pair = values.find(s => s.type === 'candidate-pair' && s.state === 'succeeded' && (s.nominated || s.selected));
+        let fps = video && video.framesPerSecond;
+        if (video && this.lastVideo && video.timestamp > this.lastVideo.timestamp) fps = fps || (video.framesDecoded - this.lastVideo.framesDecoded) * 1000 / (video.timestamp - this.lastVideo.timestamp);
+        this.lastVideo = video || null;
+        this.options.onStats({ rtt: pair && Number.isFinite(pair.currentRoundTripTime) ? Math.round(pair.currentRoundTripTime * 1000) : null,
+          fps: Number.isFinite(fps) ? Math.round(fps) : null, width: video && video.frameWidth, height: video && video.frameHeight });
+      } catch (_) { /* Measurements are optional; never interrupt a live session. */ }
     }
     sendInput(event) {
-      if (!this.active || !this.online || !this.firstFrame || this.permission !== 'control' ||
+      if (!this.active || !this.online || !this.firstFrame || this.permission !== 'control' || this.viewOnly ||
           !this.dc || this.dc.readyState !== 'open' || this.dc.bufferedAmount > 64000) return 0;
       const seq = ++this.seq;
       this.dc.send(JSON.stringify(Object.assign({}, event, { sessionId: this.sessionId, seq })));
@@ -186,6 +220,7 @@
     cleanup(notify) {
       clearTimeout(this.timer); this.timer = null;
       clearInterval(this.pulse); this.pulse = null;
+      clearInterval(this.statsTimer); this.statsTimer = null; this.lastVideo = null;
       this.sendInput({ action: 'release_all' });
       if (notify && this.requestId) this.signal('remote_desktop/stop', { requestId: this.requestId, sessionId: this.sessionId });
       const pc = this.pc;

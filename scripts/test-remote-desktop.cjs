@@ -28,6 +28,44 @@ function offer(session) {
   return { method: 'webrtc/offer', params: {requestId: session.requestId, sessionId: 'lease', permission: 'control', sdp: 'offer', iceServers: []} };
 }
 
+test('quality change retires the old lease, preserves view-only mode and carries no input', async t => {
+  const {session,signals} = fixture(t);
+  await session.receive(ready); const old = session.requestId;
+  session.viewOnly = true; session.reconfigure({quality:'sharp'});
+  assert.equal(signals.at(-1).method,'remote_desktop/status');
+  assert.ok(signals.some(s=>s.method==='remote_desktop/stop' && s.params.requestId===old));
+  await session.receive(ready);
+  assert.equal(signals.at(-1).params.quality,'sharp'); assert.equal(session.viewOnly,true);
+  assert.equal(signals.filter(s=>s.method==='remote_desktop/input').length,0);
+  session.reconfigure({quality:'arbitrary'}); assert.equal(session.preferences.quality,'sharp');
+});
+
+test('mini player blocks every input and resumes only explicit control', async t => {
+  const {session,peer} = fixture(t); await session.receive(ready); await session.receive(offer(session));
+  const sent=[]; const channel={readyState:'open',bufferedAmount:0,send:s=>sent.push(JSON.parse(s))};
+  peer().ondatachannel({channel}); channel.onopen(); session.frameReady(); session.viewOnly=true;
+  for (const action of ['tap','type','key','down','system']) assert.equal(session.sendInput({action,text:'x',x:.5,y:.5}),0);
+  assert.ok(!sent.some(s=>s.seq)); session.viewOnly=false;
+  assert.ok(session.sendInput({action:'key',text:'esc'}));
+});
+
+test('relay quality changes retain the working transport', async t => {
+  const {session,signals} = fixture(t); await session.receive(ready);
+  await session.receive({method:'remote_desktop/relay',params:{requestId:session.requestId,sessionId:'relay',permission:'control'}});
+  session.frameReady(); session.reconfigure({quality:'smooth'}); await session.receive(ready);
+  assert.equal(signals.at(-1).params.transport,'relay');
+  assert.equal(signals.at(-1).params.quality,'smooth');
+});
+
+test('statistics ignore a retired peer and report actual inbound measurements', async t => {
+  const {session,peer} = fixture(t); const values=[]; session.options.onStats=s=>values.push(s);
+  await session.receive(ready); await session.receive(offer(session)); session.firstFrame=true;
+  peer().getStats=async()=>new Map([[1,{type:'inbound-rtp',kind:'video',framesPerSecond:14.7,frameWidth:960,frameHeight:540}],[2,{type:'candidate-pair',state:'succeeded',nominated:true,currentRoundTripTime:.032}]]);
+  await session.statistics(); assert.equal(values.at(-1).fps,15); assert.equal(values.at(-1).rtt,32);
+  let resolve; peer().getStats=()=>new Promise(done=>{resolve=done;}); const pending=session.statistics();
+  session.cleanup(true); resolve(new Map()); await pending; assert.equal(values.length,1);
+});
+
 test('waits for host authorization and creates one request per attempt', async t => {
   const {session, signals, states} = fixture(t);
   await session.receive({method: 'remote_desktop/status', params: {state:'authorization_required',permission:'denied'}});
