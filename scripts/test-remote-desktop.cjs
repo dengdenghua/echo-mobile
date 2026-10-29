@@ -136,3 +136,24 @@ test('unavailable WebRTC engine recovers instead of abandoning the host session'
   assert.equal(session.requestId, null);
   assert.equal(states.at(-1).state, 'recovering');
 });
+
+
+test('operator stop after channel teardown cancels a pending retry', async t => {
+  const {session, states} = fixture(t);
+  await session.receive(ready); const requestId = session.requestId;
+  session.retry('input_disconnected');
+  await session.receive({method:'remote_desktop/stopped',params:{requestId,reason:'operator_stopped'}});
+  assert.equal(session.active,false);
+  assert.equal(session.timer,null);
+  assert.equal(states.at(-1).state,'operator_stopped');
+});
+
+test('operator stop retires a replacement request already started during teardown', async t => {
+  const {session, signals} = fixture(t);
+  await session.receive(ready); const requestId = session.requestId;
+  session.cleanup(true); session.request(); const replacement = session.requestId;
+  await session.receive({method:'remote_desktop/stopped',params:{requestId,reason:'operator_stopped'}});
+  assert.equal(session.active,false);
+  assert.equal(session.requestId,null);
+  assert.ok(signals.some(s => s.method==='remote_desktop/stop' && s.params.requestId===replacement));
+});

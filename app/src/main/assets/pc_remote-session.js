@@ -43,7 +43,8 @@
       if (!this.active || !this.online) return;
       const p = message.params || {};
       if (message.error) { this.cleanup(false); this.show('host_update_required'); return; }
-      if (p.requestId && p.requestId !== this.requestId) return;
+      if (p.requestId && p.requestId !== this.requestId &&
+          !(message.method === 'remote_desktop/stopped' && p.reason === 'operator_stopped')) return;
       if (message.method === 'remote_desktop/status') {
         this.permission = p.permission || 'denied';
         if (p.state !== 'ready') { this.cleanup(true); this.show(p.state); }
@@ -73,7 +74,7 @@
         this.show(p.code || 'failed');
       } else if (message.method === 'remote_desktop/stopped') {
         if (p.reason === 'operator_stopped') {
-          this.cleanup(false); this.active = false; this.show('operator_stopped');
+          this.cleanup(true); this.active = false; this.show('operator_stopped');
         } else if (p.reason === 'permission_changed') {
           this.cleanup(false); this.refresh();
         } else if (p.reason !== 'replaced') this.retry(p.reason);
