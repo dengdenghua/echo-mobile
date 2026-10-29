@@ -17,7 +17,7 @@
       this.pulse = null;
       this.firstFrame = false;
       this.counter = 0;
-      this.preferences = { quality: 'auto' };
+      this.preferences = { quality: 'auto', audio: false };
       this.viewOnly = false;
       this.statsTimer = null;
       this.lastVideo = null;
@@ -61,6 +61,7 @@
         if (!this.requestId) return;
         this.sessionId = p.sessionId;
         this.permission = p.permission;
+        if (this.options.onAudioStatus) this.options.onAudioStatus(p.audio || 'unsupported');
         this.dc = { readyState: 'open', bufferedAmount: 0,
           send: data => this.signal('remote_desktop/input', {
             requestId: this.requestId, sessionId: this.sessionId, data,
@@ -71,6 +72,10 @@
         this.show('waiting_frame');
       } else if (message.method === 'remote_desktop/frame') {
         if (this.sessionId === p.sessionId && this.options.onImage) this.options.onImage(p);
+      } else if (message.method === 'remote_desktop/audio') {
+        if (this.requestId === p.requestId && this.sessionId === p.sessionId && this.preferences.audio && this.options.onAudio) this.options.onAudio(p);
+      } else if (message.method === 'remote_desktop/audioStatus') {
+        if (this.requestId === p.requestId && this.sessionId === p.sessionId && this.options.onAudioStatus) this.options.onAudioStatus(p.state);
       } else if (message.method === 'remote_desktop/inputAck') {
         if (this.sessionId === p.sessionId && p.type === 'pong') this.pong();
         if (this.sessionId === p.sessionId && p.type === 'inputAck' && this.options.onInputAck) this.options.onInputAck(p);
@@ -90,13 +95,14 @@
       this.attempt++;
       this.requestId = Date.now().toString(36) + '-' + (++this.counter) + '-' + Math.random().toString(36).slice(2);
       this.show('connecting');
-      this.signal('webrtc/request', { requestId: this.requestId, transport: this.attempt > 1 ? 'relay' : 'webrtc', quality: this.preferences.quality });
+      this.signal('webrtc/request', { requestId: this.requestId, transport: this.attempt > 1 ? 'relay' : 'webrtc', quality: this.preferences.quality, audio: this.preferences.audio });
       this.timer = setTimeout(() => this.retry('first_frame_timeout'), 20000);
     }
     async accept(offer) {
       const request = this.requestId;
       this.sessionId = offer.sessionId;
       this.permission = offer.permission;
+      if (this.options.onAudioStatus) this.options.onAudioStatus(offer.audio || 'unsupported');
       this.firstFrame = false;
       const servers = offer.iceServers || [];
       const relay = servers.some(s => [].concat(s.urls).some(u => /^turns?:/.test(u)));
@@ -118,7 +124,12 @@
         const value = e.candidate.toJSON();
         if (answerSent) candidate(value); else pendingCandidates.push(value);
       };
-      pc.ontrack = e => { if (current()) this.options.onStream(e.streams[0]); };
+      pc.ontrack = e => {
+        if (!current()) return;
+        if (e.track && e.track.kind === 'audio') {
+          if (this.preferences.audio && this.options.onAudioTrack) this.options.onAudioTrack(e.track);
+        } else this.options.onStream(e.streams[0]);
+      };
       pc.ondatachannel = e => {
         if (!current()) { e.channel.close(); return; }
         this.dc = e.channel;
@@ -179,8 +190,11 @@
       if (!this.statsTimer) this.statsTimer = setInterval(() => { void this.statistics(); }, 2000);
     }
     reconfigure(preferences) {
-      if (!['auto', 'smooth', 'sharp', 'saver'].includes(preferences.quality)) return;
-      this.preferences.quality = preferences.quality;
+      if (preferences.quality === undefined && preferences.audio === undefined) return;
+      if (preferences.quality !== undefined && !['auto', 'smooth', 'sharp', 'saver'].includes(preferences.quality)) return;
+      if (preferences.audio !== undefined && typeof preferences.audio !== 'boolean') return;
+      if (preferences.quality !== undefined) this.preferences.quality = preferences.quality;
+      if (preferences.audio !== undefined) this.preferences.audio = preferences.audio;
       if (this.active && this.online) {
         const relay = this.firstFrame && !this.pc && !!this.dc;
         this.cleanup(true); this.attempt = relay ? 1 : 0; this.refresh();
@@ -227,6 +241,7 @@
       this.pc = null; this.dc = null; this.requestId = null; this.sessionId = null;
       this.firstFrame = false;
       if (pc) pc.close();
+      if (this.options.onAudioReset) this.options.onAudioReset();
       this.options.onStream(null);
     }
     pause() { this.cleanup(true); this.active = false; this.show('paused'); }

@@ -8,6 +8,19 @@
   let platform = '', stream = null, scale = 1, down = null, last = null, dragging = false, multi = null, longTimer = null, longPressed = false;
   let tap = null, focusEpoch = 0, autoOpened = false, secure = false, frames = 0, previousFrames = 0;
   let metrics = {}, noticeTimer = null;
+  const audio = new RemoteAudioPlayer({
+    media: $('system-audio'),
+    createContext: () => new (window.AudioContext || window.webkitAudioContext)(),
+    createStream: track => new MediaStream([track]),
+    onState: audioState,
+  });
+  function audioState(state) {
+    const descriptions = {off:'系统声音已关闭', enabled:'系统声音已接入', playing:'正在播放电脑系统声音',
+      unavailable:'系统声音不可用，画面和操作不受影响；检查电脑输出设备后可关闭再开启',
+      unsupported:'请更新电脑端以使用系统声音', needs_gesture:'浏览器暂停了声音，请点击播放'};
+    $('audio-note').textContent = descriptions[state] || '系统声音等待连接';
+    $('btn-audio-play').hidden = state !== 'needs_gesture';
+  }
   const labels = {
     offline: '电脑连接已断开，正在等待重新连接', checking: '正在检查电脑状态…',
     authorization_required: '请在电脑的设备互联中，允许此手机观看或控制电脑。',
@@ -77,6 +90,8 @@
     onHostStatus(host) {
       platform = host.platform || '';
       $('quality').disabled = !Array.isArray(host.qualityProfiles);
+      $('btn-audio').disabled = host.systemAudio !== true;
+      $('btn-audio').title = host.systemAudio === true ? '播放电脑的系统声音' : '此主机缺少系统声音组件或尚未更新';
       $('network-note').textContent = host.relayConfigured ? '电脑已配置视频中继；异地仍需手机能连接电脑的安全入口。' : '电脑尚未配置视频中继，连接受限时会尝试兼容画面。异地需要安全入口。';
       $('auto-keyboard').title = host.inputFocusHints ? '' : '此主机可能需要手动打开键盘';
       document.querySelectorAll('[data-modifier=win]').forEach(el => { el.textContent = platform === 'darwin' ? '⌘' : 'Win'; });
@@ -89,6 +104,10 @@
       if (typeof frame.jpeg !== 'string' || frame.jpeg.length > 320000) return;
       image.hidden = false; video.style.visibility = 'hidden'; image.src = 'data:image/jpeg;base64,' + frame.jpeg; frames++;
     },
+    onAudioTrack(track) { audio.track(track); },
+    onAudio(packet) { audio.pcm(packet); },
+    onAudioStatus(state) { audioState(session.preferences.audio ? state : 'off'); },
+    onAudioReset() { audio.reset(); audioState(session.preferences.audio ? 'waiting' : 'off'); },
     onState(state, detail) {
       connected = state === 'connected'; canControl = connected && detail.permission === 'control';
       $('conn-badge').className = connected ? 'connected' : ['checking', 'connecting', 'recovering', 'waiting_frame'].includes(state) ? 'checking' : 'disconnected';
@@ -165,6 +184,14 @@
     button.onclick = () => controls.shortcut((platform === 'darwin' ? 'command' : 'ctrl') + '+' + key); $('shortcut-grid').appendChild(button);
   });
   $('btn-back').onclick = () => { session.pause(); Android.back(); };
+  $('btn-audio').onclick = () => {
+    const enabled = !session.preferences.audio;
+    void audio.setEnabled(enabled);
+    $('btn-audio').setAttribute('aria-pressed', String(enabled));
+    $('btn-audio').textContent = enabled ? '声音开' : '声音关';
+    controls.release(); session.reconfigure({audio:enabled});
+  };
+  $('btn-audio-play').onclick = () => { void audio.setEnabled(true); };
   $('btn-retry').onclick = () => { session.pause(); Android.reconnect(); session.resume(); };
   $('btn-kb').onclick = () => keyboard($('kb').hidden, false);
   $('btn-kb-close').onclick = () => keyboard(false, false);
@@ -253,7 +280,7 @@
     document.querySelectorAll('.panel').forEach(el => observer.observe(el));
   }
   window.addEventListener('blur', () => { releasePointer(); controls.release(); send({action:'release_all'}); });
-  window.addEventListener('pagehide', () => { controls.release(); releasePointer(); session.pause(); clearInterval(measurements); });
+  window.addEventListener('pagehide', () => { controls.release(); releasePointer(); session.pause(); audio.dispose(); clearInterval(measurements); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && !mini) { controls.release(); releasePointer(); session.pause(); } });
   const measurements=setInterval(() => { if (!image.hidden && connected) { metrics={...metrics,fps:Math.round((frames-previousFrames)/2)}; previousFrames=frames; renderMetrics(); } },2000);
   session.resume(); Android.ready();

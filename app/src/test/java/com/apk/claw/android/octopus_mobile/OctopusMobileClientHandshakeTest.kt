@@ -1,6 +1,7 @@
 package com.apk.claw.android.octopus_mobile
 
 import com.apk.claw.android.utils.KVUtils
+import com.apk.claw.android.ui.featurescreens.PcRemoteWebrtcActivity
 import kotlinx.coroutines.async
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -40,6 +41,35 @@ class OctopusMobileClientHandshakeTest {
         server.shutdown()
         KVUtils.setInsecureOctopusRuntimeAllowed(false)
         KVUtils.resetForTest()
+    }
+
+    @Test
+    fun `system audio notifications reach the native remote page gate after pairing`() {
+        val delivered = CountDownLatch(2)
+        val methods = java.util.concurrent.CopyOnWriteArrayList<String>()
+        enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            socket.send(JSONObject().put("id", request.getString("id"))
+                .put("result", JSONObject().put("registered", true)).toString())
+            for (method in listOf("remote_desktop/audio", "remote_desktop/audioStatus", "remote_desktop/input")) {
+                socket.send(JSONObject().put("jsonrpc", "2.0").put("method", method)
+                    .put("params", JSONObject().put("requestId", "audio-test").put("sessionId", "lease"))
+                    .toString())
+            }
+        }
+        val client = newClient()
+        client.addMessageListener { raw ->
+            val method = JSONObject(raw).optString("method")
+            if (PcRemoteWebrtcActivity.acceptsIncoming(method)) {
+                methods.add(method)
+                delivered.countDown()
+            }
+        }
+        client.connect()
+        assertTrue(delivered.await(2, TimeUnit.SECONDS))
+        assertEquals(listOf("remote_desktop/audio", "remote_desktop/audioStatus"), methods.toList())
+        assertTrue(!PcRemoteWebrtcActivity.acceptsIncoming("remote_desktop/input"))
+        assertTrue(!PcRemoteWebrtcActivity.acceptsIncoming("remote_desktop/audio/arbitrary"))
     }
 
     @Test

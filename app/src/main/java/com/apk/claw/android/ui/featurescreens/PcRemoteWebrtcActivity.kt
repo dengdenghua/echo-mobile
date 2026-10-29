@@ -42,15 +42,18 @@ class PcRemoteWebrtcActivity : ComponentActivity() {
         "remote_desktop/status", "webrtc/request", "webrtc/answer", "webrtc/candidate",
         "remote_desktop/stop", "remote_desktop/input",
     )
-    private val received = setOf(
-        "remote_desktop/status", "remote_desktop/error", "remote_desktop/stopped", "webrtc/offer",
-        "remote_desktop/relay", "remote_desktop/frame", "remote_desktop/inputAck",
-    )
-    private companion object {
-        const val MAX_RECEIVE_CHARS = 500_000
-        const val MAX_SIGNAL_CHARS = 150_000
-        const val MINI_ASPECT_WIDTH = 16
-        const val MINI_ASPECT_HEIGHT = 9
+    internal companion object {
+        private const val MAX_RECEIVE_CHARS = 500_000
+        private const val MAX_SIGNAL_CHARS = 150_000
+        private const val MINI_ASPECT_WIDTH = 16
+        private const val MINI_ASPECT_HEIGHT = 9
+        private val received = setOf(
+            "remote_desktop/status", "remote_desktop/error", "remote_desktop/stopped", "webrtc/offer",
+            "remote_desktop/relay", "remote_desktop/frame", "remote_desktop/inputAck",
+            "remote_desktop/audio", "remote_desktop/audioStatus",
+        )
+
+        fun acceptsIncoming(method: String): Boolean = method in received
     }
     private val poll = object : Runnable {
         override fun run() {
@@ -104,7 +107,7 @@ class PcRemoteWebrtcActivity : ComponentActivity() {
             val callback: (String) -> Unit = { text ->
                 if (text.length <= MAX_RECEIVE_CHARS) runCatching {
                     val message = JSONObject(text)
-                    if (message.optString("method") in received ||
+                    if (acceptsIncoming(message.optString("method")) ||
                         (message.has("error") && message.optString("id").startsWith("remote-"))) {
                         handler.post {
                             if (observedClient === current && isForeground) {
