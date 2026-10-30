@@ -116,8 +116,8 @@ android {
         // vc14 = 语音↔文字记忆打通(L2):语音挂同一会话,注入历史续上下文 + 每轮转录存回 ChatStore。
         // vc15 = 1.1.0:首个经 release.yml 发布的版本(tag v1.1.0)—— ECHO 品牌、Dot 设备与跨端任务、HUB。
         //        1.0.0 已被 vc9–14 的 OTA 包占用,故不再复用这个名字。
-        versionCode = 15
-        versionName = "1.1.0"
+        versionCode = 16
+        versionName = "1.1.1-preview.20261030"
         buildConfigField("String", "VERSION_INFO", getVersionGit())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
