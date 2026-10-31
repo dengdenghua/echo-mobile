@@ -11,7 +11,8 @@
   let connectionPath = 'unknown';
   const pathLabels = { direct: '直连', turn: 'TURN 中继', wss: 'WSS 兼容连接', unknown: '路径检测中' };
   function renderConnection() {
-    $('st').textContent = connected ? '已连接 · ' + (canControl ? '可控制' : '仅观看') + ' · ' + pathLabels[connectionPath] : '未连接';
+    $('st').textContent = connected ? pathLabels[connectionPath] + ' · ' + (canControl ? '可控制' : '仅观看') : '未连接';
+    $('connection-path').textContent = '当前连接：' + (connected ? pathLabels[connectionPath] : '未连接');
   }
   const audio = new RemoteAudioPlayer({
     media: $('system-audio'),
