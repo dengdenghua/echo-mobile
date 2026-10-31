@@ -114,13 +114,100 @@ test('disconnect never queues or replays input and retires the old peer', async 
 test('retry selects authenticated relay without requiring phone network configuration', async t => {
   const {session, signals} = fixture(t);
   await session.receive(ready);
-  session.cleanup(true); session.request();
+  session.retry('connection_lost'); clearTimeout(session.timer); session.timer = null; session.request();
   assert.equal(signals.at(-1).params.transport, 'relay');
   await session.receive({method:'remote_desktop/relay',params:{requestId:session.requestId, sessionId:'relay-lease',permission:'control'}});
   session.frameReady();
   assert.ok(session.sendInput({action:'type',text:'兼容连接'}));
   assert.equal(signals.at(-1).method, 'remote_desktop/input');
   assert.equal(JSON.parse(signals.at(-1).params.data).text, '兼容连接');
+});
+
+function advance(session) {
+  session.retry('first_frame_timeout'); clearTimeout(session.timer); session.timer = null; session.request();
+}
+
+test('a closed data channel after a working TURN session restarts direct discovery', async t => {
+  const {session,peer}=fixture(t);
+  await session.receive({...ready,params:{...ready.params,relayConfigured:true}});advance(session);
+  await session.receive({...offer(session),params:{...offer(session).params,iceServers:[{urls:'turn:localhost:3478',username:'u',credential:'p'}]}});
+  const channel={readyState:'open',send:()=>{}};peer().ondatachannel({channel});channel.onopen();session.frameReady();
+  channel.readyState='closed';channel.onclose();
+  assert.equal(session.stage,'direct');assert.equal(session.established,false);
+});
+
+test('path telemetry contains only an enum and cannot fail a live connection', async t=>{
+  const {session,peer}=fixture(t);await session.receive(ready);await session.receive(offer(session));
+  const sent=[];const channel={readyState:'open',send:s=>sent.push(JSON.parse(s))};peer().ondatachannel({channel});
+  session.updatePath('turn');assert.deepEqual(sent.at(-1),{action:'connection_path',path:'turn',sessionId:session.sessionId});
+  channel.send=()=>{throw Error('buffer unavailable');};assert.doesNotThrow(()=>session.updatePath('unknown'));
+});
+
+test('direct then TURN then WSS are independent attempts with isolated ICE configuration', async t => {
+  const {session, signals, configs} = fixture(t);
+  await session.receive({...ready,params:{...ready.params,relayConfigured:true}});
+  const first = signals.at(-1).params;
+  assert.equal(first.transport,'webrtc'); assert.equal(first.iceMode,'direct');
+  const servers=[{urls:['stun:localhost:3478','turn:localhost:3478','turns:localhost:5349'],username:'user',credential:'secret'}];
+  await session.receive({...offer(session),params:{...offer(session).params,iceServers:servers}});
+  assert.deepEqual(configs.at(-1).iceServers[0].urls,['stun:localhost:3478']);
+  assert.equal(configs.at(-1).iceTransportPolicy,'all');
+  advance(session);
+  assert.notEqual(session.requestId,first.requestId);
+  assert.equal(signals.at(-1).params.transport,'webrtc'); assert.equal(signals.at(-1).params.iceMode,'relay');
+  await session.receive({...offer(session),params:{...offer(session).params,iceServers:servers}});
+  assert.equal(configs.at(-1).iceTransportPolicy,'relay');
+  assert.deepEqual(configs.at(-1).iceServers[0].urls,['turn:localhost:3478','turns:localhost:5349']);
+  advance(session); assert.equal(signals.at(-1).params.transport,'relay');
+  assert.equal(configs.length,2);
+});
+
+test('missing or removed TURN skips cleanly to WSS and respects retry bound', async t => {
+  const {session,signals,states} = fixture(t); await session.receive(ready);
+  advance(session); assert.equal(signals.at(-1).params.transport,'relay');
+  while (session.attempt < 5) advance(session);
+  session.retry('timeout'); assert.equal(states.at(-1).state,'failed'); assert.equal(session.timer,null);
+});
+
+test('host can report TURN removed after status without stopping automatic fallback', async t => {
+  const {session,signals}=fixture(t);
+  await session.receive({...ready,params:{...ready.params,relayConfigured:true}}); advance(session);
+  await session.receive({method:'remote_desktop/error',params:{requestId:session.requestId,code:'turn_unavailable'}});
+  clearTimeout(session.timer); session.timer=null; session.request();
+  assert.equal(signals.at(-1).params.transport,'relay');
+});
+
+test('TURN reconfiguration keeps its working stage but gateway recovery tries direct again', async t => {
+  const {session,signals,peer}=fixture(t);
+  await session.receive({...ready,params:{...ready.params,relayConfigured:true}}); advance(session);
+  await session.receive({...offer(session),params:{...offer(session).params,iceServers:[{urls:'turn:localhost:3478',username:'u',credential:'p'}]}});
+  const channel={readyState:'open',send:()=>{}};peer().ondatachannel({channel});channel.onopen();session.frameReady();
+  session.reconfigure({audio:true});await session.receive({...ready,params:{...ready.params,relayConfigured:true}});
+  assert.equal(signals.at(-1).params.iceMode,'relay'); assert.equal(signals.at(-1).params.audio,true);
+  session.setOnline(false);session.setOnline(true);await session.receive(ready);
+  assert.equal(signals.at(-1).params.iceMode,'direct');
+});
+
+for(const [local,remote,path] of [['host','srflx','direct'],['relay','host','turn'],['host','relay','turn'],['host',undefined,'unknown']]) {
+  test('actual selected candidates classify '+local+'/'+remote+' as '+path,async t=>{
+    const {session,peer}=fixture(t);const values=[];session.options.onStats=v=>values.push(v);
+    await session.receive(ready);await session.receive(offer(session));session.firstFrame=true;
+    peer().getStats=async()=>new Map([
+      ['transport',{type:'transport',selectedCandidatePairId:'used'}],
+      ['unused',{type:'candidate-pair',state:'succeeded',nominated:true,localCandidateId:'other',remoteCandidateId:'other'}],
+      ['other',{type:'local-candidate',candidateType:'relay'}],
+      ['used',{type:'candidate-pair',state:'succeeded',localCandidateId:'local',remoteCandidateId:'remote'}],
+      ['local',{type:'local-candidate',candidateType:local}],['remote',{type:'remote-candidate',candidateType:remote}],
+    ]);
+    await session.statistics();assert.equal(values.at(-1).path,path);
+  });
+}
+
+test('missing stats never infer direct from configured servers or requested stage',async t=>{
+  const {session,peer}=fixture(t);const values=[];session.options.onStats=v=>values.push(v);
+  await session.receive(ready);await session.receive(offer(session));session.firstFrame=true;
+  peer().getStats=async()=>new Map();await session.statistics();assert.equal(values.at(-1).path,'unknown');
+  peer().getStats=async()=>{throw Error('unavailable');};await session.statistics();assert.equal(values.at(-1).path,'unknown');
 });
 
 test('operator stop does not trigger an automatic reconnection', async t => {

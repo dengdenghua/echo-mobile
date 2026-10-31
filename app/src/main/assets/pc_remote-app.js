@@ -8,6 +8,11 @@
   let platform = '', stream = null, scale = 1, down = null, last = null, dragging = false, multi = null, longTimer = null, longPressed = false;
   let tap = null, focusEpoch = 0, autoOpened = false, secure = false, frames = 0, previousFrames = 0;
   let metrics = {}, noticeTimer = null;
+  let connectionPath = 'unknown';
+  const pathLabels = { direct: '直连', turn: 'TURN 中继', wss: 'WSS 兼容连接', unknown: '路径检测中' };
+  function renderConnection() {
+    $('st').textContent = connected ? '已连接 · ' + (canControl ? '可控制' : '仅观看') + ' · ' + pathLabels[connectionPath] : '未连接';
+  }
   const audio = new RemoteAudioPlayer({
     media: $('system-audio'),
     createContext: () => new (window.AudioContext || window.webkitAudioContext)(),
@@ -112,8 +117,10 @@
       connected = state === 'connected'; canControl = connected && detail.permission === 'control';
       $('conn-badge').className = connected ? 'connected' : ['checking', 'connecting', 'recovering', 'waiting_frame'].includes(state) ? 'checking' : 'disconnected';
       $('status').hidden = connected;
-      $('status').textContent = state === 'recovering' ? '连接中断，正在恢复…' : labels[state] || '连接暂不可用，请重试。';
-      $('st').textContent = connected ? ('已连接 · ' + (canControl ? '可控制' : '仅观看') + (detail.transport === 'relay' ? ' · 兼容连接' : '')) : '未连接';
+      $('status').textContent = state === 'recovering' ? '连接中断，正在恢复…' : state === 'connecting' ? ({ direct:'正在尝试直连…', turn:'正在尝试 TURN 中继…', wss:'正在尝试 WSS 兼容连接…' }[detail.stage] || labels.connecting) : labels[state] || '连接暂不可用，请重试。';
+      connectionPath = connected ? detail.path || 'unknown' : 'unknown';
+      if (!connected) metrics = {};
+      renderConnection();
       if (!canControl) { controls.release(); releasePointer(); tap = null; }
       updateButtons(); cursor();
     },
@@ -139,7 +146,10 @@
         updateButtons();
       }
     },
-    onStats(value) { metrics = { ...metrics, ...value }; renderMetrics(); },
+    onStats(value) {
+      if (connected && value.path) { connectionPath = value.path; renderConnection(); }
+      metrics = { ...metrics, ...value }; renderMetrics();
+    },
   });
   const controls = new RemoteControls(send, state => {
     document.querySelectorAll('[data-modifier]').forEach(el => el.setAttribute('aria-pressed', String(state.modifiers.has(el.dataset.modifier === 'win' && platform === 'darwin' ? 'command' : el.dataset.modifier))));
