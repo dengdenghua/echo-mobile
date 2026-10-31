@@ -199,7 +199,8 @@ open class OctopusMobileClient(
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 if (generation != connectionGeneration.get()) return
-                XLog.d(tag, "received: $text")
+                // Media may be hundreds of KB. Logging/redacting its body blocks this
+                // socket's reader and delays control/heartbeat messages behind it.
                 handleIncomingMessage(text)
             }
 
@@ -315,6 +316,10 @@ open class OctopusMobileClient(
             }
             // 母体（Python json.dumps）发的是 "method": "..."，Gson 自动处理空白
             val method = root.get("method")?.asString
+            when (method) {
+                "remote_desktop/frame", "remote_desktop/audio" -> Unit
+                else -> XLog.d(tag, "Runtime message received (${text.length} chars)")
+            }
             // Runtime sends JSON-RPC params; older relays used flat fields.
             val payload = root.get("params")?.takeIf { it.isJsonObject }?.asJsonObject ?: root
 
@@ -395,7 +400,7 @@ open class OctopusMobileClient(
                 }
             }
         } catch (e: Exception) {
-            XLog.w(tag, "handleIncomingMessage error: ${e.message}")
+            XLog.w(tag, "handleIncomingMessage error: ${e.javaClass.simpleName}")
         }
         // 通用消息分发（所有监听器）
         for (listener in messageListeners) {

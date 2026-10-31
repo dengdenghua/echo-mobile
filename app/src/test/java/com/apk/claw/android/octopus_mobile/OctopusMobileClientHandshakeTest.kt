@@ -17,6 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowLog
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -41,6 +42,40 @@ class OctopusMobileClientHandshakeTest {
         server.shutdown()
         KVUtils.setInsecureOctopusRuntimeAllowed(false)
         KVUtils.resetForTest()
+    }
+
+    @Test
+    fun mediaBurstDoesNotDelayHeartbeatOrLogPayload() {
+        val pong = CountDownLatch(1)
+        val media = java.util.concurrent.atomic.AtomicInteger()
+        val frame = JSONObject().put("method", "remote_desktop/frame")
+            .put("params", JSONObject().put("jpeg", "PRIVATE_FRAME_" + "A".repeat(120_000))).toString()
+        val audio = JSONObject().put("method", "remote_desktop/audio")
+            .put("params", JSONObject().put("pcm", "PRIVATE_PCM_" + "A".repeat(1_280))).toString()
+        ShadowLog.clear()
+        enqueueRuntimeSocket { socket, text ->
+            val request = JSONObject(text)
+            socket.send(JSONObject().put("id", request.getString("id"))
+                .put("result", JSONObject().put("registered", true)).toString())
+            socket.send(frame)
+            repeat(50) { socket.send(audio) }
+            socket.send("""{"method":"remote_desktop/inputAck","params":{"type":"pong"}}""")
+        }
+        val client = newClient()
+        client.addMessageListener { text ->
+            when (JSONObject(text).optString("method")) {
+                "remote_desktop/frame", "remote_desktop/audio" -> media.incrementAndGet()
+                "remote_desktop/inputAck" -> pong.countDown()
+            }
+        }
+        client.connect()
+        assertTrue("Media must not block a following heartbeat", pong.await(5, TimeUnit.SECONDS))
+        assertEquals(51, media.get())
+        val messages = ShadowLog.getLogsForTag("OctopusMobile").map { it.msg }
+        assertTrue("Never write screen/audio content into logs", messages.none {
+            it.contains("PRIVATE_FRAME_") || it.contains("PRIVATE_PCM_")
+        })
+        assertTrue("Diagnostics stay bounded independently of media size", messages.all { it.length < 256 })
     }
 
     @Test
