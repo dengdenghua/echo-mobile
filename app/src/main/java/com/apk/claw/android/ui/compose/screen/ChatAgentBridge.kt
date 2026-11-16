@@ -112,7 +112,7 @@ object ChatAgentBridge {
                 if (progressSink == null) main.post { onTool(iconFor(toolId), toolName, parameters, summary.take(48)) }
             }
 
-            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+            private var goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED)
 
             override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
                 goalVerdict = verdict
@@ -415,7 +415,7 @@ object ChatAgentBridge {
                 }
             }
 
-            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+            private var goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED)
 
             override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
                 goalVerdict = verdict

@@ -99,7 +99,7 @@ sealed class TaskResult {
         val summary: String,
         val totalSteps: Int,
         val totalUsage: TokenUsage,
-        val verification: GoalVerifier.Verdict = GoalVerifier.unverified("尚未核验"),
+        val verification: GoalVerifier.Verdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED),
     ) : TaskResult()
 
     /** 达到最大步数未完成 */

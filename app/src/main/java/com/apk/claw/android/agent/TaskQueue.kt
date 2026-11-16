@@ -25,7 +25,7 @@ class TaskQueue {
         val isBackground: Boolean = false,  // 后台任务不阻塞队列
         val createdAt: Long = System.currentTimeMillis(),
         var status: TaskStatus = TaskStatus.QUEUED,
-        var goalVerification: GoalVerifier.Verdict = GoalVerifier.unverified("尚未核验"),
+        var goalVerification: GoalVerifier.Verdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED),
         /** 任务来源是否受信任。false（默认）= 不可信来源（聊天渠道/LAN 控制台），高危工具走来源闸门拦截；
          *  true = 受信任来源（内部系统触发），不施加来源闸门。安全默认 false。 */
         val trusted: Boolean = false,

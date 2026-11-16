@@ -210,7 +210,7 @@ class LightweightReAct(
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (_: Exception) {
-        GoalVerifier.unverified("未能获取核验结果，请检查目标设备")
+        GoalVerifier.unverified(GoalVerifier.Reason.NO_RESULT)
     }
 
     /**
@@ -292,7 +292,7 @@ sealed class ReActStep {
     data class ToolCallDone(override val step: Int, val call: ToolCall, val result: ToolExecutionResult) : ReActStep()
     data class Done(
         override val step: Int,
-        val verification: GoalVerifier.Verdict = GoalVerifier.unverified("尚未核验"),
+        val verification: GoalVerifier.Verdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED),
     ) : ReActStep()
     data class Stuck(override val step: Int, val action: String) : ReActStep()
 }

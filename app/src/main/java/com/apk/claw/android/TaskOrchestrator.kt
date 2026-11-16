@@ -537,7 +537,7 @@ class TaskOrchestrator(
                 }
             }
 
-            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+            private var goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED)
 
             override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
                 goalVerdict = verdict

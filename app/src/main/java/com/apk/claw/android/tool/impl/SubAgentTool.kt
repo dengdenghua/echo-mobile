@@ -130,7 +130,7 @@ class SubAgentTool : BaseTool() {
                 XLog.d(TAG, "[sub-agent] tool result: ${if (result.isSuccess) "ok" else "fail"}")
             }
 
-            private var goalVerdict = GoalVerifier.unverified("尚未核验")
+            private var goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED)
 
             override fun onGoalVerification(round: Int, verdict: GoalVerifier.Verdict) {
                 goalVerdict = verdict

@@ -42,6 +42,7 @@ public class FinishTool extends BaseTool {
     @Override
     public ToolResult execute(Map<String, Object> params) {
         String summary = requireString(params, "summary");
-        return ToolResult.success("完成任务: " + summary);
+        // The summary is the final answer the user reads, in their language; no fixed-language prefix.
+        return ToolResult.success(summary);
     }
 }

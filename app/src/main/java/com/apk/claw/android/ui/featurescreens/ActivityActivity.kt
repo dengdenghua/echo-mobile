@@ -29,8 +29,8 @@ private val cDanger get() = FError
 
 private fun outcomeLabel(o: String) = when (o) {
     "success" -> ClawApplication.instance.getString(R.string.channel_msg_tool_success)
-    "unverified", "completed" -> "结果待核验"
-    "not_achieved" -> "目标尚未完成"
+    "unverified", "completed" -> ClawApplication.instance.getString(R.string.goal_label_unverified)
+    "not_achieved" -> ClawApplication.instance.getString(R.string.goal_label_not_achieved)
     "cancelled" -> ClawApplication.instance.getString(R.string.activity_outcome_cancelled)
     else -> ClawApplication.instance.getString(R.string.channel_msg_tool_failure)
 }

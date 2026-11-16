@@ -979,7 +979,7 @@ class DefaultAgentService : AgentService {
         var lastScreenshotHash = 0
         /** 剩余目标修复轮数（VLM 判未达成时消耗）。 */
         var goalRepairsLeft = MAX_GOAL_REPAIRS
-        var goalVerdict = GoalVerifier.unverified("尚未核验")
+        var goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.NOT_CHECKED)
         /** 任务是否成功完成:仅目标校验明确通过时置 true,finishLoop 据此决定是否 commit 动作录制。 */
         var taskSucceeded = false
     }
@@ -1567,7 +1567,8 @@ class DefaultAgentService : AgentService {
 
         var result = rawResult
 
-        if (!rawResult.isSuccess) {
+        // A call the gates blocked (SafetyGate, approval, guardrail, breaker) never ran, so it changed nothing.
+        if (!rawResult.isSuccess && rawResult.errorCode != com.apk.claw.android.tool.ToolErr.BLOCKED) {
             val tool = ToolRegistry.getInstance().getTool(toolName)
             if (tool != null && !tool.isIdempotent()) {
                 result = ToolResult.error(
@@ -1790,7 +1791,7 @@ class DefaultAgentService : AgentService {
             XLog.w(TAG, "Max loop warnings reached, forcing finish")
             callback.onComplete(
                 iterations,
-                ClawApplication.instance.getString(R.string.agent_task_completed) + "（检测到死循环，已自动停止）",
+                ClawApplication.instance.getString(R.string.agent_loop_stopped),
                 totalTokens
             )
             return true
@@ -1810,14 +1811,14 @@ class DefaultAgentService : AgentService {
 
     /** Retry only on explicit failure; keep unknown results visible without replaying actions. */
     private fun AgentLoopState.shouldRepairForGoal(callback: AgentCallback): String? {
-        goalVerdict = GoalVerifier.unverified("未开启视觉核验或缺少模型配置")
+        goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.CHECK_OFF)
         if (!config.enableVision || goal.isBlank() || !VisionAnalyzer.isConfigured()) return null
 
         val bitmap = runCatching {
             ClawAccessibilityService.getInstance()?.takeScreenshot(5000)
         }.getOrNull()
         if (bitmap == null) {
-            goalVerdict = GoalVerifier.unverified("未能获取截图，请检查目标设备")
+            goalVerdict = GoalVerifier.unverified(GoalVerifier.Reason.NO_SCREENSHOT)
             return null
         }
 
@@ -1834,13 +1835,14 @@ class DefaultAgentService : AgentService {
             if (!bitmap.isRecycled) bitmap.recycle()
         }
 
-        goalVerdict = verdict ?: GoalVerifier.unverified("目标校验超时或中断，请检查实际结果")
+        goalVerdict = verdict ?: GoalVerifier.unverified(GoalVerifier.Reason.INTERRUPTED)
         if (!goalVerdict.needsRepair || goalRepairsLeft <= 0) return null
 
         goalRepairsLeft--
         AgentMetrics.goalRepair()
         XLog.i(TAG, "Goal not achieved (repairs left=$goalRepairsLeft): ${goalVerdict.reason}")
-        callback.onContent(iterations, "[目标校验] 目标尚未达成：${goalVerdict.reason}")
+        val note = ClawApplication.instance.getString(R.string.goal_check_not_reached, goalVerdict.reason)
+        callback.onContent(iterations, note)
         return "[目标校验] 经看屏确认，目标尚未达成：${goalVerdict.reason}。" +
             "请继续操作直到真正完成；若确实无法完成，再调用 finish 说明原因。"
     }
