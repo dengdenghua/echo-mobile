@@ -80,3 +80,6 @@ muse-analysis/
 # release APK copies belong in release artifacts, not git
 *.apk
 *.apk_*
+
+# Local Agent runtime state, databases and device tokens.
+/data/
